@@ -1,0 +1,8 @@
+{
+  "presets": ["es2015", "react", "stage-2", "es2017"],
+  "env": {
+    "test": {
+      "plugins": ["transform-es2015-modules-commonjs"]
+    }
+  }
+}

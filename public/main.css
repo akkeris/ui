@@ -1,0 +1,115 @@
+html, body {
+    margin:0;
+    height:100%;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+}
+
+@font-face {
+    font-family: 'ProximaNova';
+    src: url("../fonts/ProximaNova-Black-webfont.woff") format('woff');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ProximaNova';
+    src: url("../fonts/ProximaNova-Bold-webfont.woff") format('woff');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ProximaNova';
+    src: url("../fonts/ProximaNova-Sbold-webfont.woff") format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ProximaNova';
+    src: url("../fonts/ProximaNova-Reg-webfont.woff") format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ProximaNova';
+    src: url("../fonts/ProximaNova-Light-webfont.woff") format('woff');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ProximaNova';
+    src: url("../fonts/ProximaNova-Thin-webfont.woff") format('woff');
+    font-weight: 100;
+    font-style: normal;
+}
+
+body {
+  font-size: 13px;
+  line-height: 20px;
+  margin: 0;
+  /*background:linear-gradient(to right, #dc8e20 0%,#e72a7e 100%);  orange to pink */
+  /*background:linear-gradient(128deg, #2E9BFF 0%, #1FE6DF 100%);  blue to light blue */
+  /*background:linear-gradient(128deg, #ff4036 0%, #ffb511 100%);  orange to yellow */
+  /*background:linear-gradient(128deg, #8aba37 0%, #ddd427 100%);  green to yellow */
+  background:linear-gradient(to right, rgb(174,58,152) 0%, rgb(206,57,98) 100%); /* blue to pink *//*linear-gradient(128deg, #E11F5C 0%, #B62AA1 100%)*/
+  
+}
+
+.recommendations {
+    margin: 2em auto;
+    box-shadow: 0 0 0 1px rgba(89,105,128,0.08), 0 2px 3px 0 rgba(89,105,128,.1), 0 2px 2px 0 rgba(0,0,0,.05);
+    padding: 1em 1em;
+    border-radius: 3px;
+    max-width: 880px;
+}
+.recommendations h3 {
+    color: #596981;
+    font-size:12px;
+    margin-left:1em;
+    margin-right:1em;
+    text-transform:uppercase;
+    margin-bottom:0;
+}
+.recommendations ul {
+    margin-top:0.5em;
+    margin-left: 0px;
+    padding-left: 1em;
+}
+.recommendations ul li {
+    color: #596981;
+    list-style: none;
+    padding-left: 2em;
+    line-height: 1.75em;
+    background-position-y: 0.25em;
+}
+.recommendations ul li.warning {
+    background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZjQwMzYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLWFsZXJ0LWNpcmNsZSI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiPjwvY2lyY2xlPjxsaW5lIHgxPSIxMiIgeTE9IjgiIHgyPSIxMiIgeTI9IjEyIj48L2xpbmU+PGxpbmUgeDE9IjEyIiB5MT0iMTYiIHgyPSIxMiIgeTI9IjE2Ij48L2xpbmU+PC9zdmc+);
+    background-repeat:no-repeat;
+}
+.recommendations ul li.error {
+    background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9InJnYigyMDYsNTcsOTgpIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1hbGVydC10cmlhbmdsZSI+PHBhdGggZD0iTTEwLjI5IDMuODZMMS44MiAxOGEyIDIgMCAwIDAgMS43MSAzaDE2Ljk0YTIgMiAwIDAgMCAxLjcxLTNMMTMuNzEgMy44NmEyIDIgMCAwIDAtMy40MiAweiI+PC9wYXRoPjxsaW5lIHgxPSIxMiIgeTE9IjkiIHgyPSIxMiIgeTI9IjEzIj48L2xpbmU+PGxpbmUgeDE9IjEyIiB5MT0iMTciIHgyPSIxMiIgeTI9IjE3Ij48L2xpbmU+PC9zdmc+);
+    background-repeat:no-repeat;
+}
+.recommendations ul li.recommendation {
+    background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM1OTY5ODEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLW1lc3NhZ2UtY2lyY2xlIj48cGF0aCBkPSJNMjEgMTEuNWE4LjM4IDguMzggMCAwIDEtLjkgMy44IDguNSA4LjUgMCAwIDEtNy42IDQuNyA4LjM4IDguMzggMCAwIDEtMy44LS45TDMgMjFsMS45LTUuN2E4LjM4IDguMzggMCAwIDEtLjktMy44IDguNSA4LjUgMCAwIDEgNC43LTcuNiA4LjM4IDguMzggMCAwIDEgMy44LS45aC41YTguNDggOC40OCAwIDAgMSA4IDh2LjV6Ij48L3BhdGg+PC9zdmc+);
+    background-repeat:no-repeat;
+}
+.internal {
+    background-color:white;
+    padding:75px 150px;
+    border-radius: 5px;
+}
+
+
+.recharts-legend-item-text{
+    color: #596981;
+    text-transform: uppercase;
+    font-size: 11px;
+    vertical-align: middle;
+}
+#app, #app > div {
+    height:100%;
+}
