@@ -108,7 +108,7 @@ export default class Audits extends Component {
             <div>{audit.username}</div>
           </TableRowColumn>
           <TableRowColumn>
-            <div>{Date(audit.received_at).toLocaleString()}</div>
+            <div>{new Date(audit.received_at).toLocaleString()}</div>
           </TableRowColumn>
         </TableRow>
       );
