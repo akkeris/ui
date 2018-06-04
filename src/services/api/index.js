@@ -56,13 +56,15 @@ function deleteFormation(app, formation) {
   return axios.delete(`/api/apps/${app}/formation/${formation}`);
 }
 
-function patchFormation(app, type, size, quantity, command, port) {
+function patchFormation(app, type, size, quantity, command, port, healthcheck, removeHealthcheck) {
   return axios.patch(`/api/apps/${app}/formation`, [{
     type,
     size,
     quantity,
     command,
     port,
+    healthcheck,
+    removeHealthcheck,
   }]);
 }
 
