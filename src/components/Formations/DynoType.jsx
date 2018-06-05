@@ -50,6 +50,7 @@ export default class DynoType extends Component {
       quantity: '',
       port: 0,
       command: '',
+      healthcheck: null,
       edit: false,
       open: false,
     };
@@ -167,6 +168,10 @@ export default class DynoType extends Component {
     });
   }
 
+  handleHealthCheckChange = (event) => {
+    this.setState({ healthcheck: event.target.value });
+  }
+
   handleCommandChange = (event) => {
     this.setState({ command: event.target.value });
   }
@@ -198,7 +203,7 @@ export default class DynoType extends Component {
   }
 
   handlePatchFormation = () => {
-    api.patchFormation(this.props.app, this.props.formation.type, this.state.size, this.state.quantity, this.state.command === '' ? null : this.state.command, this.state.port === '' ? null : this.state.port).then(() => {
+    api.patchFormation(this.props.app, this.props.formation.type, this.state.size, this.state.quantity, this.state.command === '' ? null : this.state.command, this.state.port === '' ? null : this.state.port, this.state.healthcheck === '' ? null : this.state.healthcheck, this.state.healthcheck === '').then(() => {
       this.props.onComplete('Updated Formation');
     }).catch((error) => {
       this.reset();
@@ -216,12 +221,14 @@ export default class DynoType extends Component {
       command: this.props.formation.command,
       quantity: this.props.formation.quantity,
       size,
+      healthcheck: this.props.formation.healthcheck,
       edit: false,
     });
   }
 
   render() {
     const port = this.state.port === null ? '' : this.state.port;
+    const healthcheck = this.state.healthcheck === null ? '' : this.state.healthcheck;
     const date = new Date(this.props.formation.updated_at);
     return (
       <TableRow
@@ -292,9 +299,14 @@ export default class DynoType extends Component {
                         <TextField className="port" disabled={!this.state.edit} type="numeric" floatingLabelText="Port" value={port} onChange={this.handlePortChange} errorText={this.state.errorText} />
                       )}
                       {this.props.formation.type !== 'web' && (
-                        <TextField className="command" disabled={!this.state.edit} floatingLabelText="Command" value={this.state.command} onChange={this.handleCommandChange} errorText={this.state.errorText} />
+                        <TextField className="command" disabled={!this.state.edit} floatingLabelText="command" value={this.state.command} onChange={this.handleCommandChange} errorText={this.state.errorText} />
                       )}
                     </TableRowColumn>
+                    {this.props.formation.type === 'web' && (
+                      <TableRowColumn>
+                        <TextField className="healthcheck" disabled={!this.state.edit} type="text" floatingLabelText="healthcheck" value={healthcheck} onChange={this.handleHealthCheckChange} errorText={this.state.errorText} />
+                      </TableRowColumn>
+                    )}
                     <TableRowColumn style={style.tableRowColumn.div}>
                       <div><IconButton className="restart" tooltip="Restart" tooltipPosition="top-left" onTouchTap={this.handleRestart}><RestartIcon /></IconButton></div>
                     </TableRowColumn>
