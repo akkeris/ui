@@ -8,12 +8,14 @@ import Snackbar from 'material-ui/Snackbar';
 import Paper from 'material-ui/Paper';
 import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
 import AddIcon from 'material-ui/svg-icons/content/add';
+import AttachIcon from 'material-ui/svg-icons/communication/call-merge';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 
 import api from '../../services/api';
 import NewAddon from './NewAddon';
+import AttachAddon from './AttachAddon';
 import ConfirmationModal from '../ConfirmationModal';
 
 const muiTheme = getMuiTheme({
@@ -60,21 +62,29 @@ export default class Addons extends Component {
     this.state = {
       addons: [],
       addon: null,
+      attachment: null,
       loading: true,
       open: false,
-      confirmOpen: false,
+      confirmAddonOpen: false,
+      confirmAttachmentOpen: false,
       message: '',
       new: false,
       submitFail: false,
       submitMessage: '',
+      attach: false,
+      addonAttachments: [],
     };
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.active) {
-      api.getAppAddons(this.props.app).then((response) => {
+      Promise.all([
+        api.getAppAddons(this.props.app),
+        api.getAddonAttachments(this.props.app),
+      ]).then(([r1, r2]) => {
         this.setState({
-          addons: response.data,
+          addons: r1.data,
+          addonAttachments: r2.data,
           loading: false,
         });
       });
@@ -93,7 +103,31 @@ export default class Addons extends Component {
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton className="remove" onTouchTap={() => this.handleConfirmation(addon)}>
+            <IconButton className="addon-remove" onTouchTap={() => this.handleAddonConfirmation(addon)}>
+              <RemoveIcon />
+            </IconButton>
+          </div>
+        </TableRowColumn>
+      </TableRow>
+    ));
+  }
+
+  getAddonAttachments() {
+    return this.state.addonAttachments.map(attachment => (
+      <TableRow className={attachment.name} key={attachment.id} style={style.tableRow}>
+        <TableRowColumn>
+          <div style={style.tableRowColumn.title}>{attachment.name}</div>
+          <div style={style.tableRowColumn.sub}>{attachment.id}</div>
+        </TableRowColumn>
+        <TableRowColumn>
+          <div style={style.tableRowColumn.title}>{attachment.addon.plan.name}</div>
+        </TableRowColumn>
+        <TableRowColumn>
+          <div style={style.tableRowColumn.title}>{attachment.addon.app.name}</div>
+        </TableRowColumn>
+        <TableRowColumn style={style.tableRowColumn.icon}>
+          <div style={style.tableRowColumn.end}>
+            <IconButton className="attachment-remove" onTouchTap={() => this.handleAddonAttachmentConfirmation(attachment)}>
               <RemoveIcon />
             </IconButton>
           </div>
@@ -110,6 +144,14 @@ export default class Addons extends Component {
     this.setState({ new: false });
   }
 
+  handleAttachAddon = () => {
+    this.setState({ attach: true });
+  }
+
+  handleAttachAddonCancel = () => {
+    this.setState({ attach: false });
+  }
+
   handleRemoveAddon = () => {
     this.setState({ loading: true });
     api.deleteAddon(this.props.app, this.state.addon.id).then(() => {
@@ -120,22 +162,55 @@ export default class Addons extends Component {
         submitFail: true,
         loading: false,
         new: false,
-        confirmOpen: false,
+        confirmAddonOpen: false,
+        confirmaAttachmentOpen: false,
+        attach: false,
       });
     });
   }
 
-  handleConfirmation = (addon) => {
+  handleRemoveAddonAttachment = () => {
+    this.setState({ loading: true });
+    api.deleteAddonAttachment(this.props.app, this.state.attachment.name).then(() => {
+      this.reload('Attachment Deleted');
+    }).catch((error) => {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        loading: false,
+        new: false,
+        confirmAddonOpen: false,
+        confirmaAttachmentOpen: false,
+        attach: false,
+      });
+    });
+  }
+
+  handleAddonConfirmation = (addon) => {
     this.setState({
-      confirmOpen: true,
+      confirmAddonOpen: true,
       addon,
     });
   }
 
-  handleCancelConfirmation = () => {
+  handleCancelAddonConfirmation = () => {
     this.setState({
-      confirmOpen: false,
+      confirmAddonOpen: false,
       addon: null,
+    });
+  }
+
+  handleAddonAttachmentConfirmation = (attachment) => {
+    this.setState({
+      confirmAttachmentOpen: true,
+      attachment,
+    });
+  }
+
+  handleCancelAddonAttachmentConfirmation = () => {
+    this.setState({
+      confirmAttachmentOpen: false,
+      attachment: null,
     });
   }
 
@@ -149,14 +224,20 @@ export default class Addons extends Component {
 
   reload = (message) => {
     this.setState({ loading: true });
-    api.getAppAddons(this.props.app).then((response) => {
+    Promise.all([
+      api.getAppAddons(this.props.app),
+      api.getAddonAttachments(this.props.app),
+    ]).then(([r1, r2]) => {
       this.setState({
-        addons: response.data,
+        addons: r1.data,
+        addonAttachments: r2.data,
         loading: false,
         new: false,
         message,
         open: true,
-        confirmOpen: false,
+        confirmAddonOpen: false,
+        confirmAttachmentOpen: false,
+        attach: false,
       });
     });
   }
@@ -184,12 +265,26 @@ export default class Addons extends Component {
               >
                 <AddIcon />
               </IconButton>
+              <IconButton
+                className="attach-addon"
+                onTouchTap={this.handleAttachAddon}
+                tooltip="Attach Addon"
+                tooltipPosition="bottom-left"
+              >
+                <AttachIcon />
+              </IconButton>
             </Paper>
           )}
           {this.state.new && (
             <div>
               <IconButton className="addon-cancel" onTouchTap={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
               <NewAddon app={this.props.app} onComplete={this.reload} />
+            </div>
+          )}
+          {this.state.attach && (
+            <div>
+              <IconButton className="attach-cancel" onTouchTap={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
+              <AttachAddon app={this.props.app} onComplete={this.reload} />
             </div>
           )}
           <Table className="addon-list">
@@ -204,7 +299,23 @@ export default class Addons extends Component {
               {this.getAddons()}
             </TableBody>
           </Table>
-          <ConfirmationModal className="remove-confirm" open={this.state.confirmOpen} onOk={this.handleRemoveAddon} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this addon?" />
+          {this.state.addonAttachments.length > 0 && (
+            <Table className="addon-attachment-list">
+              <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+                <TableRow>
+                  <TableHeaderColumn>Attachment</TableHeaderColumn>
+                  <TableHeaderColumn>Plan</TableHeaderColumn>
+                  <TableHeaderColumn>Source</TableHeaderColumn>
+                  <TableHeaderColumn style={style.tableRowColumn.icon}>Remove</TableHeaderColumn>
+                </TableRow>
+              </TableHeader>
+              <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+                {this.getAddonAttachments()}
+              </TableBody>
+            </Table>
+          )}
+          <ConfirmationModal className="remove-addon-confirm" open={this.state.confirmAddonOpen} onOk={this.handleRemoveAddon} onCancel={this.handleCancelAddonConfirmation} message="Are you sure you want to delete this addon?" />
+          <ConfirmationModal className="remove-attachment-confirm" open={this.state.confirmAttachmentOpen} onOk={this.handleRemoveAddonAttachment} onCancel={this.handleCancelAddonAttachmentConfirmation} message="Are you sure you want to delete this attachment?" />
           <Dialog
             className="addon-error"
             open={this.state.submitFail}

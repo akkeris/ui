@@ -111,6 +111,20 @@ function createAddon(app, plan) {
   });
 }
 
+function attachAddon(app, addon) {
+  return axios.post(`/api/apps/${app}/addon-attachments`, {
+    app,
+    addon,
+  });
+}
+
+function getAddonAttachments(app) {
+  return axios.get(`/api/apps/${app}/addon-attachments`);
+}
+
+function deleteAddonAttachment(app, attachment) {
+  return axios.delete(`/api/apps/${app}/addon-attachments/${attachment}`);
+}
 function deleteAddon(app, addon) {
   return axios.delete(`/api/apps/${app}/addons/${addon}`);
 }
@@ -361,6 +375,9 @@ export default {
   getAddonServices,
   getAddonServicePlans,
   createAddon,
+  attachAddon,
+  getAddonAttachments,
+  deleteAddonAttachment,
   createFormation,
   deleteFormation,
   createBuild,
