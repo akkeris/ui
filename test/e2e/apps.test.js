@@ -277,11 +277,6 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .click('.formation-list .web button')
     .expect(Selector('.formation-list .web .port input').value)
     .contains('8080');
-    
-  // // Check restart
-  // .click('.formation-list .web button.restart')
-  // .expect(Selector('.snack').innerText)
-  // .contains('Formation Restarted')
 });
 
 test('Should be able to create view and release builds', async (t) => { // eslint-disable-line no-undef
@@ -325,94 +320,183 @@ test('Should be able to create view and release builds', async (t) => { // eslin
     .click('.release-list .r0 button.logs')
     .expect(Selector('.logs h3').innerText)
     .contains('Logs for')
-    .click('.logs button')
-
-    // rebuilds only work for autobuilds.
-    // .click('.build-list .b1 button.rebuild')
-    // .expect(Selector('.build-error').innerText)
-    // .contains('This build has been archived and cannot be rebuilt')
-    // .click('.ok')
-    //.wait(20000)
-
-    
-    // Rollback
-    //.click('button.new-release')
-    //.click('.release-rollback button')
-    //.click('.releases-menu button')
-    //.click('.release-1')
-    //.click('.next button')
-    //.typeText('.release-description input', 'testcafe')
-    //.click('.next button')
-    //.expect(Selector('.release-snack').innerText)
-    //.contains('Triggered New Release')
-    //.expect(Selector('.release-list tbody').childElementCount)
-    //.gt(1);
+    .click('.logs button');
 });
 
-test('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef
-  await t
-    .click('.app-list .testcafe-testcafe')
-    .click('.addons-tab')
+test
+  .before(async (t) => {
+    await t
+
+    // login
+      .typeText('#username', botUsername)
+      .typeText('#password', botPassword)
+      .click('button.login')
+
+    // navigate to new app page
+      .click('.new-app')
+
+    // create app
+      .typeText('.app-name input', 'testcafe')
+      .click('.next button')
+      .click('.dropdown button')
+      .click('[role=menu] .testcafe')
+      .click('.next button')
+      .click('.dropdown button')
+      .click('[role=menu] .testcafe')
+      .click('.next button')
+      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .ok()
+
+      // navigate to new app page
+      .click('.new-app')
+
+    // create app
+      .typeText('.app-name input', 'testcafe2')
+      .click('.next button')
+      .click('.dropdown button')
+      .click('[role=menu] .testcafe')
+      .click('.next button')
+      .click('.dropdown button')
+      .click('[role=menu] .testcafe')
+      .click('.next button')
+      .expect(Selector('.app-list .testcafe2-testcafe').exists)
+      .ok();
+  })('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef
+    await t
+      .click('.app-list .testcafe-testcafe')
+      .click('.addons-tab')
 
     // Check new component shows
-    .click('button.new-addon')
-    .expect(Selector('.service-menu').exists)
-    .ok()
+      .click('button.new-addon')
+      .expect(Selector('.service-menu').exists)
+      .ok()
 
     // Make sure we can cancel
-    .click('button.addon-cancel')
-    .expect(Selector('.service-menu').exists)
-    .notOk()
+      .click('button.addon-cancel')
+      .expect(Selector('.service-menu').exists)
+      .notOk()
 
     // Test compliance
-    .click('button.new-addon')
-    .click('.service-menu button')
-    .click('.Lids.Db.Credentials')
-    .click('.next button')
-    .click('.plan-menu button')
-    .click('.Lids.Prod.Credentials')
-    .click('.next button')
-    .expect(Selector('.new-addon-error').innerText)
-    .contains('The specified addon may not be attached to this app. It requires these necessary compliances in the space')
-    .click('.ok')
+      .click('button.new-addon')
+      .click('.service-menu button')
+      .click('.Lids.Db.Credentials')
+      .click('.next button')
+      .click('.plan-menu button')
+      .click('.Lids.Prod.Credentials')
+      .click('.next button')
+      .expect(Selector('.new-addon-error').innerText)
+      .contains('The specified addon may not be attached to this app. It requires these necessary compliances in the space')
+      .click('.ok')
 
-    // attach addon
-    .click('.service-menu button')
-    .click('.Lids.Db.Credentials')
-    .click('.next button')
-    .click('.plan-menu button')
-    .click('.Lids.Dev.Credentials')
-    .click('.next button')
-    .expect(Selector('.addon-snack').innerText)
-    .contains('Addon Created')
-    .expect(Selector('.addon-list .lids-db').exists)
-    .ok()
+    // create addon
+      .click('.service-menu button')
+      .click('.Lids.Db.Credentials')
+      .click('.next button')
+      .click('.plan-menu button')
+      .click('.Lids.Dev.Credentials')
+      .click('.next button')
+      .expect(Selector('.addon-snack').innerText)
+      .contains('Addon Created')
+      .expect(Selector('.addon-list .lids-db').exists)
+      .ok()
 
     // Test duplicate
-    .click('button.new-addon')
-    .click('.service-menu button')
-    .click('.Lids.Db.Credentials')
-    .click('.next button')
-    .click('.plan-menu button')
-    .click('.Lids.Dev.Credentials')
-    .click('.next button')
-    .expect(Selector('.new-addon-error').innerText)
-    .contains('This addon is already created and attached to this application and cannot be used twice.')
-    .click('.ok')
+      .click('button.new-addon')
+      .click('.service-menu button')
+      .click('.Lids.Db.Credentials')
+      .click('.next button')
+      .click('.plan-menu button')
+      .click('.Lids.Dev.Credentials')
+      .click('.next button')
+      .expect(Selector('.new-addon-error').innerText)
+      .contains('This addon is already created and attached to this application and cannot be used twice.')
+      .click('.ok')
+      .click('.addon-cancel')
 
     // Check Config Vars
-    .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
-    .click('.config-tab')
-    .expect(Selector('.config-list .OCT_VAULT_DB_LIDS_HOSTNAME').exists)
-    .ok()
+      .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
+      .click('.config-tab')
+      .expect(Selector('.config-list .OCT_VAULT_DB_LIDS_HOSTNAME').exists)
+      .ok()
+
+    // Create and Attach addon
+      .navigateTo(`${baseUrl}/#/apps`)
+      .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
+      .click('.addons-tab')
+      .click('button.new-addon')
+      .click('.service-menu button')
+      .click('.Alamo.Postgres')
+      .click('.next button')
+      .click('.plan-menu button')
+      .click('.Hobby')
+      .click('.next button')
+      .expect(Selector('.addon-snack').innerText)
+      .contains('Addon Created')
+      .expect(Selector('.addon-list .alamo-postgresql').exists)
+      .ok()
+
+    // Attach Addon from app 2
+      .navigateTo(`${baseUrl}/#/apps`)
+      .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
+      .click('.addons-tab')
+      .click('button.attach-addon')
+      .typeText('.app-search input', 'testcafe2-testcafe')
+      .pressKey('enter')
+      .click('.addon-menu button')
+      .click('.alamo-postgresql')
+      .click('.next button')
+      .expect(Selector('.addon-snack').innerText)
+      .contains('Addon Attached')
+      .expect(Selector('.addon-attachment-list').childElementCount)
+      .gt(0)
+
+    // Test Dupes
+      .click('button.attach-addon')
+      .typeText('.app-search input', 'testcafe2-testcafe')
+      .pressKey('enter')
+      .click('.addon-menu button')
+      .click('.alamo-postgresql')
+      .click('.next button')
+      .expect(Selector('.attach-addon-error').innerText)
+      .contains('This addon is already provisioned or attached on this app.')
+      .click('.ok')
 
     // Remove
-    .click('.addons-tab')
-    .click('.addon-list .lids-db button.remove')
-    .click('.remove-confirm .ok')
-    .expect(Selector('.addon-list .lids-db').exists)
-    .notOk();
-});
+      .click('.addons-tab')
+      .click('.addon-list .lids-db button.addon-remove')
+      .click('.remove-addon-confirm .ok')
+      .expect(Selector('.addon-list .lids-dbl').exists)
+      .notOk()
+
+      .click('.addon-attachment-list button.attachment-remove')
+      .click('.remove-attachment-confirm .ok')
+      .expect(Selector('.addon-attachment-list').exists)
+      .notOk();
+  })
+  .after(async (t) => {
+    await t
+      .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
+      .click('.info-tab')
+
+    // delete the app
+      .click('.delete button')
+
+    // confirm delete and make sure app no longer exists
+      .click('.delete-confirm button.ok')
+      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .notOk()
+
+      .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
+      .click('.info-tab')
+
+    // delete the app
+      .click('.delete button')
+
+    // confirm delete and make sure app no longer exists
+      .click('.delete-confirm button.ok')
+      .expect(Selector('.app-list .testcafe2-testcafe').exists)
+      .notOk();
+  });
 
 test('Should be able to create edit and remove config vars', async (t) => { // eslint-disable-line no-undef
   const editTextArea = Selector('.config-edit-value textarea').withAttribute('id');

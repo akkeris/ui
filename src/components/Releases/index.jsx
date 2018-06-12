@@ -54,6 +54,7 @@ const style = {
       padding: '1px 12px',
       width: '52px',
       textAlign: 'center',
+      overflow: 'visible',
     },
     div: {
       width: '58px',
@@ -217,10 +218,10 @@ position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
           </TableRowColumn>
           <TableRowColumn style={style.tableRowColumn.icon}>
             {!release.release &&
-              <IconButton className="logs" onTouchTap={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
+              <IconButton tooltip="Build Logs" tooltipPosition="top-left" className="logs" onTouchTap={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
             }
             {!release.current && release.release &&
-              <IconButton className="revert" onTouchTap={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
+              <IconButton tooltip="Rollback" tooltipPosition="top-left" className="revert" onTouchTap={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
             }
           </TableRowColumn>
         </TableRow>
