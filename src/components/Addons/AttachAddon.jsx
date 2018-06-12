@@ -91,7 +91,7 @@ export default class AttachAddon extends Component {
           <div>
             <Search className={'app-search'} label="App" data={util.filterName(this.state.apps)} handleSearch={this.handleSearch} searchText="" errorText={this.state.errorText} />
             <p>
-              The application name or id to add to the pipeline. Ex. my-test-app-dev
+              The application name that has an addon you want to attach. Ex. my-test-app-dev
             </p>
           </div>
         );
@@ -102,7 +102,7 @@ export default class AttachAddon extends Component {
               {this.getAddons()}
             </DropDownMenu>
             <p>
-              Select the plan for your addon (please only use larger plans for prod)
+              Select the addon you want to attach.
             </p>
           </div>
         );
