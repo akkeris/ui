@@ -55,7 +55,7 @@ export default class NewFormation extends Component {
       type: null,
       port: 9000,
       command: '',
-      errorText: null,
+      errorText: "",
     };
   }
 
@@ -72,7 +72,7 @@ export default class NewFormation extends Component {
       this.setState({
         sizes,
         size: sizes[0].name,
-        type: null,
+        type: "",
         quantity: 1,
         loading: false,
       });
@@ -178,7 +178,7 @@ export default class NewFormation extends Component {
         stepIndex: stepIndex + 1,
         finished: stepIndex >= 3,
         loading: stepIndex >= 3,
-        errorText: null
+        errorText: ""
       });
     }
   }
@@ -189,7 +189,7 @@ export default class NewFormation extends Component {
       this.setState({
         stepIndex: stepIndex - 1,
         loading: false,
-        errorText: null,
+        errorText: "",
       });
     }
   }
@@ -238,7 +238,7 @@ export default class NewFormation extends Component {
         port: null,
         command: null,
         quantity: 1,
-        errorText: null,
+        errorText: "",
       });
     });
   }
