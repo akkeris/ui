@@ -202,9 +202,27 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .expect(Selector('.type-header').exists)
     .notOk()
 
+    
     // Create the new formation
     .click('button.new-formation')
     .click('.next button')
+    .expect(Selector('.new-type').innerText)
+    .contains('Field required')
+    .typeText('.new-type input', '!')
+    .click('.next button')
+    .expect(Selector('.new-type').innerText)
+    .contains('Alphanumeric characters only')
+    .click('.new-type input')
+    .pressKey('backspace')
+    .typeText('.new-type input', 'web')
+    .click('.next button')
+    .click('button.back')
+    .expect(Selector('.new-type').innerText)
+    .notContains('Alphanumeric characters only')
+    .expect(Selector('.new-type input').value)
+    .contains('web')
+    .click('.next button')
+
     .click('.new-dropdown button')
     .click('[role=menu] .q2')
     .click('.next button')
@@ -221,6 +239,7 @@ test('Should be able to create edit and delete formations', async (t) => { // es
 
     // Check duplicate error
     .click('button.new-formation')
+    .typeText('.new-type input', 'web')
     .click('.next button')
     .click('.next button')
     .click('.next button')
