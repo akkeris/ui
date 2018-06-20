@@ -41,7 +41,7 @@ const style = {
 export default class NewFormation extends Component {
   constructor(props, context) {
     super(props, context);
-    this.types = ['web', 'worker'];
+    this.types = '';
     this.quantities = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     this.state = {
       loading: true,
@@ -55,7 +55,7 @@ export default class NewFormation extends Component {
       type: null,
       port: 9000,
       command: '',
-      errorText: null,
+      errorText: "",
     };
   }
 
@@ -72,7 +72,7 @@ export default class NewFormation extends Component {
       this.setState({
         sizes,
         size: sizes[0].name,
-        type: this.types[0],
+        type: "",
         quantity: 1,
         loading: false,
       });
@@ -90,17 +90,6 @@ export default class NewFormation extends Component {
     ));
   }
 
-  getTypes() {
-    return this.types.sort().map(type => (
-      <RadioButton
-        className={type}
-        key={type}
-        value={type}
-        label={type}
-      />
-    ));
-  }
-
   getQuantity() {
     return this.quantities.map(quantity => (
       <MenuItem className={`q${quantity}`} key={quantity} value={quantity} primaryText={quantity} />
@@ -113,9 +102,12 @@ export default class NewFormation extends Component {
         return (
           <div>
             <h3 className="type-header" >Type</h3>
-            <RadioButtonGroup className="new-radio" name="typeSelect" style={style.radio} onChange={this.handleTypeChange} valueSelected={this.state.type} >
-              {this.getTypes()}
-            </RadioButtonGroup>
+            <div>
+              <TextField className="new-type" floatingLabelText="Type" type="text" value={this.state.type} onChange={this.handleTypeChange} errorText={this.state.errorText} />
+              <p>
+                Enter a name for your new dyno.
+              </p>
+            </div>
           </div>
         );
       case 1:
@@ -174,13 +166,19 @@ export default class NewFormation extends Component {
 
   handleNext = () => {
     const { stepIndex } = this.state;
-    if ((stepIndex === 3 && this.state.command === '' && this.state.type === 'worker') || (stepIndex === 3 && this.state.port === null && this.state.type === 'web')) {
-      this.setState({ errorText: 'field required' });
+    if (stepIndex === 0 && /[^a-zA-Z0-9]/.test(this.state.type)) {
+      this.setState({ errorText: 'Alphanumeric characters only' });
+    } else if (stepIndex === 0 && !this.state.type ) {
+      this.setState({ errorText: 'Field required' });
+    }
+    else if ((stepIndex === 3 && this.state.command === '' && this.state.type === 'worker') || (stepIndex === 3 && this.state.port === null && this.state.type === 'web')) {
+      this.setState({ errorText: 'Field required' });
     } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
         finished: stepIndex >= 3,
         loading: stepIndex >= 3,
+        errorText: ""
       });
     }
   }
@@ -191,7 +189,7 @@ export default class NewFormation extends Component {
       this.setState({
         stepIndex: stepIndex - 1,
         loading: false,
-        errorText: null,
+        errorText: "",
       });
     }
   }
@@ -236,11 +234,11 @@ export default class NewFormation extends Component {
         stepIndex: 0,
         loading: false,
         size: this.state.sizes[0].name,
-        type: this.types[0],
+        type: null,
         port: null,
         command: null,
         quantity: 1,
-        errorText: null,
+        errorText: "",
       });
     });
   }
