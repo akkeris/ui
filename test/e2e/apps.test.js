@@ -202,7 +202,7 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .expect(Selector('.type-header').exists)
     .notOk()
 
-    
+
     // Create the new formation
     .click('button.new-formation')
     .click('.next button')
@@ -342,7 +342,7 @@ test('Should be able to create view and release builds', async (t) => { // eslin
     .click('.logs button');
 });
 
-test
+test // eslint-disable-line no-undef
   .before(async (t) => {
     await t
 
@@ -414,17 +414,17 @@ test
       .click('.plan-menu button')
       .click('.Lids.Dev.Credentials')
 
-      //Test addon plan description
+      // Test addon plan description
       .expect(Selector('.plan-price').innerText)
-      .contains('$0.00/mo')
+      .contains('/mo')
       .expect(Selector('.plan-description').innerText)
-      .contains('Dev Database credentials and connection information placed as environment variables in your app when it starts.')
+      .contains('credentials')
       .click('button.back')
       .click('.next button')
-      .expect(Selector('.plan-price').innerText)
-      .contains('$0.00/mo')
-      .expect(Selector('.plan-description').innerText)
-      .contains('Dev Database credentials and connection information placed as environment variables in your app when it starts.')
+      .expect(Selector('.plan-price').exists)
+      .ok()
+      .expect(Selector('.plan-description').exists)
+      .ok()
 
       .click('.next button')
       .expect(Selector('.addon-snack').innerText)
@@ -461,10 +461,10 @@ test
       .click('.next button')
       .click('.plan-menu button')
       .click('.Standard-0')
-      .expect(Selector('.plan-price').innerText)
-      .contains('$5.00/mo')
-      .expect(Selector('.plan-description').innerText)
-      .contains('4GB space, 2GB memory, 1x CPU')
+      .expect(Selector('.plan-price').exists)
+      .ok()
+      .expect(Selector('.plan-description').exists)
+      .ok()
       .click('.next button')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Created')

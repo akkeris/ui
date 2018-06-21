@@ -45,7 +45,6 @@ export default class NewAddon extends Component {
       service: {},
       plans: [],
       plan: {},
-      price: '',
     };
   }
 
@@ -67,15 +66,9 @@ export default class NewAddon extends Component {
           plans: response.data,
           plan: response.data[0],
           loading: false,
-          price: this.formatPrice(response.data[0].price.cents),
         });
       });
     }
-  }
-
-  formatPrice(cents){
-    let dollars = cents / 100;
-    return dollars.toLocaleString("en-US", {style:"currency", currency:"USD"});
   }
 
   getServices() {
@@ -102,7 +95,6 @@ export default class NewAddon extends Component {
     ));
   }
 
-
   getStepContent(stepIndex) {
     switch (stepIndex) {
       case 0:
@@ -123,22 +115,34 @@ export default class NewAddon extends Component {
               {this.getPlans()}
             </DropDownMenu>
             <div className="plan-info">
-              <span className="plan-price">
-              <b>{this.state.price}/mo</b>
-              </span>
+              {this.state.plan.price && this.state.plan.price.cents !== 0 && (
+                <span className="plan-price">
+                  <b>{this.formatPrice(this.state.plan.price.cents)}/mo</b>
+                </span>
+              )}
+              {this.state.plan.price && this.state.plan.price.cents === 0 && (
+                <span className="plan-price">
+                  <b>{this.formatPrice(0)}/mo</b>
+                </span>
+              )}
               <br />
               <span className="plan-description">
-            {this.state.plan.description}
-            </span> 
+                {this.state.plan.description}
+              </span>
             </div>
             <p>
-              Select the plan for your addon (please only use larger plans for prod)    
+              Select the plan for your addon (please only use larger plans for prod)
             </p>
           </div>
         );
       default:
         return 'You\'re a long way from home sonny jim!';
     }
+  }
+
+  formatPrice(cents) { // eslint-disable-line class-methods-use-this
+    const dollars = cents / 100;
+    return dollars.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
 
   handleClose = () => {
@@ -156,8 +160,6 @@ export default class NewAddon extends Component {
   handlePlanChange = (event, index, value) => {
     this.setState({
       plan: value,
-      price: this.formatPrice(value.price.cents),
-
     });
   }
 
@@ -194,8 +196,6 @@ export default class NewAddon extends Component {
         loading: false,
         plans: [],
         plan: {},
-        price: '',
-
       });
     });
   }
@@ -212,8 +212,6 @@ export default class NewAddon extends Component {
         loading: false,
         plans: [],
         plan: {},
-        price: '',
-
       });
     });
   }
