@@ -202,7 +202,6 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .expect(Selector('.type-header').exists)
     .notOk()
 
-
     // Create the new formation
     .click('button.new-formation')
     .click('.next button')
@@ -425,7 +424,6 @@ test // eslint-disable-line no-undef
       .ok()
       .expect(Selector('.plan-description').exists)
       .ok()
-
       .click('.next button')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Created')
