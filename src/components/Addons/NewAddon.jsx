@@ -45,6 +45,7 @@ export default class NewAddon extends Component {
       service: {},
       plans: [],
       plan: {},
+      price: '',
     };
   }
 
@@ -66,9 +67,15 @@ export default class NewAddon extends Component {
           plans: response.data,
           plan: response.data[0],
           loading: false,
+          price: this.formatPrice(response.data[0].price.cents),
         });
       });
     }
+  }
+
+  formatPrice(cents){
+    let dollars = cents / 100;
+    return dollars.toLocaleString("en-US", {style:"currency", currency:"USD"});
   }
 
   getServices() {
@@ -95,6 +102,7 @@ export default class NewAddon extends Component {
     ));
   }
 
+
   getStepContent(stepIndex) {
     switch (stepIndex) {
       case 0:
@@ -114,8 +122,17 @@ export default class NewAddon extends Component {
             <DropDownMenu className="plan-menu" value={this.state.plan} onChange={this.handlePlanChange}>
               {this.getPlans()}
             </DropDownMenu>
+            <div className="plan-info">
+              <span className="plan-price">
+              <b>{this.state.price}/mo</b>
+              </span>
+              <br />
+              <span className="plan-description">
+            {this.state.plan.description}
+            </span> 
+            </div>
             <p>
-              Select the plan for your addon (please only use larger plans for prod)
+              Select the plan for your addon (please only use larger plans for prod)    
             </p>
           </div>
         );
@@ -139,6 +156,8 @@ export default class NewAddon extends Component {
   handlePlanChange = (event, index, value) => {
     this.setState({
       plan: value,
+      price: this.formatPrice(value.price.cents),
+
     });
   }
 
@@ -175,6 +194,8 @@ export default class NewAddon extends Component {
         loading: false,
         plans: [],
         plan: {},
+        price: this.formatPrice(value.price.cents),
+
       });
     });
   }
@@ -191,6 +212,8 @@ export default class NewAddon extends Component {
         loading: false,
         plans: [],
         plan: {},
+        price: this.formatPrice(value.price.cents),
+
       });
     });
   }
