@@ -114,6 +114,22 @@ export default class NewAddon extends Component {
             <DropDownMenu className="plan-menu" value={this.state.plan} onChange={this.handlePlanChange}>
               {this.getPlans()}
             </DropDownMenu>
+            <div className="plan-info">
+              {this.state.plan.price && this.state.plan.price.cents !== 0 && (
+                <span className="plan-price">
+                  <b>{this.formatPrice(this.state.plan.price.cents)}/mo</b>
+                </span>
+              )}
+              {this.state.plan.price && this.state.plan.price.cents === 0 && (
+                <span className="plan-price">
+                  <b>{this.formatPrice(0)}/mo</b>
+                </span>
+              )}
+              <br />
+              <span className="plan-description">
+                {this.state.plan.description}
+              </span>
+            </div>
             <p>
               Select the plan for your addon (please only use larger plans for prod)
             </p>
@@ -122,6 +138,11 @@ export default class NewAddon extends Component {
       default:
         return 'You\'re a long way from home sonny jim!';
     }
+  }
+
+  formatPrice(cents) { // eslint-disable-line class-methods-use-this
+    const dollars = cents / 100;
+    return dollars.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
 
   handleClose = () => {
