@@ -212,7 +212,7 @@ export default class NewAddon extends Component {
         loading: false,
         plans: [],
         plan: {},
-        price: this.formatPrice(value.price.cents),
+        price: '',
 
       });
     });
