@@ -102,8 +102,6 @@ export default class Webhooks extends Component {
         <TableRowColumn>
           <div style={style.tableRowColumn.events}>
             {webhook.events.map((event, idx) => { //eslint-disable-line
-              console.log(`len${webhook.events.length}`);
-              console.log(`idx${idx}`);
               if (idx === webhook.events.length - 1) {
                 return <span style={style.tableRowColumn.event}>{event} </span>;
               } else { //eslint-disable-line
