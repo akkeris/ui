@@ -364,6 +364,7 @@ export default {
   getFormationSizes,
   getDynos,
   getAppAddons,
+  getAppWebhooks,
   deleteAddon,
   getBuilds,
   getConfig,
