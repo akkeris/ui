@@ -18,6 +18,7 @@ import ConfigIcon from 'material-ui/svg-icons/image/tune';
 import AppIcon from 'material-ui/svg-icons/action/exit-to-app';
 import ReleaseIcon from 'material-ui/svg-icons/file/cloud';
 import GitIcon from '../../components/Icons/GitIcon';
+import WebhookIcon from '../../components/Icons/WebhookIcon';
 
 import Formations from '../../components/Formations';
 import Releases from '../../components/Releases';
@@ -285,6 +286,12 @@ export default class AppInfo extends Component {
                   active={this.state.addonsActive}
                 />
               </Tab>
+              <Tab
+                className="webhooks-tab"
+                icon={<WebhookIcon />}
+                label="Webhooks"
+                onActive={this.configTabActive}
+              />
               <Tab
                 className="config-tab"
                 icon={<ConfigIcon />}
