@@ -32,6 +32,17 @@ const style = {
       fontSize: '11px',
       textTransform: 'uppercase',
     },
+    events: {
+      fontSize: '14px',
+      // padding: '10px 0px 10px 0px',
+
+      display: 'flex',
+      'flex-wrap': 'wrap',
+
+    },
+    event: {
+      padding: '0px 2px 0px 2px',
+    },
     end: {
       float: 'right',
     },
@@ -89,9 +100,15 @@ export default class Webhooks extends Component {
           <div style={style.tableRowColumn.sub}>{webhook.id}</div>
         </TableRowColumn>
         <TableRowColumn>
-          <div style={style.tableRowColumn.title}>
-            {webhook.events.map((event) => { //eslint-disable-line
-              <span>{event} </span>; //eslint-disable-line
+          <div style={style.tableRowColumn.events}>
+            {webhook.events.map((event, idx) => { //eslint-disable-line
+              console.log(`len${webhook.events.length}`);
+              console.log(`idx${idx}`);
+              if (idx === webhook.events.length - 1) {
+                return <span style={style.tableRowColumn.event}>{event} </span>;
+              } else { //eslint-disable-line
+                return <span style={style.tableRowColumn.event}>{event},</span>;
+              }
             })}
           </div>
         </TableRowColumn>
