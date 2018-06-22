@@ -98,7 +98,7 @@ function getAppAddons(app) {
 }
 
 function getAppWebhooks(app) {
-  return axios.get(`/apps/${app}/hooks`);
+  return axios.get(`/api/apps/${app}/hooks`);
 }
 
 function getAddonServices() {
