@@ -13,8 +13,8 @@ import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 
 import api from '../../services/api';
-// import NewWebhook from './NewWebhook';
 import ConfirmationModal from '../ConfirmationModal';
+import NewWebhook from './NewWebhook';
 
 const muiTheme = getMuiTheme({
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
@@ -130,20 +130,21 @@ export default class Webhooks extends Component {
   }
 
   handleRemoveWebhook = () => {
-  //   this.setState({ loading: true });
-  //   api.deleteWebhook(this.props.app, this.state.addon.id).then(() => {
-  //     this.reload('Addon Deleted');
-  //   }).catch((error) => {
-  //     this.setState({
-  //       submitMessage: error.response.data,
-  //       submitFail: true,
-  //       loading: false,
-  //       new: false,
-  //       confirmAddonOpen: false,
-  //       confirmaAttachmentOpen: false,
-  //       attach: false,
-  //     });
-  //   });
+    this.setState({ loading: true });
+    api.deleteWebhook(this.props.app, this.state.webhook.id).then(() => {
+      console.log('Webhook should have been deleted');
+      this.reload('Webhook Deleted');
+    }).catch((error) => {
+      console.log('api.deleteWebhook returned an error...');
+      console.log(error);
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        loading: false,
+        new: false,
+        confirmWebhookOpen: false,
+      });
+    });
   }
 
   handleWebhookConfirmation = (webhook) => {
@@ -210,7 +211,7 @@ export default class Webhooks extends Component {
           {this.state.new && (
             <div>
               <IconButton className="webhook-cancel" onTouchTap={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
-              {/* <NewAddon app={this.props.app} onComplete={this.reload} /> */}
+              { <NewWebhook app={this.props.app} onComplete={this.reload} /> }
             </div>
           )}
           <Table className="webhook-list">

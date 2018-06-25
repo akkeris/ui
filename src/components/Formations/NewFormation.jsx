@@ -55,7 +55,7 @@ export default class NewFormation extends Component {
       type: null,
       port: 9000,
       command: '',
-      errorText: "",
+      errorText: '',
     };
   }
 
@@ -72,7 +72,7 @@ export default class NewFormation extends Component {
       this.setState({
         sizes,
         size: sizes[0].name,
-        type: "",
+        type: '',
         quantity: 1,
         loading: false,
       });
@@ -168,17 +168,16 @@ export default class NewFormation extends Component {
     const { stepIndex } = this.state;
     if (stepIndex === 0 && /[^a-zA-Z0-9]/.test(this.state.type)) {
       this.setState({ errorText: 'Alphanumeric characters only' });
-    } else if (stepIndex === 0 && !this.state.type ) {
+    } else if (stepIndex === 0 && !this.state.type) {
       this.setState({ errorText: 'Field required' });
-    }
-    else if ((stepIndex === 3 && this.state.command === '' && this.state.type === 'worker') || (stepIndex === 3 && this.state.port === null && this.state.type === 'web')) {
+    } else if ((stepIndex === 3 && this.state.command === '' && this.state.type === 'worker') || (stepIndex === 3 && this.state.port === null && this.state.type === 'web')) {
       this.setState({ errorText: 'Field required' });
     } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
         finished: stepIndex >= 3,
         loading: stepIndex >= 3,
-        errorText: ""
+        errorText: '',
       });
     }
   }
@@ -189,7 +188,7 @@ export default class NewFormation extends Component {
       this.setState({
         stepIndex: stepIndex - 1,
         loading: false,
-        errorText: "",
+        errorText: '',
       });
     }
   }
@@ -238,7 +237,7 @@ export default class NewFormation extends Component {
         port: null,
         command: null,
         quantity: 1,
-        errorText: "",
+        errorText: '',
       });
     });
   }
