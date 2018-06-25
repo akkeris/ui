@@ -532,6 +532,145 @@ test // eslint-disable-line no-undef
       .notOk();
   });
 
+
+test // eslint-disable-line no-undef
+  .before(async (t) => {
+    await t
+
+    // login
+      .typeText('#username', botUsername)
+      .typeText('#password', botPassword)
+      .click('button.login')
+
+    // navigate to new app page
+      .click('.new-app')
+
+    // create app
+      .typeText('.app-name input', 'testcafe')
+      .click('.next button')
+      .click('.dropdown button')
+      .click('[role=menu] .testcafe')
+      .click('.next button')
+      .click('.dropdown button')
+      .click('[role=menu] .testcafe')
+      .click('.next button')
+      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .ok()
+
+      // navigate to new app page
+      .click('.new-app')
+
+    // create app
+      .typeText('.app-name input', 'testcafe2')
+      .click('.next button')
+      .click('.dropdown button')
+      .click('[role=menu] .testcafe')
+      .click('.next button')
+      .click('.dropdown button')
+      .click('[role=menu] .testcafe')
+      .click('.next button')
+      .expect(Selector('.app-list .testcafe2-testcafe').exists)
+      .ok();
+  })('Should be able to create and remove webhooks', async (t) => { // eslint-disable-line no-undef
+    await t
+      .click('.app-list .testcafe-testcafe')
+      .click('.webhooks-tab')
+
+    // Check new component shows
+      .click('button.new-webhook')
+      .expect(Selector('.webhook-url').exists)
+      .ok()
+
+    // Make sure we can cancel
+      .click('button.webhook-cancel')
+      .expect(Selector('.webhook-url').exists)
+      .notOk()
+
+    // Create webhook
+
+    // URL validation tests
+      .click('button.new-webhook')
+      .click('.next button')
+      .expect(Selector('.webhook-url').innerText)
+      .contains('Invalid URL')
+      .typeText('.webhook-url input', '!')
+      .click('.next button')
+      .expect(Selector('.webhook-url').innerText)
+      .contains('Invalid URL')
+      .click('.webhook-url input')
+      .pressKey('backspace')
+      .typeText('.webhook-url input', 'http://example.com/hook')
+      .click('.next button')
+      .click('button.back')
+      .expect(Selector('.webhook-url').innerText)
+      .notContains('Invalid URL')
+      .expect(Selector('.webhook-url input').value)
+      .contains('http://example.com/hook')
+      .click('.next button')
+
+    // Events validation tests
+      .click('.next button')
+      .expect(Selector('.events-errorText').innerText)
+      .contains('Must select at least one event')
+      .click('.checkbox-release')
+      .click('.next button')
+      .click('button.back')
+      .expect(Selector('.events-errorText').exists)
+      .notOk()
+      .click('.checkbox-destroy')
+      .click('.next button')
+
+    // Secret validation tests
+      .click('.next button')
+      .expect(Selector('.webhook-secret').innerText)
+      .contains('Field required')
+      .typeText('.webhook-secret input', '!')
+      .click('.next button')
+      .expect(Selector('.webhook-secret').innerText)
+      .contains('Alphanumeric characters only')
+      .click('.webhook-secret input')
+      .pressKey('backspace')
+      .typeText('.webhook-secret input', 'mysecret')
+      .click('.next button')
+
+    // Test that webhook was created, displayed
+      .expect(Selector('.webhook-snack').innerText)
+      .contains('Webhook Created')
+      .expect(Selector('.webhook-list').exists)
+      .ok()
+      .expect(Selector('.webhook-item').innerText)
+      .contains('http://example.com/hook');
+
+    // Remove
+
+    // Uncheck Boxes
+  })
+  .after(async (t) => {
+    await t
+      .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
+      .click('.info-tab')
+
+    // delete the app
+      .click('.delete button')
+
+    // confirm delete and make sure app no longer exists
+      .click('.delete-confirm button.ok')
+      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .notOk()
+
+      .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
+      .click('.info-tab')
+
+    // delete the app
+      .click('.delete button')
+
+    // confirm delete and make sure app no longer exists
+      .click('.delete-confirm button.ok')
+      .expect(Selector('.app-list .testcafe2-testcafe').exists)
+      .notOk();
+  });
+
+
 test('Should be able to create edit and remove config vars', async (t) => { // eslint-disable-line no-undef
   const editTextArea = Selector('.config-edit-value textarea').withAttribute('id');
   const newTextArea = Selector('.config-value textarea').withAttribute('id');

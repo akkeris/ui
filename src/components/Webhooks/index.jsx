@@ -96,7 +96,7 @@ export default class Webhooks extends Component {
     return this.state.webhooks.map(webhook => (
       <TableRow className={webhook.id} key={webhook.id} style={style.tableRow}>
         <TableRowColumn>
-          <div style={style.tableRowColumn.title}>{webhook.url}</div>
+          <div className="webhook-item" style={style.tableRowColumn.title}>{webhook.url}</div>
           <div style={style.tableRowColumn.sub}>{webhook.id}</div>
         </TableRowColumn>
         <TableRowColumn>
