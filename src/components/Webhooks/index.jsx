@@ -37,7 +37,7 @@ const style = {
       // padding: '10px 0px 10px 0px',
 
       display: 'flex',
-      'flex-wrap': 'wrap',
+      flexWrap: 'wrap',
 
     },
     event: {
@@ -103,9 +103,9 @@ export default class Webhooks extends Component {
           <div style={style.tableRowColumn.events}>
             {webhook.events.map((event, idx) => { //eslint-disable-line
               if (idx === webhook.events.length - 1) {
-                return <span style={style.tableRowColumn.event}>{event} </span>;
+                return <span key={event} style={style.tableRowColumn.event}>{event} </span>;
               } else { //eslint-disable-line
-                return <span style={style.tableRowColumn.event}>{event},</span>;
+                return <span key={event} style={style.tableRowColumn.event}>{event},</span>;
               }
             })}
           </div>
