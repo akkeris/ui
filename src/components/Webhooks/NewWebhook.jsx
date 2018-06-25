@@ -33,6 +33,10 @@ const style = {
   events: {
     paddingLeft: '14px',
   },
+  eventsError: {
+    color: 'red',
+    paddingTop: '20px',
+  },
 };
 
 const events = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy'];
@@ -73,9 +77,14 @@ export default class NewWebhook extends Component {
         return (
           <div>
             <h3>Events</h3>
-            <div style={style.events}>
+            <div style={style.events} className="events">
               {this.getEvents()}
             </div>
+            {this.state.errorText && (
+              <div style={style.eventsError} className="events-errorText">
+                {this.state.errorText}
+              </div>
+            )}
           </div>
         );
       case 2:
@@ -130,6 +139,8 @@ export default class NewWebhook extends Component {
     const { stepIndex } = this.state;
     if (stepIndex === 0 && !this.checkURL(this.state.url)) {
       this.setState({ errorText: 'Invalid URL' });
+    } else if (stepIndex === 1 && this.state.events.length === 0) {
+      this.setState({ errorText: 'Must select at least one event' });
     } else if (stepIndex === 2 && /[^a-zA-Z0-9]/.test(this.state.secret)) {
       this.setState({ errorText: 'Alphanumeric characters only' });
     } else if (stepIndex === 2 && !this.state.secret) {
@@ -152,6 +163,7 @@ export default class NewWebhook extends Component {
     const { stepIndex } = this.state;
     this.setState({
       stepIndex: stepIndex - 1,
+      errorText: '',
     });
   }
 
