@@ -167,7 +167,7 @@ export default class AppInfo extends Component {
     this.setState({
       dynosActive: false,
       releasesActive: false,
-      addonsActive: true,
+      addonsActive: false,
       configActive: false,
       logsActive: false,
       metricsActive: false,

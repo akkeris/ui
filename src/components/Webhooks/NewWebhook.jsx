@@ -83,7 +83,12 @@ export default class NewWebhook extends Component {
         );
       case 2:
         return (
-          <TextField className="webhook-secret" floatingLabelText="Secret" type="text" value={this.state.secret} onChange={this.handleSecretChange} errorText={this.state.errorText} />
+          <div>
+            <TextField className="webhook-secret" floatingLabelText="Secret" type="text" value={this.state.secret} onChange={this.handleSecretChange} errorText={this.state.errorText} />
+            <p>
+              Define a secret for calculation of SHA.
+            </p>
+          </div>
         );
       default:
         return 'You\'re a long way from home sonny jim!';

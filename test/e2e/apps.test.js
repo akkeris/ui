@@ -533,179 +533,115 @@ test // eslint-disable-line no-undef
   });
 
 
-test // eslint-disable-line no-undef
-  .before(async (t) => {
-    await t
-
-    // login
-      .typeText('#username', botUsername)
-      .typeText('#password', botPassword)
-      .click('button.login')
-
-    // navigate to new app page
-      .click('.new-app')
-
-    // create app
-      .typeText('.app-name input', 'testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
-      .ok()
-
-      // navigate to new app page
-      .click('.new-app')
-
-    // create app
-      .typeText('.app-name input', 'testcafe2')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .expect(Selector('.app-list .testcafe2-testcafe').exists)
-      .ok();
-  })('Should be able to create and remove webhooks', async (t) => { // eslint-disable-line no-undef
-    await t
-      .click('.app-list .testcafe-testcafe')
-      .click('.webhooks-tab')
+test('Should be able to create and remove webhooks', async (t) => { // eslint-disable-line no-undef
+  await t
+    .click('.app-list .testcafe-testcafe')
+    .click('.webhooks-tab')
 
     // Check new component shows
-      .click('button.new-webhook')
-      .expect(Selector('.webhook-url').exists)
-      .ok()
+    .click('button.new-webhook')
+    .expect(Selector('.webhook-url').exists)
+    .ok()
 
     // Make sure we can cancel
-      .click('button.webhook-cancel')
-      .expect(Selector('.webhook-url').exists)
-      .notOk()
+    .click('button.webhook-cancel')
+    .expect(Selector('.webhook-url').exists)
+    .notOk()
 
     // Create webhook
 
     // URL validation tests
-      .click('button.new-webhook')
-      .click('.next button')
-      .expect(Selector('.webhook-url').innerText)
-      .contains('Invalid URL')
-      .typeText('.webhook-url input', '!')
-      .click('.next button')
-      .expect(Selector('.webhook-url').innerText)
-      .contains('Invalid URL')
-      .click('.webhook-url input')
-      .pressKey('backspace')
-      .typeText('.webhook-url input', 'http://example.com/hook')
-      .click('.next button')
-      .click('button.back')
-      .expect(Selector('.webhook-url').innerText)
-      .notContains('Invalid URL')
-      .expect(Selector('.webhook-url input').value)
-      .contains('http://example.com/hook')
-      .click('.next button')
+    .click('button.new-webhook')
+    .click('.next button')
+    .expect(Selector('.webhook-url').innerText)
+    .contains('Invalid URL')
+    .typeText('.webhook-url input', '!')
+    .click('.next button')
+    .expect(Selector('.webhook-url').innerText)
+    .contains('Invalid URL')
+    .click('.webhook-url input')
+    .pressKey('backspace')
+    .typeText('.webhook-url input', 'http://example.com/hook')
+    .click('.next button')
+    .click('button.back')
+    .expect(Selector('.webhook-url').innerText)
+    .notContains('Invalid URL')
+    .expect(Selector('.webhook-url input').value)
+    .contains('http://example.com/hook')
+    .click('.next button')
 
     // Events validation tests
-      .click('.next button')
-      .expect(Selector('.events-errorText').innerText)
-      .contains('Must select at least one event')
-      .click('.checkbox-release')
-      .click('.next button')
-      .click('button.back')
-      .expect(Selector('.events-errorText').exists)
-      .notOk()
-      .click('.checkbox-destroy')
-      .click('.next button')
-      .click('button.back')
-      .expect(Selector('.checkbox-destroy input').checked)
-      .ok()
-      .expect(Selector('.checkbox-release input').checked)
-      .ok()
-      .expect(Selector('.checkbox-build input').checked)
-      .notOk()
-      .click('.next button')
+    .click('.next button')
+    .expect(Selector('.events-errorText').innerText)
+    .contains('Must select at least one event')
+    .click('.checkbox-release')
+    .click('.next button')
+    .click('button.back')
+    .expect(Selector('.events-errorText').exists)
+    .notOk()
+    .click('.checkbox-destroy')
+    .click('.next button')
+    .click('button.back')
+    .expect(Selector('.checkbox-destroy input').checked)
+    .ok()
+    .expect(Selector('.checkbox-release input').checked)
+    .ok()
+    .expect(Selector('.checkbox-build input').checked)
+    .notOk()
+    .click('.next button')
 
     // Secret validation tests
-      .click('.next button')
-      .expect(Selector('.webhook-secret').innerText)
-      .contains('Field required')
-      .typeText('.webhook-secret input', 'over twenty characters')
-      .click('.next button')
-      .expect(Selector('.webhook-secret').innerText)
-      .contains('Secret must be less than 20 characters')
-      .click('.webhook-secret input')
-      .pressKey('ctrl+a')
-      .pressKey('backspace')
-      .typeText('.webhook-secret input', 'mysecret')
-      .click('.next button')
+    .click('.next button')
+    .expect(Selector('.webhook-secret').innerText)
+    .contains('Field required')
+    .typeText('.webhook-secret input', 'over twenty characters')
+    .click('.next button')
+    .expect(Selector('.webhook-secret').innerText)
+    .contains('Secret must be less than 20 characters')
+    .click('.webhook-secret input')
+    .pressKey('ctrl+a')
+    .pressKey('backspace')
+    .typeText('.webhook-secret input', 'mysecret')
+    .click('.next button')
 
     // Test that webhook was created, displayed
-      .expect(Selector('.webhook-snack').innerText)
-      .contains('Webhook Created')
-      .expect(Selector('.webhook-list').exists)
-      .ok()
-      .expect(Selector('.webhook-item-0').innerText)
-      .contains('http://example.com/hook')
+    .expect(Selector('.webhook-snack').innerText)
+    .contains('Webhook Created')
+    .expect(Selector('.webhook-item-0').innerText)
+    .contains('http://example.com/hook')
 
     // Remove
-      .click('.webhook-list tbody tr button.webhook-remove')
-      .click('.remove-webhook-confirm .ok')
-      .expect(Selector('.webhook-list .webhook-item-0').exists)
-      .notOk()
+    .click('.webhook-list tbody tr button.webhook-remove')
+    .click('.remove-webhook-confirm .ok')
+    .expect(Selector('.webhook-list .webhook-item-0').exists)
+    .notOk()
 
     // Display multiple webhooks
-      .click('button.new-webhook')
-      .typeText('.webhook-url input', 'http://example.com/hook1')
-      .click('.next button')
-      .click('.checkbox-release')
-      .click('.next button')
-      .typeText('.webhook-secret input', 'secret')
-      .click('.next button')
-      .expect(Selector('.webhook-snack').innerText)
-      .contains('Webhook Created')
-      .click('button.new-webhook')
-      .typeText('.webhook-url input', 'http://example.com/hook2')
-      .click('.next button')
-      .click('.checkbox-release')
-      .click('.next button')
-      .typeText('.webhook-secret input', 'secret')
-      .click('.next button')
-      .expect(Selector('.webhook-snack').innerText)
-      .contains('Webhook Created')
-      .expect(Selector('.webhook-list').exists)
-      .ok()
-      .expect(Selector('.webhook-item-0').innerText)
-      .contains('http://example.com/hook1')
-      .expect(Selector('.webhook-item-1').innerText)
-      .contains('http://example.com/hook2');
-  })
-  .after(async (t) => {
-    await t
-      .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
-      .click('.info-tab')
-
-    // delete the app
-      .click('.delete button')
-
-    // confirm delete and make sure app no longer exists
-      .click('.delete-confirm button.ok')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
-      .notOk()
-
-      .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
-      .click('.info-tab')
-
-    // delete the app
-      .click('.delete button')
-
-    // confirm delete and make sure app no longer exists
-      .click('.delete-confirm button.ok')
-      .expect(Selector('.app-list .testcafe2-testcafe').exists)
-      .notOk();
-  });
+    .click('button.new-webhook')
+    .typeText('.webhook-url input', 'http://example.com/hook1')
+    .click('.next button')
+    .click('.checkbox-release')
+    .click('.next button')
+    .typeText('.webhook-secret input', 'secret')
+    .click('.next button')
+    .expect(Selector('.webhook-snack').innerText)
+    .contains('Webhook Created')
+    .click('button.new-webhook')
+    .typeText('.webhook-url input', 'http://example.com/hook2')
+    .click('.next button')
+    .click('.checkbox-release')
+    .click('.next button')
+    .typeText('.webhook-secret input', 'secret')
+    .click('.next button')
+    .expect(Selector('.webhook-snack').innerText)
+    .contains('Webhook Created')
+    .expect(Selector('.webhook-list').exists)
+    .ok()
+    .expect(Selector('.webhook-item-0').innerText)
+    .contains('http://example.com/hook1')
+    .expect(Selector('.webhook-item-1').innerText)
+    .contains('http://example.com/hook2');
+});
 
 
 test('Should be able to create edit and remove config vars', async (t) => { // eslint-disable-line no-undef

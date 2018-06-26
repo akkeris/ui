@@ -21,6 +21,9 @@ const muiTheme = getMuiTheme({
 });
 
 const style = {
+  table: {
+    overflow: 'auto',
+  },
   tableRow: {
     height: '58px',
   },
@@ -92,6 +95,16 @@ export default class Webhooks extends Component {
     }
   }
 
+  getEvents(webhook) { // eslint-disable-line class-methods-use-this
+    return webhook.events.map((event, idx) => {
+      if (idx === webhook.events.length - 1) {
+        return <span key={event} style={style.tableRowColumn.event}>{event} </span>;
+      } else { //eslint-disable-line
+        return <span key={event} style={style.tableRowColumn.event}>{event},</span>;
+      }
+    });
+  }
+
   getWebhooks() {
     return this.state.webhooks.map((webhook, rowindex) => (
       <TableRow className={webhook.id} key={webhook.id} style={style.tableRow}>
@@ -101,18 +114,12 @@ export default class Webhooks extends Component {
         </TableRowColumn>
         <TableRowColumn>
           <div style={style.tableRowColumn.events}>
-            {webhook.events.map((event, idx) => { //eslint-disable-line
-              if (idx === webhook.events.length - 1) {
-                return <span key={event} style={style.tableRowColumn.event}>{event} </span>;
-              } else { //eslint-disable-line
-                return <span key={event} style={style.tableRowColumn.event}>{event},</span>;
-              }
-            })}
+            {this.getEvents(webhook)}
           </div>
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton className="webhook-remove" onTouchTap={() => this.handleWebhookConfirmation(webhook)}>
+            <IconButton className="webhook-remove" onTouchTap={() => this.handleWebhookConfirmation(webhook)} >
               <RemoveIcon />
             </IconButton>
           </div>
@@ -211,7 +218,7 @@ export default class Webhooks extends Component {
               { <NewWebhook app={this.props.app} onComplete={this.reload} /> }
             </div>
           )}
-          <Table className="webhook-list">
+          <Table className="webhook-list" style={style.table}>
             <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
               <TableRow>
                 <TableHeaderColumn>Webhook</TableHeaderColumn>
