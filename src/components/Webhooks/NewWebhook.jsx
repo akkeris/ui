@@ -39,7 +39,7 @@ const style = {
   },
 };
 
-const events = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy'];
+const events = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
 
 export default class NewWebhook extends Component {
   constructor(props, context) {
