@@ -56,12 +56,6 @@ export default class NewWebhook extends Component {
     };
   }
 
-  // componentDidMount() {
-  // }
-
-  // componentDidUpdate(prevProps, prevState) {
-  // }
-
   getStepContent(stepIndex) {
     switch (stepIndex) {
       case 0:
@@ -141,8 +135,8 @@ export default class NewWebhook extends Component {
       this.setState({ errorText: 'Invalid URL' });
     } else if (stepIndex === 1 && this.state.events.length === 0) {
       this.setState({ errorText: 'Must select at least one event' });
-    } else if (stepIndex === 2 && /[^a-zA-Z0-9]/.test(this.state.secret)) {
-      this.setState({ errorText: 'Alphanumeric characters only' });
+    } else if (stepIndex === 2 && this.state.secret.length > 20) {
+      this.setState({ errorText: 'Secret must be less than 20 characters' });
     } else if (stepIndex === 2 && !this.state.secret) {
       this.setState({ errorText: 'Field required' });
     } else {
@@ -154,9 +148,9 @@ export default class NewWebhook extends Component {
     }
   }
 
-  // regex from https://stackoverflow.com/questions/1303872
+  // regex from https://stackoverflow.com/questions/1303872, modified to have http(s) optional
   checkURL(url) { // eslint-disable-line
-      return /^HTTP|HTTP|http(s)?:\/\/(www\.)?[A-Za-z0-9]+([\-\.]{1}[A-Za-z0-9]+)*\.[A-Za-z]{2,40}(:[0-9]{1,40})?(\/.*)?$/.test(url) // eslint-disable-line
+      return /^(HTTP|HTTP|http(s)?:\/\/)?(www\.)?[A-Za-z0-9]+([\-\.]{1}[A-Za-z0-9]+)*\.[A-Za-z]{2,40}(:[0-9]{1,40})?(\/.*)?$/.test(url) // eslint-disable-line
   }
 
   handlePrev = () => {
@@ -172,7 +166,7 @@ export default class NewWebhook extends Component {
       this.props.onComplete('Webhook Created');
     }).catch((error) => {
       this.setState({
-        submitMessage: error.response.data,
+        submitMessage: error.response.data || 'Tick tock, Captain Hook!',
         submitFail: true,
         finished: false,
         stepIndex: 0,

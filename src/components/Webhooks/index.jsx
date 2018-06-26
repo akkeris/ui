@@ -93,10 +93,10 @@ export default class Webhooks extends Component {
   }
 
   getWebhooks() {
-    return this.state.webhooks.map(webhook => (
+    return this.state.webhooks.map((webhook, rowindex) => (
       <TableRow className={webhook.id} key={webhook.id} style={style.tableRow}>
         <TableRowColumn>
-          <div className="webhook-item" style={style.tableRowColumn.title}>{webhook.url}</div>
+          <div className={`webhook-item-${rowindex}`} style={style.tableRowColumn.title}>{webhook.url}</div>
           <div style={style.tableRowColumn.sub}>{webhook.id}</div>
         </TableRowColumn>
         <TableRowColumn>
@@ -132,11 +132,8 @@ export default class Webhooks extends Component {
   handleRemoveWebhook = () => {
     this.setState({ loading: true });
     api.deleteWebhook(this.props.app, this.state.webhook.id).then(() => {
-      console.log('Webhook should have been deleted');
       this.reload('Webhook Deleted');
     }).catch((error) => {
-      console.log('api.deleteWebhook returned an error...');
-      console.log(error);
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
