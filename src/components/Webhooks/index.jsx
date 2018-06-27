@@ -119,6 +119,7 @@ export default class Webhooks extends Component {
         webhook={webhook}
         rowindex={rowindex}
         app={this.props.app}
+        onComplete={this.reload}
       />
     ));
   }

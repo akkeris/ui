@@ -10,6 +10,8 @@ import Toggle from 'material-ui/Toggle';
 import Checkbox from 'material-ui/Checkbox';
 import api from '../../services/api';
 
+import ConfirmationModal from '../ConfirmationModal';
+
 const style = {
   toggle: {
     width: '35%',
@@ -103,11 +105,21 @@ export default class Webhook extends Component {
     });
   }
 
+  handleConfirmation = () => {
+    this.setState({ open: true });
+  }
+
+  handleCancelConfirmation = () => {
+    this.setState({ open: false });
+  }
+
   handleRemoveWebhook = () => {
-    this.setState({ loading: true });
-    api.deleteWebhook(this.props.app, this.state.webhook.id).then(() => {
-      this.reload('Webhook Deleted');
+    // this.setState({ loading: true });
+    api.deleteWebhook(this.props.app, this.props.webhook.id).then(() => {
+      console.log('Success!');
+      this.props.onComplete('Webhook Deleted');
     }).catch((error) => {
+      console.log('Error');
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -180,7 +192,8 @@ export default class Webhook extends Component {
                         <IconButton className="webhook-edit" tooltip="Edit" tooltipPosition="bottom-left" >
                           <EditIcon />
                         </IconButton>
-                        <IconButton className="webhook-remove" tooltip="Remove" tooltipPosition="bottom-left" onTouchTap={() => this.handleWebhookConfirmation(this.props.webhook)} >
+                        <IconButton className="webhook-remove" tooltip="Remove" tooltipPosition="bottom-left" onTouchTap={() => this.handleConfirmation(this.props.webhook)} >
+                          <ConfirmationModal className="delete-webhook" open={this.state.open} onOk={this.handleRemoveWebhook} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this webhook?" />
                           <RemoveIcon />
                         </IconButton>
                       </div>
@@ -210,4 +223,5 @@ Webhook.propTypes = {
   app: PropTypes.string.isRequired,
   rowindex: PropTypes.number.isRequired,
   webhook: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  onComplete: PropTypes.func.isRequired,
 };
