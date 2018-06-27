@@ -6,7 +6,7 @@ import RefreshIndicator from 'material-ui/RefreshIndicator';
 import IconButton from 'material-ui/IconButton';
 import Snackbar from 'material-ui/Snackbar';
 import Paper from 'material-ui/Paper';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
+import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow } from 'material-ui/Table';
 import AddIcon from 'material-ui/svg-icons/content/add';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import Dialog from 'material-ui/Dialog';
@@ -15,12 +15,19 @@ import FlatButton from 'material-ui/FlatButton';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import NewWebhook from './NewWebhook';
+import Webhook from './Webhook';
 
 const muiTheme = getMuiTheme({
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
 });
 
 const style = {
+  toggle: {
+    width: '35%',
+  },
+  noPadding: {
+    padding: 0,
+  },
   table: {
     overflow: 'auto',
   },
@@ -28,6 +35,9 @@ const style = {
     height: '58px',
   },
   tableRowColumn: {
+    div: {
+      overflow: 'visible',
+    },
     title: {
       fontSize: '16px',
     },
@@ -37,11 +47,8 @@ const style = {
     },
     events: {
       fontSize: '14px',
-      // padding: '10px 0px 10px 0px',
-
       display: 'flex',
       flexWrap: 'wrap',
-
     },
     event: {
       padding: '0px 2px 0px 2px',
@@ -81,6 +88,7 @@ export default class Webhooks extends Component {
       new: false,
       submitFail: false,
       submitMessage: '',
+      events: [],
     };
   }
 
@@ -107,24 +115,11 @@ export default class Webhooks extends Component {
 
   getWebhooks() {
     return this.state.webhooks.map((webhook, rowindex) => (
-      <TableRow className={webhook.id} key={webhook.id} style={style.tableRow}>
-        <TableRowColumn>
-          <div className={`webhook-item-${rowindex}`} style={style.tableRowColumn.title}>{webhook.url}</div>
-          <div style={style.tableRowColumn.sub}>{webhook.id}</div>
-        </TableRowColumn>
-        <TableRowColumn>
-          <div style={style.tableRowColumn.events}>
-            {this.getEvents(webhook)}
-          </div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
-          <div style={style.tableRowColumn.end}>
-            <IconButton className="webhook-remove" onTouchTap={() => this.handleWebhookConfirmation(webhook)} >
-              <RemoveIcon />
-            </IconButton>
-          </div>
-        </TableRowColumn>
-      </TableRow>
+      <Webhook
+        webhook={webhook}
+        rowindex={rowindex}
+        app={this.props.app}
+      />
     ));
   }
 
@@ -134,21 +129,6 @@ export default class Webhooks extends Component {
 
   handleNewWebhookCancel = () => {
     this.setState({ new: false });
-  }
-
-  handleRemoveWebhook = () => {
-    this.setState({ loading: true });
-    api.deleteWebhook(this.props.app, this.state.webhook.id).then(() => {
-      this.reload('Webhook Deleted');
-    }).catch((error) => {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        loading: false,
-        new: false,
-        confirmWebhookOpen: false,
-      });
-    });
   }
 
   handleWebhookConfirmation = (webhook) => {
@@ -223,7 +203,6 @@ export default class Webhooks extends Component {
               <TableRow>
                 <TableHeaderColumn>Webhook</TableHeaderColumn>
                 <TableHeaderColumn>Events</TableHeaderColumn>
-                <TableHeaderColumn style={style.tableRowColumn.icon}>Remove</TableHeaderColumn>
               </TableRow>
             </TableHeader>
             <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
