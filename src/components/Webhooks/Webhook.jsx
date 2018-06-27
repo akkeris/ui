@@ -5,11 +5,13 @@ import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import EditIcon from 'material-ui/svg-icons/editor/mode-edit';
 import SaveIcon from 'material-ui/svg-icons/content/save';
+import BackIcon from 'material-ui/svg-icons/navigation/arrow-back';
 import { Card, CardText, CardTitle } from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
 import Checkbox from 'material-ui/Checkbox';
 import api from '../../services/api';
+
 
 import ConfirmationModal from '../ConfirmationModal';
 
@@ -176,6 +178,27 @@ export default class Webhook extends Component {
     this.setState({ events });
   }
 
+  handleReset = () => {
+    // const e = this.props.webhook.events;
+    this.reset(this.props.webhook.events);
+  }
+
+  reset = (events) => {
+    this.setState({
+      confirmWebhookOpen: false,
+      message: '',
+      new: false,
+      submitFail: false,
+      submitMessage: '',
+      events: events.slice(),
+      edit: false,
+      urlErrorText: '',
+      secretErrorText: '',
+      url: '',
+      secret: '',
+    });
+  }
+
   render() {
     return (
       <TableRow
@@ -292,9 +315,14 @@ export default class Webhook extends Component {
                           </IconButton>
                         )}
                         {this.state.edit && (
-                          <IconButton className="webhook-save" tooltip="Save" tooltipPosition="top-left" onTouchTap={this.handlePatchFormation}>
-                            <SaveIcon />
-                          </IconButton>
+                          <span>
+                            <IconButton className="webhook-save" tooltip="Save" tooltipPosition="top-left" onTouchTap={this.handlePatchFormation}>
+                              <SaveIcon />
+                            </IconButton>
+                            <IconButton className="webhook-back" tooltip="Back" tooltipPosition="top-left" onTouchTap={this.handleReset} >
+                              <BackIcon />
+                            </IconButton>
+                          </span>
                         )}
                         <IconButton className="webhook-remove" tooltip="Remove" tooltipPosition="bottom-left" onTouchTap={() => this.handleConfirmation(this.props.webhook)} >
                           <ConfirmationModal className="delete-webhook" open={this.state.open} onOk={this.handleRemoveWebhook} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this webhook?" />
