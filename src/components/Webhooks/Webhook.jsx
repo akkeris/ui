@@ -12,13 +12,12 @@ import Toggle from 'material-ui/Toggle';
 import Checkbox from 'material-ui/Checkbox';
 import api from '../../services/api';
 
-
 import ConfirmationModal from '../ConfirmationModal';
 
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
 
 const style = {
-  floatingLabelStyle: {
+  enabled: {
     color: 'black',
   },
   toggle: {
@@ -30,16 +29,20 @@ const style = {
   noPadding: {
     padding: 0,
   },
-  table: {
-    overflow: 'auto',
-  },
   tableRow: {
     height: '58px',
   },
+  eventsTwoColumns: {
+    columnCount: '2',
+  },
+  eventsTwoColumnsRow: {
+    display: 'block',
+  },
+  tableRowNoBorder: {
+    borderBottom: 0,
+    overflow: 'visible',
+  },
   tableRowColumn: {
-    div: {
-      overflow: 'visible',
-    },
     title: {
       fontSize: '16px',
     },
@@ -58,22 +61,6 @@ const style = {
     end: {
       float: 'right',
     },
-    icon: {
-      width: '58px',
-    },
-  },
-  refresh: {
-    div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '350px',
-      marginTop: '20%',
-    },
-    indicator: {
-      display: 'inline-block',
-      position: 'relative',
-    },
   },
 };
 
@@ -81,56 +68,34 @@ export default class Webhook extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      confirmWebhookOpen: false,
       message: '',
-      new: false,
-      submitFail: false,
-      submitMessage: '',
+      errorMessage: '',
       events: this.props.webhook.events.slice(),
       edit: false,
       urlErrorText: '',
       secretErrorText: '',
       url: '',
       secret: '',
+      active: this.props.webhook.active,
     };
   }
 
   getEventCheckboxes() { // eslint-disable-line class-methods-use-this
-    return defaultEvents.map((event) => {
-      if (this.state.events.includes(event)) {
-        return (
-          <Checkbox
-            className={`checkbox-${event}`}
-            key={event}
-            value={event}
-            label={event}
-            disabled={!this.state.edit}
-            checked
-            onCheck={this.handleCheck}
-          />
-        );
-      }
-      return (
-        <Checkbox
-          className={`checkbox-${event}`}
-          key={event}
-          value={event}
-          label={event}
-          disabled={!this.state.edit}
-          onCheck={this.handleCheck}
-        />
-      );
-    });
+    return defaultEvents.map(event => (
+      <Checkbox
+        className={`checkbox-${event}`}
+        key={event}
+        value={event}
+        label={event}
+        disabled={!this.state.edit}
+        checked={this.state.events.includes(event)}
+        onCheck={this.handleCheck}
+      />
+    ));
   }
 
-  getEvents() { // eslint-disable-line class-methods-use-this
-    return this.props.webhook.events.map((event, idx) => {
-      if (idx === this.props.webhook.events.length - 1) {
-        return <span key={event} style={style.tableRowColumn.event}>{event} </span>;
-      } else { //eslint-disable-line
-        return <span key={event} style={style.tableRowColumn.event}>{event},</span>;
-      }
-    });
+  getEvents() {
+    return this.props.webhook.events.map((event, idx) => <span key={event} style={style.tableRowColumn.event}>{event}{idx === this.props.webhook.events.length - 1 ? '' : ','} </span>);
   }
 
   handleConfirmation = () => {
@@ -142,16 +107,12 @@ export default class Webhook extends Component {
   }
 
   handleRemoveWebhook = () => {
-    // this.setState({ loading: true });
     api.deleteWebhook(this.props.app, this.props.webhook.id).then(() => {
       this.props.onComplete('Webhook Deleted');
     }).catch((error) => {
       this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
         loading: false,
-        new: false,
-        confirmWebhookOpen: false,
+        errorMessage: error.response.data,
       });
     });
   }
@@ -179,23 +140,20 @@ export default class Webhook extends Component {
   }
 
   handleReset = () => {
-    // const e = this.props.webhook.events;
     this.reset(this.props.webhook.events);
   }
 
   reset = (events) => {
     this.setState({
-      confirmWebhookOpen: false,
       message: '',
-      new: false,
-      submitFail: false,
-      submitMessage: '',
+      errorMessage: '',
       events: events.slice(),
       edit: false,
       urlErrorText: '',
       secretErrorText: '',
       url: '',
       secret: '',
+      active: this.props.webhook.active,
     });
   }
 
@@ -237,65 +195,37 @@ export default class Webhook extends Component {
             <CardText expandable className={`${this.props.webhook.id}-info`}>
               <Table wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
                 <TableBody displayRowCheckbox={false} showRowHover={false} selectable={false}>
-                  <TableRow style={{ borderBottom: 0, overflow: 'visible' }} selectable={false}>
+                  <TableRow style={style.rowNoBorder} selectable={false}>
                     <TableRowColumn>
                       <div>
-                        {!this.state.edit && (
-                          <TextField
-                            className="edit-url"
-                            floatingLabelFixed="true"
-                            floatingLabelText="Edit URL"
-                            type="text"
-                            hintText={this.props.webhook.url}
-                            value={this.state.url}
-                            onChange={this.handleURLChange}
-                            errorText={this.state.urlErrorText}
-                            disabled="true"
-                          />
-                        )}
-                        {this.state.edit && (
-                          <TextField
-                            className="edit-url"
-                            floatingLabelFixed="true"
-                            floatingLabelText="Edit URL"
-                            type="text"
-                            hintText={this.props.webhook.url}
-                            value={this.state.url}
-                            onChange={this.handleURLChange}
-                            errorText={this.state.urlErrorText}
-                            floatingLabelStyle={style.floatingLabelStyle}
-                          />
-                        )}
+                        <TextField
+                          className="edit-url"
+                          floatingLabelFixed="true"
+                          floatingLabelText="Edit URL"
+                          type="text"
+                          hintText={this.props.webhook.url}
+                          value={this.state.url}
+                          onChange={this.handleURLChange}
+                          errorText={this.state.urlErrorText}
+                          disabled={!this.state.edit}
+                          floatingLabelStyle={this.state.edit ? style.enabled : null}
+                        />
                       </div>
                     </TableRowColumn>
                     <TableRowColumn>
                       <div>
-                        {!this.state.edit && (
-                          <TextField
-                            className="edit-secret"
-                            floatingLabelFixed="true"
-                            floatingLabelText="Edit Secret"
-                            type="text"
-                            hintText="**********"
-                            value={this.state.secret}
-                            onChange={this.handleSecretChange}
-                            errorText={this.state.secretErrorText}
-                            disabled="true"
-                          />
-                        )}
-                        {this.state.edit && (
-                          <TextField
-                            className="edit-secret"
-                            floatingLabelFixed="true"
-                            floatingLabelText="Edit Secret"
-                            type="text"
-                            hintText="**********"
-                            value={this.state.secret}
-                            onChange={this.handleSecretChange}
-                            errorText={this.state.secretErrorText}
-                            floatingLabelStyle={style.floatingLabelStyle}
-                          />
-                        )}
+                        <TextField
+                          className="edit-secret"
+                          floatingLabelFixed="true"
+                          floatingLabelText="Edit Secret"
+                          type="text"
+                          hintText="**********"
+                          value={this.state.secret}
+                          onChange={this.handleSecretChange}
+                          errorText={this.state.secretErrorText}
+                          disabled={!this.state.edit}
+                          floatingLabelStyle={this.state.edit ? style.enabled : null}
+                        />
                       </div>
                     </TableRowColumn>
                     <TableRowColumn>
@@ -304,6 +234,8 @@ export default class Webhook extends Component {
                           label="Active"
                           style={style.toggle}
                           disabled={!this.state.edit}
+                          toggled={this.state.active}
+                          onToggle={() => { this.setState({ active: !this.state.active }); }}
                         />
                       </div>
                     </TableRowColumn>
@@ -331,16 +263,11 @@ export default class Webhook extends Component {
                       </div>
                     </TableRowColumn>
                   </TableRow>
-                  <TableRow selectable={false}>
+                  <TableRow selectable={false} style={style.eventsTwoColumnsRow}>
                     <TableRowColumn>
                       <div>
-                        {!this.state.edit && (
-                          <h3 style={style.disabled}>Events</h3>
-                        )}
-                        {this.state.edit && (
-                          <h3>Events</h3>
-                        )}
-                        <div style={style.events} className="events">
+                        <h3 style={this.state.edit ? null : style.disabled}>Events</h3>
+                        <div style={style.eventsTwoColumns} className="events">
                           {this.getEventCheckboxes(this.props.webhook)}
                         </div>
                       </div>
@@ -355,7 +282,6 @@ export default class Webhook extends Component {
     );
   }
 }
-
 
 Webhook.propTypes = {
   app: PropTypes.string.isRequired,

@@ -80,7 +80,6 @@ export default class Webhooks extends Component {
     super(props, context);
     this.state = {
       webhooks: [],
-      webhook: null,
       loading: true,
       open: false,
       confirmWebhookOpen: false,
@@ -103,16 +102,6 @@ export default class Webhooks extends Component {
     }
   }
 
-  getEvents(webhook) { // eslint-disable-line class-methods-use-this
-    return webhook.events.map((event, idx) => {
-      if (idx === webhook.events.length - 1) {
-        return <span key={event} style={style.tableRowColumn.event}>{event} </span>;
-      } else { //eslint-disable-line
-        return <span key={event} style={style.tableRowColumn.event}>{event},</span>;
-      }
-    });
-  }
-
   getWebhooks() {
     return this.state.webhooks.map((webhook, rowindex) => (
       <Webhook
@@ -132,17 +121,15 @@ export default class Webhooks extends Component {
     this.setState({ new: false });
   }
 
-  handleWebhookConfirmation = (webhook) => {
+  handleWebhookConfirmation = () => {
     this.setState({
       confirmWebhookOpen: true,
-      webhook,
     });
   }
 
   handleCancelWebhookConfirmation = () => {
     this.setState({
       confirmWebhookOpen: false,
-      webhook: null,
     });
   }
 
