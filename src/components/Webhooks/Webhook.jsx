@@ -4,6 +4,7 @@ import IconButton from 'material-ui/IconButton';
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import EditIcon from 'material-ui/svg-icons/editor/mode-edit';
+import SaveIcon from 'material-ui/svg-icons/content/save';
 import { Card, CardText, CardTitle } from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
@@ -12,9 +13,17 @@ import api from '../../services/api';
 
 import ConfirmationModal from '../ConfirmationModal';
 
+const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
+
 const style = {
+  floatingLabelStyle: {
+    color: 'black',
+  },
   toggle: {
     width: '35%',
+  },
+  disabled: {
+    color: 'rgba(0, 0, 0, 0.3)',
   },
   noPadding: {
     padding: 0,
@@ -75,7 +84,7 @@ export default class Webhook extends Component {
       new: false,
       submitFail: false,
       submitMessage: '',
-      events: [],
+      events: this.props.webhook.events.slice(),
       edit: false,
       urlErrorText: '',
       secretErrorText: '',
@@ -85,14 +94,31 @@ export default class Webhook extends Component {
   }
 
   getEventCheckboxes() { // eslint-disable-line class-methods-use-this
-    return this.props.webhook.events.map(event => (
-      <Checkbox
-        className={`checkbox-${event}`}
-        key={event}
-        value={event}
-        label={event}
-      />
-    ));
+    return defaultEvents.map((event) => {
+      if (this.state.events.includes(event)) {
+        return (
+          <Checkbox
+            className={`checkbox-${event}`}
+            key={event}
+            value={event}
+            label={event}
+            disabled={!this.state.edit}
+            checked
+            onCheck={this.handleCheck}
+          />
+        );
+      }
+      return (
+        <Checkbox
+          className={`checkbox-${event}`}
+          key={event}
+          value={event}
+          label={event}
+          disabled={!this.state.edit}
+          onCheck={this.handleCheck}
+        />
+      );
+    });
   }
 
   getEvents() { // eslint-disable-line class-methods-use-this
@@ -126,6 +152,28 @@ export default class Webhook extends Component {
         confirmWebhookOpen: false,
       });
     });
+  }
+
+  handleURLChange = (event, value) => {
+    this.setState({
+      url: value,
+    });
+  }
+
+  handleSecretChange = (event, value) => {
+    this.setState({
+      secret: value,
+    });
+  }
+
+  handleCheck = (event, checked) => {
+    const events = this.state.events;
+    if (checked) {
+      events.push(event.target.value);
+    } else {
+      events.splice(events.indexOf(event.target.value), 1);
+    }
+    this.setState({ events });
   }
 
   render() {
@@ -169,12 +217,62 @@ export default class Webhook extends Component {
                   <TableRow style={{ borderBottom: 0, overflow: 'visible' }} selectable={false}>
                     <TableRowColumn>
                       <div>
-                        <TextField className="edit-url" floatingLabelFixed="true" floatingLabelText="Edit URL" type="text" hintText={this.props.webhook.url} value={this.state.url} onChange={this.handleURLChange} errorText={this.state.urlErrorText} disabled={!this.state.edit} />
+                        {!this.state.edit && (
+                          <TextField
+                            className="edit-url"
+                            floatingLabelFixed="true"
+                            floatingLabelText="Edit URL"
+                            type="text"
+                            hintText={this.props.webhook.url}
+                            value={this.state.url}
+                            onChange={this.handleURLChange}
+                            errorText={this.state.urlErrorText}
+                            disabled="true"
+                          />
+                        )}
+                        {this.state.edit && (
+                          <TextField
+                            className="edit-url"
+                            floatingLabelFixed="true"
+                            floatingLabelText="Edit URL"
+                            type="text"
+                            hintText={this.props.webhook.url}
+                            value={this.state.url}
+                            onChange={this.handleURLChange}
+                            errorText={this.state.urlErrorText}
+                            floatingLabelStyle={style.floatingLabelStyle}
+                          />
+                        )}
                       </div>
                     </TableRowColumn>
                     <TableRowColumn>
                       <div>
-                        <TextField className="edit-secret" floatingLabelFixed="true" floatingLabelText="Edit Secret" type="text" hintText="**********" value={this.state.secret} onChange={this.handleSecretChange} errorText={this.state.secretErrorText} disabled={!this.state.edit} />
+                        {!this.state.edit && (
+                          <TextField
+                            className="edit-secret"
+                            floatingLabelFixed="true"
+                            floatingLabelText="Edit Secret"
+                            type="text"
+                            hintText="**********"
+                            value={this.state.secret}
+                            onChange={this.handleSecretChange}
+                            errorText={this.state.secretErrorText}
+                            disabled="true"
+                          />
+                        )}
+                        {this.state.edit && (
+                          <TextField
+                            className="edit-secret"
+                            floatingLabelFixed="true"
+                            floatingLabelText="Edit Secret"
+                            type="text"
+                            hintText="**********"
+                            value={this.state.secret}
+                            onChange={this.handleSecretChange}
+                            errorText={this.state.secretErrorText}
+                            floatingLabelStyle={style.floatingLabelStyle}
+                          />
+                        )}
                       </div>
                     </TableRowColumn>
                     <TableRowColumn>
