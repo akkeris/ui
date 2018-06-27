@@ -116,10 +116,8 @@ export default class Webhook extends Component {
   handleRemoveWebhook = () => {
     // this.setState({ loading: true });
     api.deleteWebhook(this.props.app, this.props.webhook.id).then(() => {
-      console.log('Success!');
       this.props.onComplete('Webhook Deleted');
     }).catch((error) => {
-      console.log('Error');
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -168,15 +166,15 @@ export default class Webhook extends Component {
             <CardText expandable className={`${this.props.webhook.id}-info`}>
               <Table wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
                 <TableBody displayRowCheckbox={false} showRowHover={false} selectable={false}>
-                  <TableRow style={{ borderBottom: 0, overflow: 'visible' }}>
+                  <TableRow style={{ borderBottom: 0, overflow: 'visible' }} selectable={false}>
                     <TableRowColumn>
                       <div>
-                        <TextField className="edit-url" floatingLabelFixed="true" floatingLabelText="Edit URL" type="text" value={this.state.url} onChange={this.handleURLChange} errorText={this.state.urlErrorText} />
+                        <TextField className="edit-url" floatingLabelFixed="true" floatingLabelText="Edit URL" type="text" hintText={this.props.webhook.url} value={this.state.url} onChange={this.handleURLChange} errorText={this.state.urlErrorText} disabled={!this.state.edit} />
                       </div>
                     </TableRowColumn>
                     <TableRowColumn>
                       <div>
-                        <TextField className="edit-url" floatingLabelFixed="true" floatingLabelText="Edit Secret" type="text" value={this.state.secret} onChange={this.handleSecretChange} errorText={this.state.secretErrorText} />
+                        <TextField className="edit-secret" floatingLabelFixed="true" floatingLabelText="Edit Secret" type="text" hintText="**********" value={this.state.secret} onChange={this.handleSecretChange} errorText={this.state.secretErrorText} disabled={!this.state.edit} />
                       </div>
                     </TableRowColumn>
                     <TableRowColumn>
@@ -184,14 +182,22 @@ export default class Webhook extends Component {
                         <Toggle
                           label="Active"
                           style={style.toggle}
+                          disabled={!this.state.edit}
                         />
                       </div>
                     </TableRowColumn>
                     <TableRowColumn style={{ overflow: 'visible' }}>
                       <div style={style.tableRowColumn.end}>
-                        <IconButton className="webhook-edit" tooltip="Edit" tooltipPosition="bottom-left" >
-                          <EditIcon />
-                        </IconButton>
+                        {!this.state.edit && (
+                          <IconButton className="webhook-edit" tooltip="Edit" tooltipPosition="top-left" onTouchTap={() => this.setState({ edit: true })} >
+                            <EditIcon />
+                          </IconButton>
+                        )}
+                        {this.state.edit && (
+                          <IconButton className="webhook-save" tooltip="Save" tooltipPosition="top-left" onTouchTap={this.handlePatchFormation}>
+                            <SaveIcon />
+                          </IconButton>
+                        )}
                         <IconButton className="webhook-remove" tooltip="Remove" tooltipPosition="bottom-left" onTouchTap={() => this.handleConfirmation(this.props.webhook)} >
                           <ConfirmationModal className="delete-webhook" open={this.state.open} onOk={this.handleRemoveWebhook} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this webhook?" />
                           <RemoveIcon />
@@ -199,10 +205,15 @@ export default class Webhook extends Component {
                       </div>
                     </TableRowColumn>
                   </TableRow>
-                  <TableRow>
+                  <TableRow selectable={false}>
                     <TableRowColumn>
                       <div>
-                        <h3>Events</h3>
+                        {!this.state.edit && (
+                          <h3 style={style.disabled}>Events</h3>
+                        )}
+                        {this.state.edit && (
+                          <h3>Events</h3>
+                        )}
                         <div style={style.events} className="events">
                           {this.getEventCheckboxes(this.props.webhook)}
                         </div>
@@ -218,6 +229,7 @@ export default class Webhook extends Component {
     );
   }
 }
+
 
 Webhook.propTypes = {
   app: PropTypes.string.isRequired,
