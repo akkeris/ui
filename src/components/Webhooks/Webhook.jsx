@@ -154,14 +154,14 @@ export default class Webhook extends Component {
     api.patchWebhook(
       this.props.app,
       this.props.webhook.id,
-      this.state.url === this.props.webhook.url ? null : this.state.url,
+      this.state.url,
       this.state.events,
       this.state.secret === '' ? null : this.state.secret,
-      this.state.active === this.props.webhook.active ? null : this.state.active,
+      this.state.active,
     ).then(() => {
       this.props.onComplete('Updated Webhook');
     }).catch((error) => {
-      this.reset(this.props);
+      this.reset(this.props.webhook.events);
       this.props.onError(error.response.data);
     });
   }
