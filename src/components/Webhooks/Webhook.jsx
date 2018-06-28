@@ -19,54 +19,88 @@ import ConfirmationModal from '../ConfirmationModal';
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
 
 const style = {
-  enabled: {
-    color: 'black',
-  },
-  toggle: {
-    width: '35%',
-  },
-  disabled: {
-    color: 'rgba(0, 0, 0, 0.3)',
-  },
-  noPadding: {
-    padding: 0,
-  },
-  tableRow: {
-    height: '58px',
-  },
-  eventsTwoColumns: {
-    columnCount: '2',
-  },
-  eventsTwoColumnsRow: {
-    display: 'block',
-  },
-  tableRowNoBorder: {
-    borderBottom: 0,
-    overflow: 'visible',
-  },
-  tableRowColumn: {
-    title: {
-      fontSize: '16px',
-    },
-    sub: {
-      fontSize: '11px',
-      textTransform: 'uppercase',
-    },
-    events: {
-      fontSize: '14px',
-      display: 'flex',
-      flexWrap: 'wrap',
-    },
-    event: {
-      padding: '0px 2px 0px 2px',
-    },
-    end: {
-      float: 'right',
-    },
+  checkboxWidth: {
+    width: '175px',
   },
   eventsError: {
     color: 'red',
     paddingTop: '20px',
+  },
+  eventsTwoColumns: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: '200%',
+  },
+  icon: {
+    activeIcon: {
+      height: '18px',
+      width: '18px',
+      color: 'green',
+      position: 'relative',
+      padding: '0 10px 0 10px',
+    },
+    inactiveIcon: {
+      height: '18px',
+      width: '18px',
+      color: 'grey',
+      position: 'relative',
+      padding: '0 10px 0 10px',
+    },
+  },
+  label: {
+    enabled: {
+      color: 'black',
+    },
+    disabled: {
+      color: 'rgba(0, 0, 0, 0.3)',
+    },
+  },
+  noPadding: {
+    padding: 0,
+  },
+  titleContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  toggle: {
+    width: '35%',
+  },
+  tableRow: {
+    column: {
+      end: {
+        float: 'right',
+      },
+      event: {
+        padding: '0px 2px 0px 2px',
+      },
+      events: {
+        fontSize: '14px',
+        display: 'flex',
+        flexWrap: 'wrap',
+      },
+      noLeftPadding: {
+        paddingLeft: '0px',
+      },
+      sub: {
+        fontSize: '11px',
+        textTransform: 'uppercase',
+      },
+      title: {
+        fontSize: '16px',
+      },
+    },
+    eventsRow: {
+      display: 'block',
+      overflow: 'visible',
+    },
+    noBorder: {
+      borderBottom: 0,
+      overflow: 'visible',
+    },
+    standardHeight: {
+      height: '58px',
+    },
   },
 };
 
@@ -97,12 +131,13 @@ export default class Webhook extends Component {
         disabled={!this.state.edit}
         checked={this.state.events.includes(event)}
         onCheck={this.handleCheck}
+        style={style.checkboxWidth}
       />
     ));
   }
 
   getEvents() {
-    return this.props.webhook.events.map((event, idx) => <span key={event} style={style.tableRowColumn.event}>{event}{idx === this.props.webhook.events.length - 1 ? '' : ','} </span>);
+    return this.props.webhook.events.map((event, idx) => <span key={event} style={style.tableRow.column.event}>{event}{idx === this.props.webhook.events.length - 1 ? '' : ','} </span>);
   }
 
   handleConfirmation = () => {
@@ -206,7 +241,7 @@ export default class Webhook extends Component {
       <TableRow
         className={this.props.webhook.id}
         key={this.props.webhook.id}
-        style={style.tableRow}
+        style={style.tableRow.standardHeight}
       >
         <TableRowColumn style={style.noPadding}>
           <Card style={{ boxShadow: 'none' }} className={`webhook-item-${this.props.rowindex}`}>
@@ -221,22 +256,24 @@ export default class Webhook extends Component {
                   <TableRow
                     className={this.props.webhook.id}
                     key={this.props.webhook.id}
-                    style={style.tableRow}
+                    style={style.tableRow.standardHeight}
                   >
-                    <TableRowColumn>
-                      <div className={'webhook-title-url'} style={style.tableRowColumn.title}>{this.props.webhook.url}</div>
-                      <div className={'webhook-title-id'} style={style.tableRowColumn.sub}>
-                        {this.props.webhook.id}
+                    <TableRowColumn style={style.tableRow.column.noLeftPadding}>
+                      <div style={style.titleContainer}>
                         {this.props.webhook.active && (
-                          <ActiveIcon style={{ height: '18px', width: '18px', color: 'green', position: 'absolute' }} />
+                          <ActiveIcon style={style.icon.activeIcon} />
                         )}
                         {!this.props.webhook.active && (
-                          <InactiveIcon style={{ hieght: '18px', width: '18px', color: 'gray', position: 'absolute' }} />
+                          <InactiveIcon style={style.icon.inactiveIcon} />
                         )}
+                        <div>
+                          <div className={'webhook-title-url'} style={style.tableRow.column.title}>{this.props.webhook.url}</div>
+                          <div className={'webhook-title-id'} style={style.tableRow.column.sub}>{this.props.webhook.id}</div>
+                        </div>
                       </div>
                     </TableRowColumn>
                     <TableRowColumn>
-                      <div style={style.tableRowColumn.events}>
+                      <div style={style.tableRow.column.events}>
                         {this.getEvents(this.props.webhook)}
                       </div>
                     </TableRowColumn>
@@ -247,7 +284,7 @@ export default class Webhook extends Component {
             <CardText expandable className={`${this.props.webhook.id}-info`}>
               <Table wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
                 <TableBody displayRowCheckbox={false} showRowHover={false} selectable={false}>
-                  <TableRow style={style.tableRowNoBorder} selectable={false}>
+                  <TableRow style={style.tableRow.noBorder} selectable={false}>
                     <TableRowColumn>
                       <div>
                         <TextField
@@ -260,7 +297,7 @@ export default class Webhook extends Component {
                           onChange={this.handleURLChange}
                           errorText={this.state.urlErrorText}
                           disabled={!this.state.edit}
-                          floatingLabelStyle={this.state.edit ? style.enabled : null}
+                          floatingLabelStyle={this.state.edit ? style.label.enabled : null}
                         />
                       </div>
                     </TableRowColumn>
@@ -277,7 +314,7 @@ export default class Webhook extends Component {
                           onChange={this.handleSecretChange}
                           errorText={this.state.secretErrorText}
                           disabled={!this.state.edit}
-                          floatingLabelStyle={this.state.edit ? style.enabled : null}
+                          floatingLabelStyle={this.state.edit ? style.label.enabled : null}
                         />
                       </div>
                     </TableRowColumn>
@@ -293,7 +330,7 @@ export default class Webhook extends Component {
                       </div>
                     </TableRowColumn>
                     <TableRowColumn style={{ overflow: 'visible' }}>
-                      <div style={style.tableRowColumn.end}>
+                      <div style={style.tableRow.column.end}>
                         {!this.state.edit && (
                           <IconButton className="webhook-edit" tooltip="Edit" tooltipPosition="top-left" onTouchTap={() => this.setState({ edit: true })} >
                             <EditIcon />
@@ -316,10 +353,10 @@ export default class Webhook extends Component {
                       </div>
                     </TableRowColumn>
                   </TableRow>
-                  <TableRow selectable={false} style={style.eventsTwoColumnsRow}>
-                    <TableRowColumn>
+                  <TableRow selectable={false} style={style.tableRow.eventsRow}>
+                    <TableRowColumn style={{ overflow: 'visible' }}>
                       <div>
-                        <h3 style={this.state.edit ? null : style.disabled}>Events</h3>
+                        <h3 style={this.state.edit ? null : style.label.disabled}>Events</h3>
                         <div style={style.eventsTwoColumns} className="events">
                           {this.getEventCheckboxes(this.props.webhook)}
                         </div>

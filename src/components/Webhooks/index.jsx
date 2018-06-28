@@ -22,43 +22,8 @@ const muiTheme = getMuiTheme({
 });
 
 const style = {
-  toggle: {
-    width: '35%',
-  },
-  noPadding: {
-    padding: 0,
-  },
-  table: {
-    overflow: 'auto',
-  },
-  tableRow: {
-    height: '58px',
-  },
-  tableRowColumn: {
-    div: {
-      overflow: 'visible',
-    },
-    title: {
-      fontSize: '16px',
-    },
-    sub: {
-      fontSize: '11px',
-      textTransform: 'uppercase',
-    },
-    events: {
-      fontSize: '14px',
-      display: 'flex',
-      flexWrap: 'wrap',
-    },
-    event: {
-      padding: '0px 2px 0px 2px',
-    },
-    end: {
-      float: 'right',
-    },
-    icon: {
-      width: '58px',
-    },
+  headerLeftPadding: {
+    paddingLeft: '36px',
   },
   refresh: {
     div: {
@@ -72,6 +37,9 @@ const style = {
       display: 'inline-block',
       position: 'relative',
     },
+  },
+  table: {
+    overflow: 'auto',
   },
 };
 
@@ -200,7 +168,7 @@ export default class Webhooks extends Component {
           <Table className="webhook-list" style={style.table}>
             <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
               <TableRow>
-                <TableHeaderColumn>Webhook</TableHeaderColumn>
+                <TableHeaderColumn style={style.headerLeftPadding}>Webhook</TableHeaderColumn>
                 <TableHeaderColumn>Events</TableHeaderColumn>
               </TableRow>
             </TableHeader>
