@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import IconButton from 'material-ui/IconButton';
+import ActiveIcon from 'material-ui/svg-icons/social/notifications';
+import InactiveIcon from 'material-ui/svg-icons/social/notifications-paused';
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import EditIcon from 'material-ui/svg-icons/editor/mode-edit';
@@ -152,10 +154,10 @@ export default class Webhook extends Component {
     api.patchWebhook(
       this.props.app,
       this.props.webhook.id,
-      this.state.url,
+      this.state.url === this.props.webhook.url ? null : this.state.url,
       this.state.events,
       this.state.secret === '' ? null : this.state.secret,
-      this.state.active,
+      this.state.active === this.props.webhook.active ? null : this.state.active,
     ).then(() => {
       this.props.onComplete('Updated Webhook');
     }).catch((error) => {
@@ -223,7 +225,15 @@ export default class Webhook extends Component {
                   >
                     <TableRowColumn>
                       <div className={'webhook-title-url'} style={style.tableRowColumn.title}>{this.props.webhook.url}</div>
-                      <div className={'webhook-title-id'} style={style.tableRowColumn.sub}>{this.props.webhook.id}</div>
+                      <div className={'webhook-title-id'} style={style.tableRowColumn.sub}>
+                        {this.props.webhook.id}
+                        {this.props.webhook.active && (
+                          <ActiveIcon style={{ height: '18px', width: '18px', color: 'green', position: 'absolute' }} />
+                        )}
+                        {!this.props.webhook.active && (
+                          <InactiveIcon style={{ hieght: '18px', width: '18px', color: 'gray', position: 'absolute' }} />
+                        )}
+                      </div>
                     </TableRowColumn>
                     <TableRowColumn>
                       <div style={style.tableRowColumn.events}>
