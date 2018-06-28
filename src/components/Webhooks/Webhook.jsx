@@ -62,6 +62,10 @@ const style = {
       float: 'right',
     },
   },
+  eventsError: {
+    color: 'red',
+    paddingTop: '20px',
+  },
 };
 
 export default class Webhook extends Component {
@@ -74,7 +78,8 @@ export default class Webhook extends Component {
       edit: false,
       urlErrorText: '',
       secretErrorText: '',
-      url: '',
+      eventErrorText: '',
+      url: this.props.webhook.url.slice(),
       secret: '',
       active: this.props.webhook.active,
     };
@@ -143,6 +148,42 @@ export default class Webhook extends Component {
     this.reset(this.props.webhook.events);
   }
 
+  patchWebhook = () => {
+    api.patchWebhook(
+      this.props.app,
+      this.props.webhook.id,
+      this.state.url,
+      this.state.events,
+      this.state.secret === '' ? null : this.state.secret,
+      this.state.active,
+    ).then(() => {
+      this.props.onComplete('Updated Webhook');
+    }).catch((error) => {
+      this.reset(this.props);
+      this.props.onError(error.response.data);
+    });
+  }
+
+  handleSave = () => {
+    if (!this.checkURL(this.state.url)) {
+      this.setState({ urlErrorText: 'Invalid URL' });
+    } else if (this.state.events.length === 0) {
+      this.setState({ eventErrorText: 'Must select at least one event' });
+    } else {
+      this.setState({
+        urlErrorText: '',
+        eventErrorText: '',
+        secretErrorText: '',
+      });
+      this.patchWebhook();
+    }
+  }
+
+  // regex from https://stackoverflow.com/questions/1303872, modified to have http(s) optional
+  checkURL(url) { // eslint-disable-line
+    return /^(HTTP|HTTP|http(s)?:\/\/)?(www\.)?[A-Za-z0-9]+([\-\.]{1}[A-Za-z0-9]+)*\.[A-Za-z]{2,40}(:[0-9]{1,40})?(\/.*)?$/.test(url) // eslint-disable-line
+  }
+
   reset = (events) => {
     this.setState({
       message: '',
@@ -151,7 +192,8 @@ export default class Webhook extends Component {
       edit: false,
       urlErrorText: '',
       secretErrorText: '',
-      url: '',
+      eventErrorText: '',
+      url: this.props.webhook.url.slice(),
       secret: '',
       active: this.props.webhook.active,
     });
@@ -195,7 +237,7 @@ export default class Webhook extends Component {
             <CardText expandable className={`${this.props.webhook.id}-info`}>
               <Table wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
                 <TableBody displayRowCheckbox={false} showRowHover={false} selectable={false}>
-                  <TableRow style={style.rowNoBorder} selectable={false}>
+                  <TableRow style={style.tableRowNoBorder} selectable={false}>
                     <TableRowColumn>
                       <div>
                         <TextField
@@ -203,7 +245,7 @@ export default class Webhook extends Component {
                           floatingLabelFixed="true"
                           floatingLabelText="Edit URL"
                           type="text"
-                          hintText={this.props.webhook.url}
+                          default={this.props.webhook.url}
                           value={this.state.url}
                           onChange={this.handleURLChange}
                           errorText={this.state.urlErrorText}
@@ -215,6 +257,7 @@ export default class Webhook extends Component {
                     <TableRowColumn>
                       <div>
                         <TextField
+                          maxLength="20"
                           className="edit-secret"
                           floatingLabelFixed="true"
                           floatingLabelText="Edit Secret"
@@ -248,7 +291,7 @@ export default class Webhook extends Component {
                         )}
                         {this.state.edit && (
                           <span>
-                            <IconButton className="webhook-save" tooltip="Save" tooltipPosition="top-left" onTouchTap={this.handlePatchFormation}>
+                            <IconButton className="webhook-save" tooltip="Save" tooltipPosition="top-left" onTouchTap={this.handleSave}>
                               <SaveIcon />
                             </IconButton>
                             <IconButton className="webhook-back" tooltip="Back" tooltipPosition="top-left" onTouchTap={this.handleReset} >
@@ -256,7 +299,7 @@ export default class Webhook extends Component {
                             </IconButton>
                           </span>
                         )}
-                        <IconButton className="webhook-remove" tooltip="Remove" tooltipPosition="bottom-left" onTouchTap={() => this.handleConfirmation(this.props.webhook)} >
+                        <IconButton className="webhook-remove" tooltip="Remove" tooltipPosition="top-left" onTouchTap={() => this.handleConfirmation(this.props.webhook)} >
                           <ConfirmationModal className="delete-webhook" open={this.state.open} onOk={this.handleRemoveWebhook} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this webhook?" />
                           <RemoveIcon />
                         </IconButton>
@@ -270,6 +313,11 @@ export default class Webhook extends Component {
                         <div style={style.eventsTwoColumns} className="events">
                           {this.getEventCheckboxes(this.props.webhook)}
                         </div>
+                        {this.state.eventErrorText && (
+                          <div style={style.eventsError} className="events-errorText">
+                            {this.state.eventErrorText}
+                          </div>
+                        )}
                       </div>
                     </TableRowColumn>
                   </TableRow>
@@ -287,5 +335,6 @@ Webhook.propTypes = {
   app: PropTypes.string.isRequired,
   rowindex: PropTypes.number.isRequired,
   webhook: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  onError: PropTypes.func.isRequired,
   onComplete: PropTypes.func.isRequired,
 };

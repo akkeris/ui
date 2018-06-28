@@ -109,8 +109,19 @@ export default class Webhooks extends Component {
         rowindex={rowindex}
         app={this.props.app}
         onComplete={this.reload}
+        onError={this.handleError}
       />
     ));
+  }
+
+  handleError = (message) => {
+    this.setState({
+      submitMessage: message,
+      submitFail: true,
+      loading: false,
+      open: false,
+      message: '',
+    });
   }
 
   handleNewWebhook = () => {

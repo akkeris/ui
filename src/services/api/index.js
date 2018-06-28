@@ -77,12 +77,13 @@ function patchFormation(app, type, size, quantity, command, port, healthcheck, r
   }]);
 }
 
-function patchWebhook(app, id, url, events, secret) {
-  return axios.patch(`/api/apps/${app}/hooks/${id}`, [{
+function patchWebhook(app, id, url, events, secret, active) {
+  return axios.patch(`/api/apps/${app}/hooks/${id}`, {
     url,
     events,
     secret,
-  }]);
+    active,
+  });
 }
 
 function restartFormation(app, type) {
