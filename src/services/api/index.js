@@ -77,6 +77,14 @@ function patchFormation(app, type, size, quantity, command, port, healthcheck, r
   }]);
 }
 
+function patchWebhook(app, id, url, events, secret) {
+  return axios.patch(`/api/apps/${app}/hooks/${id}`, [{
+    url,
+    events,
+    secret,
+  }]);
+}
+
 function restartFormation(app, type) {
   return axios.delete(`/api/apps/${app}/dynos/${type}`);
 }
@@ -378,6 +386,7 @@ export default {
   getDynos,
   getAppAddons,
   getAppWebhooks,
+  patchWebhook,
   deleteAddon,
   deleteWebhook,
   getBuilds,
