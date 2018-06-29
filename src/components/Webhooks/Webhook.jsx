@@ -118,6 +118,7 @@ export default class Webhook extends Component {
       url: this.props.webhook.url.slice(),
       secret: '',
       active: this.props.webhook.active,
+      open: false,
     };
   }
 
@@ -233,6 +234,7 @@ export default class Webhook extends Component {
       url: this.props.webhook.url.slice(),
       secret: '',
       active: this.props.webhook.active,
+      open: false,
     });
   }
 
@@ -289,7 +291,7 @@ export default class Webhook extends Component {
                       <div>
                         <TextField
                           className="edit-url"
-                          floatingLabelFixed="true"
+                          floatingLabelFixed
                           floatingLabelText="Edit URL"
                           type="text"
                           default={this.props.webhook.url}
@@ -306,7 +308,7 @@ export default class Webhook extends Component {
                         <TextField
                           maxLength="20"
                           className="edit-secret"
-                          floatingLabelFixed="true"
+                          floatingLabelFixed
                           floatingLabelText="Edit Secret"
                           type="text"
                           hintText="**********"
