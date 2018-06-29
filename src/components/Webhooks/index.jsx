@@ -13,7 +13,6 @@ import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 
 import api from '../../services/api';
-import ConfirmationModal from '../ConfirmationModal';
 import NewWebhook from './NewWebhook';
 import Webhook from './Webhook';
 
@@ -100,18 +99,6 @@ export default class Webhooks extends Component {
     this.setState({ new: false });
   }
 
-  handleWebhookConfirmation = () => {
-    this.setState({
-      confirmWebhookOpen: true,
-    });
-  }
-
-  handleCancelWebhookConfirmation = () => {
-    this.setState({
-      confirmWebhookOpen: false,
-    });
-  }
-
   handleRequestClose = () => {
     this.setState({ open: false });
   }
@@ -176,7 +163,6 @@ export default class Webhooks extends Component {
               {this.getWebhooks()}
             </TableBody>
           </Table>
-          <ConfirmationModal className="remove-webhook-confirm" open={this.state.confirmWebhookOpen} onOk={this.handleRemoveWebhook} onCancel={this.handleCancelWebhookConfirmation} message="Are you sure you want to delete this webhook?" />
           <Dialog
             className="webhook-error"
             open={this.state.submitFail}
@@ -208,4 +194,3 @@ Webhooks.propTypes = {
   app: PropTypes.string.isRequired,
   active: PropTypes.bool.isRequired,
 };
-
