@@ -91,7 +91,7 @@ export default class NewWebhook extends Component {
           </div>
         );
       default:
-        return 'You\'re a long way from home sonny jim!';
+        return 'Error- Captain Hook not found';
     }
   }
 
