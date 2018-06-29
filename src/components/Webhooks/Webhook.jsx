@@ -191,7 +191,7 @@ export default class Webhook extends Component {
       this.props.webhook.id,
       this.state.url,
       this.state.events,
-      this.state.secret === '' ? null : this.state.secret,
+      this.state.secret === '' ? 'null' : this.state.secret,
       this.state.active,
     ).then(() => {
       this.props.onComplete('Updated Webhook');
