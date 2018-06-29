@@ -84,9 +84,16 @@ export default class NewWebhook extends Component {
       case 2:
         return (
           <div>
-            <TextField className="webhook-secret" floatingLabelText="Secret" type="text" value={this.state.secret} onChange={this.handleSecretChange} errorText={this.state.errorText} />
+            <TextField
+              className="webhook-secret"
+              floatingLabelText="Secret"
+              type="password"
+              value={this.state.secret}
+              onChange={this.handleSecretChange}
+              errorText={this.state.errorText}
+            />
             <p>
-              Define a secret for calculation of SHA.
+              Define a secret for calculation of SHA (optional).
             </p>
           </div>
         );
@@ -142,8 +149,6 @@ export default class NewWebhook extends Component {
       this.setState({ errorText: 'Must select at least one event' });
     } else if (stepIndex === 2 && this.state.secret.length > 20) {
       this.setState({ errorText: 'Secret must be less than 20 characters' });
-    } else if (stepIndex === 2 && !this.state.secret) {
-      this.setState({ errorText: 'Field required' });
     } else {
       this.setState({
         stepIndex: stepIndex + 1,
@@ -167,6 +172,9 @@ export default class NewWebhook extends Component {
   }
 
   submitWebHook = () => {
+    if (!this.state.secret) {
+      this.state.secret = ' ';
+    }
     api.createWebHook(this.props.app, this.state.url, this.state.events, this.state.secret).then(() => { // eslint-disable-line
       this.props.onComplete('Webhook Created');
     }).catch((error) => {

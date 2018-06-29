@@ -310,7 +310,7 @@ export default class Webhook extends Component {
                           className="edit-secret"
                           floatingLabelFixed
                           floatingLabelText="Edit Secret"
-                          type="text"
+                          type="password"
                           hintText="**********"
                           value={this.state.secret}
                           onChange={this.handleSecretChange}
@@ -334,16 +334,16 @@ export default class Webhook extends Component {
                     <TableRowColumn style={{ overflow: 'visible' }}>
                       <div style={style.tableRow.column.end}>
                         {!this.state.edit && (
-                          <IconButton className="webhook-edit" tooltip="Edit" tooltipPosition="top-left" onTouchTap={() => this.setState({ edit: true })} >
+                          <IconButton style={{ marginRight: '30px' }} className="webhook-edit" tooltip="Edit" tooltipPosition="top-left" onTouchTap={() => this.setState({ edit: true })} >
                             <EditIcon />
                           </IconButton>
                         )}
                         {this.state.edit && (
                           <span>
-                            <IconButton className="webhook-save" tooltip="Save" tooltipPosition="top-left" onTouchTap={this.handleSave}>
+                            <IconButton style={{ marginRight: '30px' }} className="webhook-save" tooltip="Save" tooltipPosition="top-left" onTouchTap={this.handleSave}>
                               <SaveIcon />
                             </IconButton>
-                            <IconButton className="webhook-back" tooltip="Back" tooltipPosition="top-left" onTouchTap={this.handleReset} >
+                            <IconButton style={{ marginRight: '30px' }} className="webhook-back" tooltip="Back" tooltipPosition="top-left" onTouchTap={this.handleReset} >
                               <BackIcon />
                             </IconButton>
                           </span>
