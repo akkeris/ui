@@ -77,6 +77,7 @@ export default class Webhooks extends Component {
         app={this.props.app}
         onComplete={this.reload}
         onError={this.handleError}
+        key={webhook.id}
       />
     ));
   }
