@@ -533,7 +533,7 @@ test // eslint-disable-line no-undef
   });
 
 
-test('Should be able to create and remove webhooks', async (t) => { // eslint-disable-line no-undef
+test('Should be able to create edit and remove webhooks', async (t) => { // eslint-disable-line no-undef
   await t
     .click('.app-list .testcafe-testcafe')
     .click('.webhooks-tab')
@@ -607,7 +607,7 @@ test('Should be able to create and remove webhooks', async (t) => { // eslint-di
     // Test that webhook was created, displayed
     .expect(Selector('.webhook-snack').innerText)
     .contains('Webhook Created')
-    .expect(Selector('.webhook-item-0').innerText)
+    .expect(Selector('.webhook-title-url-0').innerText)
     .contains('http://example.com/hook')
 
     // Remove

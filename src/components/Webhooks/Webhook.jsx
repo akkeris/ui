@@ -192,7 +192,7 @@ export default class Webhook extends Component {
       this.props.webhook.id,
       this.state.url,
       this.state.events,
-      this.state.secret === '' ? 'null' : this.state.secret,
+      this.state.secret === '' ? null : this.state.secret,
       this.state.active,
     ).then(() => {
       this.props.onComplete('Updated Webhook');
@@ -269,7 +269,7 @@ export default class Webhook extends Component {
                           <InactiveIcon style={style.icon.inactiveIcon} />
                         )}
                         <div>
-                          <div className={'webhook-title-url'} style={style.tableRow.column.title}>{this.props.webhook.url}</div>
+                          <div className={`webhook-title-url-${this.props.rowindex}`} style={style.tableRow.column.title}>{this.props.webhook.url}</div>
                           <div className={'webhook-title-id'} style={style.tableRow.column.sub}>{this.props.webhook.id}</div>
                         </div>
                       </div>
