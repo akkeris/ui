@@ -3,12 +3,15 @@ import PropTypes from 'prop-types';
 import IconButton from 'material-ui/IconButton';
 import ActiveIcon from 'material-ui/svg-icons/social/notifications';
 import InactiveIcon from 'material-ui/svg-icons/social/notifications-paused';
+import HistoryIcon from 'material-ui/svg-icons/action/history';
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import EditIcon from 'material-ui/svg-icons/editor/mode-edit';
 import SaveIcon from 'material-ui/svg-icons/content/save';
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back';
 import { Card, CardText, CardTitle } from 'material-ui/Card';
+import Dialog from 'material-ui/Dialog';
+import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
 import Checkbox from 'material-ui/Checkbox';
@@ -18,9 +21,40 @@ import ConfirmationModal from '../ConfirmationModal';
 
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
 
+function objectToTable(prefix, input) {
+  return Object.keys(input).map((key) => {
+    if (typeof input[key] === 'object') {
+      return objectToTable(prefix ? `${prefix}.${key}` : key, input[key]);
+    }
+    return (
+      <TableRow key={prefix ? `${prefix}.${key}` : key}>
+        <TableRowColumn colSpan="2">
+          <div>
+            <b>{prefix ? `${prefix}.${key}` : key}</b>
+          </div>
+          <div style={{ wordWrap: 'break-word' }}>
+            {input[key]}
+          </div>
+        </TableRowColumn>
+      </TableRow>
+    );
+  });
+}
+
 const style = {
+  buttonMargin: {
+    marginRight: '20px',
+  },
   checkboxWidth: {
     width: '175px',
+  },
+  dialogTitle: {
+    fontSize: '22px',
+    lineHeight: '32px',
+    fontWeight: '400',
+  },
+  dialogSubTitle: {
+    fontSize: '16px',
   },
   eventsError: {
     color: 'red',
@@ -31,6 +65,11 @@ const style = {
     flexDirection: 'row',
     flexWrap: 'wrap',
     width: '200%',
+  },
+  historyDialog: {
+    width: '55%',
+    maxWidth: 'none',
+    border: '0',
   },
   icon: {
     activeIcon: {
@@ -58,6 +97,19 @@ const style = {
   },
   noPadding: {
     padding: 0,
+  },
+  refresh: {
+    div: {
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      width: '40px',
+      height: '40px',
+      marginTop: '20%',
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
+    },
   },
   titleContainer: {
     display: 'flex',
@@ -119,7 +171,20 @@ export default class Webhook extends Component {
       secret: '',
       active: this.props.webhook.active,
       open: false,
+      history: [],
+      historyOpen: false,
+      itemSelected: false,
+      historyIndex: 0,
+      dialogSubtitle: 'Select an item to view detailed information.',
     };
+  }
+
+  componentDidMount() {
+    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
+      this.setState({ history: result.data })
+    )).catch((error) => {
+      this.props.onError(error);
+    });
   }
 
   getEventCheckboxes() { // eslint-disable-line class-methods-use-this
@@ -138,7 +203,106 @@ export default class Webhook extends Component {
   }
 
   getEvents() {
-    return this.props.webhook.events.map((event, idx) => <span key={event} style={style.tableRow.column.event}>{event}{idx === this.props.webhook.events.length - 1 ? '' : ','} </span>);
+    return this.props.webhook.events.map((event, idx) =>
+      (<span key={event} style={style.tableRow.column.event}>
+        {event}{idx === this.props.webhook.events.length - 1 ? '' : ','}
+      </span>));
+  }
+
+  getHistory() {
+    if (this.state.itemSelected) {
+      return (
+        <Table selectable={false}>
+          <TableBody displayRowCheckbox={false} selectable={false} showRowHover={false}>
+            {objectToTable('', this.state.history[this.state.historyIndex])}
+          </TableBody>
+        </Table>
+      );
+    }
+    return (
+      <Table style={{ paddingLeft: '10px' }}>
+        <TableBody displayRowCheckbox={false} selectable={false} showRowHover>
+          {this.state.history.length > 0 ? (
+            this.state.history.map((historyItem, idx) => (
+              <TableRow
+                className={`historyItem-${idx}`}
+                key={historyItem.id}
+                style={style.tableRow.standardHeight}
+                onTouchTap={() => this.setState({
+                  itemSelected: true,
+                  historyIndex: idx,
+                  dialogSubtitle: this.formatHistoryItemTitle(idx, true),
+                })}
+              >
+                <TableRowColumn style={style.noPadding}>
+                  {this.formatHistoryItemTitle(idx, false)}
+                </TableRowColumn>
+              </TableRow>
+            ))
+          ) : (<p><i>No history events found.</i></p>)
+          }
+        </TableBody>
+      </Table>
+    );
+  }
+
+  getDialogTitle() {
+    return (
+      <div>
+        <span style={style.dialogTitle}>Webhook History</span>
+        <br />
+        <span style={style.dialogSubTitle}>{this.state.dialogSubtitle}</span>
+      </div>
+    );
+  }
+
+  getHistoryDialog() {
+    return (
+      <Dialog
+        className="history-dialog"
+        open={this.state.historyOpen}
+        title={this.getDialogTitle()}
+        repositionOnUpdate
+        autoScrollBodyContent
+        contentStyle={style.historyDialog}
+        actions={
+          <span>
+            {this.state.itemSelected && (
+              <FlatButton className="back" label="Back" secondary onTouchTap={this.handleHistoryDialogBack} />
+            )}
+            <FlatButton className="ok" label="Ok" primary onTouchTap={this.handleHistoryDialogOk} />
+          </span>
+        }
+      >
+        {this.getHistory()}
+      </Dialog>
+    );
+  }
+
+  handleHistoryDialogOk = () => {
+    this.setState({
+      historyOpen: false,
+      itemSelected: false,
+      historyIndex: 0,
+    });
+  }
+
+  handleHistoryDialogBack= () => {
+    this.setState({
+      itemSelected: false,
+      historyIndex: 0,
+      dialogSubtitle: 'Select an item to view detailed information.',
+    });
+  }
+
+  formatHistoryItemTitle(index, subtitle) {
+    const date = new Date(this.state.history[index].last_attempt.updated_at).toLocaleString();
+    const action = this.state.history[index].last_attempt.request.body.action;
+    return subtitle ? `Selected Item: ${date} - ${action}` : `${date} - ${action}`;
+  }
+
+  updateDialogSubtitle(msg) {
+    this.setState({ dialogSubtitle: msg });
   }
 
   handleConfirmation = () => {
@@ -235,6 +399,7 @@ export default class Webhook extends Component {
       secret: '',
       active: this.props.webhook.active,
       open: false,
+      history: [],
     });
   }
 
@@ -269,8 +434,12 @@ export default class Webhook extends Component {
                           <InactiveIcon style={style.icon.inactiveIcon} />
                         )}
                         <div>
-                          <div className={`webhook-title-url-${this.props.rowindex}`} style={style.tableRow.column.title}>{this.props.webhook.url}</div>
-                          <div className={'webhook-title-id'} style={style.tableRow.column.sub}>{this.props.webhook.id}</div>
+                          <div className={`webhook-title-url-${this.props.rowindex}`} style={style.tableRow.column.title}>
+                            {this.props.webhook.url}
+                          </div>
+                          <div className={'webhook-title-id'} style={style.tableRow.column.sub}>
+                            {this.props.webhook.id}
+                          </div>
                         </div>
                       </div>
                     </TableRowColumn>
@@ -333,23 +502,61 @@ export default class Webhook extends Component {
                     </TableRowColumn>
                     <TableRowColumn style={{ overflow: 'visible' }}>
                       <div style={style.tableRow.column.end}>
-                        {!this.state.edit && (
-                          <IconButton style={{ marginRight: '30px' }} className="webhook-edit" tooltip="Edit" tooltipPosition="top-left" onTouchTap={() => this.setState({ edit: true })} >
+                        {!this.state.edit ? (
+                          <IconButton
+                            style={style.buttonMargin}
+                            className="webhook-edit"
+                            tooltip="Edit"
+                            tooltipPosition="top-left"
+                            onTouchTap={() => this.setState({ edit: true })}
+                          >
                             <EditIcon />
                           </IconButton>
-                        )}
-                        {this.state.edit && (
+                        ) : (
                           <span>
-                            <IconButton style={{ marginRight: '30px' }} className="webhook-save" tooltip="Save" tooltipPosition="top-left" onTouchTap={this.handleSave}>
+                            <IconButton
+                              style={style.buttonMargin}
+                              className="webhook-save"
+                              tooltip="Save"
+                              tooltipPosition="top-left"
+                              onTouchTap={this.handleSave}
+                            >
                               <SaveIcon />
                             </IconButton>
-                            <IconButton style={{ marginRight: '30px' }} className="webhook-back" tooltip="Back" tooltipPosition="top-left" onTouchTap={this.handleReset} >
+                            <IconButton
+                              style={style.buttonMargin}
+                              className="webhook-back"
+                              tooltip="Back"
+                              tooltipPosition="top-left"
+                              onTouchTap={this.handleReset}
+                            >
                               <BackIcon />
                             </IconButton>
                           </span>
                         )}
-                        <IconButton className="webhook-remove" tooltip="Remove" tooltipPosition="top-left" onTouchTap={() => this.handleConfirmation(this.props.webhook)} >
-                          <ConfirmationModal className="delete-webhook" open={this.state.open} onOk={this.handleRemoveWebhook} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this webhook?" />
+                        <IconButton
+                          style={style.buttonMargin}
+                          className="webhook-history"
+                          tooltip="History"
+                          tooltipPosition="top-left"
+                          onTouchTap={() => this.setState({ historyOpen: true })}
+                        >
+                          <HistoryIcon />
+                          {this.getHistoryDialog()}
+                        </IconButton>
+                        <IconButton
+                          className="webhook-remove"
+                          tooltip="Remove"
+                          tooltipPosition="top-left"
+                          onTouchTap={() => this.handleConfirmation(this.props.webhook)}
+                        >
+                          <ConfirmationModal
+                            className="delete-webhook"
+                            open={this.state.open}
+                            onOk={this.handleRemoveWebhook}
+                            onCancel={this.handleCancelConfirmation}
+                            message="Are you sure you want to delete this webhook?"
+                          />
                           <RemoveIcon />
                         </IconButton>
                       </div>

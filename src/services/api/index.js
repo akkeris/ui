@@ -85,6 +85,9 @@ function patchWebhook(app, id, url, events, secret, active) {
     active,
   });
 }
+function getWebhookResults(app, id) {
+  return axios.get(`/api/apps/${app}/hooks/${id}/results`);
+}
 
 function restartFormation(app, type) {
   return axios.delete(`/api/apps/${app}/dynos/${type}`);
@@ -438,4 +441,5 @@ export default {
   getRegions,
   getAudits,
   createWebHook,
+  getWebhookResults,
 };
