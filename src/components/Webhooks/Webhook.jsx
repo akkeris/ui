@@ -22,6 +22,9 @@ import ConfirmationModal from '../ConfirmationModal';
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
 
 function objectToTable(prefix, input) {
+  if (input === null) {
+    return null;
+  }
   return Object.keys(input).map((key) => {
     if (typeof input[key] === 'object') {
       return objectToTable(prefix ? `${prefix}.${key}` : key, input[key]);
