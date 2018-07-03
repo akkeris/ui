@@ -135,7 +135,7 @@ export default class Webhooks extends Component {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div>
-          {!this.state.new && (
+          {!this.state.new ? (
             <Paper zDepth={0}>
               <IconButton
                 className="new-webhook"
@@ -146,8 +146,7 @@ export default class Webhooks extends Component {
                 <AddIcon />
               </IconButton>
             </Paper>
-          )}
-          {this.state.new && (
+          ) : (
             <div>
               <IconButton className="webhook-cancel" onTouchTap={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
               { <NewWebhook app={this.props.app} onComplete={this.reload} /> }

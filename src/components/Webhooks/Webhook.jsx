@@ -4,6 +4,9 @@ import IconButton from 'material-ui/IconButton';
 import ActiveIcon from 'material-ui/svg-icons/social/notifications';
 import InactiveIcon from 'material-ui/svg-icons/social/notifications-paused';
 import HistoryIcon from 'material-ui/svg-icons/action/history';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import RefreshIndicator from 'material-ui/RefreshIndicator';
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import EditIcon from 'material-ui/svg-icons/editor/mode-edit';
@@ -20,6 +23,10 @@ import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
+
+const muiTheme = getMuiTheme({
+  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+});
 
 function objectToTable(prefix, input) {
   if (input === null) {
@@ -107,7 +114,6 @@ const style = {
       marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '20%',
     },
     indicator: {
       display: 'inline-block',
@@ -163,7 +169,6 @@ export default class Webhook extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      message: '',
       errorMessage: '',
       events: this.props.webhook.events.slice(),
       edit: false,
@@ -179,15 +184,8 @@ export default class Webhook extends Component {
       itemSelected: false,
       historyIndex: 0,
       dialogSubtitle: 'Select an item to view detailed information.',
+      loading: false,
     };
-  }
-
-  componentDidMount() {
-    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
-      this.setState({ history: result.data })
-    )).catch((error) => {
-      this.props.onError(error);
-    });
   }
 
   getEventCheckboxes() { // eslint-disable-line class-methods-use-this
@@ -277,9 +275,23 @@ export default class Webhook extends Component {
           </span>
         }
       >
-        {this.getHistory()}
+        {this.state.loading ? (
+          <MuiThemeProvider muiTheme={muiTheme}>
+            <div style={style.refresh.div}>
+              <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            </div>
+          </MuiThemeProvider>
+        ) : (this.getHistory())}
       </Dialog>
     );
+  }
+
+  loadHistoryFromApi() {
+    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
+      this.setState({ history: result.data, loading: false })
+    )).catch((error) => {
+      this.props.onError(error);
+    });
   }
 
   handleHistoryDialogOk = () => {
@@ -302,10 +314,6 @@ export default class Webhook extends Component {
     const date = new Date(this.state.history[index].last_attempt.updated_at).toLocaleString();
     const action = this.state.history[index].last_attempt.request.body.action;
     return subtitle ? `Selected Item: ${date} - ${action}` : `${date} - ${action}`;
-  }
-
-  updateDialogSubtitle(msg) {
-    this.setState({ dialogSubtitle: msg });
   }
 
   handleConfirmation = () => {
@@ -384,6 +392,11 @@ export default class Webhook extends Component {
     }
   }
 
+  handleHistoryIcon = () => {
+    this.loadHistoryFromApi();
+    this.setState({ historyOpen: true, loading: true });
+  }
+
   // regex from https://stackoverflow.com/questions/1303872, modified to have http(s) optional
   checkURL(url) { // eslint-disable-line
     return /^(HTTP|HTTP|http(s)?:\/\/)?(www\.)?[A-Za-z0-9]+([\-\.]{1}[A-Za-z0-9]+)*\.[A-Za-z]{2,40}(:[0-9]{1,40})?(\/.*)?$/.test(url) // eslint-disable-line
@@ -391,7 +404,6 @@ export default class Webhook extends Component {
 
   reset = (events) => {
     this.setState({
-      message: '',
       errorMessage: '',
       events: events.slice(),
       edit: false,
@@ -542,7 +554,7 @@ export default class Webhook extends Component {
                           className="webhook-history"
                           tooltip="History"
                           tooltipPosition="top-left"
-                          onTouchTap={() => this.setState({ historyOpen: true })}
+                          onTouchTap={this.handleHistoryIcon}
                         >
                           <HistoryIcon />
                           {this.getHistoryDialog()}
