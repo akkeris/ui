@@ -182,7 +182,7 @@ export default class NewWebhook extends Component {
   }
 
   handleCheckAll = (event, checked) => {
-    let currEvents = this.state.events;
+    let currEvents = [];
     if (checked) {
       for (let i = 0; i < defaultEvents.length; i++) { currEvents.push(defaultEvents[i]); }
       this.setState({ checkedAll: true });
