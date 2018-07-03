@@ -357,39 +357,40 @@ export default class Webhook extends Component {
   }
 
   renderWebhookTitle() {
-    return (<Table className="webhook-title-table">
-      <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
-        <TableRow
-          className={this.props.webhook.id}
-          key={this.props.webhook.id}
-          style={style.tableRow.standardHeight}
-        >
-          <TableRowColumn style={style.tableRow.column.noLeftPadding}>
-            <div style={style.titleContainer}>
-              {this.props.webhook.active && (
-                <ActiveIcon style={style.icon.activeIcon} />
-              )}
-              {!this.props.webhook.active && (
-                <InactiveIcon style={style.icon.inactiveIcon} />
-              )}
-              <div>
-                <div className={`webhook-title-url-${this.props.rowindex}`} style={style.tableRow.column.title}>
-                  {this.props.webhook.url}
-                </div>
-                <div className={'webhook-title-id'} style={style.tableRow.column.sub}>
-                  {this.props.webhook.id}
+    return (
+      <Table className="webhook-title-table">
+        <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+          <TableRow
+            className={this.props.webhook.id}
+            key={this.props.webhook.id}
+            style={style.tableRow.standardHeight}
+          >
+            <TableRowColumn style={style.tableRow.column.noLeftPadding}>
+              <div style={style.titleContainer}>
+                {this.props.webhook.active ? (
+                  <ActiveIcon style={style.icon.activeIcon} />
+                ) : (
+                  <InactiveIcon style={style.icon.inactiveIcon} />
+                )}
+                <div>
+                  <div className={`webhook-title-url-${this.props.rowindex}`} style={style.tableRow.column.title}>
+                    {this.props.webhook.url}
+                  </div>
+                  <div className={'webhook-title-id'} style={style.tableRow.column.sub}>
+                    {this.props.webhook.id}
+                  </div>
                 </div>
               </div>
-            </div>
-          </TableRowColumn>
-          <TableRowColumn>
-            <div style={style.tableRow.column.events}>
-              {this.getEvents(this.props.webhook)}
-            </div>
-          </TableRowColumn>
-        </TableRow>
-      </TableBody>
-    </Table>);
+            </TableRowColumn>
+            <TableRowColumn>
+              <div style={style.tableRow.column.events}>
+                {this.getEvents(this.props.webhook)}
+              </div>
+            </TableRowColumn>
+          </TableRow>
+        </TableBody>
+      </Table>
+    );
   }
 
   renderWebhookInfo() {
