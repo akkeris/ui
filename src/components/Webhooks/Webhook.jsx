@@ -324,7 +324,10 @@ export default class Webhook extends Component {
     } else {
       currEvents.splice(currEvents.indexOf(event.target.value), 1);
     }
-    this.setState({ events: currEvents });
+    this.setState({
+      events: currEvents,
+      checkedAll: currEvents.length === defaultEvents.length,
+    });
   }
 
   handleCheckAll = (event, checked) => {
@@ -550,6 +553,7 @@ export default class Webhook extends Component {
                       disabled={!this.state.edit}
                       value="Check All"
                       key="Check All"
+                      className="checkbox-check-all"
                       checked={this.state.checkedAll}
                       onCheck={this.handleCheckAll}
                     />
