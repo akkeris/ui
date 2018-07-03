@@ -127,6 +127,10 @@ const style = {
   toggle: {
     width: '35%',
   },
+  historyDialogTable: {
+    borderTop: '1px solid rgb(224, 224, 224)',
+    paddingLeft: '10px',
+  },
   tableRow: {
     column: {
       end: {
@@ -210,43 +214,6 @@ export default class Webhook extends Component {
       </span>));
   }
 
-  getHistory() {
-    if (this.state.itemSelected) {
-      return (
-        <Table selectable={false}>
-          <TableBody displayRowCheckbox={false} selectable={false} showRowHover={false}>
-            {objectToTable('', this.state.history[this.state.historyIndex])}
-          </TableBody>
-        </Table>
-      );
-    }
-    return (
-      <Table style={{ paddingLeft: '10px' }}>
-        <TableBody displayRowCheckbox={false} selectable={false} showRowHover>
-          {this.state.history.length > 0 ? (
-            this.state.history.map((historyItem, idx) => (
-              <TableRow
-                className={`historyItem-${idx}`}
-                key={historyItem.id}
-                style={style.tableRow.standardHeight}
-                onTouchTap={() => this.setState({
-                  itemSelected: true,
-                  historyIndex: idx,
-                  dialogSubtitle: this.formatHistoryItemTitle(idx, true),
-                })}
-              >
-                <TableRowColumn style={style.noPadding}>
-                  {this.formatHistoryItemTitle(idx, false)}
-                </TableRowColumn>
-              </TableRow>
-            ))
-          ) : (<p><i>No history events found.</i></p>)
-          }
-        </TableBody>
-      </Table>
-    );
-  }
-
   getDialogTitle() {
     return (
       <div>
@@ -255,43 +222,6 @@ export default class Webhook extends Component {
         <span style={style.dialogSubTitle}>{this.state.dialogSubtitle}</span>
       </div>
     );
-  }
-
-  getHistoryDialog() {
-    return (
-      <Dialog
-        className="history-dialog"
-        open={this.state.historyOpen}
-        title={this.getDialogTitle()}
-        repositionOnUpdate
-        autoScrollBodyContent
-        contentStyle={style.historyDialog}
-        actions={
-          <span>
-            {this.state.itemSelected && (
-              <FlatButton className="back" label="Back" secondary onTouchTap={this.handleHistoryDialogBack} />
-            )}
-            <FlatButton className="ok" label="Ok" primary onTouchTap={this.handleHistoryDialogOk} />
-          </span>
-        }
-      >
-        {this.state.loading ? (
-          <MuiThemeProvider muiTheme={muiTheme}>
-            <div style={style.refresh.div}>
-              <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-            </div>
-          </MuiThemeProvider>
-        ) : (this.getHistory())}
-      </Dialog>
-    );
-  }
-
-  loadHistoryFromApi() {
-    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
-      this.setState({ history: result.data, loading: false })
-    )).catch((error) => {
-      this.props.onError(error);
-    });
   }
 
   handleHistoryDialogOk = () => {
@@ -307,6 +237,14 @@ export default class Webhook extends Component {
       itemSelected: false,
       historyIndex: 0,
       dialogSubtitle: 'Select an item to view detailed information.',
+    });
+  }
+
+  loadHistoryFromApi() {
+    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
+      this.setState({ history: result.data, loading: false })
+    )).catch((error) => {
+      this.props.onError(error);
     });
   }
 
@@ -418,6 +356,245 @@ export default class Webhook extends Component {
     });
   }
 
+  renderWebhookTitle() {
+    return (<Table className="webhook-title-table">
+      <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+        <TableRow
+          className={this.props.webhook.id}
+          key={this.props.webhook.id}
+          style={style.tableRow.standardHeight}
+        >
+          <TableRowColumn style={style.tableRow.column.noLeftPadding}>
+            <div style={style.titleContainer}>
+              {this.props.webhook.active && (
+                <ActiveIcon style={style.icon.activeIcon} />
+              )}
+              {!this.props.webhook.active && (
+                <InactiveIcon style={style.icon.inactiveIcon} />
+              )}
+              <div>
+                <div className={`webhook-title-url-${this.props.rowindex}`} style={style.tableRow.column.title}>
+                  {this.props.webhook.url}
+                </div>
+                <div className={'webhook-title-id'} style={style.tableRow.column.sub}>
+                  {this.props.webhook.id}
+                </div>
+              </div>
+            </div>
+          </TableRowColumn>
+          <TableRowColumn>
+            <div style={style.tableRow.column.events}>
+              {this.getEvents(this.props.webhook)}
+            </div>
+          </TableRowColumn>
+        </TableRow>
+      </TableBody>
+    </Table>);
+  }
+
+  renderWebhookInfo() {
+    return (
+      <Table wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
+        <TableBody displayRowCheckbox={false} showRowHover={false} selectable={false}>
+          <TableRow style={style.tableRow.noBorder} selectable={false}>
+            <TableRowColumn>
+              <div>
+                <TextField
+                  className="edit-url"
+                  floatingLabelFixed
+                  floatingLabelText="Edit URL"
+                  type="text"
+                  default={this.props.webhook.url}
+                  value={this.state.url}
+                  onChange={this.handleURLChange}
+                  errorText={this.state.urlErrorText}
+                  disabled={!this.state.edit}
+                  floatingLabelStyle={this.state.edit ? style.label.enabled : null}
+                />
+              </div>
+            </TableRowColumn>
+            <TableRowColumn>
+              <div>
+                <TextField
+                  maxLength="20"
+                  className="edit-secret"
+                  floatingLabelFixed
+                  floatingLabelText="Edit Secret"
+                  type="password"
+                  hintText="**********"
+                  value={this.state.secret}
+                  onChange={this.handleSecretChange}
+                  errorText={this.state.secretErrorText}
+                  disabled={!this.state.edit}
+                  floatingLabelStyle={this.state.edit ? style.label.enabled : null}
+                />
+              </div>
+            </TableRowColumn>
+            <TableRowColumn>
+              <div>
+                <Toggle
+                  label="Active"
+                  style={style.toggle}
+                  disabled={!this.state.edit}
+                  toggled={this.state.active}
+                  onToggle={() => { this.setState({ active: !this.state.active }); }}
+                />
+              </div>
+            </TableRowColumn>
+            <TableRowColumn style={{ overflow: 'visible' }}>
+              {this.renderEditButtons()}
+            </TableRowColumn>
+          </TableRow>
+          <TableRow selectable={false} style={style.tableRow.eventsRow}>
+            <TableRowColumn style={{ overflow: 'visible' }}>
+              <div>
+                <h3 style={this.state.edit ? null : style.label.disabled}>Events</h3>
+                <div style={style.eventsTwoColumns} className="events">
+                  {this.getEventCheckboxes(this.props.webhook)}
+                </div>
+                {this.state.eventErrorText && (
+                  <div style={style.eventsError} className="events-errorText">
+                    {this.state.eventErrorText}
+                  </div>
+                )}
+              </div>
+            </TableRowColumn>
+          </TableRow>
+        </TableBody>
+      </Table>
+    );
+  }
+
+  renderEditButtons() {
+    return (
+      <div style={style.tableRow.column.end}>
+        {!this.state.edit ? (
+          <IconButton
+            style={style.buttonMargin}
+            className="webhook-edit"
+            tooltip="Edit"
+            tooltipPosition="top-left"
+            onTouchTap={() => this.setState({ edit: true })}
+          >
+            <EditIcon />
+          </IconButton>
+        ) : (
+          <span>
+            <IconButton
+              style={style.buttonMargin}
+              className="webhook-save"
+              tooltip="Save"
+              tooltipPosition="top-left"
+              onTouchTap={this.handleSave}
+            >
+              <SaveIcon />
+            </IconButton>
+            <IconButton
+              style={style.buttonMargin}
+              className="webhook-back"
+              tooltip="Back"
+              tooltipPosition="top-left"
+              onTouchTap={this.handleReset}
+            >
+              <BackIcon />
+            </IconButton>
+          </span>
+        )}
+        <IconButton
+          style={style.buttonMargin}
+          className="webhook-history"
+          tooltip="History"
+          tooltipPosition="top-left"
+          onTouchTap={this.handleHistoryIcon}
+        >
+          <HistoryIcon />
+          {this.renderHistoryDialog()}
+        </IconButton>
+        <IconButton
+          className="webhook-remove"
+          tooltip="Remove"
+          tooltipPosition="top-left"
+          onTouchTap={() => this.handleConfirmation(this.props.webhook)}
+        >
+          <ConfirmationModal
+            className="delete-webhook"
+            open={this.state.open}
+            onOk={this.handleRemoveWebhook}
+            onCancel={this.handleCancelConfirmation}
+            message="Are you sure you want to delete this webhook?"
+          />
+          <RemoveIcon />
+        </IconButton>
+      </div>
+    );
+  }
+
+  renderHistoryDialog() {
+    return (
+      <Dialog
+        className="history-dialog"
+        open={this.state.historyOpen}
+        title={this.getDialogTitle()}
+        repositionOnUpdate
+        autoScrollBodyContent
+        contentStyle={style.historyDialog}
+        actions={
+          <span>
+            {this.state.itemSelected && (
+              <FlatButton className="back" label="Back" secondary onTouchTap={this.handleHistoryDialogBack} />
+            )}
+            <FlatButton className="ok" label="Ok" primary onTouchTap={this.handleHistoryDialogOk} />
+          </span>
+        }
+      >
+        {this.state.loading ? (
+          <MuiThemeProvider muiTheme={muiTheme}>
+            <div style={style.refresh.div}>
+              <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            </div>
+          </MuiThemeProvider>
+        ) : (this.renderHistoryItems())}
+      </Dialog>
+    );
+  }
+
+  renderHistoryItems() {
+    if (this.state.itemSelected) {
+      return (
+        <Table selectable={false}>
+          <TableBody displayRowCheckbox={false} selectable={false} showRowHover={false}>
+            {objectToTable('', this.state.history[this.state.historyIndex])}
+          </TableBody>
+        </Table>
+      );
+    }
+    return (
+      <Table style={style.historyDialogTable}>
+        <TableBody displayRowCheckbox={false} selectable={false} showRowHover>
+          {this.state.history.length > 0 ? (
+            this.state.history.map((historyItem, idx) => (
+              <TableRow
+                className={`historyItem-${idx}`}
+                key={historyItem.id}
+                style={style.tableRow.standardHeight}
+                onTouchTap={() => this.setState({
+                  itemSelected: true,
+                  historyIndex: idx,
+                  dialogSubtitle: this.formatHistoryItemTitle(idx, true),
+                })}
+              >
+                <TableRowColumn style={style.noPadding}>
+                  {this.formatHistoryItemTitle(idx, false)}
+                </TableRowColumn>
+              </TableRow>
+            ))
+          ) : (<p><i>No history events found.</i></p>)
+          }
+        </TableBody>
+      </Table>
+    );
+  }
+
   render() {
     return (
       <TableRow
@@ -433,167 +610,10 @@ export default class Webhook extends Component {
               showExpandableButton
               className={'webhook-title'}
             >
-              <Table className="webhook-title-table">
-                <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
-                  <TableRow
-                    className={this.props.webhook.id}
-                    key={this.props.webhook.id}
-                    style={style.tableRow.standardHeight}
-                  >
-                    <TableRowColumn style={style.tableRow.column.noLeftPadding}>
-                      <div style={style.titleContainer}>
-                        {this.props.webhook.active && (
-                          <ActiveIcon style={style.icon.activeIcon} />
-                        )}
-                        {!this.props.webhook.active && (
-                          <InactiveIcon style={style.icon.inactiveIcon} />
-                        )}
-                        <div>
-                          <div className={`webhook-title-url-${this.props.rowindex}`} style={style.tableRow.column.title}>
-                            {this.props.webhook.url}
-                          </div>
-                          <div className={'webhook-title-id'} style={style.tableRow.column.sub}>
-                            {this.props.webhook.id}
-                          </div>
-                        </div>
-                      </div>
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      <div style={style.tableRow.column.events}>
-                        {this.getEvents(this.props.webhook)}
-                      </div>
-                    </TableRowColumn>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              {this.renderWebhookTitle()}
             </CardTitle>
             <CardText expandable className={`${this.props.webhook.id}-info`}>
-              <Table wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-                <TableBody displayRowCheckbox={false} showRowHover={false} selectable={false}>
-                  <TableRow style={style.tableRow.noBorder} selectable={false}>
-                    <TableRowColumn>
-                      <div>
-                        <TextField
-                          className="edit-url"
-                          floatingLabelFixed
-                          floatingLabelText="Edit URL"
-                          type="text"
-                          default={this.props.webhook.url}
-                          value={this.state.url}
-                          onChange={this.handleURLChange}
-                          errorText={this.state.urlErrorText}
-                          disabled={!this.state.edit}
-                          floatingLabelStyle={this.state.edit ? style.label.enabled : null}
-                        />
-                      </div>
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      <div>
-                        <TextField
-                          maxLength="20"
-                          className="edit-secret"
-                          floatingLabelFixed
-                          floatingLabelText="Edit Secret"
-                          type="password"
-                          hintText="**********"
-                          value={this.state.secret}
-                          onChange={this.handleSecretChange}
-                          errorText={this.state.secretErrorText}
-                          disabled={!this.state.edit}
-                          floatingLabelStyle={this.state.edit ? style.label.enabled : null}
-                        />
-                      </div>
-                    </TableRowColumn>
-                    <TableRowColumn>
-                      <div>
-                        <Toggle
-                          label="Active"
-                          style={style.toggle}
-                          disabled={!this.state.edit}
-                          toggled={this.state.active}
-                          onToggle={() => { this.setState({ active: !this.state.active }); }}
-                        />
-                      </div>
-                    </TableRowColumn>
-                    <TableRowColumn style={{ overflow: 'visible' }}>
-                      <div style={style.tableRow.column.end}>
-                        {!this.state.edit ? (
-                          <IconButton
-                            style={style.buttonMargin}
-                            className="webhook-edit"
-                            tooltip="Edit"
-                            tooltipPosition="top-left"
-                            onTouchTap={() => this.setState({ edit: true })}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        ) : (
-                          <span>
-                            <IconButton
-                              style={style.buttonMargin}
-                              className="webhook-save"
-                              tooltip="Save"
-                              tooltipPosition="top-left"
-                              onTouchTap={this.handleSave}
-                            >
-                              <SaveIcon />
-                            </IconButton>
-                            <IconButton
-                              style={style.buttonMargin}
-                              className="webhook-back"
-                              tooltip="Back"
-                              tooltipPosition="top-left"
-                              onTouchTap={this.handleReset}
-                            >
-                              <BackIcon />
-                            </IconButton>
-                          </span>
-                        )}
-                        <IconButton
-                          style={style.buttonMargin}
-                          className="webhook-history"
-                          tooltip="History"
-                          tooltipPosition="top-left"
-                          onTouchTap={this.handleHistoryIcon}
-                        >
-                          <HistoryIcon />
-                          {this.getHistoryDialog()}
-                        </IconButton>
-                        <IconButton
-                          className="webhook-remove"
-                          tooltip="Remove"
-                          tooltipPosition="top-left"
-                          onTouchTap={() => this.handleConfirmation(this.props.webhook)}
-                        >
-                          <ConfirmationModal
-                            className="delete-webhook"
-                            open={this.state.open}
-                            onOk={this.handleRemoveWebhook}
-                            onCancel={this.handleCancelConfirmation}
-                            message="Are you sure you want to delete this webhook?"
-                          />
-                          <RemoveIcon />
-                        </IconButton>
-                      </div>
-                    </TableRowColumn>
-                  </TableRow>
-                  <TableRow selectable={false} style={style.tableRow.eventsRow}>
-                    <TableRowColumn style={{ overflow: 'visible' }}>
-                      <div>
-                        <h3 style={this.state.edit ? null : style.label.disabled}>Events</h3>
-                        <div style={style.eventsTwoColumns} className="events">
-                          {this.getEventCheckboxes(this.props.webhook)}
-                        </div>
-                        {this.state.eventErrorText && (
-                          <div style={style.eventsError} className="events-errorText">
-                            {this.state.eventErrorText}
-                          </div>
-                        )}
-                      </div>
-                    </TableRowColumn>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              {this.renderWebhookInfo()}
             </CardText>
           </Card>
         </TableRowColumn>
