@@ -24,7 +24,7 @@ import api from '../../services/api';
 
 import ConfirmationModal from '../ConfirmationModal';
 
-const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
+const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'released', 'crashed'];
 
 const muiTheme = getMuiTheme({
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
@@ -148,8 +148,11 @@ const style = {
     width: '35%',
   },
   historyDialogTable: {
-    borderTop: '1px solid rgb(224, 224, 224)',
     paddingLeft: '10px',
+  },
+  historyDialogTitle: {
+    borderBottom: '1px solid rgba(0, 0, 0, 0.3)',
+    marginBottom: '2px',
   },
   tableRow: {
     column: {
@@ -237,7 +240,7 @@ export default class Webhook extends Component {
 
   getDialogTitle() {
     return (
-      <div>
+      <div style={style.historyDialogTitle}>
         <span style={style.dialogTitle}>Webhook History</span>
         <br />
         <span style={style.dialogSubTitle}>{this.state.dialogSubtitle}</span>
@@ -315,6 +318,7 @@ export default class Webhook extends Component {
     }
     this.setState({ events: currEvents });
   }
+
   handleCheckAll = (event, checked) => {
     let currEvents = this.state.events;
     if (checked) {

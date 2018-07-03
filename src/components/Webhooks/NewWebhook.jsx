@@ -4,14 +4,16 @@ import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import InfoButton from 'material-ui/svg-icons/action/info';
+import InfoIcon from 'material-ui/svg-icons/action/info';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import TextField from 'material-ui/TextField';
 import Dialog from 'material-ui/Dialog';
 import Checkbox from 'material-ui/Checkbox';
+import { IconButton } from 'material-ui';
 import { GridList } from 'material-ui/GridList';
 
 import api from '../../services/api';
+import eventDescriptions from './EventDescriptions';
 
 const muiTheme = getMuiTheme({
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
@@ -46,20 +48,17 @@ const style = {
     color: 'red',
     paddingTop: '20px',
   },
+  eventsInfoButton: {
+    icon: {
+      height: '18px', width: '18px',
+    },
+    padding: '1px 0 0 0',
+    height: '24px',
+    width: '24px',
+  },
 };
 
-const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
-
-const description = [
-  'Used when a new release starts. This fires once per application',
-  'Used when a new build starts, and also fires when it succeeds or fails. This will fire at least twice per app.',
-  'If a dyno type is added, removed, or changed this fires once. This includes application scale events, command changes, or health check changes.',
-  'This fires when a logdrain is added or removed.', 'This fires when an add-on is provisioned or deporvisioned.',
-  'If a config var is added, removed, or changed, this event fires once.',
-  'Fires when an application is destroyed. This may cause other events to fires as well (such as addon_change.',
-  'If a preview app is created based on the app this fires.', 'When a release succeeds and is the active release running, this fires.',
-  'If a dyno crashes this will fire. In addition, if an app entirely crashes, each dyno will fire as a separate event. This will fire as well if an application fails to shutdown gracefully when a new release is deployed.',
-];
+const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'released', 'crashed'];
 
 export default class NewWebhook extends Component {
   constructor(props, context) {
@@ -74,6 +73,7 @@ export default class NewWebhook extends Component {
       secret: '',
       errorText: '',
       checkedAll: false,
+      eventsDialogOpen: false,
     };
   }
 
@@ -93,8 +93,18 @@ export default class NewWebhook extends Component {
           <div>
             <div style={style.eventsHeader}>
               <h3>Events</h3>
-              <InfoButton style={{ height: '18px', width: '18px', paddingTop: '0.7px' }} />
+              <IconButton
+                className="events-info-button"
+                onTouchTap={this.openEventsInfoDialog}
+                style={style.eventsInfoButton}
+                iconStyle={style.eventsInfoButton.icon}
+                tooltip="Descriptions"
+                tooltipPosition="top-right"
+              >
+                <InfoIcon />
+              </IconButton>
             </div>
+            {this.renderEventsInfoDialog()}
             <div className="events">
               <GridList cellHeight="auto" style={{ width: '350px' }}>
                 {this.getEventCheckboxes(this.webhook)}
@@ -153,6 +163,13 @@ export default class NewWebhook extends Component {
     return this.state.events.map((event, idx) => <span key={event} style={style.tableRow.column.event}>{event}{idx === this.state.events.length - 1 ? '' : ','} </span>);
   }
 
+  openEventsInfoDialog = () => {
+    this.setState({ eventsDialogOpen: true });
+  }
+
+  closeEventsInfoDialog = () => {
+    this.setState({ eventsDialogOpen: false });
+  }
 
   handleCheck = (event, checked) => {
     const currEvents = this.state.events;
@@ -243,9 +260,34 @@ export default class NewWebhook extends Component {
     });
   }
 
+  renderEventsInfoDialog() {
+    return (
+      <Dialog
+        className="events-info-dialog"
+        open={this.state.eventsDialogOpen}
+        title="Description of Events"
+        autoScrollBodyContent
+        actions={
+          <FlatButton
+            className="ok"
+            label="Ok"
+            primary
+            onTouchTap={this.closeEventsInfoDialog}
+          />
+        }
+      >
+        <div>
+          {eventDescriptions.getEventDescriptions().map((event, index) => (
+            <p><b>{defaultEvents[index]}</b><br />{event}</p>
+          ))}
+        </div>
+      </Dialog>
+    );
+  }
+
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 16px', overflow: 'visible' };
     if (finished) {
       this.submitWebHook();
     } else {
