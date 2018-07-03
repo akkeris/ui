@@ -4,6 +4,7 @@ import IconButton from 'material-ui/IconButton';
 import ActiveIcon from 'material-ui/svg-icons/social/notifications';
 import InactiveIcon from 'material-ui/svg-icons/social/notifications-paused';
 import HistoryIcon from 'material-ui/svg-icons/action/history';
+import InfoButton from 'material-ui/svg-icons/action/info';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
@@ -13,6 +14,7 @@ import EditIcon from 'material-ui/svg-icons/editor/mode-edit';
 import SaveIcon from 'material-ui/svg-icons/content/save';
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back';
 import { Card, CardText, CardTitle } from 'material-ui/Card';
+import { GridList } from 'material-ui/GridList';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
@@ -52,6 +54,13 @@ function objectToTable(prefix, input) {
 }
 
 const style = {
+  eventsHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '80px',
+  },
   buttonMargin: {
     marginRight: '20px',
   },
@@ -95,6 +104,17 @@ const style = {
       color: 'grey',
       position: 'relative',
       padding: '0 10px 0 10px',
+    },
+    activeInfo: {
+      height: '18px',
+      width: '18px',
+      paddingTop: '0.7px',
+    },
+    inactiveInfo: {
+      height: '18px',
+      width: '18px',
+      paddingTop: '0.7px',
+      color: 'rgba(0, 0, 0, 0.3)',
     },
   },
   label: {
@@ -189,6 +209,7 @@ export default class Webhook extends Component {
       historyIndex: 0,
       dialogSubtitle: 'Select an item to view detailed information.',
       loading: false,
+      checkedAll: false,
     };
   }
 
@@ -286,13 +307,24 @@ export default class Webhook extends Component {
   }
 
   handleCheck = (event, checked) => {
-    const events = this.state.events;
+    const currEvents = this.state.events;
     if (checked) {
-      events.push(event.target.value);
+      currEvents.push(event.target.value);
     } else {
-      events.splice(events.indexOf(event.target.value), 1);
+      currEvents.splice(currEvents.indexOf(event.target.value), 1);
     }
-    this.setState({ events });
+    this.setState({ events: currEvents });
+  }
+  handleCheckAll = (event, checked) => {
+    let currEvents = this.state.events;
+    if (checked) {
+      for (let i = 0; i < defaultEvents.length; i++) { currEvents.push(defaultEvents[i]); }
+      this.setState({ checkedAll: true });
+    } else {
+      currEvents = [];
+      this.setState({ checkedAll: false });
+    }
+    this.setState({ events: currEvents });
   }
 
   handleReset = () => {
@@ -353,6 +385,7 @@ export default class Webhook extends Component {
       active: this.props.webhook.active,
       open: false,
       history: [],
+      checkedAll: false,
     });
   }
 
@@ -449,9 +482,24 @@ export default class Webhook extends Component {
           <TableRow selectable={false} style={style.tableRow.eventsRow}>
             <TableRowColumn style={{ overflow: 'visible' }}>
               <div>
-                <h3 style={this.state.edit ? null : style.label.disabled}>Events</h3>
+                <div style={style.eventsHeader}>
+                  <h3 style={this.state.edit ? null : style.label.disabled}>Events</h3>
+                  <InfoButton
+                    style={this.state.edit ? style.icon.activeInfo : style.icon.inactiveInfo}
+                  />
+                </div>
                 <div style={style.eventsTwoColumns} className="events">
-                  {this.getEventCheckboxes(this.props.webhook)}
+                  <GridList cellHeight="auto" style={{ width: '350px' }}>
+                    {this.getEventCheckboxes(this.props.webhook)}
+                    <Checkbox
+                      label="Check All"
+                      disabled={!this.state.edit}
+                      value="Check All"
+                      key="Check All"
+                      checked={this.state.checkedAll}
+                      onCheck={this.handleCheckAll}
+                    />
+                  </GridList>
                 </div>
                 {this.state.eventErrorText && (
                   <div style={style.eventsError} className="events-errorText">

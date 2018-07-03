@@ -4,10 +4,12 @@ import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import InfoButton from 'material-ui/svg-icons/action/info';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import TextField from 'material-ui/TextField';
 import Dialog from 'material-ui/Dialog';
 import Checkbox from 'material-ui/Checkbox';
+import { GridList } from 'material-ui/GridList';
 
 import api from '../../services/api';
 
@@ -16,6 +18,13 @@ const muiTheme = getMuiTheme({
 });
 
 const style = {
+  eventsHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '80px',
+  },
   stepper: {
     width: '100%',
     maxWidth: 700,
@@ -39,7 +48,18 @@ const style = {
   },
 };
 
-const events = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
+const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'crashed', 'released'];
+
+const description = [
+  'Used when a new release starts. This fires once per application',
+  'Used when a new build starts, and also fires when it succeeds or fails. This will fire at least twice per app.',
+  'If a dyno type is added, removed, or changed this fires once. This includes application scale events, command changes, or health check changes.',
+  'This fires when a logdrain is added or removed.', 'This fires when an add-on is provisioned or deporvisioned.',
+  'If a config var is added, removed, or changed, this event fires once.',
+  'Fires when an application is destroyed. This may cause other events to fires as well (such as addon_change.',
+  'If a preview app is created based on the app this fires.', 'When a release succeeds and is the active release running, this fires.',
+  'If a dyno crashes this will fire. In addition, if an app entirely crashes, each dyno will fire as a separate event. This will fire as well if an application fails to shutdown gracefully when a new release is deployed.',
+];
 
 export default class NewWebhook extends Component {
   constructor(props, context) {
@@ -53,6 +73,7 @@ export default class NewWebhook extends Component {
       url: '',
       secret: '',
       errorText: '',
+      checkedAll: false,
     };
   }
 
@@ -70,9 +91,21 @@ export default class NewWebhook extends Component {
       case 1:
         return (
           <div>
-            <h3>Events</h3>
-            <div style={style.events} className="events">
-              {this.getEvents()}
+            <div style={style.eventsHeader}>
+              <h3>Events</h3>
+              <InfoButton style={{ height: '18px', width: '18px', paddingTop: '0.7px' }} />
+            </div>
+            <div className="events">
+              <GridList cellHeight="auto" style={{ width: '350px' }}>
+                {this.getEventCheckboxes(this.webhook)}
+                <Checkbox
+                  label="Check All"
+                  value="Check All"
+                  key="Check All"
+                  checked={this.state.checkedAll}
+                  onCheck={this.handleCheckAll}
+                />
+              </GridList>
             </div>
             {this.state.errorText && (
               <div style={style.eventsError} className="events-errorText">
@@ -102,25 +135,45 @@ export default class NewWebhook extends Component {
     }
   }
 
-  getEvents = () => events.map(event => (
-    <Checkbox
-      className={`checkbox-${event}`}
-      key={event}
-      onCheck={this.handleCheck}
-      value={event}
-      label={event}
-      checked={this.state.events.indexOf(event) !== -1}
-    />
-  ))
+  getEventCheckboxes() { // eslint-disable-line class-methods-use-this
+    return defaultEvents.map(event => (
+      <Checkbox
+        className={`checkbox-${event}`}
+        key={event}
+        value={event}
+        label={event}
+        checked={this.state.events.includes(event)}
+        onCheck={this.handleCheck}
+        style={style.checkboxWidth}
+      />
+    ));
+  }
+
+  getEvents() {
+    return this.state.events.map((event, idx) => <span key={event} style={style.tableRow.column.event}>{event}{idx === this.state.events.length - 1 ? '' : ','} </span>);
+  }
+
 
   handleCheck = (event, checked) => {
-    const { events } = this.state; // eslint-disable-line
+    const currEvents = this.state.events;
     if (checked) {
-      events.push(event.target.value);
+      currEvents.push(event.target.value);
     } else {
-      events.splice(events.indexOf(event.target.value), 1);
+      currEvents.splice(currEvents.indexOf(event.target.value), 1);
     }
-    this.setState({ events });
+    this.setState({ events: currEvents });
+  }
+
+  handleCheckAll = (event, checked) => {
+    let currEvents = this.state.events;
+    if (checked) {
+      for (let i = 0; i < defaultEvents.length; i++) { currEvents.push(defaultEvents[i]); }
+      this.setState({ checkedAll: true });
+    } else {
+      currEvents = [];
+      this.setState({ checkedAll: false });
+    }
+    this.setState({ events: currEvents });
   }
 
   handleURLChange = (event, value) => {
