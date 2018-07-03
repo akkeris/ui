@@ -278,7 +278,7 @@ export default class NewWebhook extends Component {
       >
         <div>
           {eventDescriptions.getEventDescriptions().map((event, index) => (
-            <p><b>{defaultEvents[index]}</b><br />{event}</p>
+            <p key={`${event}.length`}><b>{defaultEvents[index]}</b><br />{event}</p>
           ))}
         </div>
       </Dialog>

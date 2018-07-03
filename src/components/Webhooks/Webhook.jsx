@@ -219,7 +219,7 @@ export default class Webhook extends Component {
       historyIndex: 0,
       dialogSubtitle: 'Select an item to view detailed information.',
       loading: false,
-      checkedAll: false,
+      checkedAll: this.props.webhook.events.length === defaultEvents.length,
       eventsDialogOpen: false,
     };
   }
@@ -328,7 +328,7 @@ export default class Webhook extends Component {
   }
 
   handleCheckAll = (event, checked) => {
-    let currEvents = this.state.events;
+    let currEvents = [];
     if (checked) {
       for (let i = 0; i < defaultEvents.length; i++) { currEvents.push(defaultEvents[i]); }
       this.setState({ checkedAll: true });
@@ -428,7 +428,7 @@ export default class Webhook extends Component {
       >
         <div>
           {eventDescriptions.getEventDescriptions().map((event, index) => (
-            <p><b>{defaultEvents[index]}</b><br />{event}</p>
+            <p key={`${event}.length`}><b>{defaultEvents[index]}</b><br />{event}</p>
           ))}
         </div>
       </Dialog>
