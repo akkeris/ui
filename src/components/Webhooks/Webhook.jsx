@@ -405,7 +405,7 @@ export default class Webhook extends Component {
       active: this.props.webhook.active,
       open: false,
       history: [],
-      checkedAll: false,
+      checkedAll: this.props.webhook.events.length === defaultEvents.length,
       eventsDialogOpen: false,
     });
   }
