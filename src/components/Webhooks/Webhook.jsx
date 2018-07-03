@@ -4,7 +4,7 @@ import IconButton from 'material-ui/IconButton';
 import ActiveIcon from 'material-ui/svg-icons/social/notifications';
 import InactiveIcon from 'material-ui/svg-icons/social/notifications-paused';
 import HistoryIcon from 'material-ui/svg-icons/action/history';
-import InfoButton from 'material-ui/svg-icons/action/info';
+import InfoIcon from 'material-ui/svg-icons/action/info';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
@@ -23,6 +23,7 @@ import Checkbox from 'material-ui/Checkbox';
 import api from '../../services/api';
 
 import ConfirmationModal from '../ConfirmationModal';
+import eventDescriptions from './EventDescriptions';
 
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'released', 'crashed'];
 
@@ -54,6 +55,14 @@ function objectToTable(prefix, input) {
 }
 
 const style = {
+  eventsInfoButton: {
+    icon: {
+      height: '18px', width: '18px',
+    },
+    padding: '1px 0 0 0',
+    height: '24px',
+    width: '24px',
+  },
   eventsHeader: {
     display: 'flex',
     flexDirection: 'row',
@@ -108,12 +117,10 @@ const style = {
     activeInfo: {
       height: '18px',
       width: '18px',
-      paddingTop: '0.7px',
     },
     inactiveInfo: {
       height: '18px',
       width: '18px',
-      paddingTop: '0.7px',
       color: 'rgba(0, 0, 0, 0.3)',
     },
   },
@@ -213,6 +220,7 @@ export default class Webhook extends Component {
       dialogSubtitle: 'Select an item to view detailed information.',
       loading: false,
       checkedAll: false,
+      eventsDialogOpen: false,
     };
   }
 
@@ -371,6 +379,14 @@ export default class Webhook extends Component {
     this.setState({ historyOpen: true, loading: true });
   }
 
+  openEventsInfoDialog = () => {
+    if (this.state.edit) { this.setState({ eventsDialogOpen: true }); }
+  }
+
+  closeEventsInfoDialog = () => {
+    this.setState({ eventsDialogOpen: false });
+  }
+
   // regex from https://stackoverflow.com/questions/1303872, modified to have http(s) optional
   checkURL(url) { // eslint-disable-line
     return /^(HTTP|HTTP|http(s)?:\/\/)?(www\.)?[A-Za-z0-9]+([\-\.]{1}[A-Za-z0-9]+)*\.[A-Za-z]{2,40}(:[0-9]{1,40})?(\/.*)?$/.test(url) // eslint-disable-line
@@ -390,7 +406,33 @@ export default class Webhook extends Component {
       open: false,
       history: [],
       checkedAll: false,
+      eventsDialogOpen: false,
     });
+  }
+
+  renderEventsInfoDialog() {
+    return (
+      <Dialog
+        className="events-info-dialog"
+        open={this.state.eventsDialogOpen}
+        title="Description of Events"
+        autoScrollBodyContent
+        actions={
+          <FlatButton
+            className="ok"
+            label="Ok"
+            primary
+            onTouchTap={this.closeEventsInfoDialog}
+          />
+        }
+      >
+        <div>
+          {eventDescriptions.getEventDescriptions().map((event, index) => (
+            <p><b>{defaultEvents[index]}</b><br />{event}</p>
+          ))}
+        </div>
+      </Dialog>
+    );
   }
 
   renderWebhookTitle() {
@@ -488,10 +530,18 @@ export default class Webhook extends Component {
               <div>
                 <div style={style.eventsHeader}>
                   <h3 style={this.state.edit ? null : style.label.disabled}>Events</h3>
-                  <InfoButton
-                    style={this.state.edit ? style.icon.activeInfo : style.icon.inactiveInfo}
-                  />
+                  <IconButton
+                    className="events-info-button"
+                    onTouchTap={this.openEventsInfoDialog}
+                    style={style.eventsInfoButton}
+                    iconStyle={this.state.edit ? style.icon.activeInfo : style.icon.inactiveInfo}
+                    tooltip="Descriptions"
+                    tooltipPosition="top-right"
+                  >
+                    <InfoIcon />
+                  </IconButton>
                 </div>
+                {this.renderEventsInfoDialog()}
                 <div style={style.eventsTwoColumns} className="events">
                   <GridList cellHeight="auto" style={{ width: '350px' }}>
                     {this.getEventCheckboxes(this.props.webhook)}
