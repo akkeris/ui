@@ -251,7 +251,7 @@ export default class Webhook extends Component {
       <div style={style.historyDialogTitle}>
         <span style={style.dialogTitle}>Webhook History</span>
         <br />
-        <span style={style.dialogSubTitle}>{this.state.dialogSubtitle}</span>
+        <span style={style.dialogSubTitle} className="history-dialog-subtitle">{this.state.dialogSubtitle}</span>
       </div>
     );
   }
@@ -671,7 +671,7 @@ export default class Webhook extends Component {
   renderHistoryItems() {
     if (this.state.itemSelected) {
       return (
-        <Table selectable={false}>
+        <Table selectable={false} className="history-info-table">
           <TableBody displayRowCheckbox={false} selectable={false} showRowHover={false}>
             {objectToTable('', this.state.history[this.state.historyIndex])}
           </TableBody>
@@ -698,7 +698,7 @@ export default class Webhook extends Component {
                 </TableRowColumn>
               </TableRow>
             ))
-          ) : (<p><i>No history events found.</i></p>)
+          ) : (<p className="history-dialog-noEvents"><i>No history events found.</i></p>)
           }
         </TableBody>
       </Table>

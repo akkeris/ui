@@ -932,7 +932,45 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .expect(Selector('.webhook-item-0 .checkbox-crashed input').checked)
     .ok()
     .expect(Selector('.webhook-item-0 .checkbox-check-all input').checked)
-    .ok();
+    .ok()
+
+    // Test history functionality
+    .click('.webhook-item-0 button.webhook-history')
+    // Expect no events
+    .expect(Selector('.history-dialog .history-dialog-noEvents').innerText)
+    .contains('No history events found.')
+    .click('.history-dialog button.ok')
+    // Create config item to fire a webhook
+    .click('.config-tab')
+    .click('button.new-config')
+    .typeText('.config-key input', 'test')
+    .click('.next')
+    .typeText(Selector('.config-value textarea').withAttribute('id'), 'test')
+    .click('.next')
+    .expect(Selector('.config-snack').innerText)
+    .contains('Added Config Var')
+    .click('.webhooks-tab')
+    // Expect an event
+    .click('.webhook-item-0 button.webhook-history')
+    .expect(Selector('.history-dialog .historyItem-0'))
+    .ok()
+    .expect(Selector('.history-dialog .historyItem-0').innerText)
+    .contains('config_change')
+    // Make sure the event details display correctly
+    .click('.history-dialog .historyItem-0')
+    .expect(Selector('.history-dialog .history-dialog-subtitle').innerText)
+    .contains('Selected Item')
+    .expect(Selector('.history-dialog .history-dialog-subtitle').innerText)
+    .contains('config_change')
+    .expect(Selector('.history-dialog .history-info-table').exists)
+    .ok()
+    // Expect back button to work
+    .click(Selector('.history-dialog button.back'))
+    .expect(Selector('.history-dialog .historyItem-0').innerText)
+    .contains('config_change')
+    .expect(Selector('.history-dialog .history-dialog-subtitle').innerText)
+    .contains('Select an item to view detailed information.')
+    .click(Selector('.history-dialog button.ok'));
 });
 
 
