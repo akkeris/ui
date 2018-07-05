@@ -367,6 +367,8 @@ export default class Webhook extends Component {
       this.setState({ urlErrorText: 'Invalid URL' });
     } else if (this.state.events.length === 0) {
       this.setState({ eventErrorText: 'Must select at least one event' });
+    } else if (this.state.secret.length > 20) {
+      this.setState({ secretErrorText: 'Secret must be less than 20 characters' });
     } else {
       this.setState({
         urlErrorText: '',
@@ -499,7 +501,7 @@ export default class Webhook extends Component {
             <TableRowColumn>
               <div>
                 <TextField
-                  maxLength="20"
+                  maxLength="30"
                   className="edit-secret"
                   floatingLabelFixed
                   floatingLabelText="Edit Secret"
@@ -516,6 +518,7 @@ export default class Webhook extends Component {
             <TableRowColumn>
               <div>
                 <Toggle
+                  className="active-toggle"
                   label="Active"
                   style={style.toggle}
                   disabled={!this.state.edit}
@@ -719,7 +722,7 @@ export default class Webhook extends Component {
             >
               {this.renderWebhookTitle()}
             </CardTitle>
-            <CardText expandable className={`${this.props.webhook.id}-info`}>
+            <CardText expandable className="webhook-info">
               {this.renderWebhookInfo()}
             </CardText>
           </Card>

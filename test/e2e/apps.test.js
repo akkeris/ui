@@ -637,6 +637,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .ok()
     .expect(Selector('.checkbox-check-all input').checked)
     .ok()
+
     // Click check all again and make sure they are all unchecked
     .click('.checkbox-check-all')
     .expect(Selector('.checkbox-release input').checked)
@@ -661,12 +662,14 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .notOk()
     .expect(Selector('.checkbox-check-all input').checked)
     .notOk()
+
     // Click one and make sure that 'check all' is unchecked
     .click('.checkbox-release')
     .expect(Selector('.checkbox-release input').checked)
     .ok()
     .expect(Selector('.checkbox-check-all input').checked)
     .notOk()
+
     // Click check all and uncheck one, and make sure that 'check all' is unchecked
     .click('.checkbox-check-all')
     .expect(Selector('.checkbox-check-all input').checked)
@@ -676,6 +679,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .notOk()
     .expect(Selector('.checkbox-check-all input').checked)
     .notOk()
+
     // Check every box, check-all should only be checked when everything else is
     .click('.checkbox-check-all')
     .click('.checkbox-check-all')
@@ -741,7 +745,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('button.new-webhook')
     .typeText('.webhook-url input', 'http://example.com/hook1')
     .click('.next button')
-    .click('.checkbox-release')
+    .click('.checkbox-config_change')
     .click('.next button')
     .click('.next button') // Also tests for empty secret
     .expect(Selector('.webhook-snack').innerText)
@@ -761,6 +765,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('http://example.com/hook1')
     .expect(Selector('.webhook-item-1').innerText)
     .contains('http://example.com/hook2')
+
     // Remove one of the webhooks
     .click('.webhook-item-1 div div button') // Open edit dropdown
     .click('.webhook-item-1 button.webhook-remove')
@@ -772,18 +777,21 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 div div button')
     .click('.webhook-item-0 .webhook-edit')
     .click('.webhook-item-0 .edit-url input')
+
     // Test inavlid URL
     .pressKey('ctrl+a')
     .pressKey('backspace')
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-item-0 .edit-url').innerText)
     .contains('Invalid URL')
+
     // Test back button resets url field
     .typeText('.webhook-item-0 .edit-url input', 'http://new-url.com/')
     .click('.webhook-item-0 .webhook-back')
     .click('.webhook-item-0 .webhook-edit')
     .expect(Selector('.webhook-item-0 .edit-url input').value)
     .contains('http://example.com/hook1')
+
     // Test save new url
     .click('.webhook-item-0 .edit-url input')
     .pressKey('ctrl+a')
@@ -795,7 +803,136 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 div div button') // Open edit dropdown
     .click('.webhook-item-0 .webhook-edit')
     .expect(Selector('.webhook-item-0 .edit-url input').value)
-    .contains('http://new-url.com/');
+    .contains('http://new-url.com/')
+
+    // Test at least one event in edit
+    .expect(Selector('.webhook-item-0 .checkbox-config_change input').checked)
+    .ok()
+    .click('.checkbox-check-all')
+    .click('.checkbox-check-all')
+    .click('.webhook-item-0 .webhook-save')
+    .expect(Selector('.webhook-item-0 .events-errorText').innerText)
+    .contains('Must select at least one event')
+    .click('.checkbox-check-all')
+    .expect(Selector('.webhook-item-0 .checkbox-release input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-build input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-formation_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-logdrain_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-addon_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-config_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-destroy input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-preview input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-released input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-crashed input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-check-all input').checked)
+    .ok()
+    .click('.webhook-item-0 .webhook-save')
+    .expect(Selector('.webhook-snack').innerText)
+    .contains('Updated Webhook')
+    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-edit')
+    .expect(Selector('.webhook-item-0 .checkbox-release input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-build input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-formation_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-logdrain_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-addon_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-config_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-destroy input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-preview input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-released input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-crashed input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-check-all input').checked)
+    .ok()
+
+    // Test events info dialog
+    .click('.webhook-item-0 .events-info-button')
+    .expect(Selector('.events-info-dialog').exists)
+    .ok()
+    .click('.events-info-dialog .ok')
+
+    // Test toggle functionality
+    .click('.webhook-item-0 .active-toggle input')
+    .click('.webhook-item-0 .webhook-save')
+    .expect(Selector('.webhook-snack').innerText)
+    .contains('Updated Webhook')
+    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-edit')
+    .expect(Selector('.webhook-item-0 .active-toggle input').checked)
+    .notOk()
+
+    // Test secret can be changed
+    .click('.webhook-item-0 .active-toggle input')
+    .click('.webhook-item-0 .edit-secret input')
+    .typeText('.webhook-item-0 .edit-secret input', 'over twenty characters')
+    .click('.webhook-item-0 .webhook-save')
+    .expect(Selector('.webhook-item-0 .edit-secret').innerText)
+    .contains('Secret must be less than 20 characters')
+    .click('.webhook-item-0 .edit-secret input')
+    .pressKey('ctrl+a')
+    .pressKey('backspace')
+    .typeText('.webhook-item-0 .edit-secret input', 'mysecret')
+    .click('.webhook-item-0 .webhook-save')
+    .expect(Selector('.webhook-snack').innerText)
+    .contains('Updated Webhook')
+
+    // Test back button functionality
+    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-edit')
+    .click('.webhook-item-0 .active-toggle input')
+    .typeText('.webhook-item-0 .edit-url input', 'http://old-url.com/')
+    .click('.checkbox-check-all')
+    .click('.checkbox-release')
+    .click('.webhook-item-0 .webhook-back')
+    .click('.webhook-item-0 .webhook-edit')
+    // Expect url to revert
+    .expect(Selector('.webhook-item-0 .edit-url input').value)
+    .contains('http://new-url.com/')
+    // Expect toggle to revert
+    .expect(Selector('.webhook-item-0 .active-toggle input').checked)
+    .ok()
+    // Expect events to revert
+    .expect(Selector('.webhook-item-0 .checkbox-release input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-build input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-formation_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-logdrain_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-addon_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-config_change input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-destroy input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-preview input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-released input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-crashed input').checked)
+    .ok()
+    .expect(Selector('.webhook-item-0 .checkbox-check-all input').checked)
+    .ok();
 });
 
 
