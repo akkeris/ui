@@ -94,6 +94,9 @@ const style = {
     flexWrap: 'wrap',
     width: '200%',
   },
+  gridListWidth: {
+    width: '350px',
+  },
   historyDialog: {
     width: '55%',
     maxWidth: 'none',
@@ -196,6 +199,9 @@ const style = {
     standardHeight: {
       height: '58px',
     },
+  },
+  overflowVisible: {
+    overflow: 'visible',
   },
 };
 
@@ -479,7 +485,7 @@ export default class Webhook extends Component {
 
   renderWebhookInfo() {
     return (
-      <Table wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
+      <Table wrapperStyle={style.overflowVisible} bodyStyle={style.overflowVisible}>
         <TableBody displayRowCheckbox={false} showRowHover={false} selectable={false}>
           <TableRow style={style.tableRow.noBorder} selectable={false}>
             <TableRowColumn>
@@ -527,12 +533,12 @@ export default class Webhook extends Component {
                 />
               </div>
             </TableRowColumn>
-            <TableRowColumn style={{ overflow: 'visible' }}>
+            <TableRowColumn style={style.overflowVisible}>
               {this.renderEditButtons()}
             </TableRowColumn>
           </TableRow>
           <TableRow selectable={false} style={style.tableRow.eventsRow}>
-            <TableRowColumn style={{ overflow: 'visible' }}>
+            <TableRowColumn style={style.overflowVisible}>
               <div>
                 <div style={style.eventsHeader}>
                   <h3 style={this.state.edit ? null : style.label.disabled}>Events</h3>
@@ -549,7 +555,7 @@ export default class Webhook extends Component {
                 </div>
                 {this.renderEventsInfoDialog()}
                 <div style={style.eventsTwoColumns} className="events">
-                  <GridList cellHeight="auto" style={{ width: '350px' }}>
+                  <GridList cellHeight="auto" style={style.gridListWidth}>
                     {this.getEventCheckboxes(this.props.webhook)}
                     <Checkbox
                       label="Check All"

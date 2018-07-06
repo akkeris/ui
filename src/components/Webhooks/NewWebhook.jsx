@@ -27,6 +27,9 @@ const style = {
     justifyContent: 'space-between',
     width: '80px',
   },
+  gridListWidth: {
+    width: '350px',
+  },
   stepper: {
     width: '100%',
     maxWidth: 700,
@@ -40,9 +43,6 @@ const style = {
     back: {
       marginRight: 12,
     },
-  },
-  events: {
-    paddingLeft: '14px',
   },
   eventsError: {
     color: 'red',
@@ -106,7 +106,7 @@ export default class NewWebhook extends Component {
             </div>
             {this.renderEventsInfoDialog()}
             <div className="events">
-              <GridList cellHeight="auto" style={{ width: '350px' }}>
+              <GridList cellHeight="auto" style={style.gridListWidth}>
                 {this.getEventCheckboxes(this.webhook)}
                 <Checkbox
                   label="Check All"
@@ -304,7 +304,7 @@ export default class NewWebhook extends Component {
               label="Back"
               disabled={stepIndex === 0}
               onTouchTap={this.handlePrev}
-              style={style.buttons.Back}
+              style={style.buttons.back}
             />)}
             <RaisedButton
               className="next"
