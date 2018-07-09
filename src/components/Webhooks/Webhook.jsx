@@ -23,7 +23,7 @@ import Checkbox from 'material-ui/Checkbox';
 import api from '../../services/api';
 
 import ConfirmationModal from '../ConfirmationModal';
-import eventDescriptions from './EventDescriptions';
+import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
 
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'released', 'crashed'];
 
@@ -169,6 +169,9 @@ const style = {
   toggle: {
     width: '35%',
   },
+  togglePadding: {
+    paddingLeft: '10%',
+  },
   historyDialogTable: {
     paddingLeft: '10px',
   },
@@ -274,11 +277,11 @@ export default class Webhook extends Component {
     );
   }
 
-  handleHistoryDialogOk = () => {
-    this.setState({
-      historyOpen: false,
-      itemSelected: false,
-      historyIndex: 0,
+  getHookHistory() {
+    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
+      this.setState({ history: result.data, loading: false })
+    )).catch((error) => {
+      this.props.onError(error);
     });
   }
 
@@ -290,11 +293,11 @@ export default class Webhook extends Component {
     });
   }
 
-  loadHistoryFromApi() {
-    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
-      this.setState({ history: result.data, loading: false })
-    )).catch((error) => {
-      this.props.onError(error);
+  handleHistoryDialogOk = () => {
+    this.setState({
+      historyOpen: false,
+      itemSelected: false,
+      historyIndex: 0,
     });
   }
 
@@ -398,7 +401,7 @@ export default class Webhook extends Component {
   }
 
   handleHistoryIcon = () => {
-    this.loadHistoryFromApi();
+    this.getHookHistory();
     this.setState({ historyOpen: true, loading: true });
   }
 
@@ -450,7 +453,7 @@ export default class Webhook extends Component {
         }
       >
         <div>
-          {eventDescriptions.getEventDescriptions().map((event, index) => (
+          {eventDescriptions.data.map((event, index) => (
             <p key={`${event}.length`}><b>{defaultEvents[index]}</b><br />{event}</p>
           ))}
         </div>
@@ -505,7 +508,7 @@ export default class Webhook extends Component {
                 <TextField
                   className="edit-url"
                   floatingLabelFixed
-                  floatingLabelText="Edit URL"
+                  floatingLabelText="URL"
                   type="text"
                   default={this.props.webhook.url}
                   value={this.state.url}
@@ -522,7 +525,7 @@ export default class Webhook extends Component {
                   maxLength="30"
                   className="edit-secret"
                   floatingLabelFixed
-                  floatingLabelText="Edit Secret"
+                  floatingLabelText="Secret"
                   type="password"
                   hintText="**********"
                   value={this.state.secret}
@@ -533,7 +536,7 @@ export default class Webhook extends Component {
                 />
               </div>
             </TableRowColumn>
-            <TableRowColumn>
+            <TableRowColumn style={style.togglePadding}>
               <div>
                 <Toggle
                   className="active-toggle"
@@ -559,7 +562,11 @@ export default class Webhook extends Component {
                     onTouchTap={this.openEventsInfoDialog}
                     style={style.eventsInfoButton}
                     iconStyle={this.state.edit ? style.icon.activeInfo : style.icon.inactiveInfo}
+<<<<<<< HEAD
                     tooltip="Click for Descriptions"
+=======
+                    tooltip="Click For Descriptions"
+>>>>>>> 6e265474d1178fa29a68a10797898968b339ac11
                     tooltipPosition="top-right"
                   >
                     <InfoIcon />
@@ -599,15 +606,42 @@ export default class Webhook extends Component {
     return (
       <div style={style.tableRow.column.end}>
         {!this.state.edit ? (
-          <IconButton
-            style={style.buttonMargin}
-            className="webhook-edit"
-            tooltip="Edit"
-            tooltipPosition="top-left"
-            onTouchTap={() => this.setState({ edit: true })}
-          >
-            <EditIcon />
-          </IconButton>
+          <span>
+            <IconButton
+              style={style.buttonMargin}
+              className="webhook-edit"
+              tooltip="Edit"
+              tooltipPosition="top-left"
+              onTouchTap={() => this.setState({ edit: true })}
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              style={style.buttonMargin}
+              className="webhook-history"
+              tooltip="History"
+              tooltipPosition="top-left"
+              onTouchTap={this.handleHistoryIcon}
+            >
+              <HistoryIcon />
+              {this.renderHistoryDialog()}
+            </IconButton>
+            <IconButton
+              className="webhook-remove"
+              tooltip="Remove"
+              tooltipPosition="top-left"
+              onTouchTap={() => this.handleConfirmation(this.props.webhook)}
+            >
+              <ConfirmationModal
+                className="delete-webhook"
+                open={this.state.open}
+                onOk={this.handleRemoveWebhook}
+                onCancel={this.handleCancelConfirmation}
+                message="Are you sure you want to delete this webhook?"
+              />
+              <RemoveIcon />
+            </IconButton>
+          </span>
         ) : (
           <span>
             <IconButton
@@ -630,31 +664,6 @@ export default class Webhook extends Component {
             </IconButton>
           </span>
         )}
-        <IconButton
-          style={style.buttonMargin}
-          className="webhook-history"
-          tooltip="History"
-          tooltipPosition="top-left"
-          onTouchTap={this.handleHistoryIcon}
-        >
-          <HistoryIcon />
-          {this.renderHistoryDialog()}
-        </IconButton>
-        <IconButton
-          className="webhook-remove"
-          tooltip="Remove"
-          tooltipPosition="top-left"
-          onTouchTap={() => this.handleConfirmation(this.props.webhook)}
-        >
-          <ConfirmationModal
-            className="delete-webhook"
-            open={this.state.open}
-            onOk={this.handleRemoveWebhook}
-            onCancel={this.handleCancelConfirmation}
-            message="Are you sure you want to delete this webhook?"
-          />
-          <RemoveIcon />
-        </IconButton>
       </div>
     );
   }
