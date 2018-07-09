@@ -27,6 +27,13 @@ const style = {
     justifyContent: 'space-between',
     width: '80px',
   },
+  checkAllActive: {
+    width: '25%',
+    borderTop: '1px solid black',
+    marginTop: '10px',
+    paddingTop: '10px',
+    display: 'inline-block',
+  },
   gridListWidth: {
     width: '350px',
   },
@@ -98,7 +105,7 @@ export default class NewWebhook extends Component {
                 onTouchTap={this.openEventsInfoDialog}
                 style={style.eventsInfoButton}
                 iconStyle={style.eventsInfoButton.icon}
-                tooltip="Descriptions"
+                tooltip="Click for Descriptions"
                 tooltipPosition="top-right"
               >
                 <InfoIcon />
@@ -108,6 +115,8 @@ export default class NewWebhook extends Component {
             <div className="events">
               <GridList cellHeight="auto" style={style.gridListWidth}>
                 {this.getEventCheckboxes(this.webhook)}
+              </GridList>
+              <span style={style.checkAllActive} >
                 <Checkbox
                   label="Check All"
                   value="Check All"
@@ -116,7 +125,7 @@ export default class NewWebhook extends Component {
                   checked={this.state.checkedAll}
                   onCheck={this.handleCheckAll}
                 />
-              </GridList>
+              </span>
             </div>
             {this.state.errorText && (
               <div style={style.eventsError} className="events-errorText">

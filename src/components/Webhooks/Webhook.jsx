@@ -76,6 +76,18 @@ const style = {
   checkboxWidth: {
     width: '175px',
   },
+  checkAllActive: {
+    width: '25%',
+    borderTop: '1px solid black',
+    marginTop: '10px',
+    paddingTop: '10px',
+  },
+  checkAllInactive: {
+    width: '25%',
+    borderTop: '1px solid rgba(0, 0, 0, 0.3)',
+    marginTop: '10px',
+    paddingTop: '10px',
+  },
   dialogTitle: {
     fontSize: '22px',
     lineHeight: '32px',
@@ -90,7 +102,7 @@ const style = {
   },
   eventsTwoColumns: {
     display: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'column',
     flexWrap: 'wrap',
     width: '200%',
   },
@@ -547,7 +559,7 @@ export default class Webhook extends Component {
                     onTouchTap={this.openEventsInfoDialog}
                     style={style.eventsInfoButton}
                     iconStyle={this.state.edit ? style.icon.activeInfo : style.icon.inactiveInfo}
-                    tooltip="Descriptions"
+                    tooltip="Click for Descriptions"
                     tooltipPosition="top-right"
                   >
                     <InfoIcon />
@@ -557,6 +569,8 @@ export default class Webhook extends Component {
                 <div style={style.eventsTwoColumns} className="events">
                   <GridList cellHeight="auto" style={style.gridListWidth}>
                     {this.getEventCheckboxes(this.props.webhook)}
+                  </GridList>
+                  <span style={this.state.edit ? style.checkAllActive : style.checkAllInactive} >
                     <Checkbox
                       label="Check All"
                       disabled={!this.state.edit}
@@ -566,7 +580,7 @@ export default class Webhook extends Component {
                       checked={this.state.checkedAll}
                       onCheck={this.handleCheckAll}
                     />
-                  </GridList>
+                  </span>
                 </div>
                 {this.state.eventErrorText && (
                   <div style={style.eventsError} className="events-errorText">
