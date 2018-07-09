@@ -7,6 +7,7 @@ import HistoryIcon from 'material-ui/svg-icons/action/history';
 import HelpIcon from 'material-ui/svg-icons/action/help';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
@@ -59,16 +60,16 @@ const style = {
     icon: {
       height: '18px', width: '18px',
     },
-    padding: '1px 0 0 0',
     height: '24px',
     width: '24px',
+    padding: 0,
   },
   eventsHeader: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '80px',
+    width: '70px',
   },
   buttonMargin: {
     marginRight: '20px',
@@ -118,26 +119,31 @@ const style = {
     activeIcon: {
       height: '18px',
       width: '18px',
-      color: 'green',
+      color: lightBaseTheme.palette.primary1Color,
       position: 'relative',
       padding: '0 10px 0 10px',
     },
     inactiveIcon: {
       height: '18px',
       width: '18px',
-      color: 'grey',
+      color: 'rgba(0, 0, 0, 0.3)',
       position: 'relative',
       padding: '0 10px 0 10px',
     },
     activeInfo: {
       height: '18px',
       width: '18px',
+      color: lightBaseTheme.palette.accent1Color,
     },
     inactiveInfo: {
       height: '18px',
       width: '18px',
       color: 'rgba(0, 0, 0, 0.3)',
     },
+  },
+  eventsLabel: {
+    color: 'rgba(0, 0, 0, 0.3)',
+    fontSize: '12px',
   },
   label: {
     enabled: {
@@ -170,7 +176,7 @@ const style = {
     width: '35%',
   },
   togglePadding: {
-    paddingLeft: '10%',
+
   },
   historyDialogTable: {
     paddingLeft: '10px',
@@ -201,6 +207,10 @@ const style = {
       },
       title: {
         fontSize: '16px',
+      },
+      iconButton: {
+        width: '58px',
+        overflow: 'visible',
       },
     },
     eventsRow: {
@@ -371,7 +381,7 @@ export default class Webhook extends Component {
     api.patchWebhook(
       this.props.app,
       this.props.webhook.id,
-      this.state.url,
+      /^(HTTP|HTTP|http(s)?:\/\/)/.test(this.state.url) ? this.state.url : `http://${this.state.url}`,
       this.state.events,
       this.state.secret === '' ? null : this.state.secret,
       this.state.active,
@@ -415,7 +425,7 @@ export default class Webhook extends Component {
 
   // regex from https://stackoverflow.com/questions/1303872, modified to have http(s) optional
   checkURL(url) { // eslint-disable-line
-    return /^(HTTP|HTTP|http(s)?:\/\/)?(www\.)?[A-Za-z0-9]+([\-\.]{1}[A-Za-z0-9]+)*\.[A-Za-z]{2,40}(:[0-9]{1,40})?(\/.*)?$/.test(url) // eslint-disable-line
+    return /^(HTTP|HTTP|http(s)?:\/\/)?[A-Za-z0-9]+([\-\.]{1}[A-Za-z0-9]+)*\.[A-Za-z]{2,40}(:[0-9]{1,40})?(\/.*)?$/.test(url); // eslint-disable-line no-useless-escape
   }
 
   reset = (events) => {
@@ -507,7 +517,6 @@ export default class Webhook extends Component {
               <div>
                 <TextField
                   className="edit-url"
-                  floatingLabelFixed
                   floatingLabelText="URL"
                   type="text"
                   default={this.props.webhook.url}
@@ -515,7 +524,6 @@ export default class Webhook extends Component {
                   onChange={this.handleURLChange}
                   errorText={this.state.urlErrorText}
                   disabled={!this.state.edit}
-                  floatingLabelStyle={this.state.edit ? style.label.enabled : null}
                 />
               </div>
             </TableRowColumn>
@@ -524,7 +532,6 @@ export default class Webhook extends Component {
                 <TextField
                   maxLength="30"
                   className="edit-secret"
-                  floatingLabelFixed
                   floatingLabelText="Secret"
                   type="password"
                   hintText="**********"
@@ -532,7 +539,6 @@ export default class Webhook extends Component {
                   onChange={this.handleSecretChange}
                   errorText={this.state.secretErrorText}
                   disabled={!this.state.edit}
-                  floatingLabelStyle={this.state.edit ? style.label.enabled : null}
                 />
               </div>
             </TableRowColumn>
@@ -548,20 +554,80 @@ export default class Webhook extends Component {
                 />
               </div>
             </TableRowColumn>
-            <TableRowColumn style={style.overflowVisible}>
-              {this.renderEditButtons()}
+            <TableRowColumn style={style.tableRow.column.iconButton}>
+              {this.state.edit ? (
+                <IconButton
+                  className="webhook-save"
+                  tooltip="Save"
+                  tooltipPosition="top-left"
+                  onTouchTap={this.handleSave}
+                >
+                  <SaveIcon />
+                </IconButton>
+              ) : (
+                <IconButton
+                  className="webhook-edit"
+                  tooltip="Edit"
+                  tooltipPosition="top-left"
+                  onTouchTap={() => this.setState({ edit: true })}
+                >
+                  <EditIcon />
+                </IconButton>
+              )}
+            </TableRowColumn>
+            <TableRowColumn style={style.tableRow.column.iconButton}>
+              {!this.state.edit && (
+                <IconButton
+                  className="webhook-history"
+                  tooltip="History"
+                  tooltipPosition="top-left"
+                  onTouchTap={this.handleHistoryIcon}
+                >
+                  <HistoryIcon />
+                  {this.renderHistoryDialog()}
+                </IconButton>
+              )}
+            </TableRowColumn>
+            <TableRowColumn style={style.tableRow.column.iconButton}>
+              {!this.state.edit ? (
+                <IconButton
+                  className="webhook-remove"
+                  tooltip="Remove"
+                  tooltipPosition="top-left"
+                  onTouchTap={() => this.handleConfirmation(this.props.webhook)}
+                >
+                  <ConfirmationModal
+                    className="delete-webhook"
+                    open={this.state.open}
+                    onOk={this.handleRemoveWebhook}
+                    onCancel={this.handleCancelConfirmation}
+                    message="Are you sure you want to delete this webhook?"
+                  />
+                  <RemoveIcon />
+                </IconButton>
+              ) : (
+                <IconButton
+                  className="webhook-back"
+                  tooltip="Back"
+                  tooltipPosition="top-left"
+                  onTouchTap={this.handleReset}
+                >
+                  <BackIcon />
+                </IconButton>
+              )}
             </TableRowColumn>
           </TableRow>
           <TableRow selectable={false} style={style.tableRow.eventsRow}>
             <TableRowColumn style={style.overflowVisible}>
               <div>
                 <div style={style.eventsHeader}>
-                  <h3 style={this.state.edit ? null : style.label.disabled}>Events</h3>
+                  <p style={style.eventsLabel}>Events</p>
                   <IconButton
                     className="events-info-button"
                     onTouchTap={this.openEventsInfoDialog}
                     style={style.eventsInfoButton}
                     iconStyle={this.state.edit ? style.icon.activeInfo : style.icon.inactiveInfo}
+                    disabled={!this.state.edit}
                     tooltip={this.state.edit ? 'Click for Descriptions' : null}
                     tooltipPosition="top-right"
                   >
@@ -598,71 +664,9 @@ export default class Webhook extends Component {
     );
   }
 
-  renderEditButtons() {
-    return (
-      <div style={style.tableRow.column.end}>
-        {!this.state.edit ? (
-          <span>
-            <IconButton
-              style={style.buttonMargin}
-              className="webhook-edit"
-              tooltip="Edit"
-              tooltipPosition="top-left"
-              onTouchTap={() => this.setState({ edit: true })}
-            >
-              <EditIcon />
-            </IconButton>
-            <IconButton
-              style={style.buttonMargin}
-              className="webhook-history"
-              tooltip="History"
-              tooltipPosition="top-left"
-              onTouchTap={this.handleHistoryIcon}
-            >
-              <HistoryIcon />
-              {this.renderHistoryDialog()}
-            </IconButton>
-            <IconButton
-              className="webhook-remove"
-              tooltip="Remove"
-              tooltipPosition="top-left"
-              onTouchTap={() => this.handleConfirmation(this.props.webhook)}
-            >
-              <ConfirmationModal
-                className="delete-webhook"
-                open={this.state.open}
-                onOk={this.handleRemoveWebhook}
-                onCancel={this.handleCancelConfirmation}
-                message="Are you sure you want to delete this webhook?"
-              />
-              <RemoveIcon />
-            </IconButton>
-          </span>
-        ) : (
-          <span>
-            <IconButton
-              style={style.buttonMargin}
-              className="webhook-save"
-              tooltip="Save"
-              tooltipPosition="top-left"
-              onTouchTap={this.handleSave}
-            >
-              <SaveIcon />
-            </IconButton>
-            <IconButton
-              style={style.buttonMargin}
-              className="webhook-back"
-              tooltip="Back"
-              tooltipPosition="top-left"
-              onTouchTap={this.handleReset}
-            >
-              <BackIcon />
-            </IconButton>
-          </span>
-        )}
-      </div>
-    );
-  }
+  // renderEditButtons() {
+
+  // }
 
   renderHistoryDialog() {
     return (
@@ -732,27 +736,29 @@ export default class Webhook extends Component {
 
   render() {
     return (
-      <TableRow
-        className={this.props.webhook.id}
-        key={this.props.webhook.id}
-        style={style.tableRow.standardHeight}
-      >
-        <TableRowColumn style={style.noPadding}>
-          <Card style={{ boxShadow: 'none' }} className={`webhook-item-${this.props.rowindex}`}>
-            <CardTitle
-              style={style.noPadding}
-              actAsExpander
-              showExpandableButton
-              className={'webhook-title'}
-            >
-              {this.renderWebhookTitle()}
-            </CardTitle>
-            <CardText expandable className="webhook-info">
-              {this.renderWebhookInfo()}
-            </CardText>
-          </Card>
-        </TableRowColumn>
-      </TableRow>
+      <MuiThemeProvider muiTheme={muiTheme}>
+        <TableRow
+          className={this.props.webhook.id}
+          key={this.props.webhook.id}
+          style={style.tableRow.standardHeight}
+        >
+          <TableRowColumn style={style.noPadding}>
+            <Card style={{ boxShadow: 'none' }} className={`webhook-item-${this.props.rowindex}`}>
+              <CardTitle
+                style={style.noPadding}
+                actAsExpander
+                showExpandableButton
+                className={'webhook-title'}
+              >
+                {this.renderWebhookTitle()}
+              </CardTitle>
+              <CardText expandable className="webhook-info">
+                {this.renderWebhookInfo()}
+              </CardText>
+            </Card>
+          </TableRowColumn>
+        </TableRow>
+      </MuiThemeProvider>
     );
   }
 }

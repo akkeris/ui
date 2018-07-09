@@ -6,6 +6,7 @@ import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import HelpIcon from 'material-ui/svg-icons/action/help';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import TextField from 'material-ui/TextField';
 import Dialog from 'material-ui/Dialog';
 import Checkbox from 'material-ui/Checkbox';
@@ -25,7 +26,11 @@ const style = {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '80px',
+    width: '70px',
+  },
+  eventsLabel: {
+    color: 'rgba(0, 0, 0, 0.3)',
+    fontSize: '12px',
   },
   checkAllActive: {
     width: '25%',
@@ -55,13 +60,23 @@ const style = {
     color: 'red',
     paddingTop: '20px',
   },
+  inactiveInfo: {
+    height: '18px',
+    width: '18px',
+    color: 'rgba(0, 0, 0, 0.3)',
+  },
   eventsInfoButton: {
     icon: {
       height: '18px', width: '18px',
     },
-    padding: '1px 0 0 0',
+    padding: '0',
     height: '24px',
     width: '24px',
+  },
+  eventsInfoIcon: {
+    height: '18px',
+    width: '18px',
+    color: lightBaseTheme.palette.accent1Color,
   },
 };
 
@@ -91,7 +106,7 @@ export default class NewWebhook extends Component {
           <div>
             <TextField className="webhook-url" floatingLabelText="URL" type="text" value={this.state.url} onChange={this.handleURLChange} errorText={this.state.errorText} />
             <p>
-              Enter a URL for the new webhook.
+              Enter a URL for the new webhook (defaults to http).
             </p>
           </div>
         );
@@ -99,12 +114,12 @@ export default class NewWebhook extends Component {
         return (
           <div>
             <div style={style.eventsHeader}>
-              <h3>Events</h3>
+              <p style={style.eventsLabel}>Events</p>
               <IconButton
                 className="events-info-button"
                 onTouchTap={this.openEventsInfoDialog}
                 style={style.eventsInfoButton}
-                iconStyle={style.eventsInfoButton.icon}
+                iconStyle={style.eventsInfoIcon}
                 tooltip="Click for Descriptions"
                 tooltipPosition="top-right"
               >
@@ -243,7 +258,13 @@ export default class NewWebhook extends Component {
 
   // regex from https://stackoverflow.com/questions/1303872, modified to have http(s) optional
   checkURL(url) { // eslint-disable-line
-      return /^(HTTP|HTTP|http(s)?:\/\/)?(www\.)?[A-Za-z0-9]+([\-\.]{1}[A-Za-z0-9]+)*\.[A-Za-z]{2,40}(:[0-9]{1,40})?(\/.*)?$/.test(url) // eslint-disable-line
+    if (/^(HTTP|HTTP|http(s)?:\/\/)?[A-Za-z0-9]+([\-\.]{1}[A-Za-z0-9]+)*\.[A-Za-z]{2,40}(:[0-9]{1,40})?(\/.*)?$/.test(url)) { // eslint-disable-line no-useless-escape
+      if (!/^(HTTP|HTTP|http(s)?:\/\/)/.test(url)) {
+        this.setState({ url: `http://${this.state.url}` });
+      }
+      return true;
+    }
+    return false;
   }
 
   handlePrev = () => {

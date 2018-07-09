@@ -561,7 +561,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('Invalid URL')
     .click('.webhook-url input')
     .pressKey('backspace')
-    .typeText('.webhook-url input', 'http://example.com/hook')
+    .typeText('.webhook-url input', 'example.com/hook')
     .click('.next button')
     .click('button.back')
     .expect(Selector('.webhook-url').innerText)
@@ -796,7 +796,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 .edit-url input')
     .pressKey('ctrl+a')
     .pressKey('backspace')
-    .typeText('.webhook-item-0 .edit-url input', 'http://new-url.com/')
+    .typeText('.webhook-item-0 .edit-url input', 'new-url.com/')
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Updated Webhook')
@@ -935,6 +935,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .ok()
 
     // Test history functionality
+    .click('.webhook-item-0 .webhook-back')
     .click('.webhook-item-0 button.webhook-history')
     // Expect no events
     .expect(Selector('.history-dialog .history-dialog-noEvents').innerText)
