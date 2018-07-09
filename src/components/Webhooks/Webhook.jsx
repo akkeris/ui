@@ -265,11 +265,11 @@ export default class Webhook extends Component {
     );
   }
 
-  handleHistoryDialogOk = () => {
-    this.setState({
-      historyOpen: false,
-      itemSelected: false,
-      historyIndex: 0,
+  getHookHistory() {
+    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
+      this.setState({ history: result.data, loading: false })
+    )).catch((error) => {
+      this.props.onError(error);
     });
   }
 
@@ -281,11 +281,11 @@ export default class Webhook extends Component {
     });
   }
 
-  getHookHistory() {
-    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
-      this.setState({ history: result.data, loading: false })
-    )).catch((error) => {
-      this.props.onError(error);
+  handleHistoryDialogOk = () => {
+    this.setState({
+      historyOpen: false,
+      itemSelected: false,
+      historyIndex: 0,
     });
   }
 
