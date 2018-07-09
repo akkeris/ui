@@ -562,7 +562,7 @@ export default class Webhook extends Component {
                     onTouchTap={this.openEventsInfoDialog}
                     style={style.eventsInfoButton}
                     iconStyle={this.state.edit ? style.icon.activeInfo : style.icon.inactiveInfo}
-                    tooltip="Click for Descriptions"
+                    tooltip={this.state.edit ? 'Click for Descriptions' : null}
                     tooltipPosition="top-right"
                   >
                     <InfoIcon />
