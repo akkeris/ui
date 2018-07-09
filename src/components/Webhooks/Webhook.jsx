@@ -4,7 +4,7 @@ import IconButton from 'material-ui/IconButton';
 import ActiveIcon from 'material-ui/svg-icons/social/notifications';
 import InactiveIcon from 'material-ui/svg-icons/social/notifications-paused';
 import HistoryIcon from 'material-ui/svg-icons/action/history';
-import InfoIcon from 'material-ui/svg-icons/action/info';
+import HelpIcon from 'material-ui/svg-icons/action/help';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
@@ -565,7 +565,7 @@ export default class Webhook extends Component {
                     tooltip={this.state.edit ? 'Click for Descriptions' : null}
                     tooltipPosition="top-right"
                   >
-                    <InfoIcon />
+                    <HelpIcon />
                   </IconButton>
                 </div>
                 {this.renderEventsInfoDialog()}

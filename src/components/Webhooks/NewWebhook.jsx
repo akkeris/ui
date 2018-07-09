@@ -4,7 +4,7 @@ import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import InfoIcon from 'material-ui/svg-icons/action/info';
+import HelpIcon from 'material-ui/svg-icons/action/help';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import TextField from 'material-ui/TextField';
 import Dialog from 'material-ui/Dialog';
@@ -108,7 +108,7 @@ export default class NewWebhook extends Component {
                 tooltip="Click for Descriptions"
                 tooltipPosition="top-right"
               >
-                <InfoIcon />
+                <HelpIcon />
               </IconButton>
             </div>
             {this.renderEventsInfoDialog()}
