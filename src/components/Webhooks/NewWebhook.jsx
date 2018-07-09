@@ -13,7 +13,7 @@ import { IconButton } from 'material-ui';
 import { GridList } from 'material-ui/GridList';
 
 import api from '../../services/api';
-import eventDescriptions from './EventDescriptions';
+import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
 
 const muiTheme = getMuiTheme({
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
@@ -98,7 +98,7 @@ export default class NewWebhook extends Component {
                 onTouchTap={this.openEventsInfoDialog}
                 style={style.eventsInfoButton}
                 iconStyle={style.eventsInfoButton.icon}
-                tooltip="Descriptions"
+                tooltip="Click For Descriptions"
                 tooltipPosition="top-right"
               >
                 <InfoIcon />
@@ -281,7 +281,7 @@ export default class NewWebhook extends Component {
         }
       >
         <div>
-          {eventDescriptions.getEventDescriptions().map((event, index) => (
+          {eventDescriptions.data.map((event, index) => (
             <p key={`${event}.length`}><b>{defaultEvents[index]}</b><br />{event}</p>
           ))}
         </div>
