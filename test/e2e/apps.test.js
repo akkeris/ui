@@ -420,6 +420,8 @@ test // eslint-disable-line no-undef
       .contains('credentials')
       .click('button.back')
       .click('.next button')
+      .click('.plan-menu button')
+      .click('.Lids.Dev.Credentials')
       .expect(Selector('.plan-price').exists)
       .ok()
       .expect(Selector('.plan-description').exists)
