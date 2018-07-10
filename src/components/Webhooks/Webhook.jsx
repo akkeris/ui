@@ -71,9 +71,6 @@ const style = {
     justifyContent: 'space-between',
     width: '70px',
   },
-  buttonMargin: {
-    marginRight: '20px',
-  },
   checkboxWidth: {
     width: '175px',
   },
@@ -145,14 +142,6 @@ const style = {
     color: 'rgba(0, 0, 0, 0.3)',
     fontSize: '12px',
   },
-  label: {
-    enabled: {
-      color: 'black',
-    },
-    disabled: {
-      color: 'rgba(0, 0, 0, 0.3)',
-    },
-  },
   noPadding: {
     padding: 0,
   },
@@ -174,9 +163,6 @@ const style = {
   },
   toggle: {
     width: '35%',
-  },
-  togglePadding: {
-
   },
   historyDialogTable: {
     paddingLeft: '10px',
@@ -663,10 +649,6 @@ export default class Webhook extends Component {
       </Table>
     );
   }
-
-  // renderEditButtons() {
-
-  // }
 
   renderHistoryDialog() {
     return (

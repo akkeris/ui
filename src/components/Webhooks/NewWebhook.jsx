@@ -60,11 +60,6 @@ const style = {
     color: 'red',
     paddingTop: '20px',
   },
-  inactiveInfo: {
-    height: '18px',
-    width: '18px',
-    color: 'rgba(0, 0, 0, 0.3)',
-  },
   eventsInfoButton: {
     icon: {
       height: '18px', width: '18px',
@@ -104,7 +99,14 @@ export default class NewWebhook extends Component {
       case 0:
         return (
           <div>
-            <TextField className="webhook-url" floatingLabelText="URL" type="text" value={this.state.url} onChange={this.handleURLChange} errorText={this.state.errorText} />
+            <TextField
+              className="webhook-url"
+              floatingLabelText="URL"
+              type="text"
+              value={this.state.url}
+              onChange={this.handleURLChange}
+              errorText={this.state.errorText}
+            />
             <p>
               Enter a URL for the new webhook (defaults to http).
             </p>
