@@ -18,8 +18,10 @@ import ConfigIcon from 'material-ui/svg-icons/image/tune';
 import AppIcon from 'material-ui/svg-icons/action/exit-to-app';
 import ReleaseIcon from 'material-ui/svg-icons/file/cloud';
 import GitIcon from '../../components/Icons/GitIcon';
+import WebhookIcon from '../../components/Icons/WebhookIcon';
 
 import Formations from '../../components/Formations';
+import Webhooks from '../../components/Webhooks';
 import Releases from '../../components/Releases';
 import Config from '../../components/ConfigVars';
 import Metrics from '../../components/Metrics';
@@ -80,6 +82,7 @@ export default class AppInfo extends Component {
       configActive: false,
       logsActive: false,
       metricsActive: false,
+      webhooksActive: false,
     };
   }
 
@@ -124,6 +127,7 @@ export default class AppInfo extends Component {
       configActive: false,
       logsActive: false,
       metricsActive: false,
+      webhooksActive: false,
     });
   }
   dynosTabActive = () => {
@@ -134,6 +138,7 @@ export default class AppInfo extends Component {
       configActive: false,
       logsActive: false,
       metricsActive: false,
+      webhooksActive: false,
     });
   }
   releasesTabActive = () => {
@@ -144,6 +149,7 @@ export default class AppInfo extends Component {
       configActive: false,
       logsActive: false,
       metricsActive: false,
+      webhooksActive: false,
     });
   }
   addonsTabActive = () => {
@@ -154,6 +160,18 @@ export default class AppInfo extends Component {
       configActive: false,
       logsActive: false,
       metricsActive: false,
+      webhooksActive: false,
+    });
+  }
+  webhooksTabActive = () => {
+    this.setState({
+      dynosActive: false,
+      releasesActive: false,
+      addonsActive: false,
+      configActive: false,
+      logsActive: false,
+      metricsActive: false,
+      webhooksActive: true,
     });
   }
   configTabActive = () => {
@@ -164,6 +182,7 @@ export default class AppInfo extends Component {
       configActive: true,
       logsActive: false,
       metricsActive: false,
+      webhooksActive: false,
     });
   }
   metricsTabActive = () => {
@@ -174,6 +193,7 @@ export default class AppInfo extends Component {
       configActive: false,
       logsActive: false,
       metricsActive: true,
+      webhooksActive: false,
     });
   }
   logsTabActive = () => {
@@ -184,6 +204,7 @@ export default class AppInfo extends Component {
       configActive: false,
       logsActive: true,
       metricsActive: false,
+      webhooksActive: false,
     });
   }
 
@@ -285,6 +306,18 @@ export default class AppInfo extends Component {
                   active={this.state.addonsActive}
                 />
               </Tab>
+              <Tab
+                className="webhooks-tab"
+                icon={<WebhookIcon />}
+                label="Webhooks"
+                onActive={this.webhooksTabActive}
+              >
+                <Webhooks
+                  app={this.state.app.name}
+                  active={this.state.webhooksActive}
+                />
+              </Tab>
+
               <Tab
                 className="config-tab"
                 icon={<ConfigIcon />}

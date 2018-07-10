@@ -52,6 +52,15 @@ function createFormation(app, size, quantity, type, port, command) {
   });
 }
 
+function createWebHook(app, url, events, secret) {
+  return axios.post(`/api/apps/${app}/hooks`, {
+    url,
+    events,
+    active: true,
+    secret,
+  });
+}
+
 function deleteFormation(app, formation) {
   return axios.delete(`/api/apps/${app}/formation/${formation}`);
 }
@@ -66,6 +75,18 @@ function patchFormation(app, type, size, quantity, command, port, healthcheck, r
     healthcheck,
     removeHealthcheck,
   }]);
+}
+
+function patchWebhook(app, id, url, events, secret, active) {
+  return axios.patch(`/api/apps/${app}/hooks/${id}`, {
+    url,
+    events,
+    secret,
+    active,
+  });
+}
+function getWebhookResults(app, id) {
+  return axios.get(`/api/apps/${app}/hooks/${id}/results`);
 }
 
 function restartFormation(app, type) {
@@ -95,6 +116,10 @@ function createSpace(space, description, compliance, stack) {
 
 function getAppAddons(app) {
   return axios.get(`/api/apps/${app}/addons`);
+}
+
+function getAppWebhooks(app) {
+  return axios.get(`/api/apps/${app}/hooks`);
 }
 
 function getAddonServices() {
@@ -127,6 +152,10 @@ function deleteAddonAttachment(app, attachment) {
 }
 function deleteAddon(app, addon) {
   return axios.delete(`/api/apps/${app}/addons/${addon}`);
+}
+
+function deleteWebhook(app, webhookId) {
+  return axios.delete(`/api/apps/${app}/hooks/${webhookId}`);
 }
 
 function getBuilds(app) {
@@ -360,7 +389,10 @@ export default {
   getFormationSizes,
   getDynos,
   getAppAddons,
+  getAppWebhooks,
+  patchWebhook,
   deleteAddon,
+  deleteWebhook,
   getBuilds,
   getConfig,
   getLogs,
@@ -408,4 +440,6 @@ export default {
   getStacks,
   getRegions,
   getAudits,
+  createWebHook,
+  getWebhookResults,
 };
