@@ -337,7 +337,6 @@ export default class AppSetups extends Component {
       return (
         <MuiThemeProvider muiTheme={muiTheme}>
           <div>
-            <h3>Testing</h3>
             <Paper style={style.paper}>
               <List style={{ padding: '5em' }}>
                 <ListItem
