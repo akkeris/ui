@@ -103,15 +103,12 @@ const style = {
 
 export default class AppSetups extends Component {
   constructor(props, context) {
-    const params = new URLSearchParams(window.location.search);
-    const blueprint = JSON.parse(params.get('blueprint'));
-    blueprint.app.name = '';
     super(props, context);
     this.state = {
       appInfo: null,
       loading: true,
       progress: 0,
-      blueprint,
+      blueprint: null,
       panel: 'form',
       orgs: null,
       spaces: null,
@@ -123,6 +120,16 @@ export default class AppSetups extends Component {
   }
 
   componentDidMount() {
+    const params = new URLSearchParams(window.location.search);
+    let blueprint = '';
+    try {
+      blueprint = JSON.parse(params.get('blueprint'));
+      blueprint.app.name = '';
+    } catch (error) {
+      this.state = { panel: 'error', error: 'Blueprint Parsing Error - Check your JSON syntax!' };
+    }
+    this.setState({ blueprint }); // eslint-disable-line react/no-did-mount-set-state
+
     api.getOrgs().then((orgResp) => {
       api.getSpaces().then((spaceResp) => {
         this.setState({
@@ -341,14 +348,14 @@ export default class AppSetups extends Component {
                 />
                 {
                   isConfiguring ?
-                  (
-                    <ListItem
-                      disabled
-                      innerDivStyle={{ paddingTop: '0px' }}
-                    >
-                      <LinearProgress mode="determinate" value={this.state.progress} />
-                    </ListItem>
-                  ) : null
+                    (
+                      <ListItem
+                        disabled
+                        innerDivStyle={{ paddingTop: '0px' }}
+                      >
+                        <LinearProgress mode="determinate" value={this.state.progress} />
+                      </ListItem>
+                    ) : null
                 }
                 <Divider inset style={style.divider} />
                 <ListItem
@@ -358,14 +365,14 @@ export default class AppSetups extends Component {
                 />
                 {
                   isBuilding ?
-                  (
-                    <ListItem
-                      disabled
-                      innerDivStyle={{ paddingTop: '0px' }}
-                    >
-                      <pre style={style.logs}><code>{this.state.logs}</code></pre>
-                    </ListItem>
-                  ) : null
+                    (
+                      <ListItem
+                        disabled
+                        innerDivStyle={{ paddingTop: '0px' }}
+                      >
+                        <pre style={style.logs}><code>{this.state.logs}</code></pre>
+                      </ListItem>
+                    ) : null
                 }
                 <Divider inset style={style.divider} />
                 <ListItem
@@ -381,23 +388,23 @@ export default class AppSetups extends Component {
                 />
                 {
                   (this.state.panel === 'ready' || this.state.panel === 'done') ?
-                  ([<Divider key="done1" inset style={style.divider} />,
-                    <ListItem
-                      key="done2"
-                      disabled
-                      primaryText="Your app was successfully deployed."
-                      innerDivStyle={{
-textAlign: 'center', paddingTop: '2em', fontWeight: '500', color: '#666',
-}}
-                    />,
-                    <ListItem
-                      key="done3"
-                      disabled
-                      innerDivStyle={{ textAlign: 'center' }}
-                    >
-                      {buttons}
-                    </ListItem>]
-                  ) : null }
+                    ([<Divider key="done1" inset style={style.divider} />,
+                      <ListItem
+                        key="done2"
+                        disabled
+                        primaryText="Your app was successfully deployed."
+                        innerDivStyle={{
+                          textAlign: 'center', paddingTop: '2em', fontWeight: '500', color: '#666',
+                        }}
+                      />,
+                      <ListItem
+                        key="done3"
+                        disabled
+                        innerDivStyle={{ textAlign: 'center' }}
+                      >
+                        {buttons}
+                      </ListItem>]
+                    ) : null }
               </List>
             </Paper>
           </div>
