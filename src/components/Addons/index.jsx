@@ -81,7 +81,7 @@ export default class Addons extends Component {
     };
   }
 
-  async componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (nextProps.active) {
       Promise.all([
         api.getAppAddons(this.props.app),
