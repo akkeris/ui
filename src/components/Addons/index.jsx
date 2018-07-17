@@ -12,6 +12,7 @@ import AttachIcon from 'material-ui/svg-icons/communication/call-merge';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
+import RaisedButton from 'material-ui/RaisedButton';
 
 import api from '../../services/api';
 import NewAddon from './NewAddon';
@@ -73,10 +74,14 @@ export default class Addons extends Component {
       submitMessage: '',
       attach: false,
       addonAttachments: [],
+      addonsLoaded: false,
+      attachmentsLoaded: false,
+      currentAddon: {},
+      addonDialogOpen: false,
     };
   }
 
-  componentWillReceiveProps(nextProps) {
+  async componentWillReceiveProps(nextProps) {
     if (nextProps.active) {
       Promise.all([
         api.getAppAddons(this.props.app),
@@ -86,6 +91,26 @@ export default class Addons extends Component {
           addons: r1.data,
           addonAttachments: r2.data,
           loading: false,
+        });
+
+        const addons = this.state.addons;
+        addons.forEach((addon, index) => {
+          api.getAppsAttachedToAddon(this.props.app, addon.id).then((res) => {
+            addons[index].attached_to = res.data.attached_to;
+            if (addons.every(a => (a.attached_to))) {
+              this.setState({ addons, addonsLoaded: true });
+            }
+          });
+        });
+
+        const addonAttachments = this.state.addonAttachments;
+        addonAttachments.forEach((attachment, index) => {
+          api.getAppsAttachedToAddon(this.props.app, attachment.addon.id).then((res) => {
+            addonAttachments[index].attached_to = res.data.attached_to;
+            if (addonAttachments.every(a => (a.attached_to))) {
+              this.setState({ addonAttachments, attachmentsLoaded: true });
+            }
+          });
         });
       });
     }
@@ -97,9 +122,29 @@ export default class Addons extends Component {
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
           <div style={style.tableRowColumn.sub}>{addon.id}</div>
+          <Dialog
+            title="Addon Information"
+            actions={
+              <FlatButton
+                className="ok"
+                label="Ok"
+                primary
+                onTouchTap={this.handleAddonDialogClose}
+              />}
+            open={this.state.addonDialogOpen}
+          >
+            { this.state.addonsLoaded && (JSON.stringify(this.state.currentAddon.attached_to, null, 2)) }
+          </Dialog>
         </TableRowColumn>
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
+        </TableRowColumn>
+        <TableRowColumn>
+          <RaisedButton
+            label="Open"
+            primary
+            onClick={() => { this.setState({ currentAddon: addon, addonDialogOpen: true }); }}
+          />
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
@@ -118,6 +163,7 @@ export default class Addons extends Component {
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
+          {this.state.attachmentsLoaded && (<div style={style.tableRowColumn.sub}>{JSON.stringify(attachment.attached_to)}</div>)}
         </TableRowColumn>
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{attachment.addon.plan.name}</div>
@@ -134,6 +180,10 @@ export default class Addons extends Component {
         </TableRowColumn>
       </TableRow>
     ));
+  }
+
+  handleAddonDialogClose = () => {
+    this.setState({ currentAddon: {}, addonDialogOpen: false });
   }
 
   handleNewAddon = () => {
@@ -292,6 +342,7 @@ export default class Addons extends Component {
               <TableRow>
                 <TableHeaderColumn>Addon</TableHeaderColumn>
                 <TableHeaderColumn>Plan</TableHeaderColumn>
+                <TableHeaderColumn>Attached To</TableHeaderColumn>
                 <TableHeaderColumn style={style.tableRowColumn.icon}>Remove</TableHeaderColumn>
               </TableRow>
             </TableHeader>
@@ -347,4 +398,3 @@ Addons.propTypes = {
   app: PropTypes.string.isRequired,
   active: PropTypes.bool.isRequired,
 };
-

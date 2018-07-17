@@ -118,6 +118,11 @@ function getAppAddons(app) {
   return axios.get(`/api/apps/${app}/addons`);
 }
 
+function getAppsAttachedToAddon(app, addon) {
+  console.log(`GET /api/apps/${app}/addons/${addon}`);
+  return axios.get(`/api/apps/${app}/addons/${addon}`);
+}
+
 function getAppWebhooks(app) {
   return axios.get(`/api/apps/${app}/hooks`);
 }
@@ -442,4 +447,5 @@ export default {
   getAudits,
   createWebHook,
   getWebhookResults,
+  getAppsAttachedToAddon,
 };
