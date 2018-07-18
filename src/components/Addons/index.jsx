@@ -13,8 +13,6 @@ import AttachIcon from 'material-ui/svg-icons/communication/call-merge';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-// import RaisedButton from 'material-ui/RaisedButton';
-import AttachedIcon from 'material-ui/svg-icons/editor/attach-file';
 
 import api from '../../services/api';
 import NewAddon from './NewAddon';
@@ -120,35 +118,18 @@ export default class Addons extends Component {
 
   getAddons() {
     return this.state.addons.map(addon => (
-      <TableRow className={addon.addon_service.name} key={addon.id} style={style.tableRow}>
+      <TableRow
+        className={addon.addon_service.name}
+        key={addon.id}
+        style={style.tableRow}
+        onTouchTap={() => { this.setState({ currentAddon: addon, addonDialogOpen: true }); }}
+      >
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
           <div style={style.tableRowColumn.sub}>{addon.id}</div>
-          <Dialog
-            title="Attached Addons"
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onTouchTap={this.handleAddonDialogClose}
-              />}
-            open={this.state.addonDialogOpen}
-          >
-            {this.state.addonDialogOpen && (
-              this.state.currentAddon.attached_to.map(attachment => this.formatAttachment(attachment))
-            )}
-          </Dialog>
         </TableRowColumn>
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
-        </TableRowColumn>
-        <TableRowColumn>
-          <AttachedIcon
-            label="Open"
-            primary
-            onClick={() => { this.setState({ currentAddon: addon, addonDialogOpen: true }); }}
-          />
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
@@ -163,12 +144,15 @@ export default class Addons extends Component {
 
   getAddonAttachments() {
     return this.state.addonAttachments.map(attachment => (
-      <TableRow className={attachment.name} key={attachment.id} style={style.tableRow}>
+      <TableRow
+        className={attachment.name}
+        key={attachment.id}
+        style={style.tableRow}
+        onTouchTap={() => { this.setState({ currentAddon: attachment, addonDialogOpen: true }); }}
+      >
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
-          {this.state.attachmentsLoaded && (<div style={style.tableRowColumn.sub}>
-            {JSON.stringify(attachment.attached_to)}</div>)}
         </TableRowColumn>
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{attachment.addon.plan.name}</div>
@@ -187,17 +171,36 @@ export default class Addons extends Component {
     ));
   }
 
-  formatAttachment(attachment) {
+  getDialogTitle() {
+    if (this.state.addonsLoaded && this.state.currentAddon) {
+      const currentAddon = this.state.currentAddon;
+      return `Apps Attached To: ${(
+        currentAddon.addon_service ? (currentAddon.addon_service.name) : (currentAddon.name)
+      )} ${(
+        currentAddon.addon_service ? (`(${currentAddon.name})`) : ''
+      )}`;
+    }
+    return '';
+  }
+
+  formatAttachment(attachment) { // eslint-disable-line class-methods-use-this
     return (
-      <div>
-        <div>{attachment.name} {attachment.owner && (<span style={{ color: lightBaseTheme.palette.primary1Color }}>Owner</span>)}</div>
-        <div>{attachment.id}</div>
-      </div>
+      <TableRow style={style.tableRow} id={attachment.id}>
+        <TableRowColumn>
+          <div style={style.tableRowColumn.title}>{attachment.name}</div>
+          <div style={style.tableRowColumn.sub}>{attachment.id}</div>
+        </TableRowColumn>
+        <TableRowColumn>
+          {attachment.owner && (
+            <div style={{ color: lightBaseTheme.palette.accent1Color }}>Owner</div>
+          )}
+        </TableRowColumn>
+      </TableRow>
     );
   }
 
   handleAddonDialogClose = () => {
-    this.setState({ currentAddon: {}, addonDialogOpen: false });
+    this.setState({ addonDialogOpen: false, currentAddon: {} });
   }
 
   handleNewAddon = () => {
@@ -356,7 +359,6 @@ export default class Addons extends Component {
               <TableRow>
                 <TableHeaderColumn>Addon</TableHeaderColumn>
                 <TableHeaderColumn>Plan</TableHeaderColumn>
-                <TableHeaderColumn>Attached To</TableHeaderColumn>
                 <TableHeaderColumn style={style.tableRowColumn.icon}>Remove</TableHeaderColumn>
               </TableRow>
             </TableHeader>
@@ -379,6 +381,33 @@ export default class Addons extends Component {
               </TableBody>
             </Table>
           )}
+          <Dialog
+            title={this.getDialogTitle()}
+            actions={
+              <FlatButton
+                className="ok"
+                label="Ok"
+                primary
+                onTouchTap={this.handleAddonDialogClose}
+              />}
+            open={this.state.addonDialogOpen}
+          >
+            {this.state.addonDialogOpen && (
+              <Table>
+                <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+                  <TableRow>
+                    <TableHeaderColumn>App</TableHeaderColumn>
+                    <TableHeaderColumn>Ownership</TableHeaderColumn>
+                  </TableRow>
+                </TableHeader>
+                <TableBody displayRowCheckbox={false} selectable={false}>
+                  {this.state.currentAddon.attached_to.map(attachment =>
+                    this.formatAttachment(attachment),
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </Dialog>
           <ConfirmationModal className="remove-addon-confirm" open={this.state.confirmAddonOpen} onOk={this.handleRemoveAddon} onCancel={this.handleCancelAddonConfirmation} message="Are you sure you want to delete this addon?" />
           <ConfirmationModal className="remove-attachment-confirm" open={this.state.confirmAttachmentOpen} onOk={this.handleRemoveAddonAttachment} onCancel={this.handleCancelAddonAttachmentConfirmation} message="Are you sure you want to delete this attachment?" />
           <Dialog
