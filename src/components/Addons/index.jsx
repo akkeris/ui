@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
 import IconButton from 'material-ui/IconButton';
 import Snackbar from 'material-ui/Snackbar';
@@ -12,7 +13,8 @@ import AttachIcon from 'material-ui/svg-icons/communication/call-merge';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import RaisedButton from 'material-ui/RaisedButton';
+// import RaisedButton from 'material-ui/RaisedButton';
+import AttachedIcon from 'material-ui/svg-icons/editor/attach-file';
 
 import api from '../../services/api';
 import NewAddon from './NewAddon';
@@ -123,7 +125,7 @@ export default class Addons extends Component {
           <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
           <div style={style.tableRowColumn.sub}>{addon.id}</div>
           <Dialog
-            title="Addon Information"
+            title="Attached Addons"
             actions={
               <FlatButton
                 className="ok"
@@ -133,14 +135,16 @@ export default class Addons extends Component {
               />}
             open={this.state.addonDialogOpen}
           >
-            { this.state.addonsLoaded && (JSON.stringify(this.state.currentAddon.attached_to, null, 2)) }
+            {this.state.addonDialogOpen && (
+              this.state.currentAddon.attached_to.map(attachment => this.formatAttachment(attachment))
+            )}
           </Dialog>
         </TableRowColumn>
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
         </TableRowColumn>
         <TableRowColumn>
-          <RaisedButton
+          <AttachedIcon
             label="Open"
             primary
             onClick={() => { this.setState({ currentAddon: addon, addonDialogOpen: true }); }}
@@ -163,7 +167,8 @@ export default class Addons extends Component {
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
-          {this.state.attachmentsLoaded && (<div style={style.tableRowColumn.sub}>{JSON.stringify(attachment.attached_to)}</div>)}
+          {this.state.attachmentsLoaded && (<div style={style.tableRowColumn.sub}>
+            {JSON.stringify(attachment.attached_to)}</div>)}
         </TableRowColumn>
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{attachment.addon.plan.name}</div>
@@ -180,6 +185,15 @@ export default class Addons extends Component {
         </TableRowColumn>
       </TableRow>
     ));
+  }
+
+  formatAttachment(attachment) {
+    return (
+      <div>
+        <div>{attachment.name} {attachment.owner && (<span style={{ color: lightBaseTheme.palette.primary1Color }}>Owner</span>)}</div>
+        <div>{attachment.id}</div>
+      </div>
+    );
   }
 
   handleAddonDialogClose = () => {
