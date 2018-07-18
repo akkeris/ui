@@ -119,7 +119,6 @@ function getAppAddons(app) {
 }
 
 function getAppsAttachedToAddon(app, addon) {
-  console.log(`GET /api/apps/${app}/addons/${addon}`);
   return axios.get(`/api/apps/${app}/addons/${addon}`);
 }
 

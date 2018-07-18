@@ -185,7 +185,7 @@ export default class Addons extends Component {
 
   formatAttachment(attachment) { // eslint-disable-line class-methods-use-this
     return (
-      <TableRow style={style.tableRow} id={attachment.id}>
+      <TableRow style={style.tableRow} key={attachment.id}>
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
