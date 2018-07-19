@@ -27,6 +27,10 @@ const style = {
   tableRow: {
     height: '58px',
   },
+  tableRowPointer: {
+    height: '58px',
+    cursor: 'pointer',
+  },
   tableRowColumn: {
     title: {
       fontSize: '16px',
@@ -121,7 +125,7 @@ export default class Addons extends Component {
       <TableRow
         className={addon.addon_service.name}
         key={addon.id}
-        style={style.tableRow}
+        style={style.tableRowPointer}
         onTouchTap={() => { this.setState({ currentAddon: addon, addonDialogOpen: true }); }}
       >
         <TableRowColumn>
@@ -147,7 +151,7 @@ export default class Addons extends Component {
       <TableRow
         className={attachment.name}
         key={attachment.id}
-        style={style.tableRow}
+        style={style.tableRowPointer}
         onTouchTap={() => { this.setState({ currentAddon: attachment, addonDialogOpen: true }); }}
       >
         <TableRowColumn>
@@ -174,18 +178,24 @@ export default class Addons extends Component {
   getDialogTitle() {
     if (this.state.addonsLoaded && this.state.currentAddon) {
       const currentAddon = this.state.currentAddon;
-      return `Apps Attached To: ${(
-        currentAddon.addon_service ? (currentAddon.addon_service.name) : (currentAddon.name)
-      )} ${(
-        currentAddon.addon_service ? (`(${currentAddon.name})`) : ''
-      )}`;
+      return (
+        <div>
+          <span>Attached Apps</span>
+          <br />
+          <span style={{ fontSize: '18px' }}>{
+            currentAddon.addon_service ? (currentAddon.addon_service.name) : (currentAddon.name)
+          } {
+            currentAddon.addon_service ? (`(${currentAddon.name})`) : ''
+          }</span>
+        </div>
+      );
     }
     return '';
   }
 
   formatAttachment(attachment) { // eslint-disable-line class-methods-use-this
     return (
-      <TableRow style={style.tableRow} key={attachment.id}>
+      <TableRow style={style.tableRow} key={attachment.id} selectable={false}>
         <TableRowColumn>
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
