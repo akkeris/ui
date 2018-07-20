@@ -24,6 +24,9 @@ const muiTheme = getMuiTheme({
 });
 
 const style = {
+  addonDialog: {
+    width: '35%',
+  },
   tableRow: {
     height: '58px',
   },
@@ -196,7 +199,7 @@ export default class Addons extends Component {
   formatAttachment(attachment) { // eslint-disable-line class-methods-use-this
     return (
       <TableRow style={style.tableRow} key={attachment.id} selectable={false}>
-        <TableRowColumn>
+        <TableRowColumn colSpan="2">
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
         </TableRowColumn>
@@ -393,6 +396,9 @@ export default class Addons extends Component {
           )}
           <Dialog
             title={this.getDialogTitle()}
+            overlayStyle={{ backgroundColor: 'null' }}
+            onRequestClose={this.handleAddonDialogClose}
+            contentStyle={style.addonDialog}
             actions={
               <FlatButton
                 className="ok"
@@ -406,7 +412,7 @@ export default class Addons extends Component {
               <Table>
                 <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
                   <TableRow>
-                    <TableHeaderColumn>App</TableHeaderColumn>
+                    <TableHeaderColumn colSpan="2">App</TableHeaderColumn>
                     <TableHeaderColumn>Ownership</TableHeaderColumn>
                   </TableRow>
                 </TableHeader>
