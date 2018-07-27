@@ -480,7 +480,7 @@ test // eslint-disable-line no-undef
       .ok()
       .expect(Selector('.attachment-0 .attachment-owner').innerText)
       .contains('Owner')
-      .click('.ok button')
+      .click('.ok')
 
     // Attach Addon from app 2
       .navigateTo(`${baseUrl}/#/apps`)
@@ -506,7 +506,7 @@ test // eslint-disable-line no-undef
       .ok()
       .expect(Selector('.attachment-1 .attachment-owner').innerText)
       .contains('Owner')
-      .click('.ok button')
+      .click('.ok')
 
     // Test Dupes
       .click('button.attach-addon')
@@ -540,7 +540,7 @@ test // eslint-disable-line no-undef
       .click('.delete button')
 
     // confirm delete and make sure app no longer exists
-      .click('.delete-confirm button.ok')
+      .click('.delete-confirm .ok')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .notOk()
 
