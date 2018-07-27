@@ -99,26 +99,7 @@ export default class Addons extends Component {
           addonAttachments: r2.data,
           loading: false,
         });
-
-        const addons = this.state.addons;
-        addons.forEach((addon, index) => {
-          api.getAppsAttachedToAddon(this.props.app, addon.id).then((res) => {
-            addons[index].attached_to = res.data.attached_to;
-            if (addons.every(a => (a.attached_to))) {
-              this.setState({ addons, addonsLoaded: true });
-            }
-          });
-        });
-
-        const addonAttachments = this.state.addonAttachments;
-        addonAttachments.forEach((attachment, index) => {
-          api.getAppsAttachedToAddon(this.props.app, attachment.addon.id).then((res) => {
-            addonAttachments[index].attached_to = res.data.attached_to;
-            if (addonAttachments.every(a => (a.attached_to))) {
-              this.setState({ addonAttachments, attachmentsLoaded: true });
-            }
-          });
-        });
+        this.getAppsAttachedToAddon();
       });
     }
   }
@@ -129,13 +110,16 @@ export default class Addons extends Component {
         className={addon.addon_service.name}
         key={addon.id}
         style={style.tableRowPointer}
-        onTouchTap={() => { this.setState({ currentAddon: addon, addonDialogOpen: true }); }}
       >
-        <TableRowColumn>
+        <TableRowColumn
+          onTouchTap={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
+        >
           <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
           <div style={style.tableRowColumn.sub}>{addon.id}</div>
         </TableRowColumn>
-        <TableRowColumn>
+        <TableRowColumn
+          onTouchTap={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
+        >
           <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
@@ -155,16 +139,21 @@ export default class Addons extends Component {
         className={`${attachment.name} addon-attachment-list-${index}`}
         key={attachment.id}
         style={style.tableRowPointer}
-        onTouchTap={() => { this.setState({ currentAddon: attachment, addonDialogOpen: true }); }}
       >
-        <TableRowColumn>
+        <TableRowColumn
+          onTouchTap={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+        >
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
         </TableRowColumn>
-        <TableRowColumn>
+        <TableRowColumn
+          onTouchTap={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+        >
           <div style={style.tableRowColumn.title}>{attachment.addon.plan.name}</div>
         </TableRowColumn>
-        <TableRowColumn>
+        <TableRowColumn
+          onTouchTap={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+        >
           <div style={style.tableRowColumn.title}>{attachment.addon.app.name}</div>
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
@@ -194,6 +183,28 @@ export default class Addons extends Component {
       );
     }
     return '';
+  }
+
+  getAppsAttachedToAddon() {
+    const addons = this.state.addons;
+    addons.forEach((addon, index) => {
+      api.getAppsAttachedToAddon(this.props.app, addon.id).then((res) => {
+        addons[index].attached_to = res.data.attached_to;
+        if (addons.every(a => (a.attached_to))) {
+          this.setState({ addons, addonsLoaded: true });
+        }
+      });
+    });
+
+    const addonAttachments = this.state.addonAttachments;
+    addonAttachments.forEach((attachment, index) => {
+      api.getAppsAttachedToAddon(this.props.app, attachment.addon.id).then((res) => {
+        addonAttachments[index].attached_to = res.data.attached_to;
+        if (addonAttachments.every(a => (a.attached_to))) {
+          this.setState({ addonAttachments, attachmentsLoaded: true });
+        }
+      });
+    });
   }
 
   formatAttachment(attachment, index) { // eslint-disable-line class-methods-use-this
@@ -319,6 +330,7 @@ export default class Addons extends Component {
         confirmAttachmentOpen: false,
         attach: false,
       });
+      this.getAppsAttachedToAddon();
     });
   }
 
