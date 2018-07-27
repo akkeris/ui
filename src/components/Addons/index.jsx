@@ -150,9 +150,9 @@ export default class Addons extends Component {
   }
 
   getAddonAttachments() {
-    return this.state.addonAttachments.map(attachment => (
+    return this.state.addonAttachments.map((attachment, index) => (
       <TableRow
-        className={attachment.name}
+        className={`${attachment.name} addon-attachment-list-${index}`}
         key={attachment.id}
         style={style.tableRowPointer}
         onTouchTap={() => { this.setState({ currentAddon: attachment, addonDialogOpen: true }); }}
@@ -185,7 +185,7 @@ export default class Addons extends Component {
         <div>
           <span>Attached Apps</span>
           <br />
-          <span style={{ fontSize: '18px' }}>{
+          <span className="addon-name" style={{ fontSize: '18px' }}>{
             currentAddon.addon_service ? (currentAddon.addon_service.name) : (currentAddon.name)
           } {
             currentAddon.addon_service ? (`(${currentAddon.name})`) : ''
@@ -196,16 +196,16 @@ export default class Addons extends Component {
     return '';
   }
 
-  formatAttachment(attachment) { // eslint-disable-line class-methods-use-this
+  formatAttachment(attachment, index) { // eslint-disable-line class-methods-use-this
     return (
-      <TableRow style={style.tableRow} key={attachment.id} selectable={false}>
+      <TableRow className={`attachment-${index}`} style={style.tableRow} key={attachment.id} selectable={false}>
         <TableRowColumn colSpan="2">
-          <div style={style.tableRowColumn.title}>{attachment.name}</div>
+          <div className="attachment-name" style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
         </TableRowColumn>
         <TableRowColumn>
           {attachment.owner && (
-            <div style={{ color: lightBaseTheme.palette.accent1Color }}>Owner</div>
+            <div className="attachment-owner" style={{ color: lightBaseTheme.palette.accent1Color }}>Owner</div>
           )}
         </TableRowColumn>
       </TableRow>
@@ -395,6 +395,7 @@ export default class Addons extends Component {
             </Table>
           )}
           <Dialog
+            className="attached-apps-dialog"
             title={this.getDialogTitle()}
             overlayStyle={{ backgroundColor: 'null' }}
             onRequestClose={this.handleAddonDialogClose}
@@ -417,8 +418,8 @@ export default class Addons extends Component {
                   </TableRow>
                 </TableHeader>
                 <TableBody displayRowCheckbox={false} selectable={false}>
-                  {this.state.currentAddon.attached_to.map(attachment =>
-                    this.formatAttachment(attachment),
+                  {this.state.currentAddon.attached_to.map((attachment, index) =>
+                    this.formatAttachment(attachment, index),
                   )}
                 </TableBody>
               </Table>

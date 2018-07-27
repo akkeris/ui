@@ -471,6 +471,17 @@ test // eslint-disable-line no-undef
       .expect(Selector('.addon-list .alamo-postgresql').exists)
       .ok()
 
+      .click('.alamo-postgresql')
+      .expect(Selector('.attached-apps-dialog').exists)
+      .ok()
+      .expect(Selector('.addon-name').innerText)
+      .contains('alamo-postgresql')
+      .expect(Selector('.attachment-0').exists)
+      .ok()
+      .expect(Selector('.attachment-0 .attachment-owner').innerText)
+      .contains('Owner')
+      .click('.ok button')
+
     // Attach Addon from app 2
       .navigateTo(`${baseUrl}/#/apps`)
       .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
@@ -485,6 +496,17 @@ test // eslint-disable-line no-undef
       .contains('Addon Attached')
       .expect(Selector('.addon-attachment-list').childElementCount)
       .gt(0)
+
+      .click('.addon-attachment-list-0')
+      .expect(Selector('.attached-apps-dialog').exists)
+      .ok()
+      .expect(Selector('.attachment-0').exists)
+      .ok()
+      .expect(Selector('.attachment-1').exists)
+      .ok()
+      .expect(Selector('.attachment-1 .attachment-owner').innerText)
+      .contains('Owner')
+      .click('.ok button')
 
     // Test Dupes
       .click('button.attach-addon')
