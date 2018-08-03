@@ -72,9 +72,11 @@ function examinSavings(metrics, formations, addons, sizes) {
         const memorySamples = Object.values(metrics[formation.type].memory_usage_bytes);
         const memoryExceeds60Percent = memorySamples.filter(z => z > (limit * 1024 * 1024));
         if (memoryExceeds60Percent.length / memorySamples.length < 0.5) {
-          savings.push((
-            <li key={`savings_mem${index}`} className="recommendation">Changing your dyno size to {previousSize.resources.limits.memory.replace(/Mi/g, '')}MB ({previousSize.name}) (on dyno {formation.type}) will save you ${(size.price - previousSize.price) * formation.quantity}.00 a month.</li>
-          ));
+          if (((size.price - previousSize.price) * formation.quantity) > 0) {
+            savings.push((
+              <li key={`savings_mem${index}`} className="recommendation">Changing your dyno size to {previousSize.resources.limits.memory.replace(/Mi/g, '')}MB ({previousSize.name}) (on dyno {formation.type}) will save you ${(size.price - previousSize.price) * formation.quantity}.00 a month.</li>
+            ));
+          }
         }
       }
     }
