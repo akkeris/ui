@@ -82,6 +82,7 @@ export default class Apps extends Component {
       region: 'all',
       apps: [],
       filteredApps: [],
+      filteredSpaces: [],
       spaces: [],
       regions: [],
       loading: true,
@@ -92,6 +93,7 @@ export default class Apps extends Component {
     api.getSpaces().then((response) => {
       this.setState({
         spaces: response.data,
+        filteredSpaces: response.data,
       });
     });
     api.getRegions().then((response) => {
@@ -113,7 +115,7 @@ export default class Apps extends Component {
   }
 
   getSpaces() {
-    return this.state.spaces.map(space => (
+    return this.state.filteredSpaces.map(space => (
       <MenuItem className={space.name} key={space.id} value={space.name} label={`Space: ${space.name}`} primaryText={space.name} />
     ));
   }
@@ -138,7 +140,16 @@ export default class Apps extends Component {
   }
 
   handleRegionChange = (event, index, value) => {
-    this.setState({ region: value });
+    const region = value;
+    const apps = util.filterAppsByRegion(this.state.apps, region);
+    const spaces = util.filterSpacesByRegion(this.state.spaces, region);
+
+    this.setState({
+      space: 'all',
+      region: value,
+      filteredApps: apps,
+      filteredSpaces: spaces,
+    });
   }
 
   render() {
