@@ -106,7 +106,7 @@ export default class ConfigVar extends Component {
     ));
   }
 
-  handleDialogClose= () => {
+  handleDialogClose = () => {
     this.setState({ submitFail: false });
   }
 
