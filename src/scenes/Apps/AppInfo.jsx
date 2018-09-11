@@ -104,6 +104,26 @@ export default class AppInfo extends Component {
     });
   }
 
+  componentDidUpdate(prevProps) {
+    // If we changed locations AND it was a 'pop' history event (back or forward button)
+    if (prevProps.location.pathname !== this.props.location.pathname && this.props.history.action === 'POP') {
+      // If we went from '.../app/info' to '/app' hit back again
+      if (prevProps.location.pathname.includes('/info') && !this.props.location.pathname.includes('/info')) {
+        window.history.back();
+      }
+      const hashPath = window.location.hash;
+      if (hashPath.includes(this.state.baseHash)) {
+        let currentTab = hashPath.replace(this.state.baseHash, '');
+        if (!tabs.includes(currentTab)) {
+          currentTab = 'info';
+          window.location.hash = `${this.state.baseHash}info`;
+        }
+        // Since we check conditions before setState we avoid infinite loops
+        this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
+      }
+    }
+  }
+
   handleClose = () => {
     this.setState({ submitFail: false });
   }
@@ -127,7 +147,7 @@ export default class AppInfo extends Component {
     this.setState({
       currentTab: newTab.props.value,
     });
-    window.location.hash = `${this.state.baseHash}${newTab.props.value}`;
+    this.props.history.push(`${newTab.props.value}`);
   }
 
   render() {
@@ -314,4 +334,6 @@ export default class AppInfo extends Component {
 
 AppInfo.propTypes = {
   match: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  location: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
