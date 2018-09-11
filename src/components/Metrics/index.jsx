@@ -110,30 +110,34 @@ export default class Metrics extends Component {
       addons: {},
       sizes: {},
     };
+    if (this.props.active) { this.loadMetrics(); }
   }
 
+  componentDidUpdate(prevProps) {
+    if (!prevProps.active && this.props.active) {
+      this.loadMetrics();
+    } else if (this.props.active !== prevProps.active && !this.props.active) {
+      this.setState({ loading: true, reading: false });
+    }
+  }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.active && !this.state.reading) {
-      api.getFormationSizes().then((sizesResp) => {
-        api.getFormations(this.props.app).then((formationResp) => {
-          api.getMetrics(this.props.app).then((metricResp) => {
-            api.getAppAddons(this.props.app).then((addonResp) => {
-              this.setState({
-                sizes: sizesResp.data,
-                formations: formationResp.data,
-                metrics: metricResp.data,
-                addons: addonResp.data,
-                loading: false,
-                reading: true,
-              });
+  loadMetrics() {
+    api.getFormationSizes().then((sizesResp) => {
+      api.getFormations(this.props.app).then((formationResp) => {
+        api.getMetrics(this.props.app).then((metricResp) => {
+          api.getAppAddons(this.props.app).then((addonResp) => {
+            this.setState({
+              sizes: sizesResp.data,
+              formations: formationResp.data,
+              metrics: metricResp.data,
+              addons: addonResp.data,
+              loading: false,
+              reading: true,
             });
           });
         });
       });
-    } else if (!nextProps.active) {
-      this.setState({ loading: true, reading: false });
-    }
+    });
   }
 
   render() {

@@ -147,10 +147,11 @@ export default class Releases extends Component {
       revertOpen: false,
       newAuto: false,
     };
+    if (this.props.active) { this.loadReleases(); }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.active) {
+  componentDidUpdate(prevProps) {
+    if (!prevProps.active && this.props.active) {
       this.loadReleases();
     }
   }
@@ -199,8 +200,8 @@ export default class Releases extends Component {
           <TableRowColumn style={{ width: '28px', paddingLeft: '24px', paddingRight: '0px' }}>
             <div style={{ position: 'relative', height: '100%' }}>
               {!release.release ? (<BuildIcon style={style.mainIcon} />) : (<ReleaseIcon style={{
-position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
-}}
+                position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
+              }}
               />)}
               <StatusIcon style={statusIconStyle} />
             </div>

@@ -57,33 +57,12 @@ export default class Formations extends Component {
       message: '',
       new: false,
     };
+    if (this.props.active) { this.loadFormations(); }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.active) {
-      Promise.all([
-        api.getFormations(this.props.app),
-        api.getFormationSizes(),
-        api.getDynos(this.props.app),
-      ])
-        .then(([r1, r2, r3]) => {
-          const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
-          const dynos = r3.data;
-          let sizes = [];
-          r2.data.forEach((size) => {
-            if (size.name.indexOf('prod') === -1) {
-              sizes.push(size);
-            }
-          });
-          sizes = sizes.sort((a, b) =>
-            parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10));
-          this.setState({
-            sizes,
-            dynos,
-            formations,
-            loading: false,
-          });
-        });
+  componentDidUpdate(prevProps) {
+    if (!prevProps.active && this.props.active) {
+      this.loadFormations();
     }
   }
 
@@ -110,6 +89,32 @@ export default class Formations extends Component {
         app={this.props.app}
       />
     ));
+  }
+
+  loadFormations() {
+    Promise.all([
+      api.getFormations(this.props.app),
+      api.getFormationSizes(),
+      api.getDynos(this.props.app),
+    ])
+      .then(([r1, r2, r3]) => {
+        const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
+        const dynos = r3.data;
+        let sizes = [];
+        r2.data.forEach((size) => {
+          if (size.name.indexOf('prod') === -1) {
+            sizes.push(size);
+          }
+        });
+        sizes = sizes.sort((a, b) =>
+          parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10));
+        this.setState({
+          sizes,
+          dynos,
+          formations,
+          loading: false,
+        });
+      });
   }
 
   handleError = (message) => {
