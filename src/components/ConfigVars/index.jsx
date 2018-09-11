@@ -66,16 +66,12 @@ export default class ConfigVar extends Component {
       edit: false,
       newValue: null,
     };
+    if (this.props.active) { this.loadConfigVars(); }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.active) {
-      api.getConfig(this.props.app).then((response) => {
-        this.setState({
-          config: response.data,
-          loading: false,
-        });
-      });
+  componentDidUpdate(prevProps) {
+    if (!prevProps.active && this.props.active) {
+      this.loadConfigVars();
     }
   }
 
@@ -104,6 +100,15 @@ export default class ConfigVar extends Component {
         </TableRowColumn>
       </TableRow>
     ));
+  }
+
+  loadConfigVars() {
+    api.getConfig(this.props.app).then((response) => {
+      this.setState({
+        config: response.data,
+        loading: false,
+      });
+    });
   }
 
   handleDialogClose = () => {

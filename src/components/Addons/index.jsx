@@ -86,21 +86,12 @@ export default class Addons extends Component {
       currentAddon: {},
       addonDialogOpen: false,
     };
+    if (this.props.active) { this.loadAddons(); }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.active) {
-      Promise.all([
-        api.getAppAddons(this.props.app),
-        api.getAddonAttachments(this.props.app),
-      ]).then(([r1, r2]) => {
-        this.setState({
-          addons: r1.data,
-          addonAttachments: r2.data,
-          loading: false,
-        });
-        this.getAppsAttachedToAddon();
-      });
+  componentDidUpdate(prevProps) {
+    if (!prevProps.active && this.props.active) {
+      this.loadAddons();
     }
   }
 
@@ -204,6 +195,20 @@ export default class Addons extends Component {
           this.setState({ addonAttachments, attachmentsLoaded: true });
         }
       });
+    });
+  }
+
+  loadAddons() {
+    Promise.all([
+      api.getAppAddons(this.props.app),
+      api.getAddonAttachments(this.props.app),
+    ]).then(([r1, r2]) => {
+      this.setState({
+        addons: r1.data,
+        addonAttachments: r2.data,
+        loading: false,
+      });
+      this.getAppsAttachedToAddon();
     });
   }
 

@@ -41,15 +41,22 @@ export default class Logs extends Component {
       logs: 'Logplex ready, waiting for logs..\n',
       url: '',
     };
+    if (this.props.active) { this.state.loading = true; this.loadLogs('constructor'); }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.active && !this.state.reading) {
-      this.setState({ logs: this.state.logs, loading: true });
-      api.getLogSession(this.props.app).then((response) => {
-        this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(response.data.logplex_url)}` });
-      });
+  componentDidUpdate(prevProps) {
+    if (!prevProps.active && this.props.active && !this.state.reading) {
+      this.loadLogs('update');
     }
+  }
+
+  loadLogs(mode) {
+    if (mode !== 'constructor') {
+      this.setState({ logs: this.state.logs, loading: true });
+    }
+    api.getLogSession(this.props.app).then((response) => {
+      this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(response.data.logplex_url)}` });
+    });
   }
 
   render() {

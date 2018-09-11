@@ -66,6 +66,8 @@ const style = {
   },
 };
 
+const tabs = ['info', 'dynos', 'releases', 'addons', 'config', 'logs', 'metrics', 'webhooks'];
+
 export default class AppInfo extends Component {
   constructor(props) {
     super(props);
@@ -76,18 +78,20 @@ export default class AppInfo extends Component {
       submitFail: false,
       open: false,
       message: '',
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-      webhooksActive: false,
+      currentTab: 'info',
+      baseHash: `#/apps/${this.props.match.params.app}/`,
     };
   }
 
   componentDidMount() {
     api.getApp(this.props.match.params.app).then((response) => {
+      const hashPath = window.location.hash;
+      let currentTab = hashPath.replace(this.state.baseHash, '');
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'info';
+        window.location.hash = `${this.state.baseHash}info`;
+      }
+      this.setState({ currentTab });
       this.setState({
         app: response.data,
         loading: false,
@@ -119,93 +123,11 @@ export default class AppInfo extends Component {
     });
   }
 
-  infoTabActive = () => {
+  changeActiveTab = (newTab) => {
     this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-      webhooksActive: false,
+      currentTab: newTab.props.value,
     });
-  }
-  dynosTabActive = () => {
-    this.setState({
-      dynosActive: true,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-      webhooksActive: false,
-    });
-  }
-  releasesTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: true,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-      webhooksActive: false,
-    });
-  }
-  addonsTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: true,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-      webhooksActive: false,
-    });
-  }
-  webhooksTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-      webhooksActive: true,
-    });
-  }
-  configTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: true,
-      logsActive: false,
-      metricsActive: false,
-      webhooksActive: false,
-    });
-  }
-  metricsTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: true,
-      webhooksActive: false,
-    });
-  }
-  logsTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: true,
-      metricsActive: false,
-      webhooksActive: false,
-    });
+    window.location.hash = `${this.state.baseHash}${newTab.props.value}`;
   }
 
   render() {
@@ -264,12 +186,13 @@ export default class AppInfo extends Component {
               </IconButton>
               {git}
             </CardHeader>
-            <Tabs>
+            <Tabs value={this.state.currentTab}>
               <Tab
                 className="info-tab"
                 icon={<InfoIcon />}
                 label="Info"
-                onActive={this.infoTabActive}
+                onActive={this.changeActiveTab}
+                value="info"
               >
                 <AppOverview app={this.state.app} onComplete={this.reload} />
               </Tab>
@@ -277,66 +200,71 @@ export default class AppInfo extends Component {
                 className="dynos-tab"
                 icon={<CPUIcon />}
                 label="Dynos"
-                onActive={this.dynosTabActive}
+                onActive={this.changeActiveTab}
+                value="dynos"
               >
                 <Formations
                   app={this.state.app.name}
-                  active={this.state.dynosActive}
+                  active={this.state.currentTab === 'dynos'}
                 />
               </Tab>
               <Tab
                 className="releases-tab"
                 icon={<ReleaseIcon />}
                 label="Activity"
-                onActive={this.releasesTabActive}
+                onActive={this.changeActiveTab}
+                value="releases"
               >
                 <Releases
                   app={this.state.app.name}
-                  active={this.state.releasesActive}
+                  active={this.state.currentTab === 'releases'}
                 />
               </Tab>
               <Tab
                 className="addons-tab"
                 icon={<AddonIcon />}
                 label="Addons"
-                onActive={this.addonsTabActive}
+                onActive={this.changeActiveTab}
+                value="addons"
               >
                 <Addons
                   app={this.state.app.name}
-                  active={this.state.addonsActive}
+                  active={this.state.currentTab === 'addons'}
                 />
               </Tab>
               <Tab
                 className="webhooks-tab"
                 icon={<WebhookIcon />}
                 label="Webhooks"
-                onActive={this.webhooksTabActive}
+                onActive={this.changeActiveTab}
+                value="webhooks"
               >
                 <Webhooks
                   app={this.state.app.name}
-                  active={this.state.webhooksActive}
+                  active={this.state.currentTab === 'webhooks'}
                 />
               </Tab>
-
               <Tab
                 className="config-tab"
                 icon={<ConfigIcon />}
                 label="Config"
-                onActive={this.configTabActive}
+                onActive={this.changeActiveTab}
+                value="config"
               >
                 <Config
                   app={this.state.app.name}
-                  active={this.state.configActive}
+                  active={this.state.currentTab === 'config'}
                 />
               </Tab>
               <Tab
                 className="metrics-tab"
                 icon={<MetricIcon />}
                 label="Metrics"
-                onActive={this.metricsTabActive}
+                onActive={this.changeActiveTab}
+                value="metrics"
               >
                 <Metrics
-                  active={this.state.metricsActive}
+                  active={this.state.currentTab === 'metrics'}
                   app={this.state.app.name}
                   appName={this.state.app.simple_name}
                   space={this.state.app.space.name}
@@ -346,10 +274,11 @@ export default class AppInfo extends Component {
                 className="logs-tab"
                 icon={<LogIcon />}
                 label="Logs"
-                onActive={this.logsTabActive}
+                onActive={this.changeActiveTab}
+                value="logs"
               >
                 <Logs
-                  active={this.state.logsActive}
+                  active={this.state.currentTab === 'logs'}
                   app={this.state.app.name}
                   appName={this.state.app.simple_name}
                   space={this.state.app.space.name}
