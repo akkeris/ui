@@ -106,6 +106,10 @@ export default class ConfigVar extends Component {
     ));
   }
 
+  handleDialogClose= () => {
+    this.setState({ submitFail: false });
+  }
+
   handleNewConfig = () => {
     this.setState({ new: true, open: false, message: '' });
   }
