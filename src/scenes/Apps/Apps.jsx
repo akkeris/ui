@@ -127,7 +127,7 @@ export default class Apps extends Component {
   }
 
   handleSearch = (searchText) => {
-    window.location = `#/apps/${searchText}`;
+    window.location = `#/apps/${searchText}/info`;
   }
 
   handleSpaceChange = (event, index, value) => {

@@ -80,8 +80,10 @@ export default class AppInfo extends Component {
       message: '',
       currentTab: 'info',
       baseHash: `#/apps/${this.props.match.params.app}/`,
+      basePath: `/apps/${this.props.match.params.app}`,
     };
   }
+
 
   componentDidMount() {
     api.getApp(this.props.match.params.app).then((response) => {
@@ -106,17 +108,20 @@ export default class AppInfo extends Component {
 
   componentDidUpdate(prevProps) {
     // If we changed locations AND it was a 'pop' history event (back or forward button)
-    if (prevProps.location.pathname !== this.props.location.pathname && this.props.history.action === 'POP') {
-      // If we went from '.../app/info' to '/app' hit back again
-      if (prevProps.location.pathname.includes('/info') && !this.props.location.pathname.includes('/info')) {
+    const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
+    if (routeHasChanged && this.props.history.action === 'POP') {
+      // If hitting back took us to the base path without a tab, hit back again
+      if (this.props.location.pathname === `${this.state.basePath}` ||
+          this.props.location.pathname === `${this.state.basePath}/`) {
         window.history.back();
+        return;
       }
       const hashPath = window.location.hash;
       if (hashPath.includes(this.state.baseHash)) {
         let currentTab = hashPath.replace(this.state.baseHash, '');
         if (!tabs.includes(currentTab)) {
           currentTab = 'info';
-          window.location.hash = `${this.state.baseHash}info`;
+          window.location = `${this.state.baseHash}info`;
         }
         // Since we check conditions before setState we avoid infinite loops
         this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state

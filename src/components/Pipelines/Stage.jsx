@@ -91,27 +91,13 @@ export default class Stage extends Component {
 
   componentDidMount() {
     if (this.props.active) {
-      api.getPipelineCouplings(this.props.pipeline.name).then((response) => {
-        const stageCouplings = util.filterCouplings(response.data, this.props.stage);
-        this.setState({
-          couplings: response.data,
-          stageCouplings,
-          loading: false,
-        });
-      });
+      this.loadPipelineCouplings();
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.active) {
-      api.getPipelineCouplings(this.props.pipeline.name).then((response) => {
-        const stageCouplings = util.filterCouplings(response.data, this.props.stage);
-        this.setState({
-          couplings: response.data,
-          stageCouplings,
-          loading: false,
-        });
-      });
+  componentDidUpdate(prevProps) {
+    if (!prevProps.active && this.props.active) {
+      this.loadPipelineCouplings();
     }
   }
 
@@ -120,6 +106,17 @@ export default class Stage extends Component {
       return util.filterCouplings(this.state.couplings, stages[stages.indexOf(stage) + 1]);
     }
     return null;
+  }
+
+  loadPipelineCouplings() {
+    api.getPipelineCouplings(this.props.pipeline.name).then((response) => {
+      const stageCouplings = util.filterCouplings(response.data, this.props.stage);
+      this.setState({
+        couplings: response.data,
+        stageCouplings,
+        loading: false,
+      });
+    });
   }
 
   handleConfirmation = (coupling) => {
@@ -195,7 +192,7 @@ export default class Stage extends Component {
   }
 
   handleGoToApp = (app) => {
-    window.location = `#/apps/${app}`;
+    window.location = `#/apps/${app}/info`;
   }
 
   handleNewCouplingCancel = () => {
@@ -238,7 +235,7 @@ export default class Stage extends Component {
       return (
         <TableRow className={coupling.app.name} key={coupling.id} style={style.tableRow}>
           <TableRowColumn>
-            <div style={style.tableRowColumn.title}><a style={style.link} href={`#/apps/${coupling.app.name}`}>{coupling.app.name}</a></div>
+            <div style={style.tableRowColumn.title}><a style={style.link} href={`#/apps/${coupling.app.name}/info`}>{coupling.app.name}</a></div>
             <div style={style.tableRowColumn.sub}>id: {coupling.id}</div>
             {coupling.release.updated_at && (
               <div>

@@ -50,6 +50,8 @@ const style = {
   },
 };
 
+const tabs = ['review', 'development', 'staging', 'production'];
+
 export default class PipelineInfo extends Component {
   constructor(props) {
     super(props);
@@ -61,15 +63,21 @@ export default class PipelineInfo extends Component {
       confirmOpen: false,
       message: '',
       pipeline: null,
-      reviewActive: true,
-      devActive: false,
-      stagingActive: false,
-      prodActive: false,
+      currentTab: 'review',
+      baseHash: `#/pipelines/${this.props.match.params.pipeline}/`,
+      basePath: `/pipelines/${this.props.match.params.pipeline}`,
     };
   }
 
   componentDidMount() {
     api.getPipeline(this.props.match.params.pipeline).then((response) => {
+      const hashPath = window.location.hash;
+      let currentTab = hashPath.replace(this.state.baseHash, '');
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'review';
+        window.location.hash = `${this.state.baseHash}review`;
+      }
+      this.setState({ currentTab });
       this.setState({
         pipeline: response.data,
         loading: false,
@@ -80,6 +88,30 @@ export default class PipelineInfo extends Component {
         submitMessage: error.response.data,
       });
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    // If we changed locations AND it was a 'pop' history event (back or forward button)
+    const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
+    if (routeHasChanged && this.props.history.action === 'POP') {
+      // If hitting back took us to the base path without a tab, hit back again
+      // TODO: what if we hit forward to the base path? detect forward click and do window.history.forward()
+      if (this.props.location.pathname === `${this.state.basePath}` ||
+          this.props.location.pathname === `${this.state.basePath}/`) {
+        window.history.back();
+        return;
+      }
+      const hashPath = window.location.hash;
+      if (hashPath.includes(this.state.baseHash)) {
+        let currentTab = hashPath.replace(this.state.baseHash, '');
+        if (!tabs.includes(currentTab)) {
+          currentTab = 'review';
+          window.location = `${this.state.baseHash}review`;
+        }
+        // Since we check conditions before setState we avoid infinite loops
+        this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
+      }
+    }
   }
 
   handleRemovePipeline = () => {
@@ -130,37 +162,11 @@ export default class PipelineInfo extends Component {
     });
   }
 
-  reviewTabActive = () => {
+  changeActiveTab = (newTab) => {
     this.setState({
-      reviewActive: true,
-      devActive: false,
-      stagingActive: false,
-      prodActive: false,
+      currentTab: newTab.props.value,
     });
-  }
-  devTabActive = () => {
-    this.setState({
-      reviewActive: false,
-      devActive: true,
-      stagingActive: false,
-      prodActive: false,
-    });
-  }
-  stagingTabActive = () => {
-    this.setState({
-      reviewActive: false,
-      devActive: false,
-      stagingActive: true,
-      prodActive: false,
-    });
-  }
-  prodTabActive = () => {
-    this.setState({
-      reviewActive: false,
-      devActive: false,
-      stagingActive: false,
-      prodActive: true,
-    });
+    this.props.history.push(`${newTab.props.value}`);
   }
 
   render() {
@@ -198,38 +204,42 @@ export default class PipelineInfo extends Component {
               <IconButton className="delete-pipeline" style={style.iconButton} onTouchTap={this.handleConfirmation}><RemoveIcon /></IconButton>
               <ConfirmationModal open={this.state.confirmOpen} onOk={this.handleRemovePipeline} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this pipeline?" />
             </CardHeader>
-            <Tabs >
+            <Tabs value={this.state.currentTab}>
               <Tab
                 className="review-tab"
                 icon={<LaptopIcon />}
                 label="Review"
-                onActive={this.reviewTabActive}
+                onActive={this.changeActiveTab}
+                value="review"
               >
-                <Stage stage="review" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.reviewActive} />
+                <Stage stage="review" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.currentTab === 'review'} />
               </Tab>
               <Tab
                 className="dev-tab"
                 icon={<Forward />}
                 label="Development"
-                onActive={this.devTabActive}
+                onActive={this.changeActiveTab}
+                value="development"
               >
-                <Stage stage="development" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.devActive} />
+                <Stage stage="development" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.currentTab === 'development'} />
               </Tab>
               <Tab
                 className="staging-tab"
                 icon={<Forward />}
                 label="Staging"
-                onActive={this.stagingTabActive}
+                onActive={this.changeActiveTab}
+                value="staging"
               >
-                <Stage stage="staging" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.stagingActive} />
+                <Stage stage="staging" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.currentTab === 'staging'} />
               </Tab>
               <Tab
                 className="prod-tab"
                 icon={<GlobeIcon />}
                 label="Production"
-                onActive={this.prodTabActive}
+                onActive={this.changeActiveTab}
+                value="production"
               >
-                <Stage stage="production" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.prodActive} />
+                <Stage stage="production" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.currentTab === 'production'} />
               </Tab>
             </Tabs>
           </Card>
@@ -262,4 +272,6 @@ export default class PipelineInfo extends Component {
 
 PipelineInfo.propTypes = {
   match: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  location: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

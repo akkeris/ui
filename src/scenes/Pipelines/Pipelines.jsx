@@ -120,11 +120,11 @@ class Pipelines extends Component {
   }
 
   handleRowSelection = (selectedRows) => {
-    window.location = `#/pipelines/${this.state.pipelines[selectedRows].name}`;
+    window.location = `#/pipelines/${this.state.pipelines[selectedRows].name}/review`;
   }
 
   handleSearch = (searchText) => {
-    window.location = `#/pipelines/${searchText}`;
+    window.location = `#/pipelines/${searchText}/review`;
   }
 
   handleNewPipeline = () => {
