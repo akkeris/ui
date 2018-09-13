@@ -190,7 +190,7 @@ export default class AppSetups extends Component {
   }
 
   handleDone = () => {
-    window.location = `/#/apps/${this.state.blueprint.app.name}-${this.state.blueprint.app.space}`;
+    window.location = `/#/apps/${this.state.blueprint.app.name}-${this.state.blueprint.app.space}/info`;
   }
 
   scrollBuildDown = () => {

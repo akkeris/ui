@@ -51,6 +51,8 @@ const style = {
   },
 };
 
+const tabs = ['info', 'routes'];
+
 export default class SiteInfo extends Component {
   constructor(props) {
     super(props);
@@ -61,11 +63,21 @@ export default class SiteInfo extends Component {
       submitMessage: '',
       submitFail: false,
       message: '',
+      currentTab: 'info',
+      basePath: `/sites/${this.props.match.params.site}`,
+      baseHash: `#/sites/${this.props.match.params.site}/`,
     };
   }
 
   componentDidMount() {
     api.getSite(this.props.match.params.site).then((response) => {
+      const hashPath = window.location.hash;
+      let currentTab = hashPath.replace(this.state.baseHash, '');
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'info';
+        window.location.hash = `${this.state.baseHash}info`;
+      }
+      this.setState({ currentTab });
       this.setState({
         site: response.data,
         loading: false,
@@ -76,6 +88,29 @@ export default class SiteInfo extends Component {
         submitMessage: error.response.data,
       });
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    // If we changed locations AND it was a 'pop' history event (back or forward button)
+    const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
+    if (routeHasChanged && this.props.history.action === 'POP') {
+      // If hitting back took us to the base path without a tab, hit back again
+      if (this.props.location.pathname === `${this.state.basePath}` ||
+          this.props.location.pathname === `${this.state.basePath}/`) {
+        window.history.back();
+        return;
+      }
+      const hashPath = window.location.hash;
+      if (hashPath.includes(this.state.baseHash)) {
+        let currentTab = hashPath.replace(this.state.baseHash, '');
+        if (!tabs.includes(currentTab)) {
+          currentTab = 'info';
+          window.location = `${this.state.baseHash}info`;
+        }
+        // Since we check conditions before setState we avoid infinite loops
+        this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
+      }
+    }
   }
 
   handleError = (message) => {
@@ -101,6 +136,13 @@ export default class SiteInfo extends Component {
       open: true,
       message,
     });
+  }
+
+  changeActiveTab = (newTab) => {
+    this.setState({
+      currentTab: newTab.props.value,
+    });
+    this.props.history.push(`${newTab.props.value}`);
   }
 
   render() {
@@ -135,11 +177,13 @@ export default class SiteInfo extends Component {
               title={this.state.site.domain}
               subtitle={this.state.site.region.name}
             />
-            <Tabs>
+            <Tabs value={this.state.currentTab}>
               <Tab
                 className="info-tab"
                 icon={<InfoIcon />}
                 label="Info"
+                value="info"
+                onActive={this.changeActiveTab}
               >
                 <SiteOverView site={this.state.site} />
               </Tab>
@@ -147,6 +191,8 @@ export default class SiteInfo extends Component {
                 className="routes-tab"
                 icon={<MapIcon />}
                 label="Routes"
+                value="routes"
+                onActive={this.changeActiveTab}
               >
                 <RouteList site={this.state.site.domain} onError={this.handleError} />
               </Tab>
@@ -180,4 +226,6 @@ export default class SiteInfo extends Component {
 
 SiteInfo.propTypes = {
   match: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  location: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

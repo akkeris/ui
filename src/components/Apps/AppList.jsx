@@ -46,7 +46,7 @@ export default class AppList extends Component {
   }
 
   handleRowSelection = (selectedRows) => {
-    window.location = `#/apps/${this.props.apps[selectedRows].name}`;
+    window.location = `#/apps/${this.props.apps[selectedRows].name}/info`;
   }
 
   render() {

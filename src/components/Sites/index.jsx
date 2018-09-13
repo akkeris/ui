@@ -40,7 +40,7 @@ export default class SitesList extends Component {
   }
 
   handleRowSelection = (selectedRows) => {
-    window.location = `#/sites/${this.props.sites[selectedRows].domain}`;
+    window.location = `#/sites/${this.props.sites[selectedRows].domain}/info`;
   }
 
   render() {
