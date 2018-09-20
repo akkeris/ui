@@ -4,7 +4,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
 import { List, ListItem } from 'material-ui/List';
-import RaisedButton from 'material-ui/RaisedButton';
+import Button from '@material-ui/core/Button';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
@@ -105,7 +105,7 @@ export default class SiteOverview extends Component {
             <ListItem primaryText="ID" secondaryText={this.props.site.id} disabled />
             <ListItem primaryText="Region" secondaryText={this.props.site.region.name} disabled />
             <ListItem primaryText="Compliance" secondaryText={this.props.site.compliance.toString()} disabled />
-            <ListItem primaryText="Updated At" secondaryText={Date(this.props.site.updated_at).toLocaleString()} rightIconButton={<RaisedButton className="delete" style={style.button}label="Delete Site" onTouchTap={this.handleConfirmation} secondary icon={<RemoveIcon />} />} disabled />
+            <ListItem primaryText="Updated At" secondaryText={Date(this.props.site.updated_at).toLocaleString()} rightIconButton={<Button variant="contained" className="delete" style={style.button}label="Delete Site" onClick={this.handleConfirmation} secondary icon={<RemoveIcon />} />} disabled />
           </List>
           <ConfirmationModal open={this.state.open} onOk={this.handleRemoveSite} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this site?" />
           <Dialog
@@ -117,7 +117,7 @@ export default class SiteOverview extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleClose}
+                onClick={this.handleClose}
               />}
           >
             {this.state.submitMessage}

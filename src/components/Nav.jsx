@@ -102,7 +102,7 @@ export default class Nav extends Component {
         <div>
           <AppBar
             className="appbar"
-            onLeftIconButtonTouchTap={this.handleToggle}
+            onLeftIconButtonClick={this.handleToggle}
             title={title}
             style={style.header}
             iconElementRight={accountMenu}
@@ -118,31 +118,31 @@ export default class Nav extends Component {
                 className="header"
                 title={title}
                 style={style.nav}
-                onLeftIconButtonTouchTap={this.handleToggle}
+                onLeftIconButtonClick={this.handleToggle}
               />
             </header>
             <List>
               <Subheader>Navigation</Subheader>
               <Link to="/" style={style.link}>
-                <ListItem primaryText="Dashboard" onTouchTap={this.handleClose} leftIcon={<HomeIcon />} />
+                <ListItem primaryText="Dashboard" onClick={this.handleClose} leftIcon={<HomeIcon />} />
               </Link>
               <Link to="/apps" style={style.link}>
-                <ListItem className="linktoapps" primaryText="Apps" onTouchTap={this.handleClose} leftIcon={<AppIcon />} />
+                <ListItem className="linktoapps" primaryText="Apps" onClick={this.handleClose} leftIcon={<AppIcon />} />
               </Link>
               <Link to="/invoices" style={style.link}>
-                <ListItem className="linktoinvoices" primaryText="Invoices" onTouchTap={this.handleClose} leftIcon={<InvoiceIcon />} />
+                <ListItem className="linktoinvoices" primaryText="Invoices" onClick={this.handleClose} leftIcon={<InvoiceIcon />} />
               </Link>
               <Link to="/orgs" style={style.link}>
-                <ListItem className="linktoorgs" primaryText="Organizations" onTouchTap={this.handleClose} leftIcon={<OrgIcon />} />
+                <ListItem className="linktoorgs" primaryText="Organizations" onClick={this.handleClose} leftIcon={<OrgIcon />} />
               </Link>
               <Link to="/pipelines" style={style.link}>
-                <ListItem className="linktopipelines"primaryText="Pipelines" onTouchTap={this.handleClose} leftIcon={<PipelinesIcon />} />
+                <ListItem className="linktopipelines"primaryText="Pipelines" onClick={this.handleClose} leftIcon={<PipelinesIcon />} />
               </Link>
               <Link to="/sites" style={style.link}>
-                <ListItem className="linktosites" primaryText="Sites" onTouchTap={this.handleClose} leftIcon={<RouterIcon />} />
+                <ListItem className="linktosites" primaryText="Sites" onClick={this.handleClose} leftIcon={<RouterIcon />} />
               </Link>
               <Link to="/spaces" style={style.link}>
-                <ListItem className="linktospaces" primaryText="Spaces" onTouchTap={this.handleClose} leftIcon={<SpacesIcon />} />
+                <ListItem className="linktospaces" primaryText="Spaces" onClick={this.handleClose} leftIcon={<SpacesIcon />} />
               </Link>
             </List>
             <Divider inset />

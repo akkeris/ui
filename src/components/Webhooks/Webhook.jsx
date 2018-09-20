@@ -444,7 +444,7 @@ export default class Webhook extends Component {
             className="ok"
             label="Ok"
             primary
-            onTouchTap={this.closeEventsInfoDialog}
+            onClick={this.closeEventsInfoDialog}
           />
         }
       >
@@ -546,7 +546,7 @@ export default class Webhook extends Component {
                   className="webhook-save"
                   tooltip="Save"
                   tooltipPosition="top-left"
-                  onTouchTap={this.handleSave}
+                  onClick={this.handleSave}
                 >
                   <SaveIcon />
                 </IconButton>
@@ -555,7 +555,7 @@ export default class Webhook extends Component {
                   className="webhook-edit"
                   tooltip="Edit"
                   tooltipPosition="top-left"
-                  onTouchTap={() => this.setState({ edit: true })}
+                  onClick={() => this.setState({ edit: true })}
                 >
                   <EditIcon />
                 </IconButton>
@@ -567,7 +567,7 @@ export default class Webhook extends Component {
                   className="webhook-history"
                   tooltip="History"
                   tooltipPosition="top-left"
-                  onTouchTap={this.handleHistoryIcon}
+                  onClick={this.handleHistoryIcon}
                 >
                   <HistoryIcon />
                   {this.renderHistoryDialog()}
@@ -580,7 +580,7 @@ export default class Webhook extends Component {
                   className="webhook-remove"
                   tooltip="Remove"
                   tooltipPosition="top-left"
-                  onTouchTap={() => this.handleConfirmation(this.props.webhook)}
+                  onClick={() => this.handleConfirmation(this.props.webhook)}
                 >
                   <ConfirmationModal
                     className="delete-webhook"
@@ -596,7 +596,7 @@ export default class Webhook extends Component {
                   className="webhook-back"
                   tooltip="Back"
                   tooltipPosition="top-left"
-                  onTouchTap={this.handleReset}
+                  onClick={this.handleReset}
                 >
                   <BackIcon />
                 </IconButton>
@@ -610,7 +610,7 @@ export default class Webhook extends Component {
                   <p style={style.eventsLabel}>Events</p>
                   <IconButton
                     className="events-info-button"
-                    onTouchTap={this.openEventsInfoDialog}
+                    onClick={this.openEventsInfoDialog}
                     style={style.eventsInfoButton}
                     iconStyle={this.state.edit ? style.icon.activeInfo : style.icon.inactiveInfo}
                     disabled={!this.state.edit}
@@ -662,9 +662,9 @@ export default class Webhook extends Component {
         actions={
           <span>
             {this.state.itemSelected && (
-              <FlatButton className="back" label="Back" secondary onTouchTap={this.handleHistoryDialogBack} />
+              <FlatButton className="back" label="Back" secondary onClick={this.handleHistoryDialogBack} />
             )}
-            <FlatButton className="ok" label="Ok" primary onTouchTap={this.handleHistoryDialogOk} />
+            <FlatButton className="ok" label="Ok" primary onClick={this.handleHistoryDialogOk} />
           </span>
         }
       >
@@ -698,7 +698,7 @@ export default class Webhook extends Component {
                 className={`historyItem-${idx}`}
                 key={historyItem.id}
                 style={style.tableRow.standardHeight}
-                onTouchTap={() => this.setState({
+                onClick={() => this.setState({
                   itemSelected: true,
                   historyIndex: idx,
                   dialogSubtitle: this.formatHistoryItemTitle(idx, true),

@@ -308,25 +308,25 @@ export default class DynoType extends Component {
                       </TableRowColumn>
                     )}
                     <TableRowColumn style={style.tableRowColumn.div}>
-                      <div><IconButton className="restart" tooltip="Restart" tooltipPosition="top-left" onTouchTap={this.handleRestart}><RestartIcon /></IconButton></div>
+                      <div><IconButton className="restart" tooltip="Restart" tooltipPosition="top-left" onClick={this.handleRestart}><RestartIcon /></IconButton></div>
                     </TableRowColumn>
                     <TableRowColumn style={style.tableRowColumn.div}>
                       {!this.state.edit && (
-                        <IconButton className="edit" tooltip="Edit" tooltipPosition="top-left" onTouchTap={this.handleEditToggle}><EditIcon /></IconButton>
+                        <IconButton className="edit" tooltip="Edit" tooltipPosition="top-left" onClick={this.handleEditToggle}><EditIcon /></IconButton>
                       )}
                       {this.state.edit && (
-                        <IconButton className="save" tooltip="Save" tooltipPosition="top-left" onTouchTap={this.handlePatchFormation}><SaveIcon /></IconButton>
+                        <IconButton className="save" tooltip="Save" tooltipPosition="top-left" onClick={this.handlePatchFormation}><SaveIcon /></IconButton>
                       )}
                     </TableRowColumn>
                     <TableRowColumn style={style.tableRowColumn.div}>
                       {this.props.formation.type !== 'web' && !this.state.edit && (
                         <div style={style.tableRowColumn.end}>
-                          <IconButton className="remove" tooltip="Remove" tooltipPosition="top-left" onTouchTap={this.handleConfirmation}><RemoveIcon /></IconButton>
+                          <IconButton className="remove" tooltip="Remove" tooltipPosition="top-left" onClick={this.handleConfirmation}><RemoveIcon /></IconButton>
                           <ConfirmationModal className="delete-formation" open={this.state.open} onOk={this.handleRemoveFormation} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this formation?" />
                         </div>
                       )}
                       {this.state.edit && (
-                        <div style={style.tableRowColumn.end}><IconButton className="back" tooltip="Back" tooltipPosition="top-left" onTouchTap={this.handleEditBack}><BackIcon /></IconButton></div>
+                        <div style={style.tableRowColumn.end}><IconButton className="back" tooltip="Back" tooltipPosition="top-left" onClick={this.handleEditBack}><BackIcon /></IconButton></div>
                       )}
                     </TableRowColumn>
                   </TableRow>

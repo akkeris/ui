@@ -144,7 +144,7 @@ export default class Webhooks extends Component {
             <Paper zDepth={0}>
               <IconButton
                 className="new-webhook"
-                onTouchTap={this.handleNewWebhook}
+                onClick={this.handleNewWebhook}
                 tooltip="New Webhook"
                 tooltipPosition="bottom-left"
               >
@@ -153,7 +153,7 @@ export default class Webhooks extends Component {
             </Paper>
           ) : (
             <div>
-              <IconButton className="webhook-cancel" onTouchTap={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
+              <IconButton className="webhook-cancel" onClick={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
               { <NewWebhook app={this.props.app} onComplete={this.reload} /> }
             </div>
           )}
@@ -177,7 +177,7 @@ export default class Webhooks extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleDialogClose}
+                onClick={this.handleDialogClose}
               />}
           >
             {this.state.submitMessage}

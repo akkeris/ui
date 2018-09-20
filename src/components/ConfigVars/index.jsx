@@ -86,14 +86,14 @@ export default class ConfigVar extends Component {
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton className="edit" onTouchTap={() => this.handleEdit(key)}>
+            <IconButton className="edit" onClick={() => this.handleEdit(key)}>
               <EditIcon />
             </IconButton>
           </div>
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton className="remove" onTouchTap={() => this.handleConfirmation(key)}>
+            <IconButton className="remove" onClick={() => this.handleConfirmation(key)}>
               <RemoveIcon />
             </IconButton>
           </div>
@@ -230,12 +230,12 @@ export default class ConfigVar extends Component {
         <div>
           {!this.state.new && (
             <Paper zDepth={0}>
-              <IconButton className="new-config" onTouchTap={this.handleNewConfig} tooltip="New Config" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+              <IconButton className="new-config" onClick={this.handleNewConfig} tooltip="New Config" tooltipPosition="bottom-left"><AddIcon /></IconButton>
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton className="config-cancel" onTouchTap={this.handleNewConfigCancel}><RemoveIcon /></IconButton>
+              <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon /></IconButton>
               <NewConfigVar
                 app={this.props.app}
                 onComplete={this.reload}
@@ -258,7 +258,7 @@ export default class ConfigVar extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleDialogClose}
+                onClick={this.handleDialogClose}
               />}
           >
             {this.state.submitMessage}
@@ -272,13 +272,13 @@ export default class ConfigVar extends Component {
                 className="submit"
                 label="Submit"
                 primary
-                onTouchTap={this.handleEditSubmit}
+                onClick={this.handleEditSubmit}
               />,
               <FlatButton
                 className="cancel"
                 label="Cancel"
                 primary
-                onTouchTap={this.handleEditCancel}
+                onClick={this.handleEditCancel}
               />]}
           >
             <TextField className="config-edit-value" floatingLabelText={this.state.key} value={this.state.newValue} multiLine fullWidth onChange={this.handleNewValueChange} />

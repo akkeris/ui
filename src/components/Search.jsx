@@ -42,7 +42,7 @@ export default class Search extends Component {
 }
 
 Search.propTypes = {
-  data: PropTypes.arrayOf(React.PropTypes.string).isRequired,
+  data: PropTypes.arrayOf(PropTypes.string).isRequired,
   handleSearch: PropTypes.func,
   errorText: PropTypes.string,
   searchText: PropTypes.string,

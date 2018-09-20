@@ -5,7 +5,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
 import IconButton from 'material-ui/IconButton';
 import Paper from 'material-ui/Paper';
-import RaisedButton from 'material-ui/RaisedButton';
+import Button from '@material-ui/core/Button';
 import Divider from 'material-ui/Divider';
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import Checkbox from 'material-ui/Checkbox';
@@ -255,7 +255,15 @@ export default class Stage extends Component {
           <TableRowColumn style={style.tableRowColumn.button}>
             {coupling.stage !== 'production' && (
               <div>
-                <RaisedButton style={style.tableRowColumn.button} className="promote" label="Promote" onTouchTap={() => this.handlePromoteConfirmation(coupling)} primary icon={<PromoteIcon />} />
+                <Button
+                  variant="contained"
+                  style={style.tableRowColumn.button}
+                  className="promote"
+                  label="Promote"
+                  onClick={() => this.handlePromoteConfirmation(coupling)}
+                  primary
+                  icon={<PromoteIcon />}
+                />
               </div>
             )}
           </TableRowColumn>
@@ -263,7 +271,7 @@ export default class Stage extends Component {
             <div style={style.tableRowColumn.end}>
               <IconButton
                 className="remove"
-                onTouchTap={() => this.handleConfirmation(coupling)}
+                onClick={() => this.handleConfirmation(coupling)}
               >
                 <RemoveIcon />
               </IconButton>
@@ -284,12 +292,12 @@ export default class Stage extends Component {
           <Divider />
           {!this.state.new && (
             <Paper zDepth={0}>
-              <IconButton className={`${this.props.stage}-new-coupling`} onTouchTap={this.handleNewCoupling} tooltip="New Coupling" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+              <IconButton className={`${this.props.stage}-new-coupling`} onClick={this.handleNewCoupling} tooltip="New Coupling" tooltipPosition="bottom-left"><AddIcon /></IconButton>
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton className={`${this.props.stage}-cancel`} onTouchTap={this.handleNewCouplingCancel}><RemoveIcon /></IconButton>
+              <IconButton className={`${this.props.stage}-cancel`} onClick={this.handleNewCouplingCancel}><RemoveIcon /></IconButton>
               <NewPipelineCoupling
                 onError={this.handleError}
                 pipeline={this.props.pipeline.name}

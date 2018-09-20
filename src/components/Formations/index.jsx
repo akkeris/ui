@@ -57,13 +57,14 @@ export default class Formations extends Component {
       message: '',
       new: false,
     };
-    if (this.props.active) { this.loadFormations(); }
+    this.loadFormations();
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active) {
-      this.loadFormations();
-    }
+  componentDidMount() {
+    this._isMounted = true;
+  }
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   getSizes() {
@@ -108,12 +109,14 @@ export default class Formations extends Component {
         });
         sizes = sizes.sort((a, b) =>
           parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10));
-        this.setState({
-          sizes,
-          dynos,
-          formations,
-          loading: false,
-        });
+        if (this._isMounted) {
+          this.setState({
+            sizes,
+            dynos,
+            formations,
+            loading: false,
+          });
+        }
       });
   }
 
@@ -159,14 +162,16 @@ export default class Formations extends Component {
       .then(([r1, r2]) => {
         const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
         const dynos = r2.data;
-        this.setState({
-          formations,
-          dynos,
-          loading: false,
-          new: false,
-          open: true,
-          message,
-        });
+        if (this._isMounted) {
+          this.setState({
+            formations,
+            dynos,
+            loading: false,
+            new: false,
+            open: true,
+            message,
+          });
+        }
       });
   }
 
@@ -185,12 +190,12 @@ export default class Formations extends Component {
         <div>
           {!this.state.new && (
             <Paper zDepth={0}>
-              <IconButton className="new-formation" onTouchTap={this.handleNewFormation} tooltip="New Formation" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+              <IconButton className="new-formation" onClick={this.handleNewFormation} tooltip="New Formation" tooltipPosition="bottom-left"><AddIcon /></IconButton>
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton className="cancel" onTouchTap={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
+              <IconButton className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
               <NewFormation app={this.props.app} onComplete={this.reload} />
             </div>
           )}
@@ -214,7 +219,7 @@ export default class Formations extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleDialogClose}
+                onClick={this.handleDialogClose}
               />}
           >
             {this.state.submitMessage}
@@ -234,5 +239,4 @@ export default class Formations extends Component {
 
 Formations.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
 };

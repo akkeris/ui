@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
+import Button from '@material-ui/core/Button';
 import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -163,15 +163,16 @@ export default class NewOrg extends Component {
             className="back"
             label="Back"
             disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
+            onClick={this.handlePrev}
             style={style.buttons.back}
           />
           )}
-          <RaisedButton
+          <Button
+                        variant="contained"
             className="next"
             label={stepIndex === 1 ? 'Submit' : 'Next'}
             primary
-            onTouchTap={this.handleNext}
+            onClick={this.handleNext}
           />
         </div>
       </div>
@@ -205,7 +206,7 @@ export default class NewOrg extends Component {
                   className="ok"
                   label="Ok"
                   primary
-                  onTouchTap={this.handleClose}
+                  onClick={this.handleClose}
                 />}
             >
               {this.state.submitMessage}

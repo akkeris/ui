@@ -90,7 +90,7 @@ export default class RouteList extends Component {
         <TableRowColumn style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
             <IconButton
-              onTouchTap={() => this.handleConfirmation(route)}
+              onClick={() => this.handleConfirmation(route)}
             >
               <RemoveIcon />
             </IconButton>
@@ -171,12 +171,12 @@ export default class RouteList extends Component {
         <div>
           {!this.state.new && (
             <Paper zDepth={0}>
-              <IconButton onTouchTap={this.handleNewRoute} tooltip="New Route" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+              <IconButton onClick={this.handleNewRoute} tooltip="New Route" tooltipPosition="bottom-left"><AddIcon /></IconButton>
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton onTouchTap={this.handleNewRouteCancel}><RemoveIcon /></IconButton>
+              <IconButton onClick={this.handleNewRouteCancel}><RemoveIcon /></IconButton>
               <NewRoute site={this.props.site} onComplete={this.reload} />
             </div>
           )}

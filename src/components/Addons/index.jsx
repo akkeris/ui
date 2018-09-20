@@ -103,19 +103,19 @@ export default class Addons extends Component {
         style={style.tableRowPointer}
       >
         <TableRowColumn
-          onTouchTap={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
+          onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
           <div style={style.tableRowColumn.sub}>{addon.id}</div>
         </TableRowColumn>
         <TableRowColumn
-          onTouchTap={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
+          onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton className="addon-remove" onTouchTap={() => this.handleAddonConfirmation(addon)}>
+            <IconButton className="addon-remove" onClick={() => this.handleAddonConfirmation(addon)}>
               <RemoveIcon />
             </IconButton>
           </div>
@@ -132,24 +132,24 @@ export default class Addons extends Component {
         style={style.tableRowPointer}
       >
         <TableRowColumn
-          onTouchTap={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+          onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
         </TableRowColumn>
         <TableRowColumn
-          onTouchTap={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+          onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{attachment.addon.plan.name}</div>
         </TableRowColumn>
         <TableRowColumn
-          onTouchTap={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+          onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{attachment.addon.app.name}</div>
         </TableRowColumn>
         <TableRowColumn style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton className="attachment-remove" onTouchTap={() => this.handleAddonAttachmentConfirmation(attachment)}>
+            <IconButton className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
               <RemoveIcon />
             </IconButton>
           </div>
@@ -356,7 +356,7 @@ export default class Addons extends Component {
             <Paper zDepth={0}>
               <IconButton
                 className="new-addon"
-                onTouchTap={this.handleNewAddon}
+                onClick={this.handleNewAddon}
                 tooltip="New Addon"
                 tooltipPosition="bottom-left"
               >
@@ -364,7 +364,7 @@ export default class Addons extends Component {
               </IconButton>
               <IconButton
                 className="attach-addon"
-                onTouchTap={this.handleAttachAddon}
+                onClick={this.handleAttachAddon}
                 tooltip="Attach Addon"
                 tooltipPosition="bottom-left"
               >
@@ -374,13 +374,13 @@ export default class Addons extends Component {
           )}
           {this.state.new && (
             <div>
-              <IconButton className="addon-cancel" onTouchTap={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
+              <IconButton className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
               <NewAddon app={this.props.app} onComplete={this.reload} />
             </div>
           )}
           {this.state.attach && (
             <div>
-              <IconButton className="attach-cancel" onTouchTap={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
+              <IconButton className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
               <AttachAddon app={this.props.app} onComplete={this.reload} />
             </div>
           )}
@@ -422,7 +422,7 @@ export default class Addons extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleAddonDialogClose}
+                onClick={this.handleAddonDialogClose}
               />}
             open={this.state.addonDialogOpen}
           >
@@ -453,7 +453,7 @@ export default class Addons extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleDialogClose}
+                onClick={this.handleDialogClose}
               />}
           >
             {this.state.submitMessage}

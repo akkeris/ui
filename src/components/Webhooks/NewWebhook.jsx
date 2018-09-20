@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
+import Button from '@material-ui/core/Button';
 import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import HelpIcon from 'material-ui/svg-icons/action/help';
@@ -119,7 +119,7 @@ export default class NewWebhook extends Component {
               <p style={style.eventsLabel}>Events</p>
               <IconButton
                 className="events-info-button"
-                onTouchTap={this.openEventsInfoDialog}
+                onClick={this.openEventsInfoDialog}
                 style={style.eventsInfoButton}
                 iconStyle={style.eventsInfoIcon}
                 tooltip="Click for Descriptions"
@@ -308,7 +308,7 @@ export default class NewWebhook extends Component {
             className="ok"
             label="Ok"
             primary
-            onTouchTap={this.closeEventsInfoDialog}
+            onClick={this.closeEventsInfoDialog}
           />
         }
       >
@@ -335,14 +335,15 @@ export default class NewWebhook extends Component {
               className="back"
               label="Back"
               disabled={stepIndex === 0}
-              onTouchTap={this.handlePrev}
+              onClick={this.handlePrev}
               style={style.buttons.back}
             />)}
-            <RaisedButton
+            <Button
+                            variant="contained"
               className="next"
               label={stepIndex === 2 ? 'Finish' : 'Next'}
               primary
-              onTouchTap={this.handleNext}
+              onClick={this.handleNext}
             />
           </div>
         </div>
@@ -379,7 +380,7 @@ export default class NewWebhook extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleClose}
+                onClick={this.handleClose}
               />}
           >
             {this.state.submitMessage}

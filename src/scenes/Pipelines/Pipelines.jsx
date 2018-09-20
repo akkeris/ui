@@ -179,7 +179,7 @@ class Pipelines extends Component {
                 <IconButton
                   className="new-pipeline"
                   iconStyle={style.icon}
-                  onTouchTap={this.handleNewPipeline}
+                  onClick={this.handleNewPipeline}
                 >
                   <AddIcon />
                 </IconButton>
@@ -189,7 +189,7 @@ class Pipelines extends Component {
           <Paper style={style.paper}>
             {this.state.new && (
               <div>
-                <IconButton className="cancel" onTouchTap={this.handleNewPipelineCancel}><RemoveIcon /></IconButton>
+                <IconButton className="cancel" onClick={this.handleNewPipelineCancel}><RemoveIcon /></IconButton>
                 <NewPipeline onComplete={this.reload} />
                 <Divider />
               </div>

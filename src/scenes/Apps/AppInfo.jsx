@@ -4,7 +4,8 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import PropTypes from 'prop-types';
 import { Card, CardHeader } from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
-import { Tabs, Tab } from 'material-ui/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
 import IconButton from 'material-ui/IconButton';
 import Dialog from 'material-ui/Dialog';
@@ -19,7 +20,6 @@ import AppIcon from 'material-ui/svg-icons/action/exit-to-app';
 import ReleaseIcon from 'material-ui/svg-icons/file/cloud';
 import GitIcon from '../../components/Icons/GitIcon';
 import WebhookIcon from '../../components/Icons/WebhookIcon';
-
 import Formations from '../../components/Formations';
 import Webhooks from '../../components/Webhooks';
 import Releases from '../../components/Releases';
@@ -148,14 +148,16 @@ export default class AppInfo extends Component {
     });
   }
 
-  changeActiveTab = (newTab) => {
+  changeActiveTab = (event, newTab) => {
+    console.log(`changeActiveTab: ${newTab}`);
     this.setState({
-      currentTab: newTab.props.value,
+      currentTab: newTab,
     });
-    this.props.history.push(`${newTab.props.value}`);
+    this.props.history.push(`${newTab}`);
   }
 
   render() {
+    const { currentTab } = this.state;
     if (this.state.loading) {
       return (
         <MuiThemeProvider muiTheme={muiTheme}>
@@ -169,7 +171,7 @@ export default class AppInfo extends Component {
                 <FlatButton
                   label="Ok"
                   primary
-                  onTouchTap={this.handleNotFoundClose}
+                  onClick={this.handleNotFoundClose}
                 />}
             >
               {this.state.submitMessage}
@@ -211,105 +213,105 @@ export default class AppInfo extends Component {
               </IconButton>
               {git}
             </CardHeader>
-            <Tabs value={this.state.currentTab}>
+            <Tabs value={this.state.currentTab} onChange={this.changeActiveTab}>
               <Tab
                 className="info-tab"
                 icon={<InfoIcon />}
                 label="Info"
-                onActive={this.changeActiveTab}
                 value="info"
-              >
-                <AppOverview app={this.state.app} onComplete={this.reload} />
-              </Tab>
+              />
               <Tab
                 className="dynos-tab"
                 icon={<CPUIcon />}
                 label="Dynos"
-                onActive={this.changeActiveTab}
                 value="dynos"
-              >
-                <Formations
-                  app={this.state.app.name}
-                  active={this.state.currentTab === 'dynos'}
-                />
-              </Tab>
+              />
               <Tab
                 className="releases-tab"
                 icon={<ReleaseIcon />}
                 label="Activity"
-                onActive={this.changeActiveTab}
                 value="releases"
-              >
-                <Releases
-                  app={this.state.app.name}
-                  active={this.state.currentTab === 'releases'}
-                />
-              </Tab>
+              />
               <Tab
                 className="addons-tab"
                 icon={<AddonIcon />}
                 label="Addons"
-                onActive={this.changeActiveTab}
                 value="addons"
-              >
-                <Addons
-                  app={this.state.app.name}
-                  active={this.state.currentTab === 'addons'}
-                />
-              </Tab>
+              />
               <Tab
                 className="webhooks-tab"
                 icon={<WebhookIcon />}
                 label="Webhooks"
-                onActive={this.changeActiveTab}
                 value="webhooks"
-              >
-                <Webhooks
-                  app={this.state.app.name}
-                  active={this.state.currentTab === 'webhooks'}
-                />
-              </Tab>
+              />
               <Tab
                 className="config-tab"
                 icon={<ConfigIcon />}
                 label="Config"
-                onActive={this.changeActiveTab}
                 value="config"
-              >
-                <Config
-                  app={this.state.app.name}
-                  active={this.state.currentTab === 'config'}
-                />
-              </Tab>
+              />
               <Tab
                 className="metrics-tab"
                 icon={<MetricIcon />}
                 label="Metrics"
-                onActive={this.changeActiveTab}
                 value="metrics"
-              >
-                <Metrics
-                  active={this.state.currentTab === 'metrics'}
-                  app={this.state.app.name}
-                  appName={this.state.app.simple_name}
-                  space={this.state.app.space.name}
-                />
-              </Tab>
+              />
               <Tab
                 className="logs-tab"
                 icon={<LogIcon />}
                 label="Logs"
-                onActive={this.changeActiveTab}
                 value="logs"
-              >
-                <Logs
-                  active={this.state.currentTab === 'logs'}
-                  app={this.state.app.name}
-                  appName={this.state.app.simple_name}
-                  space={this.state.app.space.name}
-                />
-              </Tab>
+              />
             </Tabs>
+            {currentTab === 'info' && (
+              <AppOverview app={this.state.app} onComplete={this.reload} />
+            )}
+            {currentTab === 'dynos' && (
+              <Formations
+                app={this.state.app.name}
+                active={this.state.currentTab === 'dynos'}
+              />
+            )}
+            {currentTab === 'releases' && (
+              <Releases
+                app={this.state.app.name}
+                active={this.state.currentTab === 'releases'}
+              />
+            )}
+            {currentTab === 'addons' && (
+              <Addons
+                app={this.state.app.name}
+                active={this.state.currentTab === 'addons'}
+              />
+            )}
+            {currentTab === 'webhooks' && (
+              <Webhooks
+                app={this.state.app.name}
+                active={this.state.currentTab === 'webhooks'}
+              />
+            )}
+            {currentTab === 'config' && (
+              <Config
+                app={this.state.app.name}
+                active={this.state.currentTab === 'config'}
+              />
+            )}
+            {currentTab === 'metrics' && (
+              <Metrics
+                active={this.state.currentTab === 'metrics'}
+                app={this.state.app.name}
+                appName={this.state.app.simple_name}
+                space={this.state.app.space.name}
+              />
+            )}
+            {currentTab === 'logs' && (
+              <Logs
+                active={this.state.currentTab === 'logs'}
+                app={this.state.app.name}
+                appName={this.state.app.simple_name}
+                space={this.state.app.space.name}
+              />
+            )}
           </Card>
           <Dialog
             className="app-error"
@@ -319,7 +321,7 @@ export default class AppInfo extends Component {
               <FlatButton
                 label="Ok"
                 primary
-                onTouchTap={this.handleClose}
+                onClick={this.handleClose}
               />}
           >
             {this.state.submitMessage}

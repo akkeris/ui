@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
+import Button from '@material-ui/core/Button';
 import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -199,13 +199,14 @@ export default class NewAutoBuild extends Component {
           {stepIndex > 0 && (<FlatButton
             label="Back"
             disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
+            onClick={this.handlePrev}
             style={style.buttons.back}
           />)}
-          <RaisedButton
+          <Button
+                        variant="contained"
             label={stepIndex === 3 ? 'Finish' : 'Next'}
             primary
-            onTouchTap={this.handleNext}
+            onClick={this.handleNext}
           />
         </div>
       </div>
@@ -243,7 +244,7 @@ export default class NewAutoBuild extends Component {
               <FlatButton
                 label="Ok"
                 primary
-                onTouchTap={this.handleClose}
+                onClick={this.handleClose}
               />
             }
           >

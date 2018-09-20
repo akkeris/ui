@@ -160,7 +160,7 @@ export default class SiteInfo extends Component {
                   className="ok"
                   label="Ok"
                   primary
-                  onTouchTap={this.handleNotFoundClose}
+                  onClick={this.handleNotFoundClose}
                 />}
             >
               {this.state.submitMessage}
@@ -207,7 +207,7 @@ export default class SiteInfo extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleClose}
+                onClick={this.handleClose}
               />}
           >
             {this.state.submitMessage}

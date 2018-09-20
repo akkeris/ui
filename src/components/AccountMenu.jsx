@@ -67,13 +67,13 @@ export default class AccountMenu extends Component {
       <div>
         <Avatar
           className="avatar"
-          onTouchTap={this.handleTouchTap}
+          onClick={this.handleTouchTap}
           src={this.props.src}
           style={style.avatar}
         />
         <ArrowDropDown
           className="dropdown"
-          onTouchTap={this.handleTouchTap}
+          onClick={this.handleTouchTap}
           style={style.menu}
         />
         <Popover
@@ -85,8 +85,8 @@ export default class AccountMenu extends Component {
           onRequestClose={this.handleRequestClose}
         >
           <Menu>
-            <MenuItem className="account" onTouchTap={this.account} primaryText="Account" />
-            <MenuItem className="logout" onTouchTap={this.logout} primaryText="Logout" />
+            <MenuItem className="account" onClick={this.account} primaryText="Account" />
+            <MenuItem className="logout" onClick={this.logout} primaryText="Logout" />
           </Menu>
         </Popover>
       </div>

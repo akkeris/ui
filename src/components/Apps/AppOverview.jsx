@@ -5,7 +5,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
 import Toggle from 'material-ui/Toggle';
 import { List, ListItem } from 'material-ui/List';
-import RaisedButton from 'material-ui/RaisedButton';
+import Button from '@material-ui/core/Button';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
@@ -59,6 +59,12 @@ const style = {
     icon: {
       width: '100px',
     },
+  },
+  deleteButtonLabel: {
+    paddingRight: '5px',
+  },
+  removeIcon: {
+    paddingRight: '5px',
   },
 };
 
@@ -157,7 +163,7 @@ class AppOverview extends Component {
             <GridTile>
               <List>
                 <ListItem primaryText="URL" secondaryText={<a href={this.props.app.web_url}>{this.props.app.web_url}</a>} disabled />
-                <ListItem primaryText="Discovery" secondaryText={`${this.props.app.simple_name.toUpperCase()}_SERVICE_HOST, ${this.props.app.simple_name.toUpperCase()}_SERVICE_PORT`} disabled />                
+                <ListItem primaryText="Discovery" secondaryText={`${this.props.app.simple_name.toUpperCase()}_SERVICE_HOST, ${this.props.app.simple_name.toUpperCase()}_SERVICE_PORT`} disabled />
               </List>
             </GridTile>
           </GridList>
@@ -180,7 +186,7 @@ class AppOverview extends Component {
                   </div>
                 </TableRowColumn>
                 <TableRowColumn >
-                  <div style={style.tableRowColumn.end}>{<RaisedButton className="delete" style={style.button}label="Delete App" onTouchTap={this.handleConfirmation} secondary icon={<RemoveIcon />} />}</div>
+                  <div style={style.tableRowColumn.end}>{<Button variant="contained" className="delete" style={style.button} onClick={this.handleConfirmation} color="secondary"><RemoveIcon color="white" style={style.removeIcon} /><span style={style.deleteButtonLabel}>Delete App</span></Button>}</div>
                 </TableRowColumn>
               </TableRow>
             </TableBody>
@@ -197,7 +203,7 @@ class AppOverview extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleClose}
+                onClick={this.handleClose}
               />}
           >
             {this.state.submitMessage}

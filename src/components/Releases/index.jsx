@@ -147,13 +147,14 @@ export default class Releases extends Component {
       revertOpen: false,
       newAuto: false,
     };
-    if (this.props.active) { this.loadReleases(); }
+    this.loadReleases();
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active) {
-      this.loadReleases();
-    }
+  componentDidMount() {
+    this._isMounted = true;
+  }
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   getReleases() {
@@ -219,10 +220,10 @@ export default class Releases extends Component {
           </TableRowColumn>
           <TableRowColumn style={style.tableRowColumn.icon}>
             {!release.release &&
-              <IconButton tooltip="Build Logs" tooltipPosition="top-left" className="logs" onTouchTap={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
+              <IconButton tooltip="Build Logs" tooltipPosition="top-left" className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
             }
             {!release.current && release.release &&
-              <IconButton tooltip="Rollback" tooltipPosition="top-left" className="revert" onTouchTap={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
+              <IconButton tooltip="Rollback" tooltipPosition="top-left" className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
             }
           </TableRowColumn>
         </TableRow>
@@ -264,10 +265,12 @@ export default class Releases extends Component {
             if (releaseAndBuilds.length > releaseLimit) {
               releaseAndBuilds = releaseAndBuilds.slice(0, releaseLimit);
             }
-            this.setState({
-              releases: releaseAndBuilds,
-              loading: false,
-            });
+            if (this._isMounted) {
+              this.setState({
+                releases: releaseAndBuilds,
+                loading: false,
+              });
+            }
             resolve();
           });
         });
@@ -354,20 +357,20 @@ export default class Releases extends Component {
 
   render() {
     const actions = [
-      <IconButton onTouchTap={() => { this.handleClose(); }}><RemoveIcon /></IconButton>,
+      <IconButton onClick={() => { this.handleClose(); }}><RemoveIcon /></IconButton>,
     ];
     const actionsRevert = [
       <FlatButton
         className="ok"
         label="Ok"
         primary
-        onTouchTap={() => { this.handleRevertGo(); }}
+        onClick={() => { this.handleRevertGo(); }}
       />,
       <FlatButton
         className="cancel"
         label="Cancel"
         secondary
-        onTouchTap={() => { this.handleRevertClose(); }}
+        onClick={() => { this.handleRevertClose(); }}
       />,
     ];
     if (this.state.loading) {
@@ -421,19 +424,19 @@ export default class Releases extends Component {
           )}
           {(!this.state.new && !this.state.newAuto) && (
             <Paper zDepth={0}>
-              <IconButton className="new-autobuild" onTouchTap={() => { this.handleNewAutoBuild(); }} tooltip="Attach to Repo" tooltipPosition="bottom-left"><AutoBuildIcon /></IconButton>
-              <IconButton className="new-build" onTouchTap={() => { this.handleNewBuild(); }} tooltip="New Release" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+              <IconButton className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }} tooltip="Attach to Repo" tooltipPosition="bottom-left"><AutoBuildIcon /></IconButton>
+              <IconButton className="new-build" onClick={() => { this.handleNewBuild(); }} tooltip="New Release" tooltipPosition="bottom-left"><AddIcon /></IconButton>
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton className="build-cancel" onTouchTap={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
+              <IconButton className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
               <NewBuild app={this.props.app} onComplete={(message) => { this.reload(message); }} />
             </div>
           )}
           {this.state.newAuto && (
             <div>
-              <IconButton className="auto-cancel" onTouchTap={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
+              <IconButton className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
               <NewAutoBuild
                 app={this.props.app}
                 onComplete={(message) => { this.reload(message); }}
@@ -460,5 +463,4 @@ export default class Releases extends Component {
 
 Releases.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
 };

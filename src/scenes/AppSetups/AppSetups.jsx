@@ -7,7 +7,7 @@ import RefreshIndicator from 'material-ui/RefreshIndicator';
 import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
-import RaisedButton from 'material-ui/RaisedButton';
+import Button from '@material-ui/core/Button';
 import { List, ListItem } from 'material-ui/List';
 import Divider from 'material-ui/Divider';
 import DoneBox from 'material-ui/svg-icons/action/done';
@@ -318,7 +318,15 @@ export default class AppSetups extends Component {
                 </SelectField>
                 <br />
                 {configVars}
-                <RaisedButton className="create" disabled={this.state.create_disabled} label="Create" primary fullWidth onClick={this.handleOnClick} />
+                <Button
+                  variant="contained"
+                  className="create"
+                  disabled={this.state.create_disabled}
+                  label="Create"
+                  primary
+                  fullWidth
+                  onClick={this.handleOnClick}
+                />
               </div>
             </Paper>
           </div>
@@ -327,9 +335,9 @@ export default class AppSetups extends Component {
     } else if ((this.state.panel === 'running' || this.state.panel === 'ready' || this.state.panel === 'done') && this.state.loading === false) {
       const buttons = [];
       if (this.state.blueprint.success_url) {
-        buttons.push(<RaisedButton key="view_app" label="View" icon={<OpenInNewBox />} primary onClick={this.handleDoneSuccessUrl} />);
+        buttons.push(<Button variant="contained" key="view_app" label="View" icon={<OpenInNewBox />} primary onClick={this.handleDoneSuccessUrl} />);
       }
-      buttons.push(<RaisedButton className="config_app" key="config_app" secondary label="Manage App" style={{ marginLeft: '0.5em' }} onClick={this.handleDone} />);
+      buttons.push(<Button variant="contained" className="config_app" key="config_app" secondary label="Manage App" style={{ marginLeft: '0.5em' }} onClick={this.handleDone} />);
 
       const isConfiguring = this.state.progress !== 100;
       const isBuilding = this.state.progress === 100;

@@ -23,13 +23,13 @@ export default class ConfirmationModal extends Component {
               className="ok"
               label="Ok"
               primary
-              onTouchTap={this.props.onOk}
+              onClick={this.props.onOk}
             />,
             <FlatButton
               className="cancel"
               label="Cancel"
               secondary
-              onTouchTap={this.props.onCancel}
+              onClick={this.props.onCancel}
             />,
           ]}
         >

@@ -184,7 +184,7 @@ export default class PipelineInfo extends Component {
                   className="ok"
                   label="Ok"
                   primary
-                  onTouchTap={this.handleNotFoundClose}
+                  onClick={this.handleNotFoundClose}
                 />}
             >
               {this.state.submitMessage}
@@ -201,7 +201,7 @@ export default class PipelineInfo extends Component {
               title={this.state.pipeline.name}
               subtitle={this.state.pipeline.id}
             >
-              <IconButton className="delete-pipeline" style={style.iconButton} onTouchTap={this.handleConfirmation}><RemoveIcon /></IconButton>
+              <IconButton className="delete-pipeline" style={style.iconButton} onClick={this.handleConfirmation}><RemoveIcon /></IconButton>
               <ConfirmationModal open={this.state.confirmOpen} onOk={this.handleRemovePipeline} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this pipeline?" />
             </CardHeader>
             <Tabs value={this.state.currentTab}>
@@ -252,7 +252,7 @@ export default class PipelineInfo extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleClose}
+                onClick={this.handleClose}
               />}
           >
             {this.state.submitMessage}

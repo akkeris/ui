@@ -97,7 +97,7 @@ export default class Audits extends Component {
           className={id}
           key={id}
           style={style.tableRow}
-          onTouchTap={() => this.handleRowSelection(id)}
+          onClick={() => this.handleRowSelection(id)}
           selectable={false}
         >
           <TableRowColumn style={style.tableRow}>
@@ -175,7 +175,7 @@ export default class Audits extends Component {
                 className="ok"
                 label="Ok"
                 primary
-                onTouchTap={this.handleDialogClose}
+                onClick={this.handleDialogClose}
               />}
           >
             <Table className="audit-info">
