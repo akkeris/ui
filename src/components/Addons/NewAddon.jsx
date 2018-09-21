@@ -1,18 +1,32 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import Button from '@material-ui/core/Button';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import Dialog from 'material-ui/Dialog';
+import { Step, Stepper, StepLabel, InputLabel, FormControl,
+  Select, MenuItem, Dialog, Button, Input } from '@material-ui/core';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles/';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiStepper: {
+      root: {
+        padding: '24px 0px',
+      },
+    },
+    MuiButton: {
+      root: {
+        marginRight: '15px',
+      },
+    },
+    MuiFormControl: {
+      root: {
+        marginBottom: '15px',
+      },
+    },
+  },
 });
 
 const style = {
@@ -77,9 +91,9 @@ export default class NewAddon extends Component {
         className={service.human_name}
         key={service.id}
         value={service}
-        label={service.human_name}
-        primaryText={service.human_name}
-      />
+      >
+        {service.human_name}
+      </MenuItem>
     ));
   }
 
@@ -89,9 +103,9 @@ export default class NewAddon extends Component {
         className={plan.human_name}
         key={plan.name}
         value={plan}
-        label={plan.name}
-        primaryText={plan.name}
-      />
+      >
+        {plan.name}
+      </MenuItem>
     ));
   }
 
@@ -100,9 +114,17 @@ export default class NewAddon extends Component {
       case 0:
         return (
           <div>
-            <DropDownMenu className="service-menu" value={this.state.service} onChange={this.handleServiceChange}>
-              {this.getServices()}
-            </DropDownMenu>
+            <FormControl className="service-form">
+              <Select
+                autoWidth
+                className="service-menu"
+                value={this.state.service}
+                onChange={this.handleServiceChange}
+                input={<Input name="service" id="service-helper" />}
+              >
+                {this.getServices()}
+              </Select>
+            </FormControl>
             <p>
               Select the akkeris addon you would like to attach to your app.
             </p>
@@ -111,10 +133,18 @@ export default class NewAddon extends Component {
       case 1:
         return (
           <div>
-            <DropDownMenu className="plan-menu" value={this.state.plan} onChange={this.handlePlanChange}>
-              {this.getPlans()}
-            </DropDownMenu>
-            <div className="plan-info">
+            <FormControl className="plan-form">
+              <Select
+                autoWidth
+                className="plan-menu"
+                value={this.state.plan}
+                onChange={this.handlePlanChange}
+                input={<Input name="plan" id="plan-helper" />}
+              >
+                {this.getPlans()}
+              </Select>
+            </FormControl>
+            <div className="plan-info" style={{ marginBottom: '15px' }}>
               {this.state.plan.price && this.state.plan.price.cents !== 0 && (
                 <span className="plan-price">
                   <b>{this.formatPrice(this.state.plan.price.cents)}/mo</b>
@@ -151,15 +181,15 @@ export default class NewAddon extends Component {
     });
   }
 
-  handleServiceChange = (event, index, value) => {
+  handleServiceChange = (event) => {
     this.setState({
-      service: value,
+      service: event.target.value,
     });
   }
 
-  handlePlanChange = (event, index, value) => {
+  handlePlanChange = (event) => {
     this.setState({
-      plan: value,
+      plan: event.target.value,
     });
   }
 
@@ -218,7 +248,7 @@ export default class NewAddon extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
     if (finished) {
       this.submitAddon();
     } else {
@@ -226,20 +256,25 @@ export default class NewAddon extends Component {
         <div style={contentStyle}>
           <div>{this.getStepContent(stepIndex)}</div>
           <div style={style.buttons.div}>
-            {stepIndex > 0 && (<FlatButton
-              className="back"
-              label="Back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.Back}
-            />)}
+            {stepIndex > 0 && (
+              <Button
+                className="back"
+                disabled={stepIndex === 0}
+                onClick={this.handlePrev}
+                // style={style.buttons.Back}
+                // style={{ marginRight: '12px' }}
+              >
+                Back
+              </Button>
+            )}
             <Button
               variant="contained"
               className="next"
-              label={stepIndex === 1 ? 'Finish' : 'Next'}
-              primary
+              color="primary"
               onClick={this.handleNext}
-            />
+            >
+              {stepIndex === 1 ? 'Finish' : 'Next'}
+            </Button>
           </div>
         </div>
       );
@@ -250,7 +285,7 @@ export default class NewAddon extends Component {
   render() {
     const { loading, stepIndex, finished } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
@@ -270,10 +305,10 @@ export default class NewAddon extends Component {
             open={this.state.submitFail}
             modal
             actions={
-              <FlatButton
+              <Button
                 className="ok"
                 label="Ok"
-                primary
+                color="primary"
                 onClick={this.handleClose}
               />}
           >

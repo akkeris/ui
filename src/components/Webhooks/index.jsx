@@ -56,13 +56,14 @@ export default class Webhooks extends Component {
       submitMessage: '',
       events: [],
     };
-    if (this.props.active) { this.loadWebhooks(); }
+    this.loadWebhooks();
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active) {
-      this.loadWebhooks();
-    }
+  componentDidMount() {
+    this._isMounted = true;
+  }
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   getWebhooks() {
@@ -80,10 +81,12 @@ export default class Webhooks extends Component {
 
   loadWebhooks() {
     api.getAppWebhooks(this.props.app).then((response) => {
-      this.setState({
-        webhooks: response.data,
-        loading: false,
-      });
+      if (this._isMounted) {
+        this.setState({
+          webhooks: response.data,
+          loading: false,
+        });
+      }
     });
   }
 

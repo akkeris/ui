@@ -110,15 +110,14 @@ export default class Metrics extends Component {
       addons: {},
       sizes: {},
     };
-    if (this.props.active) { this.loadMetrics(); }
+    this.loadMetrics();
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active) {
-      this.loadMetrics();
-    } else if (this.props.active !== prevProps.active && !this.props.active) {
-      this.setState({ loading: true, reading: false });
-    }
+  componentDidMount() {
+    this._isMounted = true;
+  }
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   loadMetrics() {
@@ -126,14 +125,16 @@ export default class Metrics extends Component {
       api.getFormations(this.props.app).then((formationResp) => {
         api.getMetrics(this.props.app).then((metricResp) => {
           api.getAppAddons(this.props.app).then((addonResp) => {
-            this.setState({
-              sizes: sizesResp.data,
-              formations: formationResp.data,
-              metrics: metricResp.data,
-              addons: addonResp.data,
-              loading: false,
-              reading: true,
-            });
+            if (this._isMounted) {
+              this.setState({
+                sizes: sizesResp.data,
+                formations: formationResp.data,
+                metrics: metricResp.data,
+                addons: addonResp.data,
+                loading: false,
+                reading: true,
+              });
+            }
           });
         });
       });

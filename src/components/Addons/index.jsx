@@ -1,18 +1,25 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+
+import {
+  Button, IconButton, Snackbar, Paper, CircularProgress, Dialog,
+  Tooltip,
+} from '@material-ui/core';
+
+
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import IconButton from 'material-ui/IconButton';
-import Snackbar from 'material-ui/Snackbar';
-import Paper from 'material-ui/Paper';
+// import RefreshIndicator from 'material-ui/RefreshIndicator';
+// import IconButton from 'material-ui/IconButton';
+// import Snackbar from 'material-ui/Snackbar';
+// import Paper from 'material-ui/Paper';
 import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
 import AddIcon from 'material-ui/svg-icons/content/add';
 import AttachIcon from 'material-ui/svg-icons/communication/call-merge';
 import RemoveIcon from 'material-ui/svg-icons/content/clear';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
+// import Dialog from 'material-ui/Dialog';
+// import FlatButton from 'material-ui/FlatButton';
 
 import api from '../../services/api';
 import NewAddon from './NewAddon';
@@ -86,13 +93,14 @@ export default class Addons extends Component {
       currentAddon: {},
       addonDialogOpen: false,
     };
-    if (this.props.active) { this.loadAddons(); }
+    this.loadAddons();
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active) {
-      this.loadAddons();
-    }
+  componentDidMount() {
+    this._isMounted = true;
+  }
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   getAddons() {
@@ -182,7 +190,9 @@ export default class Addons extends Component {
       api.getAppsAttachedToAddon(this.props.app, addon.id).then((res) => {
         addons[index].attached_to = res.data.attached_to;
         if (addons.every(a => (a.attached_to))) {
-          this.setState({ addons, addonsLoaded: true });
+          if (this._isMounted) {
+            this.setState({ addons, addonsLoaded: true });
+          }
         }
       });
     });
@@ -192,7 +202,9 @@ export default class Addons extends Component {
       api.getAppsAttachedToAddon(this.props.app, attachment.addon.id).then((res) => {
         addonAttachments[index].attached_to = res.data.attached_to;
         if (addonAttachments.every(a => (a.attached_to))) {
-          this.setState({ addonAttachments, attachmentsLoaded: true });
+          if (this._isMounted) {
+            this.setState({ addonAttachments, attachmentsLoaded: true });
+          }
         }
       });
     });
@@ -203,12 +215,14 @@ export default class Addons extends Component {
       api.getAppAddons(this.props.app),
       api.getAddonAttachments(this.props.app),
     ]).then(([r1, r2]) => {
-      this.setState({
-        addons: r1.data,
-        addonAttachments: r2.data,
-        loading: false,
-      });
-      this.getAppsAttachedToAddon();
+      if (this._isMounted) {
+        this.setState({
+          addons: r1.data,
+          addonAttachments: r2.data,
+          loading: false,
+        });
+        this.getAppsAttachedToAddon();
+      }
     });
   }
 
@@ -344,7 +358,7 @@ export default class Addons extends Component {
       return (
         <MuiThemeProvider muiTheme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
@@ -354,22 +368,22 @@ export default class Addons extends Component {
         <div>
           {!this.state.new && (
             <Paper zDepth={0}>
-              <IconButton
-                className="new-addon"
-                onClick={this.handleNewAddon}
-                tooltip="New Addon"
-                tooltipPosition="bottom-left"
-              >
-                <AddIcon />
-              </IconButton>
-              <IconButton
-                className="attach-addon"
-                onClick={this.handleAttachAddon}
-                tooltip="Attach Addon"
-                tooltipPosition="bottom-left"
-              >
-                <AttachIcon />
-              </IconButton>
+              <Tooltip title="New Addon" placement="bottom-end">
+                <IconButton
+                  className="new-addon"
+                  onClick={this.handleNewAddon}
+                >
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Attach Addon" placement="bottom-end">
+                <IconButton
+                  className="attach-addon"
+                  onClick={this.handleAttachAddon}
+                >
+                  <AttachIcon />
+                </IconButton>
+              </Tooltip>
             </Paper>
           )}
           {this.state.new && (
@@ -418,7 +432,7 @@ export default class Addons extends Component {
             onRequestClose={this.handleAddonDialogClose}
             contentStyle={style.addonDialog}
             actions={
-              <FlatButton
+              <Button
                 className="ok"
                 label="Ok"
                 primary
@@ -449,7 +463,7 @@ export default class Addons extends Component {
             open={this.state.submitFail}
             modal
             actions={
-              <FlatButton
+              <Button
                 className="ok"
                 label="Ok"
                 primary
@@ -473,5 +487,4 @@ export default class Addons extends Component {
 
 Addons.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
 };

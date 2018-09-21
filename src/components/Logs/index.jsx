@@ -41,22 +41,34 @@ export default class Logs extends Component {
       logs: 'Logplex ready, waiting for logs..\n',
       url: '',
     };
-    if (this.props.active) { this.state.loading = true; this.loadLogs('constructor'); }
+    this.loadLogs('constructor');
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active && !this.state.reading) {
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  /*
+  componentDidUpdate() {
+    if (!this.state.reading) {
       this.loadLogs('update');
     }
   }
+  */
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
 
   loadLogs(mode) {
-    if (mode !== 'constructor') {
-      this.setState({ logs: this.state.logs, loading: true });
+    if (this._isMounted) {
+      if (mode !== 'constructor') {
+        this.setState({ logs: this.state.logs, loading: true });
+      }
+      api.getLogSession(this.props.app).then((response) => {
+        this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(response.data.logplex_url)}` });
+      });
     }
-    api.getLogSession(this.props.app).then((response) => {
-      this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(response.data.logplex_url)}` });
-    });
   }
 
   render() {
@@ -68,7 +80,7 @@ export default class Logs extends Component {
           </div>
         </MuiThemeProvider>
       );
-    } else if (this.props.active && this.state.reading) {
+    } else if (this.state.reading) {
       return (
         <MuiThemeProvider muiTheme={muiTheme}>
           <ScrollFollow startFollowing>
@@ -89,5 +101,4 @@ export default class Logs extends Component {
 
 Logs.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
 };

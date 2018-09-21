@@ -103,7 +103,7 @@ const Footer = () => (
           Akkeris is built with a little bit of love, and a lot of anger. <br />
           Brought to you by COBRA and our open source community.
         </p>
-        <IconButton href="https://github.com/akkeris" ><GitIcon color="rgba(255,255,255,0.8)" /></IconButton>
+        <IconButton href="https://github.com/akkeris" ><GitIcon nativeColor="rgba(255,255,255,0.8)" /></IconButton>
       </div>
     </Paper>
   </MuiThemeProvider>

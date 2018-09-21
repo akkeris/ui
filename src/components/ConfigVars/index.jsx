@@ -66,13 +66,14 @@ export default class ConfigVar extends Component {
       edit: false,
       newValue: null,
     };
-    if (this.props.active) { this.loadConfigVars(); }
+    this.loadConfigVars();
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active) {
-      this.loadConfigVars();
-    }
+  componentDidMount() {
+    this._isMounted = true;
+  }
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   getConfigVars() {
@@ -104,10 +105,12 @@ export default class ConfigVar extends Component {
 
   loadConfigVars() {
     api.getConfig(this.props.app).then((response) => {
-      this.setState({
-        config: response.data,
-        loading: false,
-      });
+      if (this._isMounted) {
+        this.setState({
+          config: response.data,
+          loading: false,
+        });
+      }
     });
   }
 
