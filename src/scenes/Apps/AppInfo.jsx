@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Tooltip from '@material-ui/core/Tooltip';
 import Card from '@material-ui/core/Card';
@@ -353,10 +352,9 @@ export default class AppInfo extends Component {
             modal
             actions={
               <Button
-                label="Ok"
                 primary
                 onClick={this.handleClose}
-              />}
+              >Ok</Button>}
           >
             {this.state.submitMessage}
           </Dialog>

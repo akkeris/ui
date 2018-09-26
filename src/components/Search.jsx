@@ -1,61 +1,192 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import AutoComplete from 'material-ui/AutoComplete';
+import { TextField, MenuItem, Paper, withStyles } from '@material-ui/core';
+import parse from 'autosuggest-highlight/parse';
+import Autosuggest from 'react-autosuggest';
 import PropTypes from 'prop-types';
 
-const muiTheme = getMuiTheme();
+const styles = theme => ({
+  input: {
+    width: '300px',
+  },
+  container: {
+    position: 'relative',
+    width: '300px',
+  },
+  suggestionsContainerOpen: {
+    position: 'absolute',
+    zIndex: 1,
+    left: 0,
+    right: 0,
+  },
+  suggestion: {
+    display: 'block',
+  },
+  suggestionsList: {
+    margin: 0,
+    padding: 0,
+    listStyleType: 'none',
+  },
+  divider: {
+    height: theme.spacing.unit * 2,
+  },
+});
 
 /* eslint-disable react/default-props-match-prop-types, react/prop-types */
 
-export default class Search extends Component {
+class Search extends Component {
   constructor(props, context) {
     super(props, context);
+    this.popperNode = null;
     this.state = {
-      searchText: this.props.searchText,
+      single: '',
+      popper: '',
+      suggestions: [],
     };
   }
 
-  handleUpdateInput = (searchText) => {
-    this.setState({ searchText });
-  };
+  getSuggestions = (value) => {
+    const inputValue = value.trim().toLowerCase();
+    const inputLength = inputValue.length;
+    let results = 0;
+    const maxResults = 5;
+
+    if (inputLength === 0) { return []; }
+
+    return this.props.data.filter((suggestion) => {
+      const keep = results < maxResults && suggestion.toLowerCase().includes(inputValue);
+      if (keep) {
+        results += 1;
+      }
+      return keep;
+    });
+  }
+
+  getSuggestionValue = suggestion => suggestion;
+
+  handleSuggestionsFetchRequested = ({ value }) => {
+    this.setState({ suggestions: this.getSuggestions(value) });
+  }
+
+  handleSuggestionsClearRequested = () => {
+    this.setState({ suggestions: [] });
+  }
+
+  handleChange = name => (event, { newValue }) => {
+    this.setState({ [name]: newValue });
+  }
+
+  handleSuggestionSelected = (event, { suggestion }) => {
+    this.props.handleSearch(suggestion);
+  }
+
+  // https://github.com/moroshko/autosuggest-highlight/issues/5#issuecomment-392333344
+  customMatch = (text, query) => {
+    const results = [];
+    const trimmedQuery = query.trim().toLowerCase();
+    const textLower = text.toLowerCase();
+    const queryLength = trimmedQuery.length;
+    let indexOf = textLower.indexOf(trimmedQuery);
+    while (indexOf > -1) {
+      results.push([indexOf, indexOf + queryLength]);
+      indexOf = textLower.indexOf(query, indexOf + queryLength);
+    }
+    return results;
+  }
+
+  // Render the individual suggestion, highlighting the query inside the text
+  renderSuggestion = (suggestion, { query, isHighlighted }) => {
+    const matches = this.customMatch(suggestion, query);
+    const parts = parse(suggestion, matches);
+    return (
+      <MenuItem selected={isHighlighted} component="div">
+        <div>
+          {parts.map((part, index) => (part.highlight ? (
+            <span key={String(index)} style={{ fontWeight: 500 }}>
+              {part.text}
+            </span>
+          ) : (
+            <strong key={String(index)} style={{ fontWeight: 300 }}>
+              {part.text}
+            </strong>
+          )))}
+        </div>
+      </MenuItem>
+    );
+  }
+
+  renderInputComponent(inputProps) { // eslint-disable-line class-methods-use-this
+    const { classes, errorText, inputRef = () => {}, ref, ...other } = inputProps;
+    return (
+      <TextField
+        error={errorText ? true : undefined}
+        inputProps={{
+          inputRef: (node) => {
+            ref(node);
+            inputRef(node);
+          },
+          classes: {
+            input: classes.input,
+          },
+        }}
+        {...other}
+      />
+    );
+  }
+
 
   render() {
+    const { classes, errorText } = this.props;
+    const autoSuggestProps = {
+      renderInputComponent: this.renderInputComponent,
+      suggestions: this.state.suggestions,
+      onSuggestionsFetchRequested: this.handleSuggestionsFetchRequested,
+      onSuggestionsClearRequested: this.handleSuggestionsClearRequested,
+      getSuggestionValue: this.getSuggestionValue,
+      renderSuggestion: this.renderSuggestion,
+      onSuggestionSelected: this.handleSuggestionSelected,
+    };
+
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
-        <AutoComplete
-          className={this.props.className}
-          searchText={this.state.searchText}
-          hintText={this.props.label}
-          hintStyle={this.props.hintStyle}
-          dataSource={this.props.data}
-          onUpdateInput={this.handleUpdateInput}
-          filter={AutoComplete.fuzzyFilter}
-          maxSearchResults={5}
-          onNewRequest={this.props.handleSearch}
-          errorText={this.props.errorText}
-          inputStyle={this.props.style}
+      <div>
+        <Autosuggest
+          {...autoSuggestProps}
+          inputProps={{
+            classes,
+            errorText,
+            placeholder: 'Search for an app',
+            label: errorText || undefined,
+            value: this.state.single,
+            onChange: this.handleChange('single'),
+          }}
+          theme={{
+            input: classes.input,
+            container: classes.container,
+            suggestionsContainerOpen: classes.suggestionsContainerOpen,
+            suggestionsList: classes.suggestionsList,
+            suggestion: classes.suggestion,
+          }}
+          renderSuggestionsContainer={options => (
+            <Paper {...options.containerProps} square>
+              {options.children}
+            </Paper>
+          )}
         />
-      </MuiThemeProvider>
+      </div>
     );
   }
 }
 
 Search.propTypes = {
   data: PropTypes.arrayOf(PropTypes.string).isRequired,
-  handleSearch: PropTypes.func,
+  classes: PropTypes.object.IsRequired,
   errorText: PropTypes.string,
-  searchText: PropTypes.string,
-  label: PropTypes.string,
-  className: PropTypes.string,
+  handleSearch: PropTypes.func,
 };
 
 Search.defaultProps = {
-  handleSearch: null,
+  classes: {},
   errorText: '',
-  searchText: '',
-  label: 'Search',
-  hintStyle: null,
-  style: null,
-  className: 'autocomplete',
+  handleSearch: () => {},
 };
+
+export default withStyles(styles)(Search);

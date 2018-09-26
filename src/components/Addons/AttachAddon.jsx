@@ -1,20 +1,36 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import Button from '@material-ui/core/Button';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import Dialog from 'material-ui/Dialog';
+import {
+  Button, Step, Stepper, StepLabel, Select, MenuItem,
+  Dialog, DialogActions, DialogContent,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import Search from '../Search';
 import api from '../../services/api';
 import util from '../../services/util';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiStepper: {
+      root: {
+        padding: '24px 0px',
+      },
+    },
+    MuiButton: {
+      root: {
+        marginRight: '15px',
+      },
+    },
+    MuiFormControl: {
+      root: {
+        marginBottom: '15px',
+      },
+    },
+  },
 });
 
 const style = {
@@ -78,9 +94,9 @@ export default class AttachAddon extends Component {
         className={addon.addon_service.name}
         key={addon.name}
         value={addon}
-        label={addon.addon_service.name}
-        primaryText={addon.addon_service.name}
-      />
+      >
+        {addon.addon_service.name}
+      </MenuItem>
     ));
   }
 
@@ -89,7 +105,13 @@ export default class AttachAddon extends Component {
       case 0:
         return (
           <div>
-            <Search className={'app-search'} label="App" data={util.filterName(this.state.apps)} handleSearch={this.handleSearch} searchText="" errorText={this.state.errorText} />
+            <Search
+              className={'app-search'}
+              label="App"
+              data={util.filterName(this.state.apps)}
+              handleSearch={this.handleSearch}
+              errorText={this.state.errorText}
+            />
             <p>
               The application name that has an addon you want to attach. Ex. my-test-app-dev
             </p>
@@ -98,9 +120,9 @@ export default class AttachAddon extends Component {
       case 1:
         return (
           <div>
-            <DropDownMenu className="addon-menu" value={this.state.addon} onChange={this.handleAddonChange}>
+            <Select className="addon-menu" value={this.state.addon} onChange={this.handleAddonChange}>
               {this.getAddons()}
-            </DropDownMenu>
+            </Select>
             <p>
               Select the addon you want to attach.
             </p>
@@ -122,9 +144,9 @@ export default class AttachAddon extends Component {
     });
   }
 
-  handleAddonChange = (event, index, value) => {
+  handleAddonChange = (event) => {
     this.setState({
-      addon: value,
+      addon: event.target.value,
     });
   }
 
@@ -168,7 +190,7 @@ export default class AttachAddon extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px' };
     if (finished) {
       this.submitAddonAttachment();
     } else {
@@ -176,21 +198,25 @@ export default class AttachAddon extends Component {
         <div style={contentStyle}>
           <div>{this.getStepContent(stepIndex)}</div>
           <div style={style.buttons.div}>
-            {stepIndex > 0 && (<FlatButton
-              className="back"
-              label="Back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.Back}
-            />)}
+            {stepIndex > 0 && (
+              <Button
+                className="back"
+                disabled={stepIndex === 0}
+                onClick={this.handlePrev}
+                style={style.buttons.Back}
+              >
+                Back
+              </Button>
+            )}
             {stepIndex > 0 && (
               <Button
                 variant="contained"
                 className="next"
-                label={stepIndex === 1 ? 'Finish' : 'Next'}
-                primary
+                color="primary"
                 onClick={this.handleNext}
-              />
+              >
+                {stepIndex === 1 ? 'Finish' : 'Next'}
+              </Button>
             )}
           </div>
         </div>
@@ -202,7 +228,7 @@ export default class AttachAddon extends Component {
   render() {
     const { loading, stepIndex, finished } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
@@ -220,16 +246,19 @@ export default class AttachAddon extends Component {
           <Dialog
             className="attach-addon-error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onClick={this.handleClose}
-              />}
           >
-            {this.state.submitMessage}
+            <DialogContent>
+              {this.state.submitMessage}
+            </DialogContent>
+            <DialogActions>
+              <Button
+                className="ok"
+                color="primary"
+                onClick={this.handleClose}
+              >
+                Ok
+              </Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>

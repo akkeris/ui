@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel, InputLabel, FormControl,
-  Select, MenuItem, Dialog, Button, Input } from '@material-ui/core';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles/';
+import {
+  Step, Stepper, StepLabel, FormControl,
+  Select, MenuItem, Dialog, Button, Input,
+} from '@material-ui/core';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 

@@ -1,33 +1,45 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
 import {
-  Button, IconButton, Snackbar, Paper, CircularProgress, Dialog,
-  Tooltip,
+  Button, IconButton, Snackbar, Typography, CircularProgress, Dialog,
+  Tooltip, Table, TableHead, TableBody, TableRow, TableCell,
+  DialogTitle, DialogContent, DialogContentText, DialogActions,
 } from '@material-ui/core';
-
-
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
-// import RefreshIndicator from 'material-ui/RefreshIndicator';
-// import IconButton from 'material-ui/IconButton';
-// import Snackbar from 'material-ui/Snackbar';
-// import Paper from 'material-ui/Paper';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import AttachIcon from 'material-ui/svg-icons/communication/call-merge';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
-// import Dialog from 'material-ui/Dialog';
-// import FlatButton from 'material-ui/FlatButton';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import AddIcon from '@material-ui/icons/Add';
+import AttachIcon from '@material-ui/icons/CallMerge';
+import RemoveIcon from '@material-ui/icons/Clear';
 
 import api from '../../services/api';
 import NewAddon from './NewAddon';
 import AttachAddon from './AttachAddon';
 import ConfirmationModal from '../ConfirmationModal';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+// fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
+function isEmpty(obj) {
+  let empty = true;
+  Object.keys(obj).forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) { empty = false; }
+  });
+  return empty;
+}
+
+const muiTheme = createMuiTheme({
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiPaper: {
+      root: {
+        boxShadow: '0 !important',
+      },
+    },
+    MuiDialog: {
+      paper: {
+        width: '40%',
+      },
+    },
+  },
 });
 
 const style = {
@@ -106,28 +118,29 @@ export default class Addons extends Component {
   getAddons() {
     return this.state.addons.map(addon => (
       <TableRow
+        hover
         className={addon.addon_service.name}
         key={addon.id}
         style={style.tableRowPointer}
       >
-        <TableRowColumn
+        <TableCell
           onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
           <div style={style.tableRowColumn.sub}>{addon.id}</div>
-        </TableRowColumn>
-        <TableRowColumn
+        </TableCell>
+        <TableCell
           onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
+        </TableCell>
+        <TableCell style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
             <IconButton className="addon-remove" onClick={() => this.handleAddonConfirmation(addon)}>
               <RemoveIcon />
             </IconButton>
           </div>
-        </TableRowColumn>
+        </TableCell>
       </TableRow>
     ));
   }
@@ -135,33 +148,34 @@ export default class Addons extends Component {
   getAddonAttachments() {
     return this.state.addonAttachments.map((attachment, index) => (
       <TableRow
+        hover
         className={`${attachment.name} addon-attachment-list-${index}`}
         key={attachment.id}
         style={style.tableRowPointer}
       >
-        <TableRowColumn
+        <TableCell
           onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
-        </TableRowColumn>
-        <TableRowColumn
+        </TableCell>
+        <TableCell
           onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{attachment.addon.plan.name}</div>
-        </TableRowColumn>
-        <TableRowColumn
+        </TableCell>
+        <TableCell
           onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{attachment.addon.app.name}</div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
+        </TableCell>
+        <TableCell style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
             <IconButton className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
               <RemoveIcon />
             </IconButton>
           </div>
-        </TableRowColumn>
+        </TableCell>
       </TableRow>
     ));
   }
@@ -171,13 +185,11 @@ export default class Addons extends Component {
       const currentAddon = this.state.currentAddon;
       return (
         <div>
-          <span>Attached Apps</span>
-          <br />
-          <span className="addon-name" style={{ fontSize: '18px' }}>{
-            currentAddon.addon_service ? (currentAddon.addon_service.name) : (currentAddon.name)
-          } {
-            currentAddon.addon_service ? (`(${currentAddon.name})`) : ''
-          }</span>
+          <Typography variant="headline">Attached Apps</Typography>
+          <Typography className="addon-name" variant="subheading" style={{ marginTop: '10px' }}>
+            {currentAddon.addon_service ? (currentAddon.addon_service.name) : (currentAddon.name)}
+            {currentAddon.addon_service ? (` (${currentAddon.name})`) : ''}
+          </Typography>
         </div>
       );
     }
@@ -228,22 +240,22 @@ export default class Addons extends Component {
 
   formatAttachment(attachment, index) { // eslint-disable-line class-methods-use-this
     return (
-      <TableRow className={`attachment-${index}`} style={style.tableRow} key={attachment.id} selectable={false}>
-        <TableRowColumn colSpan="2">
+      <TableRow className={`attachment-${index}`} style={style.tableRow} key={attachment.id}>
+        <TableCell colSpan="2">
           <div className="attachment-name" style={style.tableRowColumn.title}>{attachment.name}</div>
           <div style={style.tableRowColumn.sub}>{attachment.id}</div>
-        </TableRowColumn>
-        <TableRowColumn>
+        </TableCell>
+        <TableCell>
           {attachment.owner && (
-            <div className="attachment-owner" style={{ color: lightBaseTheme.palette.accent1Color }}>Owner</div>
+            <div className="attachment-owner" style={{ color: muiTheme.palette.secondary.main }}>Owner</div>
           )}
-        </TableRowColumn>
+        </TableCell>
       </TableRow>
     );
   }
 
   handleAddonDialogClose = () => {
-    this.setState({ addonDialogOpen: false, currentAddon: {} });
+    this.setState({ addonDialogOpen: false });
   }
 
   handleNewAddon = () => {
@@ -356,7 +368,7 @@ export default class Addons extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
@@ -364,10 +376,10 @@ export default class Addons extends Component {
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
-          {!this.state.new && (
-            <Paper zDepth={0}>
+          {(!this.state.new && !this.state.attach) && (
+            <div>
               <Tooltip title="New Addon" placement="bottom-end">
                 <IconButton
                   className="new-addon"
@@ -384,7 +396,7 @@ export default class Addons extends Component {
                   <AttachIcon />
                 </IconButton>
               </Tooltip>
-            </Paper>
+            </div>
           )}
           {this.state.new && (
             <div>
@@ -399,85 +411,95 @@ export default class Addons extends Component {
             </div>
           )}
           <Table className="addon-list">
-            <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+            <TableHead>
               <TableRow>
-                <TableHeaderColumn>Addon</TableHeaderColumn>
-                <TableHeaderColumn>Plan</TableHeaderColumn>
-                <TableHeaderColumn style={style.tableRowColumn.icon}>Remove</TableHeaderColumn>
+                <TableCell>Addon</TableCell>
+                <TableCell>Plan</TableCell>
+                <TableCell style={style.tableRowColumn.icon}>Remove</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
-              {this.getAddons()}
+            </TableHead>
+            <TableBody>
+              {this.state.addons.length > 0 ? this.getAddons() : (
+                <TableRow><TableCell /><TableCell>No Results</TableCell><TableCell /></TableRow>
+              )}
             </TableBody>
           </Table>
           {this.state.addonAttachments.length > 0 && (
             <Table className="addon-attachment-list">
-              <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+              <TableHead>
                 <TableRow>
-                  <TableHeaderColumn>Attachment</TableHeaderColumn>
-                  <TableHeaderColumn>Plan</TableHeaderColumn>
-                  <TableHeaderColumn>Source</TableHeaderColumn>
-                  <TableHeaderColumn style={style.tableRowColumn.icon}>Remove</TableHeaderColumn>
+                  <TableCell>Attachment</TableCell>
+                  <TableCell>Plan</TableCell>
+                  <TableCell>Source</TableCell>
+                  <TableCell style={style.tableRowColumn.icon}>Remove</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+              </TableHead>
+              <TableBody>
                 {this.getAddonAttachments()}
               </TableBody>
             </Table>
           )}
           <Dialog
             className="attached-apps-dialog"
-            title={this.getDialogTitle()}
-            overlayStyle={{ backgroundColor: 'null' }}
-            onRequestClose={this.handleAddonDialogClose}
-            contentStyle={style.addonDialog}
-            actions={
+            onClose={this.handleAddonDialogClose}
+            open={this.state.addonDialogOpen}
+            // BackdropProps={{ invisible: true }}
+          >
+            <DialogTitle>
+              {this.getDialogTitle()}
+            </DialogTitle>
+            <DialogContent>
+              {!isEmpty(this.state.currentAddon) && (
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell colSpan="2">App</TableCell>
+                      <TableCell>Ownership</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {this.state.currentAddon.attached_to.map((attachment, index) =>
+                      this.formatAttachment(attachment, index),
+                    )}
+                  </TableBody>
+                </Table>
+              )}
+            </DialogContent>
+            <DialogActions>
               <Button
                 className="ok"
-                label="Ok"
-                primary
+                color="primary"
                 onClick={this.handleAddonDialogClose}
-              />}
-            open={this.state.addonDialogOpen}
-          >
-            {this.state.addonDialogOpen && (
-              <Table>
-                <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
-                  <TableRow>
-                    <TableHeaderColumn colSpan="2">App</TableHeaderColumn>
-                    <TableHeaderColumn>Ownership</TableHeaderColumn>
-                  </TableRow>
-                </TableHeader>
-                <TableBody displayRowCheckbox={false} selectable={false}>
-                  {this.state.currentAddon.attached_to.map((attachment, index) =>
-                    this.formatAttachment(attachment, index),
-                  )}
-                </TableBody>
-              </Table>
-            )}
+              >
+                Ok
+              </Button>
+            </DialogActions>
           </Dialog>
           <ConfirmationModal className="remove-addon-confirm" open={this.state.confirmAddonOpen} onOk={this.handleRemoveAddon} onCancel={this.handleCancelAddonConfirmation} message="Are you sure you want to delete this addon?" />
           <ConfirmationModal className="remove-attachment-confirm" open={this.state.confirmAttachmentOpen} onOk={this.handleRemoveAddonAttachment} onCancel={this.handleCancelAddonAttachmentConfirmation} message="Are you sure you want to delete this attachment?" />
           <Dialog
             className="addon-error"
             open={this.state.submitFail}
-            modal
-            actions={
+          >
+            <DialogContent>
+              <DialogContentText>{this.state.submitMessage}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
               <Button
                 className="ok"
-                label="Ok"
-                primary
+                color="primary"
                 onClick={this.handleDialogClose}
-              />}
-          >
-            {this.state.submitMessage}
+              >
+                Ok
+              </Button>
+            </DialogActions>
           </Dialog>
           <Snackbar
             className="addon-snack"
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>

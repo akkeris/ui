@@ -1,39 +1,51 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import {
+  Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+} from '@material-ui/core';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
 
-const muiTheme = getMuiTheme();
+const muiTheme = createMuiTheme({
+  overrides: {
+    MuiPaper: {
+      root: {
+        width: '75%',
+        maxWidth: '768px',
+      },
+    },
+  },
+});
 
 /* eslint-disable react/prefer-stateless-function */
 export default class ConfirmationModal extends Component {
   render() {
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <Dialog
           className={this.props.className}
           open={this.props.open}
-          modal
-          title={this.props.title}
-          actions={[
-            this.props.actions,
-            <FlatButton
-              className="ok"
-              label="Ok"
-              primary
-              onClick={this.props.onOk}
-            />,
-            <FlatButton
-              className="cancel"
-              label="Cancel"
-              secondary
-              onClick={this.props.onCancel}
-            />,
-          ]}
         >
-          {this.props.message}
+          <DialogTitle>{this.props.title}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{this.props.message}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            {this.props.actions}
+            <Button
+              className="ok"
+              color="primary"
+              onClick={this.props.onOk}
+            >
+              Ok
+            </Button>
+            <Button
+              className="cancel"
+              color="secondary"
+              onClick={this.props.onCancel}
+            >
+              Cancel
+            </Button>
+          </DialogActions>
         </Dialog>
       </MuiThemeProvider>
     );
