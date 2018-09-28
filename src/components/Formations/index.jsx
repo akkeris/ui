@@ -1,25 +1,32 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import MenuItem from 'material-ui/MenuItem';
-import Snackbar from 'material-ui/Snackbar';
-import IconButton from 'material-ui/IconButton';
-import Paper from 'material-ui/Paper';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow } from 'material-ui/Table';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
-
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import {
+  CircularProgress, MenuItem, Snackbar, IconButton, Button, Paper,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  Table, TableBody, TableHead, TableRow, TableCell,
+} from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import util from '../../services/util';
 import NewFormation from './NewFormation';
 import DynoType from './DynoType';
 
-const muiTheme = getMuiTheme({
+const muiTheme = createMuiTheme({
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  overrides: {
+    MuiTable: {
+      root: {
+        tableLayout: 'fixed',
+      },
+    },
+    MuiPaper: {
+      root: {
+        boxShadow: 'none !important',
+      },
+    },
+  },
 });
 
 const style = {
@@ -73,8 +80,7 @@ export default class Formations extends Component {
         className={size.name}
         key={size.name}
         value={size.name}
-        primaryText={size.resources.limits.memory}
-      />));
+      >{size.resources.limits.memory}</MenuItem>));
   }
 
   getFormations() {
@@ -178,15 +184,15 @@ export default class Formations extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           {!this.state.new && (
             <Paper zDepth={0}>
@@ -199,37 +205,42 @@ export default class Formations extends Component {
               <NewFormation app={this.props.app} onComplete={this.reload} />
             </div>
           )}
-          <Table className="formation-list" wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-            <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+          <Table className="formation-list" >
+            <TableHead>
               <TableRow>
-                <TableHeaderColumn>Formation</TableHeaderColumn>
-                <TableHeaderColumn>Status</TableHeaderColumn>
+                <TableCell>Formation</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+            </TableHead>
+            <TableBody hover>
               {this.getFormations()}
             </TableBody>
           </Table>
           <Dialog
             className="error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onClick={this.handleDialogClose}
-              />}
           >
-            {this.state.submitMessage}
+            <DialogTitle>
+              Error
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>{this.state.submitMessage}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                color="primary"
+                className="ok"
+                onClick={this.handleDialogClose}
+              >
+                Ok
+              </Button>
+            </DialogActions>
           </Dialog>
           <Snackbar
             className="formation-snack"
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>

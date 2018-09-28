@@ -1,17 +1,10 @@
 import React, { Component } from 'react';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import {
+  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, CardContent,
+  Tooltip, Button, IconButton, Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
+} from '@material-ui/core';
 import PropTypes from 'prop-types';
-import Tooltip from '@material-ui/core/Tooltip';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
-import RefreshIndicator from '@material-ui/core/CircularProgress';
-import Dialog from '@material-ui/core/Dialog';
-import Snackbar from '@material-ui/core/Snackbar';
 import InfoIcon from '@material-ui/icons/Info';
 import CPUIcon from '@material-ui/icons/Memory';
 import MetricIcon from '@material-ui/icons/TrackChanges';
@@ -194,19 +187,23 @@ export default class AppInfo extends Component {
       return (
         <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             <Dialog
               className="not-found-error"
               open={this.state.submitFail}
-              modal
-              actions={
-                <Button
-                  label="Ok"
-                  primary
-                  onClick={this.handleNotFoundClose}
-                />}
             >
-              {this.state.submitMessage}
+              <DialogTitle>Error</DialogTitle>
+              <DialogContent>
+                <DialogContentText>{this.state.submitMessage}</DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={this.handleNotFoundClose}
+                  color="primary"
+                >
+                  Ok
+                </Button>
+              </DialogActions>
             </Dialog>
           </div>
         </MuiThemeProvider>);
@@ -349,21 +346,26 @@ export default class AppInfo extends Component {
           <Dialog
             className="app-error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <Button
-                primary
-                onClick={this.handleClose}
-              >Ok</Button>}
           >
-            {this.state.submitMessage}
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{this.state.submitMessage}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                color="primary"
+                onClick={this.handleClose}
+              >
+              Ok
+              </Button>
+            </DialogActions>
           </Dialog>
           <Snackbar
             className="app-snack"
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>
