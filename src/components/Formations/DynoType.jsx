@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   Select, MenuItem, IconButton, TextField, Typography, FormControl, InputLabel,
-  ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails,
+  ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Tooltip,
   Table, TableHead, TableBody, TableRow, TableCell, Input,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
@@ -17,8 +17,6 @@ import { pink, teal, amber, red } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
-
-// import { pink50, teal50, amber50, red700, amber700 } from 'material-ui/styles/colors';
 
 const muiTheme = createMuiTheme({
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
@@ -83,6 +81,7 @@ export default class DynoType extends Component {
       edit: false,
       open: false,
       expanded: false,
+      errorText: '',
     };
   }
 
@@ -143,7 +142,7 @@ export default class DynoType extends Component {
           className={`dyno-${i}`}
           key={dyno.id}
           style={{ height: '58px', backgroundColor: color }}
-          selectable={false}
+          hover
         >
           <TableCell>
             <div style={style.tableRowColumn.main}>{dyno.name}</div>
@@ -266,7 +265,6 @@ export default class DynoType extends Component {
           className={this.props.formation.type}
           key={this.props.formation.id}
           style={{ ...style.tableRow, borderBottom: '1px solid rgb(224, 224, 224)' }}
-          selectable={false}
         >
           <TableCell style={{ padding: '4px 24px' }}>
             <ExpansionPanel style={{ boxShadow: 'none' }}>
@@ -345,41 +343,51 @@ export default class DynoType extends Component {
                       </TableCell>
                       <TableCell>
                         {this.props.formation.type === 'web' ? (
-                          <TextField className="port" disabled={!this.state.edit} type="numeric" label="Port" value={port} onChange={this.handleChange('port')} errorText={this.state.errorText} />
+                          <TextField className="port" disabled={!this.state.edit} type="numeric" label="Port" value={port} onChange={this.handleChange('port')} helperText={this.state.errorText} error={this.state.errorText.length > 0} />
                         ) : (
-                          <TextField className="command" disabled={!this.state.edit} label="Command" value={this.state.command} onChange={this.handleChange('command')} errorText={this.state.errorText} />
+                          <TextField className="command" disabled={!this.state.edit} label="Command" value={this.state.command} onChange={this.handleChange('command')} helperText={this.state.errorText} error={this.state.errorText.length > 0} />
                         )}
                       </TableCell>
                       {this.props.formation.type === 'web' && (
                         <TableCell>
-                          <TextField className="healthcheck" disabled={!this.state.edit} type="text" label="Healthcheck" value={healthcheck} onChange={this.handleChange('healthcheck')} errorText={this.state.errorText} />
+                          <TextField className="healthcheck" disabled={!this.state.edit} type="text" label="Healthcheck" value={healthcheck} onChange={this.handleChange('healthcheck')} helperText={this.state.errorText} error={this.state.errorText.length > 0} />
                         </TableCell>
                       )}
                       <TableCell style={{ width: '50px' }} >
-                        <IconButton className="restart" tooltip="Restart" tooltipPosition="top-left" onClick={this.handleRestart}><RestartIcon /></IconButton>
+                        <Tooltip title="Restart" placement="top-start">
+                          <IconButton className="restart" onClick={this.handleRestart}><RestartIcon /></IconButton>
+                        </Tooltip>
                       </TableCell>
                       <TableCell style={{ width: '50px' }} >
                         {!this.state.edit ? (
-                          <IconButton className="edit" tooltip="Edit" tooltipPosition="top-left" onClick={this.handleEditToggle}><EditIcon /></IconButton>
+                          <Tooltip title="Edit" placement="top-start">
+                            <IconButton className="edit" onClick={this.handleEditToggle}><EditIcon /></IconButton>
+                          </Tooltip>
                         ) : (
-                          <IconButton className="save" tooltip="Save" tooltipPosition="top-left" onClick={this.handlePatchFormation}><SaveIcon /></IconButton>
+                          <Tooltip title="Save" placement="top-start">
+                            <IconButton className="save" onClick={this.handlePatchFormation}><SaveIcon /></IconButton>
+                          </Tooltip>
                         )}
                       </TableCell>
                       <TableCell style={{ width: '50px' }} >
                         {this.props.formation.type !== 'web' && !this.state.edit && (
                           <div style={style.tableRowColumn.end}>
-                            <IconButton className="remove" tooltip="Remove" tooltipPosition="top-left" onClick={this.handleConfirmation}><RemoveIcon /></IconButton>
+                            <Tooltip title="Remove" placement="top-start">
+                              <IconButton className="remove" onClick={this.handleConfirmation}><RemoveIcon /></IconButton>
+                            </Tooltip>
                             <ConfirmationModal className="delete-formation" open={this.state.open} onOk={this.handleRemoveFormation} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this formation?" />
                           </div>
                         )}
                         {this.state.edit && (
-                          <div style={style.tableRowColumn.end}><IconButton className="back" tooltip="Back" tooltipPosition="top-left" onClick={this.handleEditBack}><BackIcon /></IconButton></div>
+                          <Tooltip title="Back" placement="top-start">
+                            <div style={style.tableRowColumn.end}><IconButton className="back" onClick={this.handleEditBack}><BackIcon /></IconButton></div>
+                          </Tooltip>
                         )}
                       </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
-                <Table style={{ tableLayout: 'fixed' }} className={`${this.props.formation.type}-dynos`} wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
+                <Table style={{ tableLayout: 'fixed' }} className={`${this.props.formation.type}-dynos`}>
                   <TableHead>
                     <TableRow>
                       <TableCell>Dyno</TableCell>
@@ -388,7 +396,7 @@ export default class DynoType extends Component {
                       <TableCell>Updated</TableCell>
                     </TableRow>
                   </TableHead>
-                  <TableBody hover>
+                  <TableBody>
                     {this.getDynos()}
                   </TableBody>
                 </Table>

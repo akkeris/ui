@@ -4,7 +4,7 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
   CircularProgress, MenuItem, Snackbar, IconButton, Button, Paper,
   Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-  Table, TableBody, TableHead, TableRow, TableCell,
+  Table, TableBody, TableHead, TableRow, TableCell, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -196,7 +196,10 @@ export default class Formations extends Component {
         <div>
           {!this.state.new && (
             <Paper zDepth={0}>
-              <IconButton className="new-formation" onClick={this.handleNewFormation} tooltip="New Formation" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+              <Tooltip title="New Formation" placement="bottom-end">
+                <IconButton className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
+              </Tooltip>
+
             </Paper>
           )}
           {this.state.new && (
@@ -211,7 +214,7 @@ export default class Formations extends Component {
                 <TableCell>Formation</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody hover>
+            <TableBody>
               {this.getFormations()}
             </TableBody>
           </Table>
