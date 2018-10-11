@@ -1,18 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import Button from '@material-ui/core/Button';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import Toggle from 'material-ui/Toggle';
-import Dialog from 'material-ui/Dialog';
+import {
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  Step, Stepper, StepLabel, Button, TextField, Collapse,
+  FormGroup, FormControlLabel, Switch, Typography,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
+const muiTheme = createMuiTheme({
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
 });
 
@@ -69,7 +67,7 @@ export default class NewAutoBuild extends Component {
       case 0:
         return (
           <div>
-            <TextField floatingLabelText="Repo" value={this.state.repo} onChange={this.handleRepoChange} />
+            <TextField label="Repo" value={this.state.repo} onChange={this.handleChange('repo')} />
             <p>
               The repo URL (e.g., https://github.com/foo/bar)
             </p>
@@ -78,7 +76,7 @@ export default class NewAutoBuild extends Component {
       case 1:
         return (
           <div>
-            <TextField floatingLabelText="Branch (defaults Master)" value={this.state.branch} onChange={this.handleBranchChange} />
+            <TextField label="Branch (defaults Master)" value={this.state.branch} onChange={this.handleChange('branch')} />
             <p>
               The branch on the repo to watch and deploy from
             </p>
@@ -87,7 +85,7 @@ export default class NewAutoBuild extends Component {
       case 2:
         return (
           <div>
-            <TextField floatingLabelText="User" value={this.state.username} onChange={this.handleUsernameChange} />
+            <TextField label="User" value={this.state.username} onChange={this.handleChange('username')} />
             <p>
               The username to access repo as
             </p>
@@ -96,18 +94,33 @@ export default class NewAutoBuild extends Component {
       case 3:
         return (
           <div>
-            <Toggle
-              label="Auto Deploy"
-              toggled={this.state.autoDeploy}
-              onToggle={this.handleAutoDeploy}
-            />
-            <Toggle
-              label="Status Check"
-              toggled={this.state.statusCheck}
-              onToggle={this.handleStatusCheck}
-            />
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={this.state.autoDeploy}
+                    onChange={this.handleAutoDeploy}
+                    color="primary"
+                  />
+                }
+                label="Auto Deploy"
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={this.state.statusCheck}
+                    onChange={this.handleStatusCheck}
+                    color="primary"
+                  />
+                }
+                label="Status Check"
+              />
+            </FormGroup>
           </div>
         );
+      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
+      case 4:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -140,23 +153,10 @@ export default class NewAutoBuild extends Component {
     }
   }
 
-  handleRepoChange = (event) => {
-    this.setState({
-      repo: event.target.value,
-    });
-  }
-
-  handleUsernameChange = (event) => {
-    this.setState({
-      username: event.target.value,
-    });
-  }
-
-  handleBranchChange = (event) => {
-    this.setState({
-      branch: event.target.value,
-    });
-  }
+   // Handles changes for repo, username, branch
+   handleChange = name => (event) => {
+     this.setState({ [name]: event.target.value });
+   }
 
   handleAutoDeploy = (event, isInputChecked) => {
     this.setState({ autoDeploy: isInputChecked });
@@ -187,7 +187,7 @@ export default class NewAutoBuild extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
     if (finished) {
       this.submitBuild();
     }
@@ -196,18 +196,18 @@ export default class NewAutoBuild extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            label="Back"
+          {stepIndex > 0 && (<Button
+            className="back"
             disabled={stepIndex === 0}
             onClick={this.handlePrev}
             style={style.buttons.back}
-          />)}
+          >Back</Button>)}
           <Button
-                        variant="contained"
-            label={stepIndex === 3 ? 'Finish' : 'Next'}
-            primary
+            variant="contained"
+            className="next"
+            color="primary"
             onClick={this.handleNext}
-          />
+          >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -216,7 +216,7 @@ export default class NewAutoBuild extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
@@ -233,22 +233,24 @@ export default class NewAutoBuild extends Component {
             </Step>
           </Stepper>
           {
-            <ExpandTransition loading={loading} open>
+            <Collapse in={!loading}>
               {this.renderContent()}
-            </ExpandTransition>
+            </Collapse>
           }
-          <Dialog
-            open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                label="Ok"
-                primary
-                onClick={this.handleClose}
-              />
-            }
-          >
-            {this.state.submitMessage}
+          <Dialog open={this.state.submitFail}>
+            <DialogTitle>
+              <Typography variant="h6">
+                Error
+              </Typography>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                {this.state.submitMessage}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>

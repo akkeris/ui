@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Radio, RadioGroup, Dialog, DialogActions,
   FormControl, FormLabel, FormControlLabel, MenuItem,
-  Button, TextField, Select, DialogContent,
+  Button, TextField, Select, DialogContent, Collapse,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
@@ -322,7 +322,11 @@ export default class NewFormation extends Component {
               <StepLabel>Describe Port/Command</StepLabel>
             </Step>
           </Stepper>
-          {(!loading) && (this.renderContent())}
+          {
+            <Collapse in={!loading}>
+              {this.renderContent()}
+            </Collapse>
+          }
           <Dialog
             className="new-error"
             open={this.state.submitFail}

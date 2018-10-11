@@ -43,6 +43,9 @@ const muiTheme = createMuiTheme({
 });
 
 const style = {
+  iconButton: {
+    color: 'black',
+  },
   addonDialog: {
     width: '35%',
   },
@@ -136,7 +139,7 @@ export default class Addons extends Component {
         </TableCell>
         <TableCell style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton className="addon-remove" onClick={() => this.handleAddonConfirmation(addon)}>
+            <IconButton style={style.iconButton} className="addon-remove" onClick={() => this.handleAddonConfirmation(addon)}>
               <RemoveIcon />
             </IconButton>
           </div>
@@ -171,7 +174,7 @@ export default class Addons extends Component {
         </TableCell>
         <TableCell style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
+            <IconButton style={style.iconButton} className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
               <RemoveIcon />
             </IconButton>
           </div>
@@ -185,8 +188,8 @@ export default class Addons extends Component {
       const currentAddon = this.state.currentAddon;
       return (
         <div>
-          <Typography variant="headline">Attached Apps</Typography>
-          <Typography className="addon-name" variant="subheading" style={{ marginTop: '10px' }}>
+          <Typography variant="h5">Attached Apps</Typography>
+          <Typography className="addon-name" variant="subtitle1" style={{ marginTop: '10px' }}>
             {currentAddon.addon_service ? (currentAddon.addon_service.name) : (currentAddon.name)}
             {currentAddon.addon_service ? (` (${currentAddon.name})`) : ''}
           </Typography>
@@ -384,6 +387,7 @@ export default class Addons extends Component {
                 <IconButton
                   className="new-addon"
                   onClick={this.handleNewAddon}
+                  style={style.iconButton}
                 >
                   <AddIcon />
                 </IconButton>
@@ -392,6 +396,7 @@ export default class Addons extends Component {
                 <IconButton
                   className="attach-addon"
                   onClick={this.handleAttachAddon}
+                  style={style.iconButton}
                 >
                   <AttachIcon />
                 </IconButton>
@@ -400,13 +405,13 @@ export default class Addons extends Component {
           )}
           {this.state.new && (
             <div>
-              <IconButton className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
+              <IconButton style={style.iconButton} className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
               <NewAddon app={this.props.app} onComplete={this.reload} />
             </div>
           )}
           {this.state.attach && (
             <div>
-              <IconButton className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
+              <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
               <AttachAddon app={this.props.app} onComplete={this.reload} />
             </div>
           )}

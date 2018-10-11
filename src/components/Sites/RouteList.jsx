@@ -170,7 +170,7 @@ export default class RouteList extends Component {
       <MuiThemeProvider muiTheme={muiTheme}>
         <div>
           {!this.state.new && (
-            <Paper zDepth={0}>
+            <Paper elevation={0}>
               <IconButton onClick={this.handleNewRoute} tooltip="New Route" tooltipPosition="bottom-left"><AddIcon /></IconButton>
             </Paper>
           )}

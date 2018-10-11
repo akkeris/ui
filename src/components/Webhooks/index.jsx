@@ -144,7 +144,7 @@ export default class Webhooks extends Component {
       <MuiThemeProvider muiTheme={muiTheme}>
         <div>
           {!this.state.new ? (
-            <Paper zDepth={0}>
+            <Paper elevation={0}>
               <IconButton
                 className="new-webhook"
                 onClick={this.handleNewWebhook}

@@ -19,14 +19,13 @@ import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 
 const muiTheme = createMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-    title: {
+    h6: {
       fontSize: 15,
       fontWeight: 500,
     },
-    subheading: {
+    subtitle1: {
       fontSize: 14,
       fontWeight: 500,
       color: 'rgba(0, 0, 0, 0.54)',
@@ -49,6 +48,9 @@ const muiTheme = createMuiTheme({
 
 
 const style = {
+  iconButton: {
+    color: 'black',
+  },
   tableRow: {
     height: '58px',
   },
@@ -271,10 +273,10 @@ export default class DynoType extends Component {
               <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} style={{ padding: '0px' }}>
                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                   <div style={{ flexGrow: 1 }}>
-                    <Typography variant="title">
+                    <Typography variant="h6">
                       {this.props.formation.type}
                     </Typography>
-                    <Typography gutterBottom variant="subheading">
+                    <Typography gutterBottom variant="subtitle1">
                       {date.toLocaleString()}
                     </Typography>
                   </div>
@@ -355,17 +357,17 @@ export default class DynoType extends Component {
                       )}
                       <TableCell style={{ width: '50px' }} >
                         <Tooltip title="Restart" placement="top-start">
-                          <IconButton className="restart" onClick={this.handleRestart}><RestartIcon /></IconButton>
+                          <IconButton style={style.iconButton} className="restart" onClick={this.handleRestart}><RestartIcon /></IconButton>
                         </Tooltip>
                       </TableCell>
                       <TableCell style={{ width: '50px' }} >
                         {!this.state.edit ? (
                           <Tooltip title="Edit" placement="top-start">
-                            <IconButton className="edit" onClick={this.handleEditToggle}><EditIcon /></IconButton>
+                            <IconButton style={style.iconButton} className="edit" onClick={this.handleEditToggle}><EditIcon /></IconButton>
                           </Tooltip>
                         ) : (
                           <Tooltip title="Save" placement="top-start">
-                            <IconButton className="save" onClick={this.handlePatchFormation}><SaveIcon /></IconButton>
+                            <IconButton style={style.iconButton} className="save" onClick={this.handlePatchFormation}><SaveIcon /></IconButton>
                           </Tooltip>
                         )}
                       </TableCell>
@@ -373,14 +375,14 @@ export default class DynoType extends Component {
                         {this.props.formation.type !== 'web' && !this.state.edit && (
                           <div style={style.tableRowColumn.end}>
                             <Tooltip title="Remove" placement="top-start">
-                              <IconButton className="remove" onClick={this.handleConfirmation}><RemoveIcon /></IconButton>
+                              <IconButton style={style.iconButton} className="remove" onClick={this.handleConfirmation}><RemoveIcon /></IconButton>
                             </Tooltip>
                             <ConfirmationModal className="delete-formation" open={this.state.open} onOk={this.handleRemoveFormation} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this formation?" />
                           </div>
                         )}
                         {this.state.edit && (
                           <Tooltip title="Back" placement="top-start">
-                            <div style={style.tableRowColumn.end}><IconButton className="back" onClick={this.handleEditBack}><BackIcon /></IconButton></div>
+                            <div style={style.tableRowColumn.end}><IconButton style={style.iconButton} className="back" onClick={this.handleEditBack}><BackIcon /></IconButton></div>
                           </Tooltip>
                         )}
                       </TableCell>

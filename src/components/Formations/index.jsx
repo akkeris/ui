@@ -30,6 +30,9 @@ const muiTheme = createMuiTheme({
 });
 
 const style = {
+  iconButton: {
+    color: 'black',
+  },
   tableRowColumn: {
     icon: {
       width: '58px',
@@ -195,16 +198,16 @@ export default class Formations extends Component {
       <MuiThemeProvider theme={muiTheme}>
         <div>
           {!this.state.new && (
-            <Paper zDepth={0}>
+            <Paper elevation={0}>
               <Tooltip title="New Formation" placement="bottom-end">
-                <IconButton className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
+                <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
               </Tooltip>
 
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
+              <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
               <NewFormation app={this.props.app} onComplete={this.reload} />
             </div>
           )}

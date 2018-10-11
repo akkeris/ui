@@ -1,20 +1,37 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import Button from '@material-ui/core/Button';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import Dialog from 'material-ui/Dialog';
+import {
+  Step, Stepper, StepLabel, Button, TextField, Typography,
+  Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
+  Select, MenuItem, Collapse, CircularProgress,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  typography: {
+    // map old typography variants to v2 (still throws warnings)
+    useNextVariants: true,
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiStepper: {
+      root: {
+        padding: '24px 0px',
+      },
+    },
+    MuiButton: {
+      root: {
+        marginRight: '15px',
+      },
+    },
+    MuiFormControl: {
+      root: {
+        marginBottom: '15px',
+      },
+    },
+  },
 });
 
 const style = {
@@ -68,7 +85,9 @@ export default class NewBuild extends Component {
 
   getOrgs() {
     return this.state.orgs.map(org => (
-      <MenuItem className={org.name} key={org.id} value={org.name} primaryText={org.name} />
+      <MenuItem key={org.id} className={org.name} value={org.name}>
+        {org.name}
+      </MenuItem>
     ));
   }
 
@@ -77,9 +96,14 @@ export default class NewBuild extends Component {
       case 0:
         return (
           <div>
-            <DropDownMenu className="org-menu" value={this.state.org} onChange={this.handleOrgChange}>
+            <Select
+              className="org-menu"
+              // have to provide '' rather than null on empty: https://github.com/facebook/react/issues/11417
+              value={this.state.org || ''}
+              onChange={this.handleChange('org')}
+            >
               {this.getOrgs()}
-            </DropDownMenu>
+            </Select>
             <p>
               Select the org for this build.
             </p>
@@ -88,7 +112,14 @@ export default class NewBuild extends Component {
       case 1:
         return (
           <div>
-            <TextField className="url" floatingLabelText="URL" value={this.state.url} onChange={this.handleUrlChange} errorText={this.state.errorText} />
+            <TextField
+              className="url"
+              label="URL"
+              value={this.state.url}
+              onChange={this.handleChange('url')}
+              helperText={this.state.errorText}
+              error={this.state.errorText && this.state.errorText.length > 0}
+            />
             <p>
               The URI to fetch the image or sources for this build.
               If an image is provided no build will occur, but the image will be fetched.
@@ -100,7 +131,14 @@ export default class NewBuild extends Component {
       case 2:
         return (
           <div>
-            <TextField className="checksum" floatingLabelText="Checksum (optional)" value={this.state.checksum} onChange={this.handleChecksumChange} errorText={this.state.errorText} />
+            <TextField
+              className="checksum"
+              label="Checksum (optional)"
+              value={this.state.checksum}
+              onChange={this.handleChange('checksum')}
+              helperText={this.state.errorText}
+              error={this.state.errorText && this.state.errorText.length > 0}
+            />
             <p>
               The sha 256 checksum (prepended with sha256:)
               of the contents specified in the url parameter,
@@ -112,7 +150,12 @@ export default class NewBuild extends Component {
       case 3:
         return (
           <div>
-            <TextField className="repo" floatingLabelText="Repo (optional)" value={this.state.repo} onChange={this.handleRepoChange} />
+            <TextField
+              className="repo"
+              label="Repo (optional)"
+              value={this.state.repo}
+              onChange={this.handleChange('repo')}
+            />
             <p>
               The href of the repo that will show in the logs and build information.
             </p>
@@ -121,7 +164,12 @@ export default class NewBuild extends Component {
       case 4:
         return (
           <div>
-            <TextField className="sha" floatingLabelText="Sha (optional)" value={this.state.sha} onChange={this.handleShaChange} />
+            <TextField
+              className="sha"
+              label="Sha (optional)"
+              value={this.state.sha}
+              onChange={this.handleChange('sha')}
+            />
             <p>
               SHA commit value (shown in logs and build info)
             </p>
@@ -130,7 +178,12 @@ export default class NewBuild extends Component {
       case 5:
         return (
           <div>
-            <TextField className="branch" floatingLabelText="Branch (optional)" value={this.state.branch} onChange={this.handleBranchChange} />
+            <TextField
+              className="branch"
+              label="Branch (optional)"
+              value={this.state.branch}
+              onChange={this.handleChange('branch')}
+            />
             <p>
               Branch of commit that caused the build (shown in logs and build info)
             </p>
@@ -139,12 +192,20 @@ export default class NewBuild extends Component {
       case 6:
         return (
           <div>
-            <TextField className="version" floatingLabelText="Version (optional)" value={this.state.version} onChange={this.handleVersionChange} />
+            <TextField
+              className="version"
+              label="Version (optional)"
+              value={this.state.version}
+              onChange={this.handleChange('version')}
+            />
             <p>
               An optional version to specify that will show in the logs
             </p>
           </div>
         );
+      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
+      case 7:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -179,44 +240,9 @@ export default class NewBuild extends Component {
     }
   }
 
-  handleOrgChange = (event, index, value) => {
-    this.setState({ org: value });
-  }
-
-  handleChecksumChange = (event) => {
-    this.setState({
-      checksum: event.target.value,
-    });
-  }
-
-  handleUrlChange = (event) => {
-    this.setState({
-      url: event.target.value,
-    });
-  }
-
-  handleRepoChange = (event) => {
-    this.setState({
-      repo: event.target.value,
-    });
-  }
-
-  handleShaChange = (event) => {
-    this.setState({
-      sha: event.target.value,
-    });
-  }
-
-  handleBranchChange = (event) => {
-    this.setState({
-      branch: event.target.value,
-    });
-  }
-
-  handleVersionChange = (event) => {
-    this.setState({
-      version: event.target.value,
-    });
+  // Handles changes for org, checksum, URL, repo, SHA, branch, and version.
+  handleChange = name => (event) => {
+    this.setState({ [name]: event.target.value });
   }
 
   submitBuild = () => {
@@ -246,7 +272,7 @@ export default class NewBuild extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
     if (finished) {
       this.submitBuild();
     }
@@ -255,20 +281,18 @@ export default class NewBuild extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
+          {stepIndex > 0 && (<Button
             className="back"
-            label="Back"
             disabled={stepIndex === 0}
             onClick={this.handlePrev}
             style={style.buttons.back}
-          />)}
+          >Back</Button>)}
           <Button
-                        variant="contained"
+            variant="contained"
             className="next"
-            label={stepIndex === 6 ? 'Finish' : 'Next'}
-            primary
+            color="primary"
             onClick={this.handleNext}
-          />
+          >{stepIndex === 6 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -277,7 +301,7 @@ export default class NewBuild extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
@@ -303,21 +327,24 @@ export default class NewBuild extends Component {
             </Step>
           </Stepper>
           {
-            <ExpandTransition loading={loading} open>
+            <Collapse in={!loading}>
               {this.renderContent()}
-            </ExpandTransition>
+            </Collapse>
           }
-          <Dialog
-            open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                label="Ok"
-                primary
-                onClick={this.handleClose}
-              />}
-          >
-            {this.state.submitMessage}
+          <Dialog open={this.state.submitFail}>
+            <DialogTitle>
+              <Typography variant="h6">
+                Error
+              </Typography>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                {this.state.submitMessage}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>

@@ -74,6 +74,9 @@ const muiTheme = createMuiTheme({
 });
 
 const style = {
+  iconButton: {
+    color: 'black',
+  },
   refresh: {
     div: {
       marginLeft: 'auto',
@@ -220,6 +223,7 @@ export default class AppInfo extends Component {
             <CardContent>
               <Tooltip title="Live App" placement="top-end">
                 <IconButton
+                  style={style.iconButton}
                   className="live-app"
                   href={this.state.app.web_url}
                 >
@@ -229,6 +233,7 @@ export default class AppInfo extends Component {
               {this.state.app.git_url && (
                 <Tooltip title="Github Repo" placement="top-end">
                   <IconButton
+                    style={style.iconButton}
                     className="github"
                     href={this.state.app.git_url}
                   >

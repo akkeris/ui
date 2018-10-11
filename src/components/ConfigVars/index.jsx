@@ -232,7 +232,7 @@ export default class ConfigVar extends Component {
       <MuiThemeProvider muiTheme={muiTheme}>
         <div>
           {!this.state.new && (
-            <Paper zDepth={0}>
+            <Paper elevation={0}>
               <IconButton className="new-config" onClick={this.handleNewConfig} tooltip="New Config" tooltipPosition="bottom-left"><AddIcon /></IconButton>
             </Paper>
           )}

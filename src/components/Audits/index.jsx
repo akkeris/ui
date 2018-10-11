@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import { Table, TableBody, TableRow, TableRowColumn, TableHeader, TableHeaderColumn } from 'material-ui/Table';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-
 import SHA256 from 'crypto-js/sha256';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import {
+  CircularProgress, Table, TableHead, TableBody, TableRow, TableCell, Button,
+  Dialog, DialogContent, DialogActions, DialogTitle,
+} from '@material-ui/core';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -57,12 +57,12 @@ function sillyfunc(prefix, input) {
     }
     return (
       <TableRow>
-        <TableRowColumn>
+        <TableCell>
           {prefix ? `${prefix}.${key}` : key}
-        </TableRowColumn>
-        <TableRowColumn>
+        </TableCell>
+        <TableCell>
           {input[key]}
-        </TableRowColumn>
+        </TableCell>
       </TableRow>
     );
   });
@@ -98,18 +98,18 @@ export default class Audits extends Component {
           key={id}
           style={style.tableRow}
           onClick={() => this.handleRowSelection(id)}
-          selectable={false}
+          hover
         >
-          <TableRowColumn style={style.tableRow}>
+          <TableCell style={style.tableRow}>
             <div style={style.tableRowColumn.main}>{audit.action}</div>
             <div style={style.tableRowColumn.sub}>{id}</div>
-          </TableRowColumn>
-          <TableRowColumn>
+          </TableCell>
+          <TableCell>
             <div>{audit.username}</div>
-          </TableRowColumn>
-          <TableRowColumn>
+          </TableCell>
+          <TableCell>
             <div>{new Date(audit.received_at).toLocaleString()}</div>
-          </TableRowColumn>
+          </TableCell>
         </TableRow>
       );
     });
@@ -136,53 +136,56 @@ export default class Audits extends Component {
   handleDialogClose = () => {
     this.setState({
       diagOpen: false,
-      id: '',
+      // id: '',
     });
   }
 
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           <Table className="audit-list" wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-            <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+            <TableHead>
               <TableRow>
-                <TableHeaderColumn>Change</TableHeaderColumn>
-                <TableHeaderColumn>User</TableHeaderColumn>
-                <TableHeaderColumn>Time</TableHeaderColumn>
+                <TableCell>Change</TableCell>
+                <TableCell>User</TableCell>
+                <TableCell>Time</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+            </TableHead>
+            <TableBody>
               {this.getAudits()}
             </TableBody>
           </Table>
           <Dialog
             className="audit-dialog"
             open={this.state.diagOpen}
-            autoScrollBodyContent
-            title="Audit Info"
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onClick={this.handleDialogClose}
-              />}
+            // Clear id on exited to avoid race between closing dialog and clearing displayed audit info
+            onExited={() => { this.setState({ id: '' }); }}
           >
-            <Table className="audit-info">
-              <TableBody displayRowCheckbox={false} showRowHover={false} selectable={false}>
-                {this.getAuditInfo()}
-              </TableBody>
-            </Table>
+            <DialogTitle>Audit Info</DialogTitle>
+            <DialogContent>
+              <Table className="audit-info">
+                <TableBody>
+                  {this.getAuditInfo()}
+                </TableBody>
+              </Table>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                className="ok"
+                color="primary"
+                onClick={this.handleDialogClose}
+              >Ok</Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>

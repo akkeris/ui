@@ -167,7 +167,7 @@ export default class Apps extends Component {
           <Toolbar style={style.toolbar}>
             <ToolbarGroup>
               <Search
-                style={style.search}
+                inputStyle={style.search}
                 hintStyle={style.searchHint}
                 data={util.filterName(this.state.filteredApps)}
                 handleSearch={this.handleSearch}

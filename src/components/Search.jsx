@@ -1,8 +1,36 @@
 import React, { Component } from 'react';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { TextField, MenuItem, Paper, withStyles } from '@material-ui/core';
 import parse from 'autosuggest-highlight/parse';
 import Autosuggest from 'react-autosuggest';
 import PropTypes from 'prop-types';
+
+const muiTheme = createMuiTheme({
+  overrides: {
+    MuiInput: {
+      input: {
+        '&::placeholder': {
+          color: 'white',
+        },
+        color: 'white',
+      },
+      underline: {
+        // Border color when input is not selected
+        '&:before': {
+          borderBottom: '1px solid rgb(200, 200, 200)',
+        },
+        // Border color when input is selected
+        '&:after': {
+          borderBottom: '1px solid white',
+        },
+        // Border color on hover
+        '&:hover:not([class^=".MuiInput-disabled-"]):not([class^=".MuiInput-focused-"]):not([class^=".MuiInput-error-"]):before': {
+          borderBottom: '1px solid rgb(200, 200, 200)',
+        },
+      },
+    },
+  },
+});
 
 const styles = theme => ({
   input: {
@@ -115,21 +143,18 @@ class Search extends Component {
   }
 
   renderInputComponent(inputProps) { // eslint-disable-line class-methods-use-this
-    const { classes, errorText, inputRef = () => {}, ref, ...other } = inputProps;
+    const { inputStyle, errorText, ...other } = inputProps;
+    console.log(inputStyle);
     return (
-      <TextField
-        error={errorText ? true : undefined}
-        inputProps={{
-          inputRef: (node) => {
-            ref(node);
-            inputRef(node);
-          },
-          classes: {
-            input: classes.input,
-          },
-        }}
-        {...other}
-      />
+      <MuiThemeProvider theme={muiTheme}>
+        <TextField
+          error={errorText ? true : undefined}
+          InputProps={{
+
+          }}
+          {...other}
+        />
+      </MuiThemeProvider>
     );
   }
 
@@ -145,13 +170,15 @@ class Search extends Component {
       renderSuggestion: this.renderSuggestion,
       onSuggestionSelected: this.handleSuggestionSelected,
     };
-
+    // console.log(this.props.inputStyle);
     return (
       <div>
         <Autosuggest
           {...autoSuggestProps}
           inputProps={{
-            classes,
+            inputStyle: this.props.inputStyle,
+            disableUnderline: false,
+            // classes,
             errorText,
             placeholder: 'Search for an app',
             label: errorText || undefined,

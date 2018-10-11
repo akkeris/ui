@@ -291,7 +291,7 @@ export default class Stage extends Component {
           </Table>
           <Divider />
           {!this.state.new && (
-            <Paper zDepth={0}>
+            <Paper elevation={0}>
               <IconButton className={`${this.props.stage}-new-coupling`} onClick={this.handleNewCoupling} tooltip="New Coupling" tooltipPosition="bottom-left"><AddIcon /></IconButton>
             </Paper>
           )}

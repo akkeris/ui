@@ -1,26 +1,54 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Toggle from 'material-ui/Toggle';
-import { List, ListItem } from 'material-ui/List';
-import Button from '@material-ui/core/Button';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
-import { GridList, GridTile } from 'material-ui/GridList';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+
+import {
+  CircularProgress, Switch, List, ListItem, ListItemText, Button, Dialog,
+  GridList, GridListTile, Table, TableBody, TableRow, TableCell,
+  DialogActions, DialogContent, DialogContentText,
+  FormGroup, FormControlLabel,
+} from '@material-ui/core';
+import RemoveIcon from '@material-ui/icons/Clear';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiDialog: {
+      paper: {
+        width: '40%',
+      },
+    },
+    MuiTableCell: {
+      root: {
+        borderBottom: 'none',
+      },
+    },
+    MuiFormGroup: {
+      root: {
+        alignContent: 'center',
+      },
+    },
+  },
 });
 
 const style = {
+  link: {
+    color: 'rgba(0, 0, 0, 0.54)',
+  },
+  currentImage: {
+    visible: {
+      padding: '0 24px 10px 24px',
+    },
+    hidden: {
+      padding: '0 24px 18px 24px',
+    },
+  },
   refresh: {
     div: {
       marginLeft: 'auto',
@@ -40,12 +68,12 @@ const style = {
   gridList: {
     overflowY: 'auto',
   },
-  tableRowColumn: {
+  tableCell: {
     main: {
       fontSize: '16px',
     },
     header: {
-      paddingLeft: '16px',
+      paddingLeft: '24px',
       marginLeft: '0px',
       paddingRight: '16px',
     },
@@ -55,9 +83,6 @@ const style = {
     },
     end: {
       float: 'right',
-    },
-    icon: {
-      width: '100px',
     },
   },
   deleteButtonLabel: {
@@ -143,70 +168,104 @@ class AppOverview extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           <GridList style={style.gridList} cellHeight={'auto'}>
-            <GridTile>
+            <GridListTile>
               <List>
-                <ListItem primaryText="Organization" secondaryText={this.props.app.organization.name} disabled />
-                <ListItem primaryText="ID" secondaryText={`${this.props.app.id}`} disabled />
+                <ListItem>
+                  <ListItemText primary="Organization" secondary={this.props.app.organization.name} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="ID" secondary={`${this.props.app.id}`} />
+                </ListItem>
               </List>
-            </GridTile>
-            <GridTile>
+            </GridListTile>
+            <GridListTile>
               <List>
-                <ListItem primaryText="URL" secondaryText={<a href={this.props.app.web_url}>{this.props.app.web_url}</a>} disabled />
-                <ListItem primaryText="Discovery" secondaryText={`${this.props.app.simple_name.toUpperCase()}_SERVICE_HOST, ${this.props.app.simple_name.toUpperCase()}_SERVICE_PORT`} disabled />
+                <ListItem>
+                  <ListItemText
+                    primary="URL"
+                    secondary={
+                      <a style={style.link} href={this.props.app.web_url}>{this.props.app.web_url}</a>
+                    }
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="Discovery" secondary={`${this.props.app.simple_name.toUpperCase()}_SERVICE_HOST, ${this.props.app.simple_name.toUpperCase()}_SERVICE_PORT`} />
+                </ListItem>
               </List>
-            </GridTile>
+            </GridListTile>
           </GridList>
-          <ListItem primaryText="Current Image" secondaryText={this.props.app.image} disabled />
+          <ListItemText
+            style={this.props.app.image ? style.currentImage.visible : style.currentImage.hidden}
+            primary="Current Image"
+            secondary={this.props.app.image}
+          />
           <Table>
-            <TableBody displayRowCheckbox={false} showRowHover={false} selectable={false}>
-              <TableRow selectable={false} displayBorder={false}>
-                <TableRowColumn style={style.tableRowColumn.header}>
-                  <div style={style.tableRowColumn.main}>{'Last Release and Most Recent Changes'}</div>
-                  <div style={style.tableRowColumn.sub}>{Date(this.props.app.released_at).toLocaleString()}</div>
-                </TableRowColumn>
-                <TableRowColumn style={style.tableRowColumn.icon}>
-                  <div style={style.tableRowColumn.icon}>
-                    <Toggle
-                      className="toggle"
+            <TableBody>
+              <TableRow>
+                <TableCell style={style.tableCell.header}>
+                  <div style={style.tableCell.main}>{'Last Release and Most Recent Changes'}</div>
+                  <div style={style.tableCell.sub}>{Date(this.props.app.released_at).toLocaleString()}</div>
+                </TableCell>
+                <TableCell>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          className="toggle"
+                          checked={this.state.isMaintenance}
+                          onChange={this.handleMaintenanceConfirmation}
+                        />
+                      }
                       label="Maintenance"
-                      toggled={this.state.isMaintenance}
-                      onToggle={this.handleMaintenanceConfirmation}
+                      labelPlacement="start"
                     />
+                  </FormGroup>
+                </TableCell>
+                <TableCell >
+                  <div style={style.tableCell.end}>
+                    <Button variant="contained" className="delete" style={style.button} onClick={this.handleConfirmation} color="secondary">
+                      <RemoveIcon color="white" style={style.removeIcon} />
+                      <span style={style.deleteButtonLabel}>Delete App</span>
+                    </Button>
                   </div>
-                </TableRowColumn>
-                <TableRowColumn >
-                  <div style={style.tableRowColumn.end}>{<Button variant="contained" className="delete" style={style.button} onClick={this.handleConfirmation} color="secondary"><RemoveIcon color="white" style={style.removeIcon} /><span style={style.deleteButtonLabel}>Delete App</span></Button>}</div>
-                </TableRowColumn>
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
           <Audits app={this.props.app} />
           <ConfirmationModal className="delete-confirm" open={this.state.open} onOk={this.handleRemoveApp} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this app?" />
-          <ConfirmationModal className="maintenance-confirm" open={this.state.mOpen} onOk={this.handleMaintenanceToggle} onCancel={this.handleCancelMaintenanceConfirmation} message="Are you sure you want to put this app in maintenance?" title="Confirm Maintenance" />
-          <Dialog
-            className="error"
-            open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onClick={this.handleClose}
-              />}
-          >
-            {this.state.submitMessage}
+          <ConfirmationModal
+            className="maintenance-confirm"
+            open={this.state.mOpen}
+            onOk={this.handleMaintenanceToggle}
+            onCancel={this.handleCancelMaintenanceConfirmation}
+            message={!this.state.isMaintenance ? (
+              'Are you sure you want to take this app out of maintenance?'
+            ) : (
+              'Are you sure you want to put this app in maintenance?'
+            )}
+            title="Confirm Maintenance"
+          />
+          <Dialog className="error" open={this.state.loading}>
+            <DialogContent>
+              <DialogContentText>
+                {this.state.submitMessage}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button className="ok" color="primary" onClick={this.handleClose}>Ok</Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>
