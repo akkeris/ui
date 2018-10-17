@@ -179,6 +179,9 @@ export default class NewWebhook extends Component {
             </p>
           </div>
         );
+        // Have to have this otherwise it displays "Error- Captain Hook not found" on submit
+      case 3:
+        return '';
       default:
         return 'Error- Captain Hook not found';
     }

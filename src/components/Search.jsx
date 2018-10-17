@@ -164,7 +164,7 @@ class Search extends Component {
 
 
   render() {
-    const { classes, errorText } = this.props;
+    const { classes, errorText, className } = this.props;
     const autoSuggestProps = {
       renderInputComponent: this.renderInputComponent,
       suggestions: this.state.suggestions,
@@ -176,7 +176,7 @@ class Search extends Component {
     };
     // console.log(this.props.inputStyle);
     return (
-      <div>
+      <div className={className}>
         <Autosuggest
           {...autoSuggestProps}
           inputProps={{
@@ -212,12 +212,14 @@ Search.propTypes = {
   classes: PropTypes.object.IsRequired,
   errorText: PropTypes.string,
   handleSearch: PropTypes.func,
+  className: PropTypes.string,
 };
 
 Search.defaultProps = {
   classes: {},
   errorText: '',
   handleSearch: () => {},
+  className: '',
 };
 
 export default withStyles(styles)(Search);

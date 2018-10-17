@@ -189,7 +189,9 @@ export default class NewFormation extends Component {
             </p>
           </div>
         );
-
+      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
+      case 4:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }

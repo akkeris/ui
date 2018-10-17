@@ -53,7 +53,7 @@ test('Should throw error on non-existent app', async (t) => { // eslint-disable-
 test('Should follow search to app and see all info', async (t) => { // eslint-disable-line no-undef
   await t
     .typeText('.search input', 'api-default')
-    .pressKey('enter')
+    .pressKey('down').pressKey('enter')
     .expect(Selector('.card .header').innerText)
     .contains('api-default');
 });
@@ -161,6 +161,7 @@ test('Should follow search to app and see all info', async (t) => { // eslint-di
     .click('.dynos-tab')
     .click('.releases-tab')
     .click('.addons-tab')
+    .click('.webhooks-tab')
     .click('.config-tab')
     .click('.metrics-tab')
     .click('.logs-tab');
@@ -194,40 +195,40 @@ test('Should be able to create edit and delete formations', async (t) => { // es
 
     // Check new component shows
     .click('button.new-formation')
-    .expect(Selector('.type-header').innerText)
+    .expect(Selector('.new-type label').innerText)
     .contains('Type')
 
     // Make sure we can cancel
     .click('button.cancel')
-    .expect(Selector('.type-header').exists)
+    .expect(Selector('.new-type').exists)
     .notOk()
 
     // Create the new formation
     .click('button.new-formation')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.new-type').innerText)
     .contains('Field required')
     .typeText('.new-type input', '!')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.new-type').innerText)
     .contains('Alphanumeric characters only')
     .click('.new-type input')
     .pressKey('backspace')
     .typeText('.new-type input', 'web')
-    .click('.next button')
+    .click('button.next')
     .click('button.back')
     .expect(Selector('.new-type').innerText)
     .notContains('Alphanumeric characters only')
     .expect(Selector('.new-type input').value)
     .contains('web')
-    .click('.next button')
+    .click('button.next')
 
-    .click('.new-dropdown button')
-    .click('[role=menu] .q2')
-    .click('.next button')
+    .click('div.new-dropdown')
+    .click('.q2')
+    .click('button.next')
     .click('.new-size .constellation')
-    .click('.next button')
-    .click('.next button')
+    .click('button.next')
+    .click('button.next')
 
     .expect(Selector('.formation-snack').innerText)
     .contains('New Formation Added')
@@ -239,50 +240,51 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     // Check duplicate error
     .click('button.new-formation')
     .typeText('.new-type input', 'web')
-    .click('.next button')
-    .click('.next button')
-    .click('.next button')
-    .click('.next button')
+    .click('button.next')
+    .click('button.next')
+    .click('button.next')
+    .click('button.next')
     .expect(Selector('.new-error').innerText)
     .contains('The process of type web already exists.')
     .click('.new-error button.ok')
 
     // Check dyno info
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .expect(Selector('.formation-list .web .web-info').exists)
     .ok()
     .expect(Selector('.formation-list .web .web-dynos').exists)
     .ok()
-    .click('.formation-list .web button')
-    .expect(Selector('.formation-list .web .web-info').exists)
-    .notOk()
-    .expect(Selector('.formation-list .web .web-dynos').exists)
-    .notOk()
+    .click('.formation-list .web')
+    // With new material-ui ExpansionPanel, these elements always 'exist'
+    // .expect(Selector('.formation-list .web .web-info').exists)
+    // .notOk()
+    // .expect(Selector('.formation-list .web .web-dynos').exists)
+    // .notOk()
 
     // Check edit
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .click('.formation-list .web .web-info button.edit')
     .click('.formation-list .web .web-info button.back')
 
     // Size
     .click('.formation-list .web .web-info button.edit')
     .click('.formation-list .web .web-info .size-select')
-    .click('[role=menu] .scout')
+    .click('.scout')
     .click('.formation-list .web .web-info button.save')
     .expect(Selector('.formation-snack').innerText)
     .contains('Updated Formation')
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .expect(Selector('.formation-list .web .web-info .size-select').innerText)
     .contains('scout')
 
     // Quantity
     .click('.formation-list .web .web-info button.edit')
     .click('.formation-list .web .web-info .quantity-select')
-    .click('[role=menu] .q1')
+    .click('.q1')
     .click('.formation-list .web .web-info button.save')
     .expect(Selector('.formation-snack').innerText)
     .contains('Updated Formation')
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .expect(Selector('.formation-list .web .quantity-select').innerText)
     .contains('1')
 
@@ -292,7 +294,7 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .click('.formation-list .web .web-info button.save')
     .expect(Selector('.formation-snack').innerText)
     .contains('Updated Formation')
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .expect(Selector('.formation-list .web .port input').value)
     .contains('8080');
 });
