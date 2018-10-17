@@ -1,28 +1,32 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import IconButton from 'material-ui/IconButton';
-import Snackbar from 'material-ui/Snackbar';
-import Paper from 'material-ui/Paper';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow } from 'material-ui/Table';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import {
+  CircularProgress, Button, IconButton, Paper, Snackbar, Typography,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  Table, TableHead, TableBody, TableRow, TableCell, Tooltip, Grid,
+} from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Clear';
+import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import NewWebhook from './NewWebhook';
 import Webhook from './Webhook';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
   headerLeftPadding: {
     paddingLeft: '36px',
+    minWidth: '50%',
   },
   refresh: {
     div: {
@@ -68,14 +72,18 @@ export default class Webhooks extends Component {
 
   getWebhooks() {
     return this.state.webhooks.map((webhook, rowindex) => (
-      <Webhook
-        webhook={webhook}
-        rowindex={rowindex}
-        app={this.props.app}
-        onComplete={this.reload}
-        onError={this.handleError}
-        key={webhook.id}
-      />
+      <TableRow key="webhook.id">
+        <TableCell style={{ padding: 0 }}>
+          <Webhook
+            webhook={webhook}
+            rowindex={rowindex}
+            app={this.props.app}
+            onComplete={this.reload}
+            onError={this.handleError}
+            key={webhook.id}
+          />
+        </TableCell>
+      </TableRow>
     ));
   }
 
@@ -133,26 +141,26 @@ export default class Webhooks extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           {!this.state.new ? (
             <Paper elevation={0}>
-              <IconButton
-                className="new-webhook"
-                onClick={this.handleNewWebhook}
-                tooltip="New Webhook"
-                tooltipPosition="bottom-left"
-              >
-                <AddIcon />
-              </IconButton>
+              <Tooltip placement="bottom-end" title="New Webhook">
+                <IconButton
+                  className="new-webhook"
+                  onClick={this.handleNewWebhook}
+                >
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
             </Paper>
           ) : (
             <div>
@@ -160,37 +168,43 @@ export default class Webhooks extends Component {
               { <NewWebhook app={this.props.app} onComplete={this.reload} /> }
             </div>
           )}
-          <Table className="webhook-list" style={style.table}>
-            <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
-              <TableRow>
-                <TableHeaderColumn style={style.headerLeftPadding}>Webhook</TableHeaderColumn>
-                <TableHeaderColumn>Events</TableHeaderColumn>
-              </TableRow>
-            </TableHeader>
-            <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+          <Table>
+            <TableHead>
+              <TableCell style={{ padding: 0, paddingBottom: '10px' }}>
+                <Grid container>
+                  <Grid item xs={6} style={style.headerLeftPadding}>Webhook</Grid>
+                  <Grid item xs={6}>Events</Grid>
+                </Grid>
+              </TableCell>
+            </TableHead>
+            <TableBody>
               {this.getWebhooks()}
             </TableBody>
           </Table>
           <Dialog
-            className="webhook-error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onClick={this.handleDialogClose}
-              />}
+            className="webhook-error"
           >
-            {this.state.submitMessage}
+            <DialogTitle>
+              <Typography variant="h6">
+                Error
+              </Typography>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                {this.state.submitMessage}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button label="Ok" color="primary" onClick={this.handleDialogClose}>Ok</Button>
+            </DialogActions>
           </Dialog>
           <Snackbar
             className="webhook-snack"
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>
@@ -200,5 +214,4 @@ export default class Webhooks extends Component {
 
 Webhooks.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
 };
