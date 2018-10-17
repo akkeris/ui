@@ -177,9 +177,11 @@ export default class Webhooks extends Component {
                 </Grid>
               </TableCell>
             </TableHead>
-            <TableBody>
-              {this.getWebhooks()}
-            </TableBody>
+            {this.state.webhooks && this.state.webhooks.length > 0 && (
+              <TableBody className="webhook-list">
+                {this.getWebhooks()}
+              </TableBody>
+            )}
           </Table>
           <Dialog
             open={this.state.submitFail}

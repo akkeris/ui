@@ -68,15 +68,15 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
 
   // create app
     .typeText('.app-name input', 'testcafe')
-    .click('.next button')
-    .click('.dropdown button')
-    .click('[role=menu] .testcafe')
-    .click('.next button')
-    .click('.dropdown button')
-    .click('[role=menu] .testcafe')
-    .click('.next button')
-    .expect(Selector('.app-list .testcafe-testcafe').innerText)
-    .contains('testcafe-testcafe')
+    .click('button.next')
+    .click('div.dropdown')
+    .click('li.testcafe')
+    .click('button.next')
+    .click('div.dropdown')
+    .click('li.testcafe')
+    .click('button.next')
+    .expect(Selector('.app-list .testcafe-testcafe').exists)
+    .ok()
 
   // navigate to new app page
     .click('.new-app')
@@ -86,13 +86,13 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
 
   // test duplicate
     .typeText('.app-name input', 'testcafe')
-    .click('.next button')
-    .click('.dropdown button')
-    .click('[role=menu] .testcafe')
-    .click('.next button')
-    .click('.dropdown button')
-    .click('[role=menu] .testcafe')
-    .click('.next button')
+    .click('button.next')
+    .click('div.dropdown')
+    .click('li.testcafe')
+    .click('button.next')
+    .click('div.dropdown')
+    .click('li.testcafe')
+    .click('button.next')
     .expect(Selector('.new-app-error').innerText)
     .contains('The requested application already exists.')
     .click('.ok')
@@ -104,7 +104,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .contains('testcafe-testcafe')
 
     // delete the app
-    .click('.delete button')
+    .click('button.delete')
     .expect(Selector('.delete-confirm').innerText)
     .contains('Are you sure you want to delete this app?')
 
@@ -130,13 +130,13 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
 
       // create app
       .typeText('.app-name input', 'testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok();
   })
@@ -146,7 +146,7 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('.delete button')
+      .click('button.delete')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
@@ -355,13 +355,13 @@ test // eslint-disable-line no-undef
 
     // create app
       .typeText('.app-name input', 'testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok()
 
@@ -370,14 +370,14 @@ test // eslint-disable-line no-undef
 
     // create app
       .typeText('.app-name input', 'testcafe2')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .expect(Selector('.app-list .testcafe2-testcafe').exists)
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
+      .expect(Selector('.app-list .testcafe-testcafe2').exists)
       .ok();
   })('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef
     await t
@@ -537,7 +537,7 @@ test // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('.delete button')
+      .click('button.delete')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm .ok')
@@ -548,7 +548,7 @@ test // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('.delete button')
+      .click('button.delete')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
@@ -576,30 +576,30 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
 
     // URL validation tests
     .click('button.new-webhook')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.webhook-url').innerText)
     .contains('Invalid URL')
     .typeText('.webhook-url input', '!')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.webhook-url').innerText)
     .contains('Invalid URL')
     .click('.webhook-url input')
     .pressKey('backspace')
     .typeText('.webhook-url input', 'example.com/hook')
-    .click('.next button')
+    .click('button.next')
     .click('button.back')
     .expect(Selector('.webhook-url').innerText)
     .notContains('Invalid URL')
     .expect(Selector('.webhook-url input').value)
     .contains('http://example.com/hook')
-    .click('.next button')
+    .click('button.next')
 
     // Events validation tests
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.events-errorText').innerText)
     .contains('Must select at least one event')
     .click('.checkbox-release')
-    .click('.next button')
+    .click('button.next')
     .click('button.back')
     .expect(Selector('.events-errorText').exists)
     .notOk()
@@ -637,7 +637,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .ok()
     .expect(Selector('.checkbox-check-all input').checked)
     .ok()
-    .click('.next button')
+    .click('button.next')
     .click('button.back')
     .expect(Selector('.checkbox-release input').checked)
     .ok()
@@ -739,18 +739,18 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.checkbox-crashed')
     .expect(Selector('.checkbox-check-all input').checked)
     .ok()
-    .click('.next button')
+    .click('button.next')
 
     // Secret validation tests
     .typeText('.webhook-secret input', 'over twenty characters')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.webhook-secret').innerText)
     .contains('Secret must be less than 20 characters')
     .click('.webhook-secret input')
     .pressKey('ctrl+a')
     .pressKey('backspace')
     .typeText('.webhook-secret input', 'mysecret')
-    .click('.next button')
+    .click('button.next')
 
     // Test that webhook was created, displayed
     .expect(Selector('.webhook-snack').innerText)
@@ -759,7 +759,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('http://example.com/hook')
 
     // Remove
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 button.webhook-remove')
     .click('.delete-webhook .ok')
     .expect(Selector('.webhook-item-0').exists)
@@ -768,38 +768,38 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     // Display multiple webhooks
     .click('button.new-webhook')
     .typeText('.webhook-url input', 'http://example.com/hook1')
-    .click('.next button')
+    .click('button.next')
     .click('.checkbox-config_change')
-    .click('.next button')
-    .click('.next button') // Also tests for empty secret
+    .click('button.next')
+    .click('button.next') // Also tests for empty secret
     .expect(Selector('.webhook-snack').innerText)
     .contains('Webhook Created')
     .click('button.new-webhook')
     .typeText('.webhook-url input', 'http://example.com/hook2')
-    .click('.next button')
+    .click('button.next')
     .click('.checkbox-release')
-    .click('.next button')
+    .click('button.next')
     .typeText('.webhook-secret input', 'secret')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Webhook Created')
     .expect(Selector('.webhook-list').exists)
     .ok()
-    .expect(Selector('.webhook-item-0').innerText)
+    .expect(Selector('.webhook-title-url-0').innerText)
     .contains('http://example.com/hook1')
-    .expect(Selector('.webhook-item-1').innerText)
+    .expect(Selector('.webhook-title-url-1').innerText)
     .contains('http://example.com/hook2')
 
     // Remove one of the webhooks
-    .click('.webhook-item-1 div div button') // Open edit dropdown
+    .click('.webhook-item-1 .webhook-title') // Open edit dropdown
     .click('.webhook-item-1 button.webhook-remove')
     .click('.delete-webhook .ok')
     .expect(Selector('.webhook-item-1').exists)
     .notOk()
 
     // Edit webhooks tests
-    .click('.webhook-item-0 div div button')
-    .click('.webhook-item-0 .webhook-edit')
+    .click('.webhook-item-0 .webhook-title')
+    .click('.webhook-item-0 button.webhook-edit')
     .click('.webhook-item-0 .edit-url input')
 
     // Test inavlid URL
@@ -824,7 +824,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Updated Webhook')
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 .webhook-edit')
     .expect(Selector('.webhook-item-0 .edit-url input').value)
     .contains('http://new-url.com/')
@@ -863,7 +863,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Updated Webhook')
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 .webhook-edit')
     .expect(Selector('.webhook-item-0 .checkbox-release input').checked)
     .ok()
@@ -899,7 +899,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Updated Webhook')
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 .webhook-edit')
     .expect(Selector('.webhook-item-0 .active-toggle input').checked)
     .notOk()
@@ -920,7 +920,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('Updated Webhook')
 
     // Test back button functionality
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 .webhook-edit')
     .click('.webhook-item-0 .active-toggle input')
     .typeText('.webhook-item-0 .edit-url input', 'http://old-url.com/')
@@ -976,6 +976,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('Added Config Var')
     .click('.webhooks-tab')
     // Expect an event
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 button.webhook-history')
     .expect(Selector('.history-dialog .historyItem-0'))
     .ok()
