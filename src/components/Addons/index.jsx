@@ -9,7 +9,7 @@ import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import AttachIcon from '@material-ui/icons/CallMerge';
 import RemoveIcon from '@material-ui/icons/Clear';
-
+import { blue } from '@material-ui/core/colors';
 import api from '../../services/api';
 import NewAddon from './NewAddon';
 import AttachAddon from './AttachAddon';
@@ -25,6 +25,9 @@ function isEmpty(obj) {
 }
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   },

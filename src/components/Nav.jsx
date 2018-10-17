@@ -13,6 +13,7 @@ import RouterIcon from '@material-ui/icons/Router';
 import OrgIcon from '@material-ui/icons/Face';
 import InvoiceIcon from '@material-ui/icons/CreditCard';
 import MenuIcon from '@material-ui/icons/Menu';
+import { blue } from '@material-ui/core/colors';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
@@ -21,6 +22,9 @@ import api from '../services/api';
 
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   typography: {
     fontFamily: 'ProximaNova',
   },

@@ -9,12 +9,16 @@ import {
   FormGroup, FormControlLabel,
 } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Clear';
+import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   },

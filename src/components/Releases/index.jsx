@@ -16,6 +16,7 @@ import RevertIcon from '@material-ui/icons/Replay';
 import PendingIcon from '@material-ui/icons/Lens';
 import ErrorIcon from '@material-ui/icons/Cancel';
 import SuccessIcon from '@material-ui/icons/CheckCircle';
+import { blue } from '@material-ui/core/colors';
 
 import Logs from './Logs';
 import api from '../../services/api';
@@ -25,6 +26,9 @@ import NewAutoBuild from './NewAutoBuild';
 import AutoBuildIcon from '../Icons/GitIcon';
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   },

@@ -6,10 +6,14 @@ import {
   CircularProgress, Table, TableHead, TableBody, TableRow, TableCell, Button,
   Dialog, DialogContent, DialogActions, DialogTitle,
 } from '@material-ui/core';
+import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   },

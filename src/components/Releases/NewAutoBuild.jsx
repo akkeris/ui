@@ -6,11 +6,14 @@ import {
   FormGroup, FormControlLabel, Switch, Typography,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-
+import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
 });
 

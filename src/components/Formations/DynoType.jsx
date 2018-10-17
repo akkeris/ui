@@ -13,12 +13,15 @@ import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import BackIcon from '@material-ui/icons/ArrowBack';
 import WarningIcon from '@material-ui/icons/Warning';
-import { pink, teal, amber, red } from '@material-ui/core/colors';
+import { pink, teal, amber, red, blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
     h6: {

@@ -9,8 +9,12 @@ import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import Search from '../Search';
 import api from '../../services/api';
 import util from '../../services/util';
+import { blue } from '@material-ui/core/colors';
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   },

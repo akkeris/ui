@@ -12,8 +12,12 @@ import api from '../../services/api';
 import util from '../../services/util';
 import NewFormation from './NewFormation';
 import DynoType from './DynoType';
+import { blue } from '@material-ui/core/colors';
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   overrides: {
     MuiTable: {

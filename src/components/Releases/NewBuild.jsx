@@ -6,10 +6,13 @@ import {
   Select, MenuItem, Collapse, CircularProgress,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-
+import { blue } from '@material-ui/core/colors';
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   typography: {
     // map old typography variants to v2 (still throws warnings)
     useNextVariants: true,

@@ -4,8 +4,12 @@ import { TextField, MenuItem, Paper, withStyles } from '@material-ui/core';
 import parse from 'autosuggest-highlight/parse';
 import Autosuggest from 'react-autosuggest';
 import PropTypes from 'prop-types';
+import { blue } from '@material-ui/core/colors';
 
 const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
   overrides: {
     MuiInput: {
       input: {
