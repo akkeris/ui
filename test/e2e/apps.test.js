@@ -316,16 +316,16 @@ test('Should be able to create view and release builds', async (t) => { // eslin
 
     // Create the new build
     .click('button.new-build')
-    .click('.org-menu button')
+    .click('div.org-menu')
     .click('.testcafe')
-    .click('.next button')
+    .click('button.next')
     .typeText('.url input', 'docker://registry.hub.docker.com/library/httpd:alpine')
-    .click('.next button')
-    .click('.next button') // checksum
-    .click('.next button') // repo
-    .click('.next button') // sha
-    .click('.next button') // branch
-    .click('.next button') // versiom
+    .click('button.next') // checksum
+    .click('button.next')
+    .click('button.next') // repo
+    .click('button.next') // sha
+    .click('button.next') // branch
+    .click('button.next') // versiom
 
     .expect(Selector('.release-snack').innerText)
     .contains('New Deployment Requested')
@@ -336,7 +336,7 @@ test('Should be able to create view and release builds', async (t) => { // eslin
     .click('.addons-tab')
     .click('.releases-tab')
     .click('.release-list .r0 button.logs')
-    .expect(Selector('.logs h3').innerText)
+    .expect(Selector('.logs h2').innerText)
     .contains('Logs for')
     .click('.logs button');
 });
