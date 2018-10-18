@@ -972,7 +972,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('button.new-config')
     .typeText('.config-key input', 'test')
     .click('.next')
-    .typeText(Selector('.config-value textarea').withAttribute('id'), 'test')
+    .typeText('.config-value input', 'test')
     .click('.next')
     .expect(Selector('.config-snack').innerText)
     .contains('Added Config Var')
@@ -1003,8 +1003,6 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
 
 
 test('Should be able to create edit and remove config vars', async (t) => { // eslint-disable-line no-undef
-  const editTextArea = Selector('.config-edit-value textarea').withAttribute('id');
-  const newTextArea = Selector('.config-value textarea').withAttribute('id');
   await t
     .click('.app-list .testcafe-testcafe')
     .click('.config-tab')
@@ -1021,16 +1019,17 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
 
     // Create new config var
     .click('button.new-config')
-    .click('.next')
-    .expect(Selector('.config-key').innerText)
+    .click('button.next')
+    .expect(Selector('.config-key p').innerText)
     .contains('field required')
     .typeText('.config-key input', 'MERP')
-    .click('.next')
-    .click('.next')
-    .expect(Selector('.config-value').innerText)
+    .click('button.next')
+    .click('button.next')
+    .expect(Selector('.config-value p').innerText)
     .contains('field required')
-    .typeText(newTextArea, 'DERP', { replace: true })
-    .click('.next')
+    .typeText('.config-value input', 'DERP')
+    // .typeText(newTextArea, 'DERP', { replace: true })
+    .click('button.next')
     .expect(Selector('.config-snack').innerText)
     .contains('Added Config Var')
     .expect(Selector('.config-list .MERP').innerText)
@@ -1038,7 +1037,8 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
 
     // Edit config var
     .click('.config-list .MERP button.edit')
-    .typeText(editTextArea, 'Testcafe', { replace: true })
+    .typeText('.config-edit-value input', 'Testcafe', { replace: true })
+    // .typeText(editTextArea, 'Testcafe', { replace: true })
     .click('.submit')
     .expect(Selector('.config-snack').innerText)
     .contains('Updated Config Var')

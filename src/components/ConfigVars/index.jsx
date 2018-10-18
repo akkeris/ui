@@ -1,38 +1,50 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
-import IconButton from 'material-ui/IconButton';
-import Snackbar from 'material-ui/Snackbar';
-import Divider from 'material-ui/Divider';
-import Paper from 'material-ui/Paper';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import TextField from 'material-ui/TextField';
-import EditIcon from 'material-ui/svg-icons/editor/mode-edit';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { blue } from '@material-ui/core/colors';
+import {
+  CircularProgress, Table, TableBody, TableRow, TableCell, IconButton, Tooltip,
+  Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
+  Snackbar, Divider, Paper, Button, TextField,
+} from '@material-ui/core';
+
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Clear';
+import EditIcon from '@material-ui/icons/Edit';
 
 import api from '../../services/api';
 import NewConfigVar from './NewConfigVar';
 import ConfirmationModal from '../ConfirmationModal';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
   tableRow: {
     height: '58px',
   },
-  tableRowColumn: {
-    end: {
-      float: 'right',
+  removeIcon: {
+    width: '58px',
+  },
+  editIcon: {
+    width: '58px',
+    padding: 0,
+  },
+  configVar: {
+    overflowWrap: 'break-word',
+    key: {
+      maxWidth: '300px',
+      overflowWrap: 'break-word',
     },
-    icon: {
-      width: '58px',
+    value: {
+      maxWidth: '425px',
+      overflowWrap: 'break-word',
     },
   },
   refresh: {
@@ -78,27 +90,27 @@ export default class ConfigVar extends Component {
 
   getConfigVars() {
     return Object.keys(this.state.config).map(key => (
-      <TableRow className={key} key={key} style={style.tableRow} selectable={false}>
-        <TableRowColumn>
-          <div>{key}</div>
-        </TableRowColumn>
-        <TableRowColumn>
-          <div>{this.state.config[key]}</div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
-          <div style={style.tableRowColumn.end}>
+      <TableRow hover className={key} key={key} style={style.tableRow}>
+        <TableCell style={style.configVar}>
+          <div style={style.configVar.key}>{key}</div>
+        </TableCell>
+        <TableCell style={style.configVar}>
+          <div style={style.configVar.value}>{this.state.config[key]}</div>
+        </TableCell>
+        <TableCell style={style.editIcon}>
+          <Tooltip title="Edit" placement="top-start">
             <IconButton className="edit" onClick={() => this.handleEdit(key)}>
-              <EditIcon />
+              <EditIcon nativeColor="black" />
             </IconButton>
-          </div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
-          <div style={style.tableRowColumn.end}>
+          </Tooltip>
+        </TableCell>
+        <TableCell style={style.removeIcon}>
+          <Tooltip title="Remove" placement="top-start">
             <IconButton className="remove" onClick={() => this.handleConfirmation(key)}>
-              <RemoveIcon />
+              <RemoveIcon nativeColor="black" />
             </IconButton>
-          </div>
-        </TableRowColumn>
+          </Tooltip>
+        </TableCell>
       </TableRow>
     ));
   }
@@ -112,6 +124,10 @@ export default class ConfigVar extends Component {
         });
       }
     });
+  }
+
+  closeEditDialog = () => {
+    this.setState({ edit: false });
   }
 
   handleDialogClose = () => {
@@ -172,7 +188,6 @@ export default class ConfigVar extends Component {
 
   handleEditCancel = () => {
     this.setState({
-      edit: false,
       key: null,
       newValue: null,
     });
@@ -221,24 +236,26 @@ export default class ConfigVar extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           {!this.state.new && (
             <Paper elevation={0}>
-              <IconButton className="new-config" onClick={this.handleNewConfig} tooltip="New Config" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+              <Tooltip title="New Config" placement="bottom-start">
+                <IconButton className="new-config" onClick={this.handleNewConfig}><AddIcon nativeColor="black" /></IconButton>
+              </Tooltip>
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon /></IconButton>
+              <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon nativeColor="black" /></IconButton>
               <NewConfigVar
                 app={this.props.app}
                 onComplete={this.reload}
@@ -247,54 +264,59 @@ export default class ConfigVar extends Component {
             </div>
           )}
           <Divider />
-          <Table className="config-list" wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-            <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+          <Table className="config-list">
+            <TableBody>
               {this.getConfigVars()}
             </TableBody>
           </Table>
-          <Dialog
-            className="config-error"
-            open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onClick={this.handleDialogClose}
-              />}
-          >
-            {this.state.submitMessage}
+          <Dialog className="config-error" open={this.state.submitFail}>
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                {this.state.submitMessage}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button className="ok" color="primary" onClick={this.handleDialogClose}>Ok</Button>
+            </DialogActions>
           </Dialog>
-          <Dialog
-            className="config-edit"
-            open={this.state.edit}
-            modal
-            actions={[
-              <FlatButton
-                className="submit"
-                label="Submit"
-                primary
-                onClick={this.handleEditSubmit}
-              />,
-              <FlatButton
-                className="cancel"
-                label="Cancel"
-                primary
-                onClick={this.handleEditCancel}
-              />]}
-          >
-            <TextField className="config-edit-value" floatingLabelText={this.state.key} value={this.state.newValue} multiLine fullWidth onChange={this.handleNewValueChange} />
-          </Dialog>
-          <ConfirmationModal className="remove-config" open={this.state.confirmOpen} onOk={this.handleRemoveConfig} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this config var?" />
+          <ConfirmationModal
+            className="remove-config"
+            open={this.state.confirmOpen}
+            onOk={this.handleRemoveConfig}
+            onCancel={this.handleCancelConfirmation}
+            message="Are you sure you want to delete this config var?"
+          />
           <Snackbar
             className="config-snack"
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
+        <Dialog
+          className="config-edit"
+          open={this.state.edit}
+          maxWidth="lg"
+          onClose={this.closeEditDialog}
+          onExited={this.handleEditCancel}
+        >
+          <DialogTitle>{this.state.key ? `Edit ${this.state.key}` : 'Edit Config'}</DialogTitle>
+          <DialogContent style={{ minWidth: '400px' }}>
+            <TextField
+              className="config-edit-value"
+              value={this.state.newValue}
+              multiLine
+              fullWidth
+              onChange={this.handleNewValueChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button className="cancel" color="secondary" onClick={this.closeEditDialog}>Cancel</Button>
+            <Button className="submit" color="primary" onClick={this.handleEditSubmit}>Submit</Button>
+          </DialogActions>
+        </Dialog>
       </MuiThemeProvider>
     );
   }
@@ -302,5 +324,5 @@ export default class ConfigVar extends Component {
 
 ConfigVar.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
+  // active: PropTypes.bool.isRequired,
 };

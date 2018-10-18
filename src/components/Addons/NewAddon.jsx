@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, FormControl,
   Select, MenuItem, Dialog, Button, Input,
+  DialogTitle, DialogActions, DialogContent,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { blue } from '@material-ui/core/colors';
@@ -308,16 +309,17 @@ export default class NewAddon extends Component {
           <Dialog
             className="new-addon-error"
             open={this.state.submitFail}
-            modal
-            actions={
+          >
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>{this.state.submitMessage}</DialogContent>
+            <DialogActions>
               <Button
                 className="ok"
                 label="Ok"
                 color="primary"
                 onClick={this.handleClose}
-              />}
-          >
-            {this.state.submitMessage}
+              />
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>

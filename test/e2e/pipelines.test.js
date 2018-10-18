@@ -77,9 +77,8 @@ test('Should be able to create and delete pipeline', async (t) => { // eslint-di
 fixture('Pipeline Info Page') // eslint-disable-line no-undef
   .page(baseUrl)
   .beforeEach(async (t) => {
-    const newTextArea = Selector('.config-value textarea').withAttribute('id');
     await t
-    
+
       // login
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
@@ -133,7 +132,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .contains('field required')
       .typeText('.config-key input', 'MERP')
       .click('.next')
-      .typeText(newTextArea, 'DERP', { replace: true })
+      .typeText('.config-value', 'DERP', { replace: true })
       .click('.next')
       .expect(Selector('.config-list .MERP').innerText)
       .contains('DERP')

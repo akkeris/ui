@@ -1,18 +1,21 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import Button from '@material-ui/core/Button';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import Dialog from 'material-ui/Dialog';
+import {
+  Step, Stepper, StepLabel, Button, TextField, Collapse,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -52,7 +55,14 @@ export default class NewConfigVar extends Component {
       case 0:
         return (
           <div>
-            <TextField className="config-key" floatingLabelText="Key" value={this.state.key} onChange={this.handleKeyTextChange} errorText={this.state.errorText} />
+            <TextField
+              className="config-key"
+              floatingLabelText="Key"
+              value={this.state.key}
+              onChange={this.handleKeyTextChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
             <p>
               Config Var Key
             </p>
@@ -61,12 +71,24 @@ export default class NewConfigVar extends Component {
       case 1:
         return (
           <div>
-            <TextField className="config-value" floatingLabelText="Value" multiLine fullWidth value={this.state.value} onChange={this.handleValueChange} errorText={this.state.errorText} />
+            <TextField
+              className="config-value"
+              floatingLabelText="Value"
+              multiLine
+              fullWidth
+              value={this.state.value}
+              onChange={this.handleValueChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
             <p>
               Config Var Value
             </p>
           </div>
         );
+        // need this otherwise "You're a long way ..." shows up when you hit finish
+      case 2:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -134,7 +156,7 @@ export default class NewConfigVar extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
     if (finished) {
       this.submitConfig();
     }
@@ -143,20 +165,21 @@ export default class NewConfigVar extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            className="back"
-            label="Back"
-            disabled={stepIndex === 0}
-            onClick={this.handlePrev}
-            style={style.buttons.back}
-          />)}
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              label="Back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >Back</Button>
+          )}
           <Button
             variant="contained"
             className="next"
-            label={stepIndex === 1 ? 'Finish' : 'Next'}
-            primary
+            color="primary"
             onClick={this.handleNext}
-          />
+          >{stepIndex === 1 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -165,7 +188,7 @@ export default class NewConfigVar extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
@@ -176,23 +199,30 @@ export default class NewConfigVar extends Component {
             </Step>
           </Stepper>
           {
-            <ExpandTransition loading={loading} open>
+            <Collapse in={!loading}>
               {this.renderContent()}
-            </ExpandTransition>
+            </Collapse>
           }
           <Dialog
             className="new-config-error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
+          >
+            <DialogTitle>
+              Error
+            </DialogTitle>
+            <DialogContent>
+              {this.state.submitMessage}
+            </DialogContent>
+            <DialogActions>
+              <Button
                 className="ok"
                 label="Ok"
-                primary
+                color="primary"
                 onClick={this.handleClose}
-              />}
-          >
-            {this.state.submitMessage}
+              >
+                Ok
+              </Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>
