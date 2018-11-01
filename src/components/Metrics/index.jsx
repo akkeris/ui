@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Subheader from 'material-ui/Subheader';
-import Divider from 'material-ui/Divider';
-import CPUIcon from 'material-ui/svg-icons/hardware/memory';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { CircularProgress, ListSubheader, Divider } from '@material-ui/core';
+import CPUIcon from '@material-ui/icons/Memory';
+import { blue, pink } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import recommendations from '../../services/util/recommendations';
@@ -14,8 +12,13 @@ import Charts from './Charts';
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable max-len */
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -37,14 +40,19 @@ const style = {
       paddingLeft: '0px',
       textTransform: 'uppercase',
       marginTop: '0px',
-      color: muiTheme.palette.accent1Color,
+      color: pink[500],
       fontWeight: 400,
       padding: '0.5em 4em',
       borderTop: '1px solid rgba(0,0,0,0.05)',
       borderBottom: '1px solid rgba(0,0,0,0.05)',
       background: 'rgba(0,0,0,.02)',
     },
-    subsectionIcon: { width: '24px', height: '24px', verticalAlign: 'middle' },
+    subsectionIcon: {
+      width: '24px',
+      height: '24px',
+      verticalAlign: 'middle',
+    },
+    subsectionTitle: { paddingLeft: '2.5px', verticalAlign: 'middle' },
   },
 };
 
@@ -144,15 +152,15 @@ export default class Metrics extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div>
             <div style={style.refresh.div}>
-              <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+              <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             </div>
           </div>
         </MuiThemeProvider>
       );
-    } else if (this.props.active && this.state.reading) {
+    } else if (this.state.reading) {
       const charts = [];
       const date = new Date();
       const { metrics } = this.state;
@@ -160,13 +168,13 @@ export default class Metrics extends Component {
         charts.push((
           <div key={section.toString()}>
             <Divider key={`divider${section}${index}`} />
-            <Subheader key={`subheader${section}${index}`} style={style.header.subsection}>
+            <ListSubheader key={`subheader${section}${index}`} style={style.header.subsection}>
               <CPUIcon
-                color={muiTheme.palette.accent1Color}
+                color="secondary"
                 style={style.header.subsectionIcon}
               />
-              {section} Dyno
-            </Subheader>
+              <span style={style.header.subsectionTitle}>{`${section} Dyno`}</span>
+            </ListSubheader>
           </div>
         ));
         groupMetrics(Object.keys(metrics[section])).forEach((metricNames, metricIndex) => {
@@ -219,7 +227,7 @@ export default class Metrics extends Component {
         );
       }
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div>
             {notesDom}
             {charts}
@@ -228,7 +236,7 @@ export default class Metrics extends Component {
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div />
       </MuiThemeProvider>
     );
@@ -237,5 +245,4 @@ export default class Metrics extends Component {
 
 Metrics.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
 };

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { CircularProgress } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { LazyStream, ScrollFollow } from 'react-lazylog';
+import { LazyLog, ScrollFollow } from 'react-lazylog';
 import { blue } from '@material-ui/core/colors';
 import api from '../../services/api';
 
@@ -41,7 +41,7 @@ export default class Logs extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      loading: false,
+      loading: true,
       reading: false,
       logs: 'Logplex ready, waiting for logs..\n',
       url: '',
@@ -49,9 +49,9 @@ export default class Logs extends Component {
     this.loadLogs('constructor');
   }
 
-  componentDidMount() {
-    this._isMounted = true;
-  }
+  // componentDidMount() {
+  //   this._isMounted = true;
+  // }
 
   /*
   componentDidUpdate() {
@@ -61,19 +61,17 @@ export default class Logs extends Component {
   }
   */
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
+  // componentWillUnmount() {
+  //   this._isMounted = false;
+  // }
 
   loadLogs(mode) {
-    if (this._isMounted) {
-      if (mode !== 'constructor') {
-        this.setState({ logs: this.state.logs, loading: true });
-      }
-      api.getLogSession(this.props.app).then((response) => {
-        this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(response.data.logplex_url)}` });
-      });
+    if (mode !== 'constructor') {
+      this.setState({ logs: this.state.logs });
     }
+    api.getLogSession(this.props.app).then((response) => {
+      this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(response.data.logplex_url)}` });
+    });
   }
 
   render() {
@@ -88,11 +86,18 @@ export default class Logs extends Component {
     } else if (this.state.reading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
-          <ScrollFollow startFollowing>
-            {({ follow, onScroll }) => (
-              <LazyStream height={500} url={this.state.url} follow={follow} onScroll={onScroll} />
+          <ScrollFollow
+            startFollowing
+            render={({ follow, onScroll }) => (
+              <LazyLog
+                stream
+                url={this.state.url}
+                follow={follow}
+                onScroll={onScroll}
+                height={500}
+              />
             )}
-          </ScrollFollow>
+          />
         </MuiThemeProvider>
       );
     }
