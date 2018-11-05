@@ -6,36 +6,6 @@ import Autosuggest from 'react-autosuggest';
 import PropTypes from 'prop-types';
 import { blue } from '@material-ui/core/colors';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: blue,
-  },
-  overrides: {
-    MuiInput: {
-      input: {
-        '&::placeholder': {
-          color: 'white',
-        },
-        color: 'white',
-      },
-      underline: {
-        // Border color when input is not selected
-        '&:before': {
-          borderBottom: '1px solid rgb(200, 200, 200)',
-        },
-        // Border color when input is selected
-        '&:after': {
-          borderBottom: '1px solid white',
-        },
-        // Border color on hover
-        '&:hover:not([class^=".MuiInput-disabled-"]):not([class^=".MuiInput-focused-"]):not([class^=".MuiInput-error-"]):before': {
-          borderBottom: '1px solid rgb(200, 200, 200)',
-        },
-      },
-    },
-  },
-});
-
 const styles = theme => ({
   input: {
     width: '300px',
@@ -74,6 +44,38 @@ class Search extends Component {
       popper: '',
       suggestions: [],
     };
+
+    const { color } = this.props;
+
+    this.muiTheme = createMuiTheme({
+      palette: {
+        primary: blue,
+      },
+      overrides: {
+        MuiInput: {
+          input: {
+            '&::placeholder': {
+              color,
+            },
+            color,
+          },
+          underline: {
+            // Border color when input is not selected
+            '&:before': {
+              borderBottom: '1px solid rgb(200, 200, 200)',
+            },
+            // Border color when input is selected
+            '&:after': {
+              borderBottom: `1px solid ${color}`,
+            },
+            // Border color on hover
+            '&:hover:not([class^=".MuiInput-disabled-"]):not([class^=".MuiInput-focused-"]):not([class^=".MuiInput-error-"]):before': {
+              borderBottom: '1px solid rgb(200, 200, 200)',
+            },
+          },
+        },
+      },
+    });
   }
 
   getSuggestions = (value) => {
@@ -94,6 +96,13 @@ class Search extends Component {
   }
 
   getSuggestionValue = suggestion => suggestion;
+
+  catchReturn = (event, value) => {
+    if (event.key === 'Enter') {
+      this.props.handleSearch(value);
+      event.preventDefault();
+    }
+  }
 
   handleSuggestionsFetchRequested = ({ value }) => {
     this.setState({ suggestions: this.getSuggestions(value) });
@@ -147,15 +156,12 @@ class Search extends Component {
   }
 
   renderInputComponent(inputProps) { // eslint-disable-line class-methods-use-this
-    const { inputStyle, errorText, ...other } = inputProps;
-    console.log(inputStyle);
+    const { catchReturn, errorText, value, muiTheme, ...other } = inputProps;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <TextField
+          onKeyPress={event => catchReturn(event, value)}
           error={errorText ? true : undefined}
-          InputProps={{
-
-          }}
           {...other}
         />
       </MuiThemeProvider>
@@ -164,7 +170,7 @@ class Search extends Component {
 
 
   render() {
-    const { classes, errorText, className } = this.props;
+    const { classes, errorText, className, placeholder } = this.props;
     const autoSuggestProps = {
       renderInputComponent: this.renderInputComponent,
       suggestions: this.state.suggestions,
@@ -174,17 +180,16 @@ class Search extends Component {
       renderSuggestion: this.renderSuggestion,
       onSuggestionSelected: this.handleSuggestionSelected,
     };
-    // console.log(this.props.inputStyle);
+
     return (
       <div className={className}>
         <Autosuggest
           {...autoSuggestProps}
           inputProps={{
-            inputStyle: this.props.inputStyle,
-            disableUnderline: false,
-            // classes,
+            catchReturn: this.catchReturn,
             errorText,
-            placeholder: 'Search for an app',
+            muiTheme: this.muiTheme,
+            placeholder,
             label: errorText || undefined,
             value: this.state.single,
             onChange: this.handleChange('single'),
@@ -208,18 +213,20 @@ class Search extends Component {
 }
 
 Search.propTypes = {
+  color: PropTypes.string,
   data: PropTypes.arrayOf(PropTypes.string).isRequired,
-  classes: PropTypes.object.IsRequired,
   errorText: PropTypes.string,
   handleSearch: PropTypes.func,
   className: PropTypes.string,
+  placeholder: PropTypes.string,
 };
 
 Search.defaultProps = {
-  classes: {},
   errorText: '',
   handleSearch: () => {},
   className: '',
+  placeholder: 'Search',
+  color: 'white',
 };
 
 export default withStyles(styles)(Search);

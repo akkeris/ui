@@ -307,7 +307,7 @@ export default class ConfigVar extends Component {
             <TextField
               className="config-edit-value"
               value={this.state.newValue}
-              multiLine
+              multiline
               fullWidth
               onChange={this.handleNewValueChange}
             />

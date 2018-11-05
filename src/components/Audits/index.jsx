@@ -60,12 +60,12 @@ function sillyfunc(prefix, input) {
       return sillyfunc(prefix ? `${prefix}.${key}` : key, input[key]);
     }
     return (
-      <TableRow>
+      <TableRow key={key}>
         <TableCell>
-          {prefix ? `${prefix}.${key}` : key}
+          <span>{prefix ? `${prefix}.${key}` : key}</span>
         </TableCell>
         <TableCell>
-          {input[key]}
+          <span>{input[key]}</span>
         </TableCell>
       </TableRow>
     );
@@ -95,7 +95,6 @@ export default class Audits extends Component {
   getAudits() {
     return this.state.audits.map((audit) => {
       const id = SHA256(JSON.stringify(audit)).toString().substring(0, 7);
-
       return (
         <TableRow
           className={id}
@@ -157,12 +156,18 @@ export default class Audits extends Component {
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div>
-          <Table className="audit-list" wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
+          <Table className="audit-list" >
             <TableHead>
               <TableRow>
-                <TableCell>Change</TableCell>
-                <TableCell>User</TableCell>
-                <TableCell>Time</TableCell>
+                <TableCell>
+                  <span>Change</span>
+                </TableCell>
+                <TableCell>
+                  <span>User</span>
+                </TableCell>
+                <TableCell >
+                  <span>Time</span>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -174,6 +179,7 @@ export default class Audits extends Component {
             open={this.state.diagOpen}
             // Clear id on exited to avoid race between closing dialog and clearing displayed audit info
             onExited={() => { this.setState({ id: '' }); }}
+            maxWidth="lg"
           >
             <DialogTitle>Audit Info</DialogTitle>
             <DialogContent>

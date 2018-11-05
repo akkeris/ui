@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
+import { Table, TableBody, TableRow, TableCell } from '@material-ui/core';
 
 const style = {
   tableRow: {
@@ -36,24 +36,24 @@ export default class AppList extends Component {
 
   getApps() {
     return this.props.apps.map(app => (
-      <TableRow className={app.name} key={app.id} style={style.tableRow}>
-        <TableRowColumn style={style.tableRow}>
+      <TableRow className={app.name} key={app.id} style={style.tableRow} hover onClick={() => this.handleRowSelection(app)}>
+        <TableCell style={style.tableRow}>
           <div style={style.tableRowColumn.main}>{app.name} {app.preview ? AppList.previewAnnotation(app.preview) : ''}</div>
           <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>
-        </TableRowColumn>
+        </TableCell>
       </TableRow>
     ));
   }
 
-  handleRowSelection = (selectedRows) => {
-    window.location = `#/apps/${this.props.apps[selectedRows].name}/info`;
+  handleRowSelection = (app) => {
+    window.location = `#/apps/${app.name}/info`;
   }
 
   render() {
     return (
       <div style={{ marginBottom: '12px' }}>
-        <Table className="app-list" onRowSelection={this.handleRowSelection} wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-          <TableBody displayRowCheckbox={false} showRowHover>
+        <Table className="app-list">
+          <TableBody>
             {this.getApps()}
           </TableBody>
         </Table>

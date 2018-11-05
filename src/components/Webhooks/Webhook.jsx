@@ -73,7 +73,7 @@ function objectToTable(prefix, input) {
       return objectToTable(prefix ? `${prefix}.${key}` : key, input[key]);
     }
     return (
-      <TableRow key={prefix ? `${prefix}.${key}` : key}>
+      <TableRow hover key={prefix ? `${prefix}.${key}` : key}>
         <TableCell colSpan="2">
           <div>
             <b>{prefix ? `${prefix}.${key}` : key}</b>

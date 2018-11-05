@@ -170,12 +170,14 @@ export default class Webhooks extends Component {
           )}
           <Table>
             <TableHead>
-              <TableCell style={{ padding: 0, paddingBottom: '10px' }}>
-                <Grid container>
-                  <Grid item xs={6} style={style.headerLeftPadding}>Webhook</Grid>
-                  <Grid item xs={6}>Events</Grid>
-                </Grid>
-              </TableCell>
+              <TableRow>
+                <TableCell style={{ padding: 0, paddingBottom: '10px' }}>
+                  <Grid container>
+                    <Grid item xs={6} style={style.headerLeftPadding}>Webhook</Grid>
+                    <Grid item xs={6}>Events</Grid>
+                  </Grid>
+                </TableCell>
+              </TableRow>
             </TableHead>
             {this.state.webhooks && this.state.webhooks.length > 0 && (
               <TableBody className="webhook-list">

@@ -239,7 +239,7 @@ class AppOverview extends Component {
                 <TableCell >
                   <div style={style.tableCell.end}>
                     <Button variant="contained" className="delete" style={style.button} onClick={this.handleConfirmation} color="secondary">
-                      <RemoveIcon color="white" style={style.removeIcon} />
+                      <RemoveIcon nativeColor="white" style={style.removeIcon} />
                       <span style={style.deleteButtonLabel}>Delete App</span>
                     </Button>
                   </div>

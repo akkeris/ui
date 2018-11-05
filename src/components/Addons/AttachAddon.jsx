@@ -5,11 +5,12 @@ import {
   Dialog, DialogActions, DialogContent,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { blue } from '@material-ui/core/colors';
 
+import ConfirmationModal from '../ConfirmationModal';
 import Search from '../Search';
 import api from '../../services/api';
 import util from '../../services/util';
-import { blue } from '@material-ui/core/colors';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -67,6 +68,8 @@ export default class AttachAddon extends Component {
       app: '',
       addons: [],
       addon: {},
+      loadingError: false,
+      loadingErrorMessage: '',
     };
   }
 
@@ -88,6 +91,8 @@ export default class AttachAddon extends Component {
           addon: response.data[0],
           loading: false,
         });
+      }).catch((err) => {
+        this.setState(prevState, () => this.setState({ loadingErrorMessage: 'Could not find specified app', loadingError: true }));
       });
     }
   }
@@ -115,6 +120,7 @@ export default class AttachAddon extends Component {
               data={util.filterName(this.state.apps)}
               handleSearch={this.handleSearch}
               errorText={this.state.errorText}
+              color="black"
             />
             <p>
               The application name that has an addon you want to attach. Ex. my-test-app-dev
@@ -264,6 +270,29 @@ export default class AttachAddon extends Component {
               </Button>
             </DialogActions>
           </Dialog>
+          <Dialog
+            className="load-app-error"
+            open={this.state.loadingError}
+          >
+            <DialogContent>
+              {this.state.loadingErrorMessage}
+            </DialogContent>
+            <DialogActions>
+              <Button
+                className="ok"
+                color="primary"
+                onClick={() => this.setState({ loadingError: false, loadingErrorMessage: '' })}
+              >
+                Ok
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <ConfirmationModal
+            open={this.state.loadingError}
+            onOk={() => this.setState({ loadingError: false, loadingErrorMessage: '' })}
+            message={this.state.loadingErrorMessage}
+            title="Error"
+          />
         </div>
       </MuiThemeProvider>
     );

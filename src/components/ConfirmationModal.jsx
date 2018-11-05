@@ -42,13 +42,15 @@ export default class ConfirmationModal extends Component {
             >
               Ok
             </Button>
-            <Button
-              className="cancel"
-              color="secondary"
-              onClick={this.props.onCancel}
-            >
-              Cancel
-            </Button>
+            {this.props.onCancel !== null && (
+              <Button
+                className="cancel"
+                color="secondary"
+                onClick={this.props.onCancel}
+              >
+            Cancel
+              </Button>
+            )}
           </DialogActions>
         </Dialog>
       </MuiThemeProvider>
@@ -59,7 +61,7 @@ export default class ConfirmationModal extends Component {
 ConfirmationModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onOk: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  onCancel: PropTypes.func,
   message: PropTypes.string.isRequired,
   title: PropTypes.string,
   className: PropTypes.string,
@@ -69,5 +71,6 @@ ConfirmationModal.propTypes = {
 ConfirmationModal.defaultProps = {
   title: 'Confirm Delete',
   className: 'confirm',
+  onCancel: null,
   actions: null,
 };

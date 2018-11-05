@@ -113,7 +113,7 @@ export default class NewWebhook extends Component {
               value={this.state.url}
               onChange={this.handleChange('url')}
               helperText={this.state.errorText ? this.state.errorText : ''}
-              error={this.state.errorText}
+              error={!!this.state.errorText}
             />
             <p>
               Enter a URL for the new webhook (defaults to http).
@@ -125,7 +125,7 @@ export default class NewWebhook extends Component {
           <div>
             <div style={style.eventsHeader}>
               <p style={style.eventsLabel}>Events</p>
-              <Tooltip placement="right-center" title="Click for Descriptions">
+              <Tooltip placement="right" title="Click for Descriptions">
                 <IconButton
                   className="events-info-button"
                   onClick={this.openEventsInfoDialog}
@@ -189,7 +189,7 @@ export default class NewWebhook extends Component {
 
   getEventCheckboxes() { // eslint-disable-line class-methods-use-this
     return defaultEvents.map(event => (
-      <Grid item xs={6}>
+      <Grid key={`checkbox-${event}`} item xs={6}>
         <FormControlLabel
           control={
             <Checkbox

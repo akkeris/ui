@@ -72,9 +72,9 @@ export default class NewFormation extends Component {
       submitFail: false,
       submitMessage: '',
       sizes: [],
-      size: null,
-      quantity: null,
-      type: null,
+      size: '',
+      quantity: 1,
+      type: '',
       port: 9000,
       command: '',
       errorText: '',
@@ -254,7 +254,6 @@ export default class NewFormation extends Component {
   }
 
   submitFormation = () => {
-    console.log('submitFormation()');
     api.createFormation(this.props.app, this.state.size, this.state.quantity, this.state.type, (this.state.type === 'web' ? this.state.port : null), (this.state.command === '' ? null : this.state.command)).then(() => {
       this.props.onComplete('New Formation Added');
     }).catch((error) => {
@@ -265,9 +264,9 @@ export default class NewFormation extends Component {
         stepIndex: 0,
         loading: false,
         size: this.state.sizes[0].name,
-        type: null,
-        port: null,
-        command: null,
+        type: '',
+        port: '',
+        command: '',
         quantity: 1,
         errorText: '',
       });
@@ -275,11 +274,8 @@ export default class NewFormation extends Component {
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
+    const { stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'visible' };
-    // if (finished) {
-    //   this.submitFormation();
-    // }
 
     return (
       <div style={contentStyle}>

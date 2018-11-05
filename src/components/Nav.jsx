@@ -104,7 +104,7 @@ export default class Nav extends Component {
       accountMenu = (
         <AccountMenu
           className="account-menu"
-          src={this.state.account.thumbnailPhoto}
+          src={this.state.account.thumbnailPhoto ? this.state.account.thumbnailPhoto : ''}
           accountName={this.state.account.name ? this.state.account.name : ''}
         />
       );

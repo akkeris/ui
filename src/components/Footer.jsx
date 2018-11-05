@@ -1,14 +1,18 @@
 import React from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import { Table, TableBody, TableRow, TableRowColumn, TableHeader, TableHeaderColumn } from 'material-ui/Table';
-import Paper from 'material-ui/Paper';
-import IconButton from 'material-ui/IconButton';
-
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import {
+  Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Typography,
+} from '@material-ui/core';
+import { blue } from '@material-ui/core/colors';
 import GitIcon from './Icons/GitIcon';
 
-const muiTheme = getMuiTheme({
-  fontFamily: 'ProximaNova',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: 'ProximaNova',
+  },
 });
 
 const style = {
@@ -43,50 +47,59 @@ const style = {
   table: {
     body: {
       backgroundColor: 'rgba(255,255,255,0)',
+      marginBottom: '10px',
     },
-    row: {
+    cell: {
       textAlign: 'center',
+      width: '33%',
+      borderBottom: 'none',
+    },
+    headerCell: {
+      textAlign: 'center',
+      color: 'rgb(158, 158, 158)',
+      width: '33%',
+      borderBottom: '1px solid rgba(224, 224, 224, 1)',
     },
   },
 };
 
 const Footer = () => (
-  <MuiThemeProvider muiTheme={muiTheme}>
+  <MuiThemeProvider theme={muiTheme}>
     <Paper style={style.footer}>
       <div style={style.div}>
-        <Table style={style.table.body} selectable={false}>
-          <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
-            <TableRow displayBorder={false}>
-              <TableHeaderColumn style={style.table.row}>
+        <Table style={style.table.body}>
+          <TableHead>
+            <TableRow>
+              <TableCell style={style.table.headerCell} padding="none">
                 Documentation
-              </TableHeaderColumn >
-              <TableHeaderColumn style={style.table.row}>
+              </TableCell >
+              <TableCell style={style.table.headerCell} padding="none">
                 Contribution
-              </TableHeaderColumn>
-              <TableHeaderColumn style={style.table.row}>
+              </TableCell>
+              <TableCell style={style.table.headerCell} padding="none">
                 Support
-              </TableHeaderColumn>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody displayRowCheckbox={false}>
-            <TableRow displayBorder={false}>
-              <TableRowColumn style={style.table.row}>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell style={style.table.cell} padding="none">
                 <div style={style.link}>
                     Wiki
                 </div>
                 <div style={style.link}>
                     Getting Started
                 </div>
-              </TableRowColumn>
-              <TableRowColumn style={style.table.row}>
+              </TableCell>
+              <TableCell style={style.table.cell} padding="none">
                 <div style={style.link}>
                     API
                 </div>
                 <div style={style.link}>
                     Releases
                 </div>
-              </TableRowColumn>
-              <TableRowColumn style={style.table.row}>
+              </TableCell>
+              <TableCell style={style.table.cell} padding="none">
                 <div style={style.link}>
                     Akkeris
                 </div>
@@ -95,14 +108,14 @@ const Footer = () => (
                     Kubernetes
                   </a>
                 </div>
-              </TableRowColumn>
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
-        <p style={style.paragraph}>
+        <Typography variant="body2" style={style.paragraph}>
           Akkeris is built with a little bit of love, and a lot of anger. <br />
           Brought to you by COBRA and our open source community.
-        </p>
+        </Typography>
         <IconButton href="https://github.com/akkeris" ><GitIcon nativeColor="rgba(255,255,255,0.8)" /></IconButton>
       </div>
     </Paper>

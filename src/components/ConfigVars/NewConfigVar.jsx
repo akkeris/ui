@@ -74,7 +74,7 @@ export default class NewConfigVar extends Component {
             <TextField
               className="config-value"
               floatingLabelText="Value"
-              multiLine
+              multiline
               fullWidth
               value={this.state.value}
               onChange={this.handleValueChange}
