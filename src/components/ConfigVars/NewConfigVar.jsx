@@ -156,7 +156,7 @@ export default class NewConfigVar extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
     if (finished) {
       this.submitConfig();
     }
@@ -168,7 +168,6 @@ export default class NewConfigVar extends Component {
           {stepIndex > 0 && (
             <Button
               className="back"
-              label="Back"
               disabled={stepIndex === 0}
               onClick={this.handlePrev}
               style={style.buttons.back}
