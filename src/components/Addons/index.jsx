@@ -451,7 +451,6 @@ export default class Addons extends Component {
             className="attached-apps-dialog"
             onClose={this.handleAddonDialogClose}
             open={this.state.addonDialogOpen}
-            // BackdropProps={{ invisible: true }}
           >
             <DialogTitle>
               {this.getDialogTitle()}
@@ -466,9 +465,10 @@ export default class Addons extends Component {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {this.state.currentAddon.attached_to.map((attachment, index) =>
-                      this.formatAttachment(attachment, index),
-                    )}
+                    {this.state.currentAddon.attached_to &&
+                      this.state.currentAddon.attached_to.map((attachment, index) =>
+                        this.formatAttachment(attachment, index),
+                      )}
                   </TableBody>
                 </Table>
               )}
@@ -483,8 +483,20 @@ export default class Addons extends Component {
               </Button>
             </DialogActions>
           </Dialog>
-          <ConfirmationModal className="remove-addon-confirm" open={this.state.confirmAddonOpen} onOk={this.handleRemoveAddon} onCancel={this.handleCancelAddonConfirmation} message="Are you sure you want to delete this addon?" />
-          <ConfirmationModal className="remove-attachment-confirm" open={this.state.confirmAttachmentOpen} onOk={this.handleRemoveAddonAttachment} onCancel={this.handleCancelAddonAttachmentConfirmation} message="Are you sure you want to delete this attachment?" />
+          <ConfirmationModal
+            className="remove-addon-confirm"
+            open={this.state.confirmAddonOpen}
+            onOk={this.handleRemoveAddon}
+            onCancel={this.handleCancelAddonConfirmation}
+            message="Are you sure you want to delete this addon?"
+          />
+          <ConfirmationModal
+            className="remove-attachment-confirm"
+            open={this.state.confirmAttachmentOpen}
+            onOk={this.handleRemoveAddonAttachment}
+            onCancel={this.handleCancelAddonAttachmentConfirmation}
+            message="Are you sure you want to delete this attachment?"
+          />
           <Dialog
             className="addon-error"
             open={this.state.submitFail}

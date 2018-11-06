@@ -22,22 +22,22 @@ test('Should show list of apps based on filter', async (t) => { // eslint-disabl
     .expect(Selector('.app-list .api-default').innerText)
     .contains('api-default')
 
-    .click('.region-dropdown button')
-    .expect(Selector('[role=menu] .us-seattle').innerText)
+    .click('.region-dropdown')
+    .expect(Selector('#menu-region .us-seattle').innerText)
     .contains('us-seattle')
 
-    .click('[role=menu] .us-seattle')
+    .click('#menu-region .us-seattle')
 
-    .click('.space-dropdown button')
-    .expect(Selector('[role=menu] .default').innerText)
+    .click('.space-dropdown')
+    .expect(Selector('#menu-space .default').innerText)
     .contains('default')
 
-    .click('[role=menu] .default')
+    .click('#menu-space .default')
     .expect(Selector('.app-list .api-default').innerText)
     .contains('default')
 
-    .click('.space-dropdown button')
-    .click('[role=menu] .test')
+    .click('.space-dropdown')
+    .click('#menu-space .test')
     .expect(Selector('.app-list tbody').childElementCount)
     .eql(0);
 });
@@ -62,7 +62,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
   await t
   // navigate to new app page
     .click('.new-app')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.app-name').innerText)
     .contains('field required')
 
@@ -80,7 +80,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
 
   // navigate to new app page
     .click('.new-app')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.app-name').innerText)
     .contains('field required')
 
@@ -379,7 +379,7 @@ test // eslint-disable-line no-undef
       .click('div.dropdown')
       .click('li.testcafe')
       .click('button.next')
-      .expect(Selector('.app-list .testcafe-testcafe2').exists)
+      .expect(Selector('.app-list .testcafe2-testcafe').exists)
       .ok();
   })('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef
     await t
@@ -398,21 +398,21 @@ test // eslint-disable-line no-undef
 
     // Test compliance
       .click('button.new-addon')
-      .click('.service-menu button')
+      .click('.service-menu')
       .click('.Lids.Db.Credentials')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Lids.Prod.Credentials')
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.new-addon-error').innerText)
       .contains('The specified addon may not be attached to this app. It requires these necessary compliances in the space')
       .click('.ok')
 
     // create addon
-      .click('.service-menu button')
+      .click('.service-menu')
       .click('.Lids.Db.Credentials')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Lids.Dev.Credentials')
 
       // Test addon plan description
@@ -421,14 +421,14 @@ test // eslint-disable-line no-undef
       .expect(Selector('.plan-description').innerText)
       .contains('credentials')
       .click('button.back')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Lids.Dev.Credentials')
       .expect(Selector('.plan-price').exists)
       .ok()
       .expect(Selector('.plan-description').exists)
       .ok()
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Created')
       .expect(Selector('.addon-list .lids-db').exists)
@@ -436,12 +436,12 @@ test // eslint-disable-line no-undef
 
     // Test duplicate
       .click('button.new-addon')
-      .click('.service-menu button')
+      .click('.service-menu')
       .click('.Lids.Db.Credentials')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Lids.Dev.Credentials')
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.new-addon-error').innerText)
       .contains('This addon is already created and attached to this application and cannot be used twice.')
       .click('.ok')
@@ -458,16 +458,16 @@ test // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
       .click('.addons-tab')
       .click('button.new-addon')
-      .click('.service-menu button')
+      .click('.service-menu')
       .click('.Alamo.Postgres')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Standard-0')
       .expect(Selector('.plan-price').exists)
       .ok()
       .expect(Selector('.plan-description').exists)
       .ok()
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Created')
       .expect(Selector('.addon-list .alamo-postgresql').exists)
@@ -491,9 +491,9 @@ test // eslint-disable-line no-undef
       .click('button.attach-addon')
       .typeText('.app-search input', 'testcafe2-testcafe')
       .pressKey('enter')
-      .click('.addon-menu button')
+      .click('.addon-menu')
       .click('.alamo-postgresql')
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Attached')
       .expect(Selector('.addon-attachment-list').childElementCount)
@@ -514,9 +514,9 @@ test // eslint-disable-line no-undef
       .click('button.attach-addon')
       .typeText('.app-search input', 'testcafe2-testcafe')
       .pressKey('enter')
-      .click('.addon-menu button')
+      .click('.addon-menu')
       .click('.alamo-postgresql')
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.attach-addon-error').innerText)
       .contains('This addon is already provisioned or attached on this app.')
       .click('.ok')
@@ -972,7 +972,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('button.new-config')
     .typeText('.config-key input', 'test')
     .click('.next')
-    .typeText('.config-value input', 'test')
+    .typeText(Selector('.config-value textarea').withAttribute('style'), 'test')
     .click('.next')
     .expect(Selector('.config-snack').innerText)
     .contains('Added Config Var')
@@ -1027,8 +1027,7 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
     .click('button.next')
     .expect(Selector('.config-value p').innerText)
     .contains('field required')
-    .typeText('.config-value input', 'DERP')
-    // .typeText(newTextArea, 'DERP', { replace: true })
+    .typeText(Selector('.config-value textarea').withAttribute('style'), 'DERP')
     .click('button.next')
     .expect(Selector('.config-snack').innerText)
     .contains('Added Config Var')
@@ -1037,8 +1036,8 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
 
     // Edit config var
     .click('.config-list .MERP button.edit')
-    .typeText('.config-edit-value input', 'Testcafe', { replace: true })
-    // .typeText(editTextArea, 'Testcafe', { replace: true })
+    .typeText(Selector('.config-edit-value textarea').withAttribute('style'), 'Testcafe', { replace: true })
+    // .typeText('.config-edit-value input', 'Testcafe', { replace: true })
     .click('.submit')
     .expect(Selector('.config-snack').innerText)
     .contains('Updated Config Var')

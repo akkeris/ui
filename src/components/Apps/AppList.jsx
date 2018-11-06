@@ -36,7 +36,13 @@ export default class AppList extends Component {
 
   getApps() {
     return this.props.apps.map(app => (
-      <TableRow className={app.name} key={app.id} style={style.tableRow} hover onClick={() => this.handleRowSelection(app)}>
+      <TableRow
+        className={app.name}
+        key={app.id}
+        style={style.tableRow}
+        hover
+        onClick={() => this.handleRowSelection(app)}
+      >
         <TableCell style={style.tableRow}>
           <div style={style.tableRowColumn.main}>{app.name} {app.preview ? AppList.previewAnnotation(app.preview) : ''}</div>
           <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>

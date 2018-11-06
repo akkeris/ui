@@ -267,8 +267,6 @@ export default class NewAddon extends Component {
                 className="back"
                 disabled={stepIndex === 0}
                 onClick={this.handlePrev}
-                // style={style.buttons.Back}
-                // style={{ marginRight: '12px' }}
               >
                 Back
               </Button>
@@ -315,10 +313,9 @@ export default class NewAddon extends Component {
             <DialogActions>
               <Button
                 className="ok"
-                label="Ok"
                 color="primary"
                 onClick={this.handleClose}
-              />
+              >OK</Button>
             </DialogActions>
           </Dialog>
         </div>

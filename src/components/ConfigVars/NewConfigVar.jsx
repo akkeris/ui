@@ -57,7 +57,7 @@ export default class NewConfigVar extends Component {
           <div>
             <TextField
               className="config-key"
-              floatingLabelText="Key"
+              label="Key"
               value={this.state.key}
               onChange={this.handleKeyTextChange}
               error={!!this.state.errorText}
@@ -73,7 +73,7 @@ export default class NewConfigVar extends Component {
           <div>
             <TextField
               className="config-value"
-              floatingLabelText="Value"
+              label="Value"
               multiline
               fullWidth
               value={this.state.value}
