@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import {
+  Paper, List, ListSubheader, CircularProgress, LinearProgress,
+} from '@material-ui/core';
+import { blue } from '@material-ui/core/colors';
 import PropTypes from 'prop-types';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import LinearProgress from 'material-ui/LinearProgress';
-import { List } from 'material-ui/List';
-import Paper from 'material-ui/Paper';
-import Subheader from 'material-ui/Subheader';
 import api from '../../services/api';
 import recommendations from '../../services/util/recommendations';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 /* eslint-disable no-console */
@@ -23,11 +26,13 @@ const style = {
       marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '20%',
+      marginTop: '15%',
+      marginBottom: '5%',
     },
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   toolbar: {
@@ -162,7 +167,7 @@ export default class WasteReport extends Component {
       if (notes.length > 0) {
         return (
           <div key={`recommend_${app.name}`} className="recommendations" style={style.recommendations}>
-            <Subheader>{app.name}</Subheader>
+            <ListSubheader>{app.name}</ListSubheader>
             <ul>
               {notes}
             </ul>
@@ -176,14 +181,14 @@ export default class WasteReport extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div className="invoices" style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     } else if (this.state.analyzing) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div className="invoices">
             <Paper style={style.paper}>
               <div className="internal">
@@ -196,7 +201,7 @@ export default class WasteReport extends Component {
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div className="invoices">
           <Paper style={style.paper}>
             <div style={style.header}>Cost Report for {this.props.match.params.org}</div>

@@ -1,12 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
-import { Card, CardHeader } from 'material-ui/Card';
+import { blue } from '@material-ui/core/colors';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { Table, TableBody, TableRow, TableCell, Card, CardHeader } from '@material-ui/core';
 import { BarChart, Bar, XAxis } from 'recharts';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -14,19 +19,22 @@ const style = {
     height: '58px',
     cursor: 'pointer',
   },
-  tableRowColumn: {
+  tableCell: {
     main: {
+      width: '33%',
       fontSize: '16px',
       textDecoration: 'underline',
       color: 'rgb(174,58,152)',
     },
     mainRight: {
+      width: '33%',
       fontSize: '16px',
       textAlign: 'right',
       textDecoration: 'underline',
       color: 'rgb(174,58,152)',
     },
     mainCenter: {
+      width: '33%',
       fontSize: '16px',
       textAlign: 'center',
       textDecoration: 'underline',
@@ -99,49 +107,56 @@ export default class InvoiceList extends Component {
       const periodStart = new Date(invoice.period_start);
       const month = getNamedMonth(periodStart);
       return (
-        <TableRow key={invoice.id} style={style.tableRow}>
-          <TableRowColumn style={style.tableRowColumn.main}>
+        <TableRow
+          key={invoice.id}
+          style={style.tableRow}
+          hover
+          onClick={() => this.handleRowSelection(invoice.id)}
+        >
+          <TableCell style={style.tableCell.main}>
             {month} {periodStart.getUTCFullYear()}
-          </TableRowColumn>
-          <TableRowColumn style={style.tableRowColumn.mainCenter}>
+          </TableCell>
+          <TableCell style={style.tableCell.mainCenter}>
             {formatMoney(invoice.charges_total)}
-          </TableRowColumn>
-          <TableRowColumn style={style.tableRowColumn.mainRight}>
+          </TableCell>
+          <TableCell style={style.tableCell.mainRight}>
             {invoice.state === 1 ? 'Paid' : 'Pending'}
-          </TableRowColumn>
+          </TableCell>
         </TableRow>
       );
     });
   }
 
-  handleRowSelection = (selectedRows) => {
-    window.location = `#/invoices/${this.props.invoices[selectedRows].id}`;
+  handleRowSelection = (id) => {
+    window.location = `#/invoices/${id}`;
   }
 
   render() {
     return (
-      <div>
-        <Card>
-          <CardHeader title="Billing Information" subtitle={`Current Usage: ${formatMoney(this.getInvoiceTotal())}`} />
-        </Card>
-        <BarChart
-          style={{ marginLeft: 'auto', marginRight: 'auto' }}
-          margin={{
- top: 15, bottom: 15, left: 15, right: 15,
-}}
-          width={600}
-          height={200}
-          data={this.getInvoiceHistory()}
-        >
-          <XAxis axisLine={false} dataKey="time" tickLine={false} />
-          <Bar type="monotone" dataKey="x" fill={muiTheme.palette.primary1Color} />
-        </BarChart>
-        <Table onRowSelection={this.handleRowSelection}>
-          <TableBody displayRowCheckbox={false} showRowHover>
-            {this.getInvoices()}
-          </TableBody>
-        </Table>
-      </div>
+      <MuiThemeProvider theme={muiTheme}>
+        <div>
+          <Card>
+            <CardHeader title="Billing Information" subheader={`Current Usage: ${formatMoney(this.getInvoiceTotal())}`} />
+          </Card>
+          <BarChart
+            style={{ marginLeft: 'auto', marginRight: 'auto' }}
+            margin={{
+              top: 15, bottom: 15, left: 15, right: 15,
+            }}
+            width={600}
+            height={200}
+            data={this.getInvoiceHistory()}
+          >
+            <XAxis axisLine={false} dataKey="time" tickLine={false} />
+            <Bar type="monotone" dataKey="x" fill={muiTheme.palette.primary.main} />
+          </BarChart>
+          <Table>
+            <TableBody>
+              {this.getInvoices()}
+            </TableBody>
+          </Table>
+        </div>
+      </MuiThemeProvider>
     );
   }
 }

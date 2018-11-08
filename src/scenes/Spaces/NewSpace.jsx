@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Checkbox, Paper,
   MenuItem, Select, FormControl, InputLabel, FormControlLabel,
