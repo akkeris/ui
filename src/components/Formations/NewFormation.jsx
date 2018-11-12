@@ -128,7 +128,15 @@ export default class NewFormation extends Component {
           <div>
             {/* <h3 className="type-header" >Type</h3> */}
             <div>
-              <TextField className="new-type" label="Type" type="text" value={this.state.type} onChange={this.handleChange('type')} error={this.state.errorText.length > 0} helperText={this.state.errorText} />
+              <TextField
+                className="new-type"
+                label="Type"
+                type="text"
+                value={this.state.type}
+                onChange={this.handleChange('type')}
+                error={this.state.errorText.length > 0}
+                helperText={this.state.errorText}
+              />
               <p>
                 Enter a name for your new dyno.
               </p>

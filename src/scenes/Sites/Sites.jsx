@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
-import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar';
+import {
+  Toolbar, IconButton, CircularProgress, Paper, Select, MenuItem,
+  FormControl, InputLabel,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { blue } from '@material-ui/core/colors';
+import AddIcon from '@material-ui/icons/Add';
 import { Link } from 'react-router-dom';
-import IconButton from 'material-ui/IconButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Paper from 'material-ui/Paper';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
 
 import api from '../../services/api';
 import SitesList from '../../components/Sites';
@@ -17,8 +15,56 @@ import Search from '../../components/Search';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiIconButton: {
+      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
+    },
+    MuiToolbar: {
+      root: {
+        minHeight: '48px !important',
+        maxHeight: '48px !important',
+      },
+    },
+    MuiInputLabel: {
+      root: { color: 'white !important' },
+      shrink: { color: 'white !important' },
+      animated: { color: 'white !important' },
+    },
+    MuiSelect: {
+      root: { color: 'white' },
+      icon: { color: 'white' },
+      select: { color: 'white !important' },
+    },
+    MuiInput: {
+      input: {
+        '&::placeholder': {
+          color: 'white',
+        },
+        color: 'white',
+      },
+      underline: {
+        // Border color when input is not selected
+        '&:before': {
+          borderBottom: '1px solid rgb(200, 200, 200)',
+        },
+        // Border color when input is selected
+        '&:after': {
+          borderBottom: '2px solid white',
+        },
+        // Border color on hover
+        '&:hover:not([class^=".MuiInput-disabled-"]):not([class^=".MuiInput-focused-"]):not([class^=".MuiInput-error-"]):before': {
+          borderBottom: '1px solid rgb(200, 200, 200)',
+        },
+      },
+    },
+  },
 });
 
 const style = {
@@ -37,6 +83,7 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   toolbar: {
@@ -45,33 +92,24 @@ const style = {
     marginLeft: 'auto',
     marginRight: 'auto',
     padding: '16px 0',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
   },
   link: {
     textDecoration: 'none',
-  },
-  font: {
-    color: 'white',
+    marginLeft: 'auto',
   },
   paper: {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
+    marginBottom: '12px',
   },
-  menu: {
-    height: '48px',
-    lineHeight: '48px',
-    color: 'white',
-  },
-  icon: {
-    top: '0px',
-  },
-  search: {
-    color: 'white',
-    WebkitTextFillColor: 'white',
-  },
-  searchHint: {
-    color: 'rgba(255,255,255,0.3)',
+  regionContainer: {
+    marginLeft: '30px',
+    minWidth: '145px',
   },
 };
 
@@ -82,7 +120,7 @@ class Sites extends Component {
       sites: [],
       filteredSites: [],
       regions: [],
-      region: 'all',
+      region: '',
       loading: true,
     };
   }
@@ -104,7 +142,7 @@ class Sites extends Component {
 
   getRegions() {
     return this.state.regions.map(region => (
-      <MenuItem className={region.name} key={region.id} value={region.name} label={`Region: ${region.name}`} primaryText={region.name} />
+      <MenuItem className={region.name} key={region.id} value={region.name}>{region.name}</MenuItem>
     ));
   }
 
@@ -112,8 +150,8 @@ class Sites extends Component {
     window.location = `#/sites/${searchText}/info`;
   }
 
-  handleRegionChange = (event, index, value) => {
-    const region = value;
+  handleRegionChange = (event) => {
+    const region = event.target.value;
     const sites = util.filterSites(this.state.sites, region);
     this.setState({
       region,
@@ -124,41 +162,39 @@ class Sites extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
-          <Toolbar style={style.toolbar}>
-            <ToolbarGroup>
-              <Search
-                style={style.search}
-                hintStyle={style.searchHint}
-                className="search"
-                data={util.filterDomain(this.state.filteredSites)}
-                handleSearch={this.handleSearch}
-              />
-              <DropDownMenu
+          <Toolbar style={style.toolbar} disableGutters>
+            <Search
+              className="search"
+              data={util.filterDomain(this.state.filteredSites)}
+              handleSearch={this.handleSearch}
+            />
+            <FormControl style={style.regionContainer}>
+              <InputLabel htmlFor="region-select">Filter by Region</InputLabel>
+              <Select
                 className="region-dropdown"
-                style={style.filter}
-                labelStyle={style.menu}
-                iconStyle={style.icon}
                 value={this.state.region}
                 onChange={this.handleRegionChange}
+                inputProps={{
+                  name: 'region',
+                  id: 'region-select',
+                }}
               >
-                <MenuItem className="all" value="all" label="Filter by Region" primaryText="all" />
+                <MenuItem className="all" value="all">All</MenuItem>
                 {this.getRegions()}
-              </DropDownMenu>
-            </ToolbarGroup>
-            <ToolbarGroup>
-              <Link to="/sites/new" style={style.link}>
-                <IconButton className="new-site" iconStyle={style.font}><AddIcon /></IconButton>
-              </Link>
-            </ToolbarGroup>
+              </Select>
+            </FormControl>
+            <Link to="/sites/new" style={style.link}>
+              <IconButton className="new-site"><AddIcon /></IconButton>
+            </Link>
           </Toolbar>
           <Paper style={style.paper}>
             <SitesList sites={this.state.filteredSites} />

@@ -1,22 +1,26 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { blue } from '@material-ui/core/colors';
+import {
+  Table, TableHead, TableBody, TableRow, TableCell, Paper,
+  CircularProgress, Snackbar, IconButton, Tooltip,
+} from '@material-ui/core';
+import ArrowIcon from '@material-ui/icons/ArrowForward';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Clear';
 import PropTypes from 'prop-types';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
-import Paper from 'material-ui/Paper';
-import IconButton from 'material-ui/IconButton';
-import Snackbar from 'material-ui/Snackbar';
-import ArrowIcon from 'material-ui/svg-icons/navigation/arrow-forward';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
 
 import api from '../../services/api';
 import NewRoute from './NewRoute';
 import ConfirmationModal from '../ConfirmationModal';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -77,18 +81,18 @@ export default class RouteList extends Component {
   getRoutes() {
     return this.state.routes.map(route => (
       <TableRow key={route.id} style={style.tableRow}>
-        <TableRowColumn>
+        <TableCell>
           <div style={style.tableRowColumn.title}><a href={`https://${this.props.site.domain || this.props.site}${route.source_path}`}>{`https://${this.props.site.domain || this.props.site}${route.source_path}`}</a></div>
           <div style={style.tableRowColumn.sub}>{route.id}</div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
+        </TableCell>
+        <TableCell style={style.tableRowColumn.icon}>
           <ArrowIcon />
-        </TableRowColumn>
-        <TableRowColumn>
+        </TableCell>
+        <TableCell>
           <div style={style.tableRowColumn.title}>{route.target_path}</div>
           <div style={style.tableRowColumn.sub}>{route.app.name || route.app}</div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
+        </TableCell>
+        <TableCell style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
             <IconButton
               onClick={() => this.handleConfirmation(route)}
@@ -96,7 +100,7 @@ export default class RouteList extends Component {
               <RemoveIcon />
             </IconButton>
           </div>
-        </TableRowColumn>
+        </TableCell>
       </TableRow>
     ));
   }
@@ -160,19 +164,21 @@ export default class RouteList extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           {!this.state.new && (
             <Paper elevation={0}>
-              <IconButton onClick={this.handleNewRoute} tooltip="New Route" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+              <Tooltip title="New Route" placement="bottom-start">
+                <IconButton onClick={this.handleNewRoute}><AddIcon /></IconButton>
+              </Tooltip>
             </Paper>
           )}
           {this.state.new && (
@@ -181,16 +187,16 @@ export default class RouteList extends Component {
               <NewRoute site={this.props.site} onComplete={this.reload} />
             </div>
           )}
-          <Table selectable={false} wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-            <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableHeaderColumn>Source</TableHeaderColumn>
-                <TableHeaderColumn style={style.tableRowColumn.icon} />
-                <TableHeaderColumn>Target</TableHeaderColumn>
-                <TableHeaderColumn style={style.tableRowColumn.icon} />
+                <TableCell>Source</TableCell>
+                <TableCell style={style.tableRowColumn.icon} />
+                <TableCell>Target</TableCell>
+                <TableCell style={style.tableRowColumn.icon} />
               </TableRow>
-            </TableHeader>
-            <TableBody displayRowCheckbox={false} showRowHover>
+            </TableHead>
+            <TableBody>
               {this.getRoutes()}
             </TableBody>
           </Table>
@@ -199,7 +205,7 @@ export default class RouteList extends Component {
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>
