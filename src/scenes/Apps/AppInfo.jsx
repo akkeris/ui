@@ -218,7 +218,7 @@ export default class AppInfo extends Component {
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={{ marginBottom: '12px' }}>
-          <Card className="card">
+          <Card className="card" style={{ overflow: 'visible' }}>
             <CardHeader
               className="header"
               title={this.state.app.name}

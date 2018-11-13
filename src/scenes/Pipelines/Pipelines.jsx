@@ -1,23 +1,36 @@
 import React, { Component } from 'react';
-import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
-import IconButton from 'material-ui/IconButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Paper from 'material-ui/Paper';
-import Snackbar from 'material-ui/Snackbar';
-import Divider from 'material-ui/Divider';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
+import {
+  Toolbar, IconButton, CircularProgress, Paper, Table, TableBody, TableRow, TableCell,
+  Snackbar, Divider, Collapse,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { blue } from '@material-ui/core/colors';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Clear';
 
 import { NewPipeline } from '../../components/Pipelines';
 import api from '../../services/api';
 import util from '../../services/util';
 import Search from '../../components/Search';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiToolbar: {
+      root: {
+        minHeight: '48px !important',
+        maxHeight: '48px !important',
+      },
+    },
+    MuiIconButton: {
+      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
+    },
+  },
 });
 
 const style = {
@@ -33,6 +46,7 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   toolbar: {
@@ -40,16 +54,13 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '16px 0',
-  },
-  link: {
-    textDecoration: 'none',
   },
   paper: {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
+    marginBottom: '12px',
   },
   tableRow: {
     height: '58px',
@@ -71,14 +82,11 @@ const style = {
     },
   },
   icon: {
+    marginLeft: 'auto',
     color: 'white',
   },
-  search: {
-    color: 'white',
-    WebkitTextFillColor: 'white',
-  },
-  searchHint: {
-    color: 'rgba(255,255,255,0.3)',
+  cancelIcon: {
+    margin: '5px',
   },
 };
 
@@ -107,21 +115,27 @@ class Pipelines extends Component {
     return this.state.pipelines.map((pipeline) => {
       const date = new Date(pipeline.updated_at);
       return (
-        <TableRow className={pipeline.name} key={pipeline.id} style={style.tableRow}>
-          <TableRowColumn>
+        <TableRow
+          className={pipeline.name}
+          key={pipeline.id}
+          style={style.tableRow}
+          hover
+          onClick={() => this.handleRowSelection(pipeline.id)}
+        >
+          <TableCell>
             <div style={style.tableRowColumn.title}>{pipeline.name}</div>
             <div style={style.tableRowColumn.sub}>{pipeline.id}</div>
-          </TableRowColumn>
-          <TableRowColumn>
+          </TableCell>
+          <TableCell>
             <div style={style.tableRowColumn.title}>{date.toLocaleString()}</div>
-          </TableRowColumn>
+          </TableCell>
         </TableRow>
       );
     });
   }
 
-  handleRowSelection = (selectedRows) => {
-    window.location = `#/pipelines/${this.state.pipelines[selectedRows].name}/review`;
+  handleRowSelection = (id) => {
+    window.location = `#/pipelines/${id}/review`;
   }
 
   handleSearch = (searchText) => {
@@ -156,47 +170,44 @@ class Pipelines extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           <Toolbar style={style.toolbar}>
-            <ToolbarGroup>
-              <Search
-                style={style.search}
-                hintStyle={style.searchHint}
-                className="search"
-                data={util.filterName(this.state.pipelines)}
-                handleSearch={this.handleSearch}
-              />
-            </ToolbarGroup>
-            <ToolbarGroup>
-              {!this.state.new && (
-                <IconButton
-                  className="new-pipeline"
-                  iconStyle={style.icon}
-                  onClick={this.handleNewPipeline}
-                >
-                  <AddIcon />
-                </IconButton>
-              )}
-            </ToolbarGroup>
+            <Search
+              className="search"
+              data={util.filterName(this.state.pipelines)}
+              handleSearch={this.handleSearch}
+            />
+            {!this.state.new && (
+              <IconButton
+                className="new-pipeline"
+                style={style.icon}
+                onClick={this.handleNewPipeline}
+              >
+                <AddIcon />
+              </IconButton>
+            )}
           </Toolbar>
           <Paper style={style.paper}>
-            {this.state.new && (
+            <Collapse in={this.state.new}>
               <div>
-                <IconButton className="cancel" onClick={this.handleNewPipelineCancel}><RemoveIcon /></IconButton>
+                <IconButton className="cancel" onClick={this.handleNewPipelineCancel} style={style.cancelIcon}>
+                  <RemoveIcon nativeColor="black" />
+                </IconButton>
                 <NewPipeline onComplete={this.reload} />
-                <Divider />
+                <Divider style={{ marginTop: '15px' }} />
               </div>
-            )}
-            <Table className="pipeline-list" onRowSelection={this.handleRowSelection} wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-              <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+            </Collapse>
+
+            <Table className="pipeline-list">
+              <TableBody >
                 {this.getPipelines()}
               </TableBody>
             </Table>
@@ -206,7 +217,7 @@ class Pipelines extends Component {
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>

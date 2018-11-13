@@ -1,32 +1,41 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import IconButton from 'material-ui/IconButton';
-import Paper from 'material-ui/Paper';
-import Button from '@material-ui/core/Button';
-import Divider from 'material-ui/Divider';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
-import Checkbox from 'material-ui/Checkbox';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
-import PromoteIcon from 'material-ui/svg-icons/file/cloud-upload';
-import AddIcon from 'material-ui/svg-icons/content/add';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import {
+  CircularProgress, IconButton, Button, Paper, Divider, FormControlLabel,
+  Table, TableBody, TableRow, TableCell, Tooltip, Checkbox,
+} from '@material-ui/core';
+import { blue } from '@material-ui/core/colors';
+import RemoveIcon from '@material-ui/icons/Clear';
+import PromoteIcon from '@material-ui/icons/CloudUpload';
+import AddIcon from '@material-ui/icons/Add';
 
 import api from '../../services/api';
 import util from '../../services/util';
 import ConfirmationModal from '../ConfirmationModal';
 import { NewPipelineCoupling } from '../../components/Pipelines';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiCheckbox: {
+      root: {
+        padding: '2px 12px',
+      },
+    },
+  },
 });
 
 const style = {
   tableRow: {
     height: '100px',
   },
-  tableRowColumn: {
+  tableCell: {
     title: {
       fontSize: '16px',
       paddingTop: '1em',
@@ -53,9 +62,9 @@ const style = {
       marginLeft: 'auto',
       marginRight: 'auto',
       width: '40px',
-      height: '40px',
-      marginTop: '15%',
-      marginBottom: '5%',
+      height: '200px',
+      display: 'flex',
+      alignItems: 'center',
     },
     indicator: {
       display: 'inline-block',
@@ -97,7 +106,7 @@ export default class Stage extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active) {
+    if (prevProps.stage !== this.props.stage) {
       this.loadPipelineCouplings();
     }
   }
@@ -110,6 +119,7 @@ export default class Stage extends Component {
   }
 
   loadPipelineCouplings() {
+    // this.setState({ couplings: [], stageCouplings: [] });
     api.getPipelineCouplings(this.props.pipeline.name).then((response) => {
       const stageCouplings = util.filterCouplings(response.data, this.props.stage);
       this.setState({
@@ -219,9 +229,9 @@ export default class Stage extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
@@ -234,10 +244,10 @@ export default class Stage extends Component {
       const commitAuthor = coupling.release.build.commit.author ? `, ${coupling.release.build.commit.author.substring(0, 20)}` : null;
 
       return (
-        <TableRow className={coupling.app.name} key={coupling.id} style={style.tableRow}>
-          <TableRowColumn>
-            <div style={style.tableRowColumn.title}><a style={style.link} href={`#/apps/${coupling.app.name}/info`}>{coupling.app.name}</a></div>
-            <div style={style.tableRowColumn.sub}>id: {coupling.id}</div>
+        <TableRow hover className={coupling.app.name} key={coupling.id} style={style.tableRow}>
+          <TableCell>
+            <div style={style.tableCell.title}><a style={style.link} href={`#/apps/${coupling.app.name}/info`}>{coupling.app.name}</a></div>
+            <div style={style.tableCell.sub}>id: {coupling.id}</div>
             {coupling.release.updated_at && (
               <div>
                 Released on: {releaseDate.toLocaleString()},
@@ -250,26 +260,24 @@ export default class Stage extends Component {
               </div>
             )}
             {coupling.release.version && (
-              <div style={style.tableRowColumn.last}>Release: {coupling.release.version}</div>
+              <div style={style.tableCell.last}>Release: {coupling.release.version}</div>
             )}
-          </TableRowColumn>
-          <TableRowColumn style={style.tableRowColumn.button}>
+          </TableCell>
+          <TableCell style={style.tableCell.button}>
             {coupling.stage !== 'production' && (
               <div>
                 <Button
                   variant="contained"
-                  style={style.tableRowColumn.button}
+                  style={style.tableCell.button}
                   className="promote"
-                  label="Promote"
                   onClick={() => this.handlePromoteConfirmation(coupling)}
-                  primary
-                  icon={<PromoteIcon />}
-                />
+                  color="primary"
+                ><PromoteIcon style={{ paddingRight: '10px' }} />Promote</Button>
               </div>
             )}
-          </TableRowColumn>
-          <TableRowColumn style={style.tableRowColumn.icon}>
-            <div style={style.tableRowColumn.end}>
+          </TableCell>
+          <TableCell style={style.tableCell.icon}>
+            <div style={style.tableCell.end}>
               <IconButton
                 className="remove"
                 onClick={() => this.handleConfirmation(coupling)}
@@ -277,23 +285,27 @@ export default class Stage extends Component {
                 <RemoveIcon />
               </IconButton>
             </div>
-          </TableRowColumn>
+          </TableCell>
         </TableRow>
       );
     });
 
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
-          <Table className={`${this.props.stage}-coupling-list`} wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-            <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+          <Table className={`${this.props.stage}-coupling-list`}>
+            <TableBody>
               {couplingList}
             </TableBody>
           </Table>
           <Divider />
           {!this.state.new && (
             <Paper elevation={0}>
-              <IconButton className={`${this.props.stage}-new-coupling`} onClick={this.handleNewCoupling} tooltip="New Coupling" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+              <Tooltip title="New Coupling" placement="left">
+                <IconButton className={`${this.props.stage}-new-coupling`} onClick={this.handleNewCoupling}>
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
             </Paper>
           )}
           {this.state.new && (
@@ -315,14 +327,18 @@ export default class Stage extends Component {
             message="Are you sure you want to promote?"
             title="Promote"
             actions={
-              <Checkbox
-                className="force-check"
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    className="force-check"
+                    checked={!this.state.safePromote}
+                    onChange={this.handleSafePromoteCheck}
+                    style={{ maxWidth: '120', textAlign: 'left', marginLeft: '12' }}
+                    iconStyle={{ textAlign: 'left' }}
+                  />}
                 label="Force"
-                checked={!this.state.safePromote}
-                onCheck={this.handleSafePromoteCheck}
-                style={{ maxWidth: '120', textAlign: 'left', marginLeft: '12' }}
-                iconStyle={{ textAlign: 'left' }}
-              />}
+              />
+            }
           />
           <ConfirmationModal
             className={`${this.props.stage}-remove-confirm`}

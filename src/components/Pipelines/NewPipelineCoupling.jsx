@@ -1,16 +1,22 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
+import {
+  Step, Stepper, StepLabel, Collapse,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import Search from '../../components/Search';
 import util from '../../services/util';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -57,12 +63,21 @@ export default class NewPipelineCoupling extends Component {
       case 0:
         return (
           <div>
-            <Search className={`${this.props.stage}-app-search`} label="App" data={util.filterName(this.state.apps)} handleSearch={this.handleSearch} searchText="" errorText={this.state.errorText} />
+            <Search
+              className={`${this.props.stage}-app-search`}
+              label="App"
+              data={util.filterName(this.state.apps)}
+              handleSearch={this.handleSearch}
+              color="black"
+              errorText={this.state.errorText}
+            />
             <p>
               The application name or id to add to the pipeline. Ex. my-test-app-dev
             </p>
           </div>
         );
+      case 1:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -102,7 +117,7 @@ export default class NewPipelineCoupling extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 0 40px 57px' };
 
     if (finished) {
       this.submitPipelineCoupling();
@@ -119,16 +134,16 @@ export default class NewPipelineCoupling extends Component {
     const { loading, stepIndex } = this.state;
 
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
               <StepLabel>Select App</StepLabel>
             </Step>
           </Stepper>
-          <ExpandTransition loading={loading} open>
+          <Collapse in={!loading}>
             {this.renderContent()}
-          </ExpandTransition>
+          </Collapse>
         </div>
       </MuiThemeProvider>
     );

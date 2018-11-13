@@ -1,31 +1,74 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import {
+  Button, IconButton, Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
+  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
+} from '@material-ui/core';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { blue } from '@material-ui/core/colors';
 import PropTypes from 'prop-types';
-import { Card, CardHeader } from 'material-ui/Card';
-import FlatButton from 'material-ui/FlatButton';
-import { Tabs, Tab } from 'material-ui/Tabs';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Dialog from 'material-ui/Dialog';
-import Snackbar from 'material-ui/Snackbar';
-import LaptopIcon from 'material-ui/svg-icons/hardware/computer';
-import GlobeIcon from 'material-ui/svg-icons/social/public';
-import Forward from 'material-ui/svg-icons/navigation/arrow-forward';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
-import IconButton from 'material-ui/IconButton';
+
+import LaptopIcon from '@material-ui/icons/Computer';
+import GlobeIcon from '@material-ui/icons/Public';
+import Forward from '@material-ui/icons/ArrowForward';
+import RemoveIcon from '@material-ui/icons/Clear';
 
 import api from '../../services/api';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { Stage } from '../../components/Pipelines';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  tabs: {
-    backgroundColor: '#3c4146',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: blue,
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiTabs: {
+      root: {
+        backgroundColor: '#3c4146',
+        color: 'white',
+        maxWidth: '1024px',
+      },
+    },
+    MuiTab: {
+      root: {
+        minWidth: '120px !important',
+      },
+    },
+    MuiCardContent: {
+      root: {
+        display: 'flex',
+        flexFlow: 'row-reverse',
+        padding: '0px 16px 0px 0px !important',
+      },
+    },
+    MuiCard: {
+      root: {
+        maxWidth: '1024px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        marginTop: '12px',
+      },
+    },
+    MuiCardHeader: {
+      title: {
+        fontSize: '15px',
+        fontWeight: '500',
+      },
+      subheader: {
+        fontSize: '14px',
+        fontWeight: '500',
+      },
+    },
   },
 });
 
 const style = {
+  iconButton: {
+    color: 'black',
+    float: 'right',
+  },
   refresh: {
     div: {
       marginLeft: 'auto',
@@ -38,16 +81,12 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   card: {
-    maxWidth: '1024px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    marginTop: '12px',
-  },
-  iconButton: {
-    float: 'right',
+    overflow: 'visible',
+    marginBottom: '20px',
   },
 };
 
@@ -96,7 +135,8 @@ export default class PipelineInfo extends Component {
     const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
     if (routeHasChanged && this.props.history.action === 'POP') {
       // If hitting back took us to the base path without a tab, hit back again
-      // TODO: what if we hit forward to the base path? detect forward click and do window.history.forward()
+      // TODO: what if we hit forward to the base path?
+      //    detect forward click and do window.history.forward()
       if (this.props.location.pathname === `${this.state.basePath}` ||
           this.props.location.pathname === `${this.state.basePath}/`) {
         window.history.back();
@@ -163,107 +203,165 @@ export default class PipelineInfo extends Component {
     });
   }
 
-  changeActiveTab = (newTab) => {
-    this.setState({
-      currentTab: newTab.props.value,
-    });
-    this.props.history.push(`${newTab.props.value}`);
+  changeActiveTab = (event, newTab) => {
+    if (this.state.currentTab !== newTab) {
+      this.setState({
+        currentTab: newTab,
+      });
+      this.props.history.push(`${newTab}`);
+    }
+  }
+
+  renderTabContent = () => {
+    const { currentTab } = this.state;
+    return (
+      <React.Fragment>
+        {currentTab === 'review' && (
+          <Stage
+            stage="review"
+            pipeline={this.state.pipeline}
+            onError={this.handleError}
+            onAlert={this.handleAlert}
+            active={this.state.currentTab === 'review'}
+          />
+        )}
+        {currentTab === 'development' && (
+          <Stage
+            stage="development"
+            pipeline={this.state.pipeline}
+            onError={this.handleError}
+            onAlert={this.handleAlert}
+            active={this.state.currentTab === 'development'}
+          />
+        )}
+        {currentTab === 'staging' && (
+          <Stage
+            stage="staging"
+            pipeline={this.state.pipeline}
+            onError={this.handleError}
+            onAlert={this.handleAlert}
+            active={this.state.currentTab === 'staging'}
+          />
+        )}
+        {currentTab === 'production' && (
+          <Stage
+            stage="production"
+            pipeline={this.state.pipeline}
+            onError={this.handleError}
+            onAlert={this.handleAlert}
+            active={this.state.currentTab === 'production'}
+          />
+        )}
+      </React.Fragment>
+    );
   }
 
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             <Dialog
               className="not-found-error"
               open={this.state.submitFail}
-              modal
-              actions={
-                <FlatButton
-                  className="ok"
-                  label="Ok"
-                  primary
-                  onClick={this.handleNotFoundClose}
-                />}
             >
-              {this.state.submitMessage}
+              <DialogTitle>Error</DialogTitle>
+              <DialogContent>
+                <DialogContentText>{this.state.submitMessage}</DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={this.handleNotFoundClose}
+                  color="primary"
+                >
+                  Ok
+                </Button>
+              </DialogActions>
             </Dialog>
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           <Card className="card" style={style.card}>
             <CardHeader
               className="header"
               title={this.state.pipeline.name}
-              subtitle={this.state.pipeline.id}
+              subheader={this.state.pipeline.id}
+              action={
+                <IconButton className="delete-pipeline" style={style.iconButton} onClick={this.handleConfirmation}>
+                  <RemoveIcon />
+                </IconButton>
+              }
+            />
+            <Tabs
+              fullWidth
+              value={this.state.currentTab}
+              onChange={this.changeActiveTab}
+              scrollButtons="off"
             >
-              <IconButton className="delete-pipeline" style={style.iconButton} onClick={this.handleConfirmation}><RemoveIcon /></IconButton>
-              <ConfirmationModal open={this.state.confirmOpen} onOk={this.handleRemovePipeline} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this pipeline?" />
-            </CardHeader>
-            <Tabs value={this.state.currentTab}>
               <Tab
+                disableRipple
                 className="review-tab"
                 icon={<LaptopIcon />}
                 label="Review"
-                onActive={this.changeActiveTab}
                 value="review"
-              >
-                <Stage stage="review" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.currentTab === 'review'} />
-              </Tab>
+              />
               <Tab
+                disableRipple
                 className="dev-tab"
                 icon={<Forward />}
                 label="Development"
-                onActive={this.changeActiveTab}
                 value="development"
-              >
-                <Stage stage="development" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.currentTab === 'development'} />
-              </Tab>
+              />
               <Tab
+                disableRipple
                 className="staging-tab"
                 icon={<Forward />}
                 label="Staging"
-                onActive={this.changeActiveTab}
                 value="staging"
-              >
-                <Stage stage="staging" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.currentTab === 'staging'} />
-              </Tab>
+              />
               <Tab
+                disableRipple
                 className="prod-tab"
                 icon={<GlobeIcon />}
                 label="Production"
-                onActive={this.changeActiveTab}
                 value="production"
-              >
-                <Stage stage="production" pipeline={this.state.pipeline} onError={this.handleError} onAlert={this.handleAlert} active={this.state.currentTab === 'production'} />
-              </Tab>
+              />
             </Tabs>
+            {this.renderTabContent()}
           </Card>
+          <ConfirmationModal
+            open={this.state.confirmOpen}
+            onOk={this.handleRemovePipeline}
+            onCancel={this.handleCancelConfirmation}
+            message="Are you sure you want to delete this pipeline?"
+          />
           <Dialog
             className="error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onClick={this.handleClose}
-              />}
           >
-            {this.state.submitMessage}
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{this.state.submitMessage}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                color="primary"
+                onClick={this.handleClose}
+              >
+              Ok
+              </Button>
+            </DialogActions>
           </Dialog>
           <Snackbar
             className="pipeline-snack"
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>

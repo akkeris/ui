@@ -383,7 +383,7 @@ export default class Addons extends Component {
     }
     return (
       <MuiThemeProvider theme={muiTheme}>
-        <div>
+        <div style={{ overflow: 'visible' }}>
           {(!this.state.new && !this.state.attach) && (
             <div>
               <Tooltip title="New Addon" placement="bottom-end">

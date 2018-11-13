@@ -66,19 +66,13 @@ const style = {
     paddingTop: '20px',
   },
   eventsInfoButton: {
-    // icon: {
-    //   height: '18px', width: '18px',
-    // },
-
     padding: '0',
     height: '18px',
     width: '18px',
-    // color: lightBaseTheme.palette.accent1Color,
   },
   eventsInfoIcon: {
     height: '18px',
     width: '18px',
-    // color: lightBaseTheme.palette.accent1Color,
   },
 };
 
