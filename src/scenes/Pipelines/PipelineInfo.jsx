@@ -351,6 +351,7 @@ export default class PipelineInfo extends Component {
               <Button
                 color="primary"
                 onClick={this.handleClose}
+                className="ok"
               >
               Ok
               </Button>
