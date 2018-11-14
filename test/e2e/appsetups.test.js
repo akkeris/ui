@@ -80,13 +80,14 @@ test('ensure the app setup works', async (t) => { // eslint-disable-line no-unde
 
     .click('.application_name')
     .typeText('.application_name', 'akkeristest1')
-    .click('.space_field')
+    .click('div.space-field')
     .click('.testcafe-space')
     .click('.create')
 
     .expect(Selector('.config-environment').exists)
     .ok()
     .wait(65000)
+
     .expect(Selector('.config_app').exists)
     .ok();
 });

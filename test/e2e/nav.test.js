@@ -15,7 +15,6 @@ fixture('Navigation') // eslint-disable-line no-undef
   });
 
 test('Should show title bar and navigation', async (t) => { // eslint-disable-line no-undef
-  const bar = Selector('.appbar');
   const button = Selector('.appbar button');
 
   await t
