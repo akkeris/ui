@@ -69,7 +69,7 @@ function deriveMetricName(metricName) {
     .replace(/_db_/g, ' Database ')
     .replace(/_/g, ' ')
     .split(' ')
-    .map(x => (x ? x[0].toUpperCase() + x.substring(1) : 'INVALID NAME'))
+    .map(x => (x ? x[0].toUpperCase() + x.substring(1) : `INVALID NAME: ${metricName}`))
     .join(' ');
 }
 
