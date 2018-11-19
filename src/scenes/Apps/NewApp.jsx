@@ -38,21 +38,21 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,
     },
   },
   paper: {
-    maxWidth: '1048px',
+    width: '800px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
+    marginBottom: '12px',
   },
   div: {
     width: '90%',
-    maxWidth: 800,
     margin: 'auto',
   },
   menu: {
@@ -158,6 +158,8 @@ export default class NewApp extends Component {
             </p>
           </div>
         );
+      case 3:
+        return null;
       default:
         return 'You\'re a long way from home sonny jim!';
     }

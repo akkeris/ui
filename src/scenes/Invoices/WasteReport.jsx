@@ -156,8 +156,9 @@ export default class WasteReport extends Component {
     });
   }
 
-  getApps() {
-    return this.state.apps.map((app) => {
+  getAppRecommendations() {
+    const results = [];
+    this.state.apps.forEach((app) => {
       const notes = recommendations.execute(
         app.metrics,
         app.formations,
@@ -165,17 +166,26 @@ export default class WasteReport extends Component {
         this.state.sizes,
       );
       if (notes.length > 0) {
-        return (
+        results.push(
           <div key={`recommend_${app.name}`} className="recommendations" style={style.recommendations}>
             <ListSubheader>{app.name}</ListSubheader>
             <ul>
               {notes}
             </ul>
-          </div>
+          </div>,
         );
       }
-      return null;
     });
+    if (results.length === 0) {
+      results.push(
+        <div key={'reccomend_empty'} style={style.recommendations}>
+          <ListSubheader>
+            No recommendations available for {this.props.match.params.org}
+          </ListSubheader>
+        </div>,
+      );
+    }
+    return results;
   }
 
   render() {
@@ -193,7 +203,7 @@ export default class WasteReport extends Component {
             <Paper style={style.paper}>
               <div className="internal">
                 <span style={style.label}>Analyzing...</span>
-                <LinearProgress mode="determinate" value={this.state.progress} />
+                <LinearProgress variant="determinate" value={this.state.progress} />
               </div>
             </Paper>
           </div>
@@ -206,7 +216,7 @@ export default class WasteReport extends Component {
           <Paper style={style.paper}>
             <div style={style.header}>Cost Report for {this.props.match.params.org}</div>
             <List>
-              {this.getApps()}
+              {this.getAppRecommendations()}
             </List>
           </Paper>
         </div>

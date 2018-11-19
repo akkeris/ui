@@ -59,8 +59,8 @@ const style = {
       marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '15%',
-      marginBottom: '5%',
+      marginTop: '10%',
+      paddingBottom: '10%',
     },
     indicator: {
       display: 'inline-block',
@@ -157,9 +157,10 @@ class AppOverview extends Component {
   }
 
   handleMaintenanceToggle = () => {
+    this.setState({ loading: true });
     api.patchApp(this.props.app.name, this.state.isMaintenance).then(() => {
       this.props.onComplete('Maintenance Mode Updated');
-      this.setState({ mOpen: false });
+      this.setState({ mOpen: false, loading: false });
     }).catch((error) => {
       this.setState({
         submitMessage: error.response.data,
@@ -200,7 +201,9 @@ class AppOverview extends Component {
                   <ListItemText
                     primary="URL"
                     secondary={
-                      <a style={style.link} href={this.props.app.web_url}>{this.props.app.web_url}</a>
+                      <a style={style.link} href={this.props.app.web_url}>
+                        {this.props.app.web_url}
+                      </a>
                     }
                   />
                 </ListItem>
@@ -220,7 +223,9 @@ class AppOverview extends Component {
               <TableRow>
                 <TableCell style={style.tableCell.header}>
                   <div style={style.tableCell.main}>{'Last Release and Most Recent Changes'}</div>
-                  <div style={style.tableCell.sub}>{Date(this.props.app.released_at).toLocaleString()}</div>
+                  <div style={style.tableCell.sub}>
+                    {Date(this.props.app.released_at).toLocaleString()}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <FormGroup>
@@ -262,7 +267,7 @@ class AppOverview extends Component {
             )}
             title="Confirm Maintenance"
           />
-          <Dialog className="error" open={this.state.loading}>
+          <Dialog className="error" open={this.state.loading || this.state.submitFail}>
             <DialogContent>
               <DialogContentText>
                 {this.state.submitMessage}

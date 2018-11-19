@@ -84,13 +84,13 @@ const Charts = (props) => {
       >
         <defs>
           <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muiTheme.palette.accent1Color} stopOpacity={0.25} />
+            <stop offset="0%" stopColor={muiTheme.palette.secondary.main} stopOpacity={0.25} />
           </linearGradient>
           <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muiTheme.palette.primary1Color} stopOpacity={0.25} />
+            <stop offset="0%" stopColor={muiTheme.palette.primary.main} stopOpacity={0.25} />
           </linearGradient>
           <linearGradient id="colorRv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muiTheme.palette.primary2Color} stopOpacity={0.25} />
+            <stop offset="0%" stopColor={muiTheme.palette.primary.dark} stopOpacity={0.25} />
           </linearGradient>
         </defs>
         <XAxis
@@ -117,7 +117,7 @@ const Charts = (props) => {
           name={props.legend.x}
           type="step"
           dataKey="x"
-          stroke={muiTheme.palette.accent1Color}
+          stroke={muiTheme.palette.secondary.main}
           fill="url(#colorUv)"
           fillOpacity={1}
         />

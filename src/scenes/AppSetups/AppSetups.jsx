@@ -110,6 +110,39 @@ const style = {
   },
 };
 
+// https://stackoverflow.com/a/8486188
+// Parses query parameters from a URL (including hashes)
+function getJsonFromUrl(hashBased) {
+  let query;
+  if (hashBased) {
+    const pos = location.href.indexOf('?');
+    if (pos === -1) return [];
+    query = location.href.substr(pos + 1);
+  } else {
+    query = location.search.substr(1);
+  }
+  const result = {};
+  query.split('&').forEach((part) => {
+    if (!part) return;
+    // replace every + with space, regexp-free version
+    part = part.split('+').join(' '); // eslint-disable-line
+    const eq = part.indexOf('=');
+    let key = eq > -1 ? part.substr(0, eq) : part;
+    const val = eq > -1 ? decodeURIComponent(part.substr(eq + 1)) : '';
+    const from = key.indexOf('[');
+    if (from === -1) result[decodeURIComponent(key)] = val;
+    else {
+      const to = key.indexOf(']', from);
+      const index = decodeURIComponent(key.substring(from + 1, to));
+      key = decodeURIComponent(key.substring(0, from));
+      if (!result[key]) result[key] = [];
+      if (!index) result[key].push(val);
+      else result[key][index] = val;
+    }
+  });
+  return result;
+}
+
 export default class AppSetups extends Component {
   constructor(props, context) {
     super(props, context);
@@ -132,7 +165,13 @@ export default class AppSetups extends Component {
     const params = new URLSearchParams(window.location.search);
     let blueprint = '';
     try {
-      blueprint = JSON.parse(params.get('blueprint'));
+      if (!params.get('blueprint')) {
+        // Parse the blueprint JSON from the hash portion of the current location
+        const newParams = getJsonFromUrl(window.location.hash);
+        blueprint = JSON.parse(newParams.blueprint);
+      } else {
+        blueprint = JSON.parse(params.get('blueprint'));
+      }
       blueprint.app.name = '';
     } catch (error) {
       this.setState({ // eslint-disable-line react/no-did-mount-set-state
@@ -269,6 +308,19 @@ export default class AppSetups extends Component {
     });
   }
 
+  renderErrorMessage = msg => (
+    <MuiThemeProvider theme={muiTheme}>
+      <div>
+        <Paper style={style.paper}>
+          <div className="internal">
+            <div className="status" style={style.header}>Uh oh...</div>
+            <span>{msg}</span>
+          </div>
+        </Paper>
+      </div>
+    </MuiThemeProvider>
+  )
+
   render() {
     if (this.state.loading) {
       return (
@@ -276,112 +328,115 @@ export default class AppSetups extends Component {
           <div className="apps" style={style.refresh.div}>
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
-        </MuiThemeProvider>);
-    } else if (this.state.panel === 'form' && this.state.loading === false) {
-      const configVars = [];
-      Object.keys(this.state.blueprint.env).forEach((key) => {
-        if (configVars.length === 0) {
-          configVars.push((
-            <div key="configuration_subheader" style={style.subheader}>Config Vars</div>
-          ));
-          configVars.push((
-            <div key="configuration_subheadertext" style={style.subheadertext}>These configuration values need to be provided for this application to work.</div>
-          ));
-        }
-        configVars.push((
-          <ConfigVar
-            key={`config_var${key}`}
-            name={key}
-            value={this.state.blueprint.env[key].value ? this.state.blueprint.env[key].value : ''}
-            editable
-            editing
-            editbutton={false}
-            keyedit
-            description={this.state.blueprint.env[key].description}
-            onChange={this.onConfigVarChange.bind(this, key)}
-          />
-        ));
-        // }
-      });
-
-      const headers = [];
-
-      if (this.state.blueprint.logo) {
-        headers.push((
-          <img key="name_logo" className="name_logo" src={this.state.blueprint.logo} style={style.logo} alt="" />
-        ));
-      }
-      if (this.state.blueprint.name) {
-        headers.push((
-          <div key="name_subheader" className="name_subheader" style={style.header}>{this.state.blueprint.name}</div>
-        ));
-      }
-      if (this.state.blueprint.description) {
-        headers.push((
-          <div key="name_subheadertext" className="name_subheadertext" style={{ ...style.subheadertext, marginBottom: '10px' }}>
-            {this.state.blueprint.description}
-          </div>
-        ));
-      }
-
-      return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div>
-            <Paper style={style.paper}>
-              <div className="internal">
-                {headers}
-                <TextField
-                  className="application_name"
-                  label="Application Name"
-                  style={style.textfield}
-                  error={!!this.state.app_name_error}
-                  helperText={this.state.app_name_error ? this.state.app_name_error : undefined}
-                  onChange={this.handleNameChange}
-                />
-                <FormControl style={style.fullWidth}>
-                  <InputLabel htmlFor="space-field">Space</InputLabel>
-                  <Select
-                    className="space-field"
-                    value={this.state.blueprint.app.space}
-                    onChange={this.handleSpaceChange}
-                    inputProps={{
-                      name: 'space',
-                      id: 'space-field',
-                    }}
-                  >
-                    {this.getSpaces()}
-                  </Select>
-                </FormControl>
-                <br />
-                <FormControl style={style.fullWidth}>
-                  <InputLabel htmlFor="org-field">Organization</InputLabel>
-                  <Select
-                    className="org-field"
-                    value={this.state.blueprint.app.organization}
-                    onChange={this.handleOrgChange}
-                    inputProps={{
-                      name: 'org',
-                      id: 'org-field',
-                    }}
-                  >
-                    {this.getOrgs()}
-                  </Select>
-                </FormControl>
-                <br />
-                {configVars}
-                <Button
-                  variant="contained"
-                  className="create"
-                  disabled={this.state.create_disabled}
-                  color="primary"
-                  fullWidth
-                  onClick={this.handleOnClick}
-                >Create</Button>
-              </div>
-            </Paper>
-          </div>
         </MuiThemeProvider>
       );
+    } else if (this.state.panel === 'form' && this.state.loading === false) {
+      const configVars = [];
+      try {
+        Object.keys(this.state.blueprint.env).forEach((key) => {
+          if (configVars.length === 0) {
+            configVars.push((
+              <div key="configuration_subheader" style={style.subheader}>Config Vars</div>
+            ));
+            configVars.push((
+              <div key="configuration_subheadertext" style={style.subheadertext}>These configuration values need to be provided for this application to work.</div>
+            ));
+          }
+          configVars.push((
+            <ConfigVar
+              key={`config_var${key}`}
+              name={key}
+              value={this.state.blueprint.env[key].value ? this.state.blueprint.env[key].value : ''}
+              editable
+              editing
+              editbutton={false}
+              keyedit
+              description={this.state.blueprint.env[key].description}
+              onChange={this.onConfigVarChange.bind(this, key)}
+            />
+          ));
+        });
+        const headers = [];
+
+        if (this.state.blueprint.logo) {
+          headers.push((
+            <img key="name_logo" className="name_logo" src={this.state.blueprint.logo} style={style.logo} alt="" />
+          ));
+        }
+        if (this.state.blueprint.name) {
+          headers.push((
+            <div key="name_subheader" className="name_subheader" style={style.header}>{this.state.blueprint.name}</div>
+          ));
+        }
+        if (this.state.blueprint.description) {
+          headers.push((
+            <div key="name_subheadertext" className="name_subheadertext" style={{ ...style.subheadertext, marginBottom: '10px' }}>
+              {this.state.blueprint.description}
+            </div>
+          ));
+        }
+
+        return (
+          <MuiThemeProvider theme={muiTheme}>
+            <div>
+              <Paper style={style.paper}>
+                <div className="internal">
+                  {headers}
+                  <TextField
+                    className="application_name"
+                    label="Application Name"
+                    style={style.textfield}
+                    error={!!this.state.app_name_error}
+                    helperText={this.state.app_name_error ? this.state.app_name_error : undefined}
+                    onChange={this.handleNameChange}
+                  />
+                  <FormControl style={style.fullWidth}>
+                    <InputLabel htmlFor="space-field">Space</InputLabel>
+                    <Select
+                      className="space-field"
+                      value={this.state.blueprint.app.space}
+                      onChange={this.handleSpaceChange}
+                      inputProps={{
+                        name: 'space',
+                        id: 'space-field',
+                      }}
+                    >
+                      {this.getSpaces()}
+                    </Select>
+                  </FormControl>
+                  <br />
+                  <FormControl style={style.fullWidth}>
+                    <InputLabel htmlFor="org-field">Organization</InputLabel>
+                    <Select
+                      className="org-field"
+                      value={this.state.blueprint.app.organization}
+                      onChange={this.handleOrgChange}
+                      inputProps={{
+                        name: 'org',
+                        id: 'org-field',
+                      }}
+                    >
+                      {this.getOrgs()}
+                    </Select>
+                  </FormControl>
+                  <br />
+                  {configVars}
+                  <Button
+                    variant="contained"
+                    className="create"
+                    disabled={this.state.create_disabled}
+                    color="primary"
+                    fullWidth
+                    onClick={this.handleOnClick}
+                  >Create</Button>
+                </div>
+              </Paper>
+            </div>
+          </MuiThemeProvider>
+        );
+      } catch (error) {
+        return (this.renderErrorMessage('Blueprint Parsing Error - Check your JSON syntax!'));
+      }
     } else if ((this.state.panel === 'running' || this.state.panel === 'ready' || this.state.panel === 'done') && this.state.loading === false) {
       const buttons = [];
       if (this.state.blueprint.success_url) {
@@ -478,18 +533,7 @@ export default class AppSetups extends Component {
         </MuiThemeProvider>
       );
     } else if (this.state.panel === 'error' && this.state.loading === false) {
-      return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div>
-            <Paper style={style.paper}>
-              <div className="internal">
-                <div className="status" style={style.header}>Uh oh...</div>
-                <span>{this.state.error}</span>
-              </div>
-            </Paper>
-          </div>
-        </MuiThemeProvider>
-      );
+      this.renderErrorMessage(this.state.error);
     }
     return null;
   }

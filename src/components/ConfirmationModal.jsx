@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-  Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
@@ -25,7 +25,20 @@ const muiTheme = createMuiTheme({
 
 /* eslint-disable react/prefer-stateless-function */
 export default class ConfirmationModal extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false,
+    };
+  }
+
+  onOk = () => {
+    const { onOk } = this.props;
+    this.setState({ loading: true }, () => onOk());
+  }
+
   render() {
+    const { loading } = this.state;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <Dialog
@@ -34,14 +47,21 @@ export default class ConfirmationModal extends Component {
         >
           <DialogTitle>{this.props.title}</DialogTitle>
           <DialogContent>
-            <DialogContentText>{this.props.message}</DialogContentText>
+            {!loading ? (
+              <DialogContentText>{this.props.message}</DialogContentText>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CircularProgress />
+              </div>
+            )}
           </DialogContent>
           <DialogActions>
             {this.props.actions}
             <Button
               className="ok"
               color="primary"
-              onClick={this.props.onOk}
+              onClick={this.onOk}
+              disabled={loading}
             >
               Ok
             </Button>
@@ -50,8 +70,9 @@ export default class ConfirmationModal extends Component {
                 className="cancel"
                 color="secondary"
                 onClick={this.props.onCancel}
+                disabled={loading}
               >
-            Cancel
+                Cancel
               </Button>
             )}
           </DialogActions>

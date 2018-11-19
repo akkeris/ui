@@ -55,6 +55,9 @@ const style = {
 };
 
 function sillyfunc(prefix, input) {
+  if (!input) {
+    return null;
+  }
   return Object.keys(input).map((key) => {
     if (typeof input[key] === 'object') {
       return sillyfunc(prefix ? `${prefix}.${key}` : key, input[key]);
@@ -125,6 +128,7 @@ export default class Audits extends Component {
         if (id === this.state.id) {
           return sillyfunc('', JSON.parse(audit.info));
         }
+        return null;
       })
     );
   }
@@ -177,7 +181,8 @@ export default class Audits extends Component {
           <Dialog
             className="audit-dialog"
             open={this.state.diagOpen}
-            // Clear id on exited to avoid race between closing dialog and clearing displayed audit info
+            // Clear id on exited to avoid race between
+            // closing dialog and clearing displayed audit info
             onExited={() => { this.setState({ id: '' }); }}
             maxWidth="lg"
           >

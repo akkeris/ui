@@ -63,8 +63,10 @@ export default class NewAddon extends Component {
       submitMessage: '',
       services: [],
       service: {},
+      serviceid: '',
       plans: [],
       plan: {},
+      planid: '',
     };
   }
 
@@ -85,6 +87,7 @@ export default class NewAddon extends Component {
         this.setState({
           plans: response.data,
           plan: response.data[0],
+          planid: response.data[0].id,
           loading: false,
         });
       });
@@ -96,7 +99,7 @@ export default class NewAddon extends Component {
       <MenuItem
         className={service.human_name}
         key={service.id}
-        value={service}
+        value={service.id}
       >
         {service.human_name}
       </MenuItem>
@@ -108,7 +111,7 @@ export default class NewAddon extends Component {
       <MenuItem
         className={plan.human_name}
         key={plan.name}
-        value={plan}
+        value={plan.id}
       >
         {plan.name}
       </MenuItem>
@@ -124,7 +127,7 @@ export default class NewAddon extends Component {
               <Select
                 autoWidth
                 className="service-menu"
-                value={this.state.service}
+                value={this.state.service.id}
                 onChange={this.handleServiceChange}
                 input={<Input name="service" id="service-helper" />}
               >
@@ -143,7 +146,7 @@ export default class NewAddon extends Component {
               <Select
                 autoWidth
                 className="plan-menu"
-                value={this.state.plan}
+                value={this.state.planid}
                 onChange={this.handlePlanChange}
                 input={<Input name="plan" id="plan-helper" />}
               >
@@ -188,15 +191,15 @@ export default class NewAddon extends Component {
   }
 
   handleServiceChange = (event) => {
-    this.setState({
-      service: event.target.value,
-    });
+    const serviceid = event.target.value;
+    const service = this.state.services.find(a => a.id === serviceid);
+    this.setState({ service, serviceid });
   }
 
   handlePlanChange = (event) => {
-    this.setState({
-      plan: event.target.value,
-    });
+    const planid = event.target.value;
+    const plan = this.state.plans.find(a => a.id === planid);
+    this.setState({ plan, planid });
   }
 
   handleNext = () => {
@@ -218,22 +221,6 @@ export default class NewAddon extends Component {
         loading: false,
       });
     }
-  }
-
-  submitAddon = () => {
-    api.createAddon(this.props.app, this.state.plan.id).then(() => {
-      this.props.onComplete('Addon Created');
-    }).catch((error) => {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        loading: false,
-        plans: [],
-        plan: {},
-      });
-    });
   }
 
   submitAddon = () => {
