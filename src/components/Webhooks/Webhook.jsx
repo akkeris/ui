@@ -493,6 +493,20 @@ export default class Webhook extends Component {
   }
 
   renderWebhookInfo() {
+    const eventsHelperButton = () => (
+      <IconButton
+        className="events-info-button"
+        onClick={this.openEventsInfoDialog}
+        color={this.state.edit ? 'secondary' : undefined}
+        style={this.state.edit ? style.infoButton : {
+          ...style.infoButton, color: 'rgba(0,0,0,0.3)',
+        }}
+        disabled={!this.state.edit}
+      >
+        <HelpIcon style={style.infoIcon} />
+      </IconButton>
+    );
+
     return (
       <Table>
         <TableBody>
@@ -602,22 +616,11 @@ export default class Webhook extends Component {
               <div>
                 <div style={style.eventsHeader}>
                   <p style={style.eventsLabel}>Events</p>
-                  <Tooltip
-                    placement="right"
-                    title={this.state.edit ? 'Click for Descriptions' : ''}
-                  >
-                    <IconButton
-                      className="events-info-button"
-                      onClick={this.openEventsInfoDialog}
-                      color={this.state.edit ? 'secondary' : undefined}
-                      style={this.state.edit ? style.infoButton : {
-                        ...style.infoButton, color: 'rgba(0,0,0,0.3)',
-                      }}
-                      disabled={!this.state.edit}
-                    >
-                      <HelpIcon style={style.infoIcon} />
-                    </IconButton>
-                  </Tooltip>
+                  {this.state.edit ? (
+                    <Tooltip placement="right" title="Click for Descriptions">
+                      {eventsHelperButton()}
+                    </Tooltip>
+                  ) : eventsHelperButton()}
                 </div>
                 {this.renderEventsInfoDialog()}
                 <div style={style.eventsTwoColumns} className="events">
