@@ -3,16 +3,17 @@ import PropTypes from 'prop-types';
 import {
   Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
   Step, Stepper, StepLabel, Button, TextField, Collapse,
-  FormGroup, FormControlLabel, Switch, Typography,
+  FormGroup, FormControlLabel, Switch, Typography, FormControl, Radio, RadioGroup, FormLabel,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: blue,
+    primary: {
+      main: '#0097a7',
+    },
   },
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
 });
@@ -38,31 +39,20 @@ export default class NewAutoBuild extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      loading: true,
+      loading: false,
       finished: false,
       stepIndex: 0,
       submitFail: false,
       submitMessage: '',
+      errorText: null,
       branch: '',
       repo: '',
       autoDeploy: true,
-      username: '',
+      username: null,
       token: null,
       statusCheck: true,
+      userSelection: 'bot',
     };
-  }
-
-  componentDidMount() {
-    api.gitHubAuth().then((response) => {
-      this.setState({
-        token: response.data.token,
-        loading: false,
-      });
-    }).catch((error) => {
-      if (error.response.status === 404) {
-        window.location = `/github/oauth?url=${encodeURIComponent(window.location)}`;
-      }
-    });
   }
 
   getStepContent(stepIndex) {
@@ -70,28 +60,67 @@ export default class NewAutoBuild extends Component {
       case 0:
         return (
           <div>
-            <TextField label="Repo" value={this.state.repo} onChange={this.handleChange('repo')} />
-            <p>
+            <TextField
+              className="Repo"
+              label="Repo"
+              value={this.state.repo}
+              onChange={this.handleChange('repo')}
+              helperText={this.state.errorText}
+              error={this.state.errorText && this.state.errorText.length > 0}
+            />
+            <Typography variant="body">
               The repo URL (e.g., https://github.com/foo/bar)
-            </p>
+            </Typography>
           </div>
         );
       case 1:
         return (
           <div>
-            <TextField label="Branch (defaults Master)" value={this.state.branch} onChange={this.handleChange('branch')} />
-            <p>
+            <TextField label="Master" value={this.state.branch} onChange={this.handleChange('branch')} />
+            <Typography variant="body">
               The branch on the repo to watch and deploy from
-            </p>
+            </Typography>
           </div>
         );
       case 2:
         return (
           <div>
-            <TextField label="User" value={this.state.username} onChange={this.handleChange('username')} />
-            <p>
-              The username to access repo as
-            </p>
+            <FormControl component="fieldset" className="FormControl">
+              <FormLabel component="legend">GitHub User</FormLabel>
+              <RadioGroup
+                name="User Selection"
+                className="UserRadio"
+                value={this.state.userSelection}
+                onChange={this.handleChange('userSelection')}
+              >
+                <FormControlLabel value="bot" control={<Radio />} label="Service Account" />
+                <FormControlLabel value="user" control={<Radio />} label="User Account" />
+                {this.state.userSelection === 'user' && (
+                  <div>
+                    <TextField
+                      label="User"
+                      value={this.state.username}
+                      onChange={this.handleChange('username')}
+                      helperText={this.state.errorText}
+                      error={this.state.errorText && this.state.errorText.length > 0}
+                    />
+                    <Typography variant="body">
+                      The username to access repo as
+                    </Typography>
+                    <TextField
+                      label="Token"
+                      value={this.state.token}
+                      onChange={this.handleChange('token')}
+                      helperText={this.state.errorText}
+                      error={this.state.errorText && this.state.errorText.length > 0} 
+                    />
+                    <Typography variant="body">
+                      The users token
+                    </Typography>
+                  </div>
+                )}
+              </RadioGroup>
+            </FormControl>
           </div>
         );
       case 3:
@@ -130,18 +159,19 @@ export default class NewAutoBuild extends Component {
   }
 
   handleClose = () => {
-    this.setState({
-      submitFail: false,
-    });
+    this.setState({ submitFail: false });
   }
 
   handleNext = () => {
     const { stepIndex } = this.state;
-    if (!this.state.loading) {
+    if ((stepIndex === 0 && this.state.repo === '') || (stepIndex === 2 && (this.state.userSelection === 'user' && (!this.state.username || !this.state.token)))) {
+      this.setState({ errorText: 'field required' });
+    } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
         finished: stepIndex >= 3,
         loading: stepIndex >= 3,
+        errorText: null,
       });
     }
   }
@@ -152,14 +182,23 @@ export default class NewAutoBuild extends Component {
       this.setState({
         stepIndex: stepIndex - 1,
         loading: false,
+        errorText: null,
       });
     }
   }
 
-   // Handles changes for repo, username, branch
-   handleChange = name => (event) => {
-     this.setState({ [name]: event.target.value });
-   }
+  // Handles changes for repo, username, branch
+  handleChange = name => (event) => {
+    if (event.target.value === 'bot' && name === 'userSelection') {
+      this.setState({
+        [name]: event.target.value,
+        username: null,
+        token: null,
+      });
+    } else {
+      this.setState({ [name]: event.target.value });
+    }
+  }
 
   handleAutoDeploy = (event, isInputChecked) => {
     this.setState({ autoDeploy: isInputChecked });
@@ -182,7 +221,7 @@ export default class NewAutoBuild extends Component {
         branch: '',
         repo: '',
         autoDeploy: true,
-        username: '',
+        username: null,
         statusCheck: true,
       });
     });
@@ -229,7 +268,7 @@ export default class NewAutoBuild extends Component {
               <StepLabel>Input Branch</StepLabel>
             </Step>
             <Step>
-              <StepLabel>Input Git User</StepLabel>
+              <StepLabel>Input GitHub User</StepLabel>
             </Step>
             <Step>
               <StepLabel>Options</StepLabel>

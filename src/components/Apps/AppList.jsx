@@ -1,6 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Table, TableBody, TableRow, TableCell } from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
+import { blue } from '@material-ui/core/colors';
+
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: {       main: '#0097a7',     },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+});
 
 const style = {
   tableRow: {
@@ -34,8 +45,13 @@ export default class AppList extends Component {
     );
   }
 
-  getApps() {
-    return this.props.apps.map(app => (
+  state = {
+    page: 0,
+    rowsPerPage: 20,
+  }
+
+  getApps(page, rowsPerPage) {
+    return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
       <TableRow
         className={app.name}
         key={app.id}
@@ -55,15 +71,40 @@ export default class AppList extends Component {
     window.location = `#/apps/${app.name}/info`;
   }
 
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+
   render() {
+    const { rowsPerPage, page } = this.state;
     return (
-      <div style={{ marginBottom: '12px' }}>
-        <Table className="app-list">
-          <TableBody>
-            {this.getApps()}
-          </TableBody>
-        </Table>
-      </div>
+      <MuiThemeProvider theme={muiTheme}>
+        <div style={{ marginBottom: '12px' }}>
+          <Table className="app-list">
+            <TableBody>
+              {this.getApps(page, rowsPerPage)}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[10, 20, 30]}
+                  colSpan={3}
+                  count={this.props.apps.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onChangePage={this.handleChangePage}
+                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </div>
+      </MuiThemeProvider>
     );
   }
 }

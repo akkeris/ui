@@ -74,38 +74,6 @@ app.get('/oauth/callback', (req, res) => {
   });
 });
 
-app.get('/github/callback', (req, res) => {
-  request.post({
-    url: 'https://github.com/login/oauth/access_token',
-    form: {
-      client_id: gitClientID,
-      client_secret: gitClientSecret,
-      code: req.query.code,
-    },
-    headers: {
-      Accept: 'application/json',
-    },
-  }, (err, response, body) => {
-    req.session.git_token = JSON.parse(body).access_token;
-    res.redirect(req.session.redirect || '/');
-  });
-});
-
-
-app.use('/github/oauth', (req, res) => {
-  req.session.redirect = req.query.url;
-  res.redirect(`https://github.com/login/oauth/authorize?client_id=${gitClientID}&scope=admin:repo_hook repo&redirect_uri=${encodeURIComponent(`${clientURI}/github/callback`)}`);
-});
-
-app.use('/github/gimme', (req, res) => {
-  if (req.session.git_token) {
-    res.send({
-      token: req.session.git_token,
-    });
-  } else {
-    res.status(404).send();
-  }
-});
 
 /* eslint-disable no-param-reassign */
 app.use('/account', proxy(`${authEndpoint}/user`, {
