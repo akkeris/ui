@@ -5,7 +5,6 @@ import {
   CircularProgress, IconButton, Button, Paper, Divider, FormControlLabel,
   Table, TableBody, TableRow, TableCell, Tooltip, Checkbox,
 } from '@material-ui/core';
-import { blue } from '@material-ui/core/colors';
 import RemoveIcon from '@material-ui/icons/Clear';
 import PromoteIcon from '@material-ui/icons/CloudUpload';
 import AddIcon from '@material-ui/icons/Add';
@@ -17,7 +16,7 @@ import { NewPipelineCoupling } from '../../components/Pipelines';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

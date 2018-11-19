@@ -6,7 +6,6 @@ import {
   Collapse,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { cyan } from '@material-ui/core/colors';
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({

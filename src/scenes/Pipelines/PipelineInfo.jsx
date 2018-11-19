@@ -4,7 +4,6 @@ import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import { blue } from '@material-ui/core/colors';
 import PropTypes from 'prop-types';
 
 import LaptopIcon from '@material-ui/icons/Computer';
@@ -18,7 +17,7 @@ import { Stage } from '../../components/Pipelines';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

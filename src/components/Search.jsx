@@ -4,7 +4,6 @@ import { TextField, MenuItem, Paper, withStyles } from '@material-ui/core';
 import parse from 'autosuggest-highlight/parse';
 import Autosuggest from 'react-autosuggest';
 import PropTypes from 'prop-types';
-import { blue } from '@material-ui/core/colors';
 
 const styles = theme => ({
   input: {
@@ -49,7 +48,7 @@ class Search extends Component {
 
     this.muiTheme = createMuiTheme({
       palette: {
-        primary: {       main: '#0097a7',     },
+        primary: { main: '#0097a7' },
       },
       overrides: {
         MuiInput: {

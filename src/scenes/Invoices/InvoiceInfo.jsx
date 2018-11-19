@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-
-import { blue } from '@material-ui/core/colors';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
   List, ListItem, ListItemText, CircularProgress, Button, Paper, ListSubheader, Divider,
@@ -17,7 +15,7 @@ import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
@@ -293,7 +291,9 @@ export default class InvoiceInfo extends Component {
       <div key={`${org + index}container`}>
         <ListItem button onClick={() => this.handleClick(index, org)}>
           <ListItemText primary={item} secondary={`Total: ${formatMoney(sumByApp(items, item))}`} />
-          {(open && currentItem === index && currentOrg === org) ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          {(open && currentItem === index && currentOrg === org) ?
+            <ExpandLessIcon /> : <ExpandMoreIcon />
+          }
         </ListItem>
         <Collapse
           in={open && currentItem === index && currentOrg === org}

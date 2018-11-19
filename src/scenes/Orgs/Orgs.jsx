@@ -3,7 +3,6 @@ import {
   Toolbar, IconButton, CircularProgress, Paper,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { blue } from '@material-ui/core/colors';
 import { Link } from 'react-router-dom';
 import AddIcon from '@material-ui/icons/Add';
 
@@ -14,7 +13,7 @@ import OrgList from '../../components/Orgs';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

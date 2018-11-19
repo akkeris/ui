@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { blue } from '@material-ui/core/colors';
 import {
   Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
   List, ListItem, ListItemText, Button, CircularProgress,
@@ -13,7 +12,7 @@ import ConfirmationModal from '../ConfirmationModal';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

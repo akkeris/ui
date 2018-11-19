@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { CircularProgress, Paper } from '@material-ui/core';
-import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import InvoiceList from '../../components/Invoices/InvoiceList';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

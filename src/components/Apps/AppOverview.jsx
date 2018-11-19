@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-
 import {
   CircularProgress, Switch, List, ListItem, ListItemText, Button, Dialog,
   GridList, GridListTile, Table, TableBody, TableRow, TableCell,
@@ -9,7 +8,6 @@ import {
   FormGroup, FormControlLabel,
 } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Clear';
-import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
@@ -17,7 +15,7 @@ import Audits from '../Audits';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

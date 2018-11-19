@@ -5,7 +5,6 @@ import {
   Dialog, DialogActions, DialogContent,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { blue } from '@material-ui/core/colors';
 
 import ConfirmationModal from '../ConfirmationModal';
 import Search from '../Search';
@@ -14,7 +13,7 @@ import util from '../../services/util';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {   
+    primary: {
       main: '#0097a7',
     },
   },
@@ -93,7 +92,7 @@ export default class AttachAddon extends Component {
           addon: response.data[0],
           loading: false,
         });
-      }).catch((err) => {
+      }).catch(() => {
         this.setState(prevState, () => this.setState({ loadingErrorMessage: 'Could not find specified app', loadingError: true }));
       });
     }

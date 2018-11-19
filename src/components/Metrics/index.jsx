@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { CircularProgress, ListSubheader, Divider } from '@material-ui/core';
 import CPUIcon from '@material-ui/icons/Memory';
-import { blue, pink } from '@material-ui/core/colors';
+import { pink } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import recommendations from '../../services/util/recommendations';
@@ -14,7 +14,7 @@ import Charts from './Charts';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

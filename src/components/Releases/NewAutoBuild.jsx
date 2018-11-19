@@ -112,7 +112,7 @@ export default class NewAutoBuild extends Component {
                       value={this.state.token}
                       onChange={this.handleChange('token')}
                       helperText={this.state.errorText}
-                      error={this.state.errorText && this.state.errorText.length > 0} 
+                      error={this.state.errorText && this.state.errorText.length > 0}
                     />
                     <Typography variant="body">
                       The users token

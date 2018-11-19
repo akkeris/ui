@@ -4,7 +4,6 @@ import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, CardContent,
   Tooltip, Button, IconButton, Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
 } from '@material-ui/core';
-import { blue } from '@material-ui/core/colors';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
 import CPUIcon from '@material-ui/icons/Memory';
@@ -28,7 +27,7 @@ import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

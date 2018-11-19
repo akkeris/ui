@@ -3,12 +3,11 @@ import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
   Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Typography,
 } from '@material-ui/core';
-import { blue } from '@material-ui/core/colors';
 import GitIcon from './Icons/GitIcon';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: 'ProximaNova',

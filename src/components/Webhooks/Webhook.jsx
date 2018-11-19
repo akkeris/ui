@@ -17,7 +17,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import BackIcon from '@material-ui/icons/ArrowBack';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { blue } from '@material-ui/core/colors';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
@@ -27,7 +26,7 @@ const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change'
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

@@ -4,7 +4,6 @@ import {
   Paper, CircularProgress, LinearProgress, TextField, Select, MenuItem, Button, Divider,
   List, ListItem, ListItemIcon, ListItemText, FormControl, InputLabel,
 } from '@material-ui/core';
-import { blue } from '@material-ui/core/colors';
 import DoneBox from '@material-ui/icons/Done';
 import OpenInNewBox from '@material-ui/icons/OpenInNew';
 import ConfigVar from '../../components/ConfigVar';
@@ -14,7 +13,7 @@ import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: {       main: '#0097a7',     },
+    primary: { main: '#0097a7' },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
