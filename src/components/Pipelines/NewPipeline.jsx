@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import Dialog from 'material-ui/Dialog';
+import {
+  Step, Stepper, StepLabel, Button, TextField, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -36,7 +38,6 @@ export default class NewPipeline extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: false,
       finished: false,
       errorText: null,
       stepIndex: 0,
@@ -51,11 +52,21 @@ export default class NewPipeline extends Component {
       case 0:
         return (
           <div>
-            <TextField className="pipeline-name" floatingLabelText="Name" value={this.state.pipeline} onChange={this.handlePipelineChange} errorText={this.state.errorText} />
-            <p>
-                          The name of the pipeline, less than 24 characters, alpha numeric only.
-            </p>
+            <TextField
+              className="pipeline-name"
+              label="Name"
+              type="text"
+              value={this.state.pipeline}
+              onChange={this.handlePipelineChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>The name of the pipeline, less than 24 characters, alpha numeric only.</p>
           </div>
+        );
+      case 1:
+        return (
+          <div style={{ margin: '0 auto', width: '1%' }}><CircularProgress /></div>
         );
       default:
         return 'You\'re a long way from home sonny jim!';
@@ -67,26 +78,20 @@ export default class NewPipeline extends Component {
       this.setState({ errorText: 'field required' });
     } else {
       const { stepIndex } = this.state;
-      if (!this.state.loading) {
-        this.setState({
-          loading: stepIndex >= 0,
-          stepIndex: stepIndex + 1,
-          finished: stepIndex >= 0,
-          errorText: null,
-        });
-      }
+      this.setState({
+        stepIndex: stepIndex + 1,
+        finished: stepIndex >= 0,
+        errorText: null,
+      });
     }
   };
 
   handlePrev = () => {
     const { stepIndex } = this.state;
-    if (!this.state.loading) {
-      this.setState({
-        loading: false,
-        stepIndex: stepIndex - 1,
-        errorText: null,
-      });
-    }
+    this.setState({
+      stepIndex: stepIndex - 1,
+      errorText: null,
+    });
   };
 
   handleClose = () => {
@@ -112,14 +117,13 @@ export default class NewPipeline extends Component {
         stepIndex: 0,
         errorText: null,
         pipeline: '',
-        loading: false,
       });
     });
   };
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
 
     if (finished) {
       this.submitPipeline();
@@ -129,49 +133,48 @@ export default class NewPipeline extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            className="back"
-            label="Back"
-            disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
-            style={style.buttons.back}
-          />
+          {stepIndex < 1 && (
+            <span>
+              {stepIndex > 0 && (
+                <Button
+                  className="back"
+                  disabled={stepIndex === 0}
+                  onClick={this.handlePrev}
+                  style={style.buttons.back}
+                >Back</Button>
+              )}
+              <Button
+                variant="contained"
+                className="next"
+                color="primary"
+                onClick={this.handleNext}
+              >{stepIndex === 0 ? 'Finish' : 'Next'}</Button>
+            </span>
           )}
-          <RaisedButton
-            className="next"
-            label={stepIndex === 0 ? 'Submit' : 'Next'}
-            primary
-            onTouchTap={this.handleNext}
-          />
         </div>
       </div>
     );
   }
 
   render() {
-    const { loading, stepIndex } = this.state;
+    const { stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
               <StepLabel>Create Pipeline</StepLabel>
             </Step>
           </Stepper>
-          <ExpandTransition loading={loading} open>
-            {this.renderContent()}
-          </ExpandTransition>
-          <Dialog
-            open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                label="Ok"
-                primary
-                onTouchTap={this.handleClose}
-              />}
-          >
-            {this.state.submitMessage}
+          {this.renderContent()}
+          <Dialog open={this.state.submitFail} className="new-pipeline-error">
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{this.state.submitMessage}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>

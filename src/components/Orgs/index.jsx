@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
+import { Table, TableBody, TableRow, TableCell } from '@material-ui/core';
 
 const style = {
   tableRow: {
@@ -20,19 +20,19 @@ const style = {
 export default class OrgList extends Component {
   getOrgs() {
     return this.props.orgs.map(org => (
-      <TableRow className={org.name} key={org.id} style={style.tableRow} selectable={false}>
-        <TableRowColumn>
+      <TableRow className={org.name} key={org.id} style={style.tableRow} hover>
+        <TableCell>
           <div style={style.tableRowColumn.title}>{org.name}</div>
           <div style={style.tableRowColumn.sub}>{org.role}</div>
-        </TableRowColumn>
+        </TableCell>
       </TableRow>
     ));
   }
   render() {
     return (
       <div>
-        <Table className="org-list" wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-          <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+        <Table className="org-list">
+          <TableBody>
             {this.getOrgs()}
           </TableBody>
         </Table>

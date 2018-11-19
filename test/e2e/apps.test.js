@@ -22,22 +22,22 @@ test('Should show list of apps based on filter', async (t) => { // eslint-disabl
     .expect(Selector('.app-list .api-default').innerText)
     .contains('api-default')
 
-    .click('.region-dropdown button')
-    .expect(Selector('[role=menu] .us-seattle').innerText)
+    .click('.region-dropdown')
+    .expect(Selector('#menu-region .us-seattle').innerText)
     .contains('us-seattle')
 
-    .click('[role=menu] .us-seattle')
+    .click('#menu-region .us-seattle')
 
-    .click('.space-dropdown button')
-    .expect(Selector('[role=menu] .default').innerText)
+    .click('.space-dropdown')
+    .expect(Selector('#menu-space .default').innerText)
     .contains('default')
 
-    .click('[role=menu] .default')
+    .click('#menu-space .default')
     .expect(Selector('.app-list .api-default').innerText)
     .contains('default')
 
-    .click('.space-dropdown button')
-    .click('[role=menu] .test')
+    .click('.space-dropdown')
+    .click('#menu-space .test')
     .expect(Selector('.app-list tbody').childElementCount)
     .eql(0);
 });
@@ -53,7 +53,7 @@ test('Should throw error on non-existent app', async (t) => { // eslint-disable-
 test('Should follow search to app and see all info', async (t) => { // eslint-disable-line no-undef
   await t
     .typeText('.search input', 'api-default')
-    .pressKey('enter')
+    .pressKey('down').pressKey('enter')
     .expect(Selector('.card .header').innerText)
     .contains('api-default');
 });
@@ -62,37 +62,37 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
   await t
   // navigate to new app page
     .click('.new-app')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.app-name').innerText)
     .contains('field required')
 
   // create app
     .typeText('.app-name input', 'testcafe')
-    .click('.next button')
-    .click('.dropdown button')
-    .click('[role=menu] .testcafe')
-    .click('.next button')
-    .click('.dropdown button')
-    .click('[role=menu] .testcafe')
-    .click('.next button')
-    .expect(Selector('.app-list .testcafe-testcafe').innerText)
-    .contains('testcafe-testcafe')
+    .click('button.next')
+    .click('div.dropdown')
+    .click('li.testcafe')
+    .click('button.next')
+    .click('div.dropdown')
+    .click('li.testcafe')
+    .click('button.next')
+    .expect(Selector('.app-list .testcafe-testcafe').exists)
+    .ok()
 
   // navigate to new app page
     .click('.new-app')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.app-name').innerText)
     .contains('field required')
 
   // test duplicate
     .typeText('.app-name input', 'testcafe')
-    .click('.next button')
-    .click('.dropdown button')
-    .click('[role=menu] .testcafe')
-    .click('.next button')
-    .click('.dropdown button')
-    .click('[role=menu] .testcafe')
-    .click('.next button')
+    .click('button.next')
+    .click('div.dropdown')
+    .click('li.testcafe')
+    .click('button.next')
+    .click('div.dropdown')
+    .click('li.testcafe')
+    .click('button.next')
     .expect(Selector('.new-app-error').innerText)
     .contains('The requested application already exists.')
     .click('.ok')
@@ -104,7 +104,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .contains('testcafe-testcafe')
 
     // delete the app
-    .click('.delete button')
+    .click('button.delete')
     .expect(Selector('.delete-confirm').innerText)
     .contains('Are you sure you want to delete this app?')
 
@@ -130,13 +130,13 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
 
       // create app
       .typeText('.app-name input', 'testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok();
   })
@@ -146,7 +146,7 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('.delete button')
+      .click('button.delete')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
@@ -161,6 +161,7 @@ test('Should follow search to app and see all info', async (t) => { // eslint-di
     .click('.dynos-tab')
     .click('.releases-tab')
     .click('.addons-tab')
+    .click('.webhooks-tab')
     .click('.config-tab')
     .click('.metrics-tab')
     .click('.logs-tab');
@@ -194,40 +195,40 @@ test('Should be able to create edit and delete formations', async (t) => { // es
 
     // Check new component shows
     .click('button.new-formation')
-    .expect(Selector('.type-header').innerText)
+    .expect(Selector('.new-type label').innerText)
     .contains('Type')
 
     // Make sure we can cancel
     .click('button.cancel')
-    .expect(Selector('.type-header').exists)
+    .expect(Selector('.new-type').exists)
     .notOk()
 
     // Create the new formation
     .click('button.new-formation')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.new-type').innerText)
     .contains('Field required')
     .typeText('.new-type input', '!')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.new-type').innerText)
     .contains('Alphanumeric characters only')
     .click('.new-type input')
     .pressKey('backspace')
     .typeText('.new-type input', 'web')
-    .click('.next button')
+    .click('button.next')
     .click('button.back')
     .expect(Selector('.new-type').innerText)
     .notContains('Alphanumeric characters only')
     .expect(Selector('.new-type input').value)
     .contains('web')
-    .click('.next button')
+    .click('button.next')
 
-    .click('.new-dropdown button')
-    .click('[role=menu] .q2')
-    .click('.next button')
+    .click('div.new-dropdown')
+    .click('.q2')
+    .click('button.next')
     .click('.new-size .constellation')
-    .click('.next button')
-    .click('.next button')
+    .click('button.next')
+    .click('button.next')
 
     .expect(Selector('.formation-snack').innerText)
     .contains('New Formation Added')
@@ -239,50 +240,51 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     // Check duplicate error
     .click('button.new-formation')
     .typeText('.new-type input', 'web')
-    .click('.next button')
-    .click('.next button')
-    .click('.next button')
-    .click('.next button')
+    .click('button.next')
+    .click('button.next')
+    .click('button.next')
+    .click('button.next')
     .expect(Selector('.new-error').innerText)
     .contains('The process of type web already exists.')
     .click('.new-error button.ok')
 
     // Check dyno info
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .expect(Selector('.formation-list .web .web-info').exists)
     .ok()
     .expect(Selector('.formation-list .web .web-dynos').exists)
     .ok()
-    .click('.formation-list .web button')
-    .expect(Selector('.formation-list .web .web-info').exists)
-    .notOk()
-    .expect(Selector('.formation-list .web .web-dynos').exists)
-    .notOk()
+    .click('.formation-list .web')
+    // With new material-ui ExpansionPanel, these elements always 'exist'
+    // .expect(Selector('.formation-list .web .web-info').exists)
+    // .notOk()
+    // .expect(Selector('.formation-list .web .web-dynos').exists)
+    // .notOk()
 
     // Check edit
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .click('.formation-list .web .web-info button.edit')
     .click('.formation-list .web .web-info button.back')
 
     // Size
     .click('.formation-list .web .web-info button.edit')
     .click('.formation-list .web .web-info .size-select')
-    .click('[role=menu] .scout')
+    .click('.scout')
     .click('.formation-list .web .web-info button.save')
     .expect(Selector('.formation-snack').innerText)
     .contains('Updated Formation')
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .expect(Selector('.formation-list .web .web-info .size-select').innerText)
     .contains('scout')
 
     // Quantity
     .click('.formation-list .web .web-info button.edit')
     .click('.formation-list .web .web-info .quantity-select')
-    .click('[role=menu] .q1')
+    .click('.q1')
     .click('.formation-list .web .web-info button.save')
     .expect(Selector('.formation-snack').innerText)
     .contains('Updated Formation')
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .expect(Selector('.formation-list .web .quantity-select').innerText)
     .contains('1')
 
@@ -292,7 +294,7 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .click('.formation-list .web .web-info button.save')
     .expect(Selector('.formation-snack').innerText)
     .contains('Updated Formation')
-    .click('.formation-list .web button')
+    .click('.formation-list .web')
     .expect(Selector('.formation-list .web .port input').value)
     .contains('8080');
 });
@@ -316,16 +318,16 @@ test('Should be able to create view and release builds', async (t) => { // eslin
 
     // Create the new build
     .click('button.new-build')
-    .click('.org-menu button')
+    .click('div.org-menu')
     .click('.testcafe')
-    .click('.next button')
+    .click('button.next')
     .typeText('.url input', 'docker://registry.hub.docker.com/library/httpd:alpine')
-    .click('.next button')
-    .click('.next button') // checksum
-    .click('.next button') // repo
-    .click('.next button') // sha
-    .click('.next button') // branch
-    .click('.next button') // versiom
+    .click('button.next') // checksum
+    .click('button.next')
+    .click('button.next') // repo
+    .click('button.next') // sha
+    .click('button.next') // branch
+    .click('button.next') // versiom
 
     .expect(Selector('.release-snack').innerText)
     .contains('New Deployment Requested')
@@ -336,7 +338,7 @@ test('Should be able to create view and release builds', async (t) => { // eslin
     .click('.addons-tab')
     .click('.releases-tab')
     .click('.release-list .r0 button.logs')
-    .expect(Selector('.logs h3').innerText)
+    .expect(Selector('.logs h2').innerText)
     .contains('Logs for')
     .click('.logs button');
 });
@@ -355,13 +357,13 @@ test // eslint-disable-line no-undef
 
     // create app
       .typeText('.app-name input', 'testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok()
 
@@ -370,13 +372,13 @@ test // eslint-disable-line no-undef
 
     // create app
       .typeText('.app-name input', 'testcafe2')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
-      .click('.dropdown button')
-      .click('[role=menu] .testcafe')
-      .click('.next button')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
+      .click('div.dropdown')
+      .click('li.testcafe')
+      .click('button.next')
       .expect(Selector('.app-list .testcafe2-testcafe').exists)
       .ok();
   })('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef
@@ -396,21 +398,21 @@ test // eslint-disable-line no-undef
 
     // Test compliance
       .click('button.new-addon')
-      .click('.service-menu button')
+      .click('.service-menu')
       .click('.Lids.Db.Credentials')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Lids.Prod.Credentials')
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.new-addon-error').innerText)
       .contains('The specified addon may not be attached to this app. It requires these necessary compliances in the space')
       .click('.ok')
 
     // create addon
-      .click('.service-menu button')
+      .click('.service-menu')
       .click('.Lids.Db.Credentials')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Lids.Dev.Credentials')
 
       // Test addon plan description
@@ -419,14 +421,14 @@ test // eslint-disable-line no-undef
       .expect(Selector('.plan-description').innerText)
       .contains('credentials')
       .click('button.back')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Lids.Dev.Credentials')
       .expect(Selector('.plan-price').exists)
       .ok()
       .expect(Selector('.plan-description').exists)
       .ok()
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Created')
       .expect(Selector('.addon-list .lids-db').exists)
@@ -434,12 +436,12 @@ test // eslint-disable-line no-undef
 
     // Test duplicate
       .click('button.new-addon')
-      .click('.service-menu button')
+      .click('.service-menu')
       .click('.Lids.Db.Credentials')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Lids.Dev.Credentials')
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.new-addon-error').innerText)
       .contains('This addon is already created and attached to this application and cannot be used twice.')
       .click('.ok')
@@ -456,16 +458,16 @@ test // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
       .click('.addons-tab')
       .click('button.new-addon')
-      .click('.service-menu button')
+      .click('.service-menu')
       .click('.Alamo.Postgres')
-      .click('.next button')
-      .click('.plan-menu button')
+      .click('button.next')
+      .click('.plan-menu')
       .click('.Standard-0')
       .expect(Selector('.plan-price').exists)
       .ok()
       .expect(Selector('.plan-description').exists)
       .ok()
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Created')
       .expect(Selector('.addon-list .alamo-postgresql').exists)
@@ -489,9 +491,9 @@ test // eslint-disable-line no-undef
       .click('button.attach-addon')
       .typeText('.app-search input', 'testcafe2-testcafe')
       .pressKey('enter')
-      .click('.addon-menu button')
+      .click('.addon-menu')
       .click('.alamo-postgresql')
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Attached')
       .expect(Selector('.addon-attachment-list').childElementCount)
@@ -512,9 +514,9 @@ test // eslint-disable-line no-undef
       .click('button.attach-addon')
       .typeText('.app-search input', 'testcafe2-testcafe')
       .pressKey('enter')
-      .click('.addon-menu button')
+      .click('.addon-menu')
       .click('.alamo-postgresql')
-      .click('.next button')
+      .click('button.next')
       .expect(Selector('.attach-addon-error').innerText)
       .contains('This addon is already provisioned or attached on this app.')
       .click('.ok')
@@ -537,7 +539,7 @@ test // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('.delete button')
+      .click('button.delete')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm .ok')
@@ -548,7 +550,7 @@ test // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('.delete button')
+      .click('button.delete')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
@@ -576,30 +578,30 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
 
     // URL validation tests
     .click('button.new-webhook')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.webhook-url').innerText)
     .contains('Invalid URL')
     .typeText('.webhook-url input', '!')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.webhook-url').innerText)
     .contains('Invalid URL')
     .click('.webhook-url input')
     .pressKey('backspace')
     .typeText('.webhook-url input', 'example.com/hook')
-    .click('.next button')
+    .click('button.next')
     .click('button.back')
     .expect(Selector('.webhook-url').innerText)
     .notContains('Invalid URL')
     .expect(Selector('.webhook-url input').value)
     .contains('http://example.com/hook')
-    .click('.next button')
+    .click('button.next')
 
     // Events validation tests
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.events-errorText').innerText)
     .contains('Must select at least one event')
     .click('.checkbox-release')
-    .click('.next button')
+    .click('button.next')
     .click('button.back')
     .expect(Selector('.events-errorText').exists)
     .notOk()
@@ -637,7 +639,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .ok()
     .expect(Selector('.checkbox-check-all input').checked)
     .ok()
-    .click('.next button')
+    .click('button.next')
     .click('button.back')
     .expect(Selector('.checkbox-release input').checked)
     .ok()
@@ -739,18 +741,18 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.checkbox-crashed')
     .expect(Selector('.checkbox-check-all input').checked)
     .ok()
-    .click('.next button')
+    .click('button.next')
 
     // Secret validation tests
     .typeText('.webhook-secret input', 'over twenty characters')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.webhook-secret').innerText)
     .contains('Secret must be less than 20 characters')
     .click('.webhook-secret input')
     .pressKey('ctrl+a')
     .pressKey('backspace')
     .typeText('.webhook-secret input', 'mysecret')
-    .click('.next button')
+    .click('button.next')
 
     // Test that webhook was created, displayed
     .expect(Selector('.webhook-snack').innerText)
@@ -759,7 +761,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('http://example.com/hook')
 
     // Remove
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 button.webhook-remove')
     .click('.delete-webhook .ok')
     .expect(Selector('.webhook-item-0').exists)
@@ -768,38 +770,38 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     // Display multiple webhooks
     .click('button.new-webhook')
     .typeText('.webhook-url input', 'http://example.com/hook1')
-    .click('.next button')
+    .click('button.next')
     .click('.checkbox-config_change')
-    .click('.next button')
-    .click('.next button') // Also tests for empty secret
+    .click('button.next')
+    .click('button.next') // Also tests for empty secret
     .expect(Selector('.webhook-snack').innerText)
     .contains('Webhook Created')
     .click('button.new-webhook')
     .typeText('.webhook-url input', 'http://example.com/hook2')
-    .click('.next button')
+    .click('button.next')
     .click('.checkbox-release')
-    .click('.next button')
+    .click('button.next')
     .typeText('.webhook-secret input', 'secret')
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Webhook Created')
     .expect(Selector('.webhook-list').exists)
     .ok()
-    .expect(Selector('.webhook-item-0').innerText)
+    .expect(Selector('.webhook-title-url-0').innerText)
     .contains('http://example.com/hook1')
-    .expect(Selector('.webhook-item-1').innerText)
+    .expect(Selector('.webhook-title-url-1').innerText)
     .contains('http://example.com/hook2')
 
     // Remove one of the webhooks
-    .click('.webhook-item-1 div div button') // Open edit dropdown
+    .click('.webhook-item-1 .webhook-title') // Open edit dropdown
     .click('.webhook-item-1 button.webhook-remove')
     .click('.delete-webhook .ok')
     .expect(Selector('.webhook-item-1').exists)
     .notOk()
 
     // Edit webhooks tests
-    .click('.webhook-item-0 div div button')
-    .click('.webhook-item-0 .webhook-edit')
+    .click('.webhook-item-0 .webhook-title')
+    .click('.webhook-item-0 button.webhook-edit')
     .click('.webhook-item-0 .edit-url input')
 
     // Test inavlid URL
@@ -824,7 +826,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Updated Webhook')
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 .webhook-edit')
     .expect(Selector('.webhook-item-0 .edit-url input').value)
     .contains('http://new-url.com/')
@@ -863,7 +865,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Updated Webhook')
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 .webhook-edit')
     .expect(Selector('.webhook-item-0 .checkbox-release input').checked)
     .ok()
@@ -899,7 +901,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Updated Webhook')
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 .webhook-edit')
     .expect(Selector('.webhook-item-0 .active-toggle input').checked)
     .notOk()
@@ -920,7 +922,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('Updated Webhook')
 
     // Test back button functionality
-    .click('.webhook-item-0 div div button') // Open edit dropdown
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 .webhook-edit')
     .click('.webhook-item-0 .active-toggle input')
     .typeText('.webhook-item-0 .edit-url input', 'http://old-url.com/')
@@ -970,12 +972,13 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('button.new-config')
     .typeText('.config-key input', 'test')
     .click('.next')
-    .typeText(Selector('.config-value textarea').withAttribute('id'), 'test')
+    .typeText(Selector('.config-value textarea').withAttribute('style'), 'test')
     .click('.next')
     .expect(Selector('.config-snack').innerText)
     .contains('Added Config Var')
     .click('.webhooks-tab')
     // Expect an event
+    .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 button.webhook-history')
     .expect(Selector('.history-dialog .historyItem-0'))
     .ok()
@@ -1000,8 +1003,6 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
 
 
 test('Should be able to create edit and remove config vars', async (t) => { // eslint-disable-line no-undef
-  const editTextArea = Selector('.config-edit-value textarea').withAttribute('id');
-  const newTextArea = Selector('.config-value textarea').withAttribute('id');
   await t
     .click('.app-list .testcafe-testcafe')
     .click('.config-tab')
@@ -1018,16 +1019,16 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
 
     // Create new config var
     .click('button.new-config')
-    .click('.next')
-    .expect(Selector('.config-key').innerText)
+    .click('button.next')
+    .expect(Selector('.config-key p').innerText)
     .contains('field required')
     .typeText('.config-key input', 'MERP')
-    .click('.next')
-    .click('.next')
-    .expect(Selector('.config-value').innerText)
+    .click('button.next')
+    .click('button.next')
+    .expect(Selector('.config-value p').innerText)
     .contains('field required')
-    .typeText(newTextArea, 'DERP', { replace: true })
-    .click('.next')
+    .typeText(Selector('.config-value textarea').withAttribute('style'), 'DERP')
+    .click('button.next')
     .expect(Selector('.config-snack').innerText)
     .contains('Added Config Var')
     .expect(Selector('.config-list .MERP').innerText)
@@ -1035,7 +1036,8 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
 
     // Edit config var
     .click('.config-list .MERP button.edit')
-    .typeText(editTextArea, 'Testcafe', { replace: true })
+    .typeText(Selector('.config-edit-value textarea').withAttribute('style'), 'Testcafe', { replace: true })
+    // .typeText('.config-edit-value input', 'Testcafe', { replace: true })
     .click('.submit')
     .expect(Selector('.config-snack').innerText)
     .contains('Updated Config Var')

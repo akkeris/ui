@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Paper from 'material-ui/Paper';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { CircularProgress, Paper } from '@material-ui/core';
 
 import api from '../../services/api';
 import InvoiceList from '../../components/Invoices/InvoiceList';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -18,11 +21,13 @@ const style = {
       marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '20%',
+      marginTop: '15%',
+      marginBottom: '5%',
     },
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   toolbar: {
@@ -68,14 +73,14 @@ export default class Invoices extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div className="invoices" style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div className="invoices">
           <Paper style={style.paper}>
             <InvoiceList invoices={this.state.invoices} />

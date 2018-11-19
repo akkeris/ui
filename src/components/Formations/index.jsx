@@ -1,28 +1,41 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import MenuItem from 'material-ui/MenuItem';
-import Snackbar from 'material-ui/Snackbar';
-import IconButton from 'material-ui/IconButton';
-import Paper from 'material-ui/Paper';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow } from 'material-ui/Table';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
-
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import {
+  CircularProgress, MenuItem, Snackbar, IconButton, Button, Paper,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  Table, TableBody, TableHead, TableRow, TableCell, Tooltip,
+} from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import util from '../../services/util';
 import NewFormation from './NewFormation';
 import DynoType from './DynoType';
 
-const muiTheme = getMuiTheme({
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  overrides: {
+    MuiTable: {
+      root: {
+        tableLayout: 'fixed',
+      },
+    },
+    MuiPaper: {
+      root: {
+        boxShadow: 'none !important',
+      },
+    },
+  },
 });
 
 const style = {
+  iconButton: {
+    color: 'black',
+  },
   tableRowColumn: {
     icon: {
       width: '58px',
@@ -57,13 +70,14 @@ export default class Formations extends Component {
       message: '',
       new: false,
     };
-    if (this.props.active) { this.loadFormations(); }
+    this.loadFormations();
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active) {
-      this.loadFormations();
-    }
+  componentDidMount() {
+    this._isMounted = true;
+  }
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   getSizes() {
@@ -72,8 +86,7 @@ export default class Formations extends Component {
         className={size.name}
         key={size.name}
         value={size.name}
-        primaryText={size.resources.limits.memory}
-      />));
+      >{size.resources.limits.memory}</MenuItem>));
   }
 
   getFormations() {
@@ -108,12 +121,14 @@ export default class Formations extends Component {
         });
         sizes = sizes.sort((a, b) =>
           parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10));
-        this.setState({
-          sizes,
-          dynos,
-          formations,
-          loading: false,
-        });
+        if (this._isMounted) {
+          this.setState({
+            sizes,
+            dynos,
+            formations,
+            loading: false,
+          });
+        }
       });
   }
 
@@ -159,72 +174,82 @@ export default class Formations extends Component {
       .then(([r1, r2]) => {
         const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
         const dynos = r2.data;
-        this.setState({
-          formations,
-          dynos,
-          loading: false,
-          new: false,
-          open: true,
-          message,
-        });
+        if (this._isMounted) {
+          this.setState({
+            formations,
+            dynos,
+            loading: false,
+            new: false,
+            open: true,
+            message,
+          });
+        }
       });
   }
 
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           {!this.state.new && (
-            <Paper zDepth={0}>
-              <IconButton className="new-formation" onTouchTap={this.handleNewFormation} tooltip="New Formation" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+            <Paper elevation={0}>
+              <Tooltip title="New Formation" placement="bottom-end">
+                <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
+              </Tooltip>
+
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton className="cancel" onTouchTap={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
+              <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
               <NewFormation app={this.props.app} onComplete={this.reload} />
             </div>
           )}
-          <Table className="formation-list" wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-            <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+          <Table className="formation-list" >
+            <TableHead>
               <TableRow>
-                <TableHeaderColumn>Formation</TableHeaderColumn>
-                <TableHeaderColumn>Status</TableHeaderColumn>
+                <TableCell>Formation</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
+            </TableHead>
+            <TableBody>
               {this.getFormations()}
             </TableBody>
           </Table>
           <Dialog
             className="error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onTouchTap={this.handleDialogClose}
-              />}
           >
-            {this.state.submitMessage}
+            <DialogTitle>
+              Error
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>{this.state.submitMessage}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                color="primary"
+                className="ok"
+                onClick={this.handleDialogClose}
+              >
+                Ok
+              </Button>
+            </DialogActions>
           </Dialog>
           <Snackbar
             className="formation-snack"
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>
@@ -234,5 +259,4 @@ export default class Formations extends Component {
 
 Formations.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
 };

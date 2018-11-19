@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
+import { CircularProgress } from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import { LazyStream, ScrollFollow } from 'react-lazylog';
+import { LazyLog, ScrollFollow } from 'react-lazylog';
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -36,23 +40,33 @@ export default class Logs extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      loading: false,
+      loading: true,
       reading: false,
       logs: 'Logplex ready, waiting for logs..\n',
       url: '',
     };
-    if (this.props.active) { this.state.loading = true; this.loadLogs('constructor'); }
+    this.loadLogs('constructor');
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.active && this.props.active && !this.state.reading) {
+  // componentDidMount() {
+  //   this._isMounted = true;
+  // }
+
+  /*
+  componentDidUpdate() {
+    if (!this.state.reading) {
       this.loadLogs('update');
     }
   }
+  */
+
+  // componentWillUnmount() {
+  //   this._isMounted = false;
+  // }
 
   loadLogs(mode) {
     if (mode !== 'constructor') {
-      this.setState({ logs: this.state.logs, loading: true });
+      this.setState({ logs: this.state.logs });
     }
     api.getLogSession(this.props.app).then((response) => {
       this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(response.data.logplex_url)}` });
@@ -62,25 +76,32 @@ export default class Logs extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
-    } else if (this.props.active && this.state.reading) {
+    } else if (this.state.reading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
-          <ScrollFollow startFollowing>
-            {({ follow, onScroll }) => (
-              <LazyStream height={500} url={this.state.url} follow={follow} onScroll={onScroll} />
+        <MuiThemeProvider theme={muiTheme}>
+          <ScrollFollow
+            startFollowing
+            render={({ follow, onScroll }) => (
+              <LazyLog
+                stream
+                url={this.state.url}
+                follow={follow}
+                onScroll={onScroll}
+                height={500}
+              />
             )}
-          </ScrollFollow>
+          />
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div />
       </MuiThemeProvider>
     );
@@ -89,5 +110,4 @@ export default class Logs extends Component {
 
 Logs.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
 };

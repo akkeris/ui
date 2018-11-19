@@ -1,5 +1,6 @@
 import React from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+import PageNotFound from '../components/PageNotFound';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
 import { Apps, NewApp, AppInfo } from '../scenes/Apps';
@@ -9,10 +10,6 @@ import { Spaces, NewSpace } from '../scenes/Spaces';
 import { Invoices, InvoiceInfo, WasteReport } from '../scenes/Invoices';
 import { AppSetups } from '../scenes/AppSetups';
 import { Sites, NewSite, SiteInfo } from '../scenes/Sites';
-
-const NotFound = () => (
-  <h1>404.. This page is not found!</h1>
-);
 
 const AppRoutes = () => (
   <Switch>
@@ -79,7 +76,7 @@ const Router = () => (
           <Route path="/spaces" component={SpaceRoutes} />
           <Route path="/invoices" component={InvoiceRoutes} />
           <Route path="/sites" component={SitesRoutes} />
-          <Route component={NotFound} />
+          <Route component={PageNotFound} />
         </Switch>
         <Footer />
       </div>

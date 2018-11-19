@@ -1,21 +1,19 @@
 import React, { Component } from 'react';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import Checkbox from 'material-ui/Checkbox';
-import Paper from 'material-ui/Paper';
-import Dialog from 'material-ui/Dialog';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-
+import {
+  Step, Stepper, StepLabel, Button, TextField, Collapse, Checkbox, Paper,
+  MenuItem, Select, FormControl, InputLabel, FormControlLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const tags = ['internal', 'socs', 'prod', 'dev', 'qa'];
@@ -43,6 +41,8 @@ const style = {
   },
   compliance: {
     paddingLeft: '14px',
+    display: 'flex',
+    flexDirection: 'column',
   },
 };
 
@@ -80,7 +80,14 @@ export default class NewApp extends Component {
       case 0:
         return (
           <div>
-            <TextField className="space-name" floatingLabelText="Space name" value={this.state.space} onChange={this.handleSpaceChange} errorText={this.state.errorText} />
+            <TextField
+              className="space-name"
+              label="Space Name"
+              value={this.state.space}
+              onChange={this.handleSpaceChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
             <p>
               Create a space! Enter a name that will define your space.
               (this is typically an org id with environment ex. perf-dev, perf-qa, perf-prod).
@@ -91,9 +98,20 @@ export default class NewApp extends Component {
       case 1:
         return (
           <div>
-            <DropDownMenu className="dropdown" value={this.state.stack} onChange={this.handleStackChange}>
-              {this.getStacks()}
-            </DropDownMenu>
+            <FormControl className="stack-form">
+              <InputLabel htmlFor="stack-select">Stack</InputLabel>
+              <Select
+                className="stack-menu"
+                value={this.state.stack}
+                onChange={this.handleStackChange}
+                inputProps={{
+                  id: 'stack-select',
+                  name: 'stack',
+                }}
+              >
+                {this.getStacks()}
+              </Select>
+            </FormControl>
             <p>
             Stacks are unique runtimes in akkeris.
             One or more of them may exist in any one region.
@@ -107,7 +125,12 @@ export default class NewApp extends Component {
       case 2:
         return (
           <div>
-            <TextField className="space-description" floatingLabelText="Description" value={this.state.description} onChange={this.handleDescriptionChange} />
+            <TextField
+              className="space-description"
+              label="Description"
+              value={this.state.description}
+              onChange={this.handleDescriptionChange}
+            />
             <p>
               Give a description of your space.
             </p>
@@ -127,31 +150,42 @@ export default class NewApp extends Component {
             </p>
           </div>
         );
+      // need this otherwise "You're a long way ..." shows up when you hit finish
+      case 4:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
   }
 
   getCompliance = () => tags.map(tag => (
-    <Checkbox
-      className={`checkbox-${tag}`}
-      key={tag}
-      onCheck={this.handleCheck}
-      value={tag}
+    <FormControlLabel
+      control={
+        <Checkbox
+          className={`checkbox-${tag}`}
+          key={tag}
+          onChange={this.handleCheck}
+          value={tag}
+          checked={this.state.compliance.indexOf(tag) !== -1}
+        />
+      }
       label={tag}
-      checked={this.state.compliance.indexOf(tag) !== -1}
     />
   ))
 
   getStacks() {
     return this.state.stacks.map(stack => (
-      <MenuItem className={stack.name} key={stack.id} value={stack.name} label={`Stack: ${stack.name}`} primaryText={stack.name} />
+      <MenuItem
+        className={stack.name}
+        key={stack.id}
+        value={stack.name}
+      >{stack.name}</MenuItem>
     ));
   }
 
-  handleStackChange = (event, index, value) => {
+  handleStackChange = (event) => {
     this.setState({
-      stack: value,
+      stack: event.target.value,
     });
   }
   handleClose = () => {
@@ -241,7 +275,7 @@ export default class NewApp extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
     if (finished) {
       this.submitSpace();
     }
@@ -249,19 +283,20 @@ export default class NewApp extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            className="back"
-            label="Back"
-            disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
-            style={style.buttons.back}
-          />)}
-          <RaisedButton
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >Back</Button>
+          )}
+          <Button
+            variant="contained"
             className="next"
-            label={stepIndex === 3 ? 'Finish' : 'Next'}
-            primary
-            onTouchTap={this.handleNext}
-          />
+            color="primary"
+            onClick={this.handleNext}
+          >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -270,7 +305,7 @@ export default class NewApp extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
@@ -287,22 +322,24 @@ export default class NewApp extends Component {
                 <StepLabel>Select tags</StepLabel>
               </Step>
             </Stepper>
-            <ExpandTransition loading={loading} open>
-              {this.renderContent()}
-            </ExpandTransition>
+            {
+              <Collapse in={!loading}>
+                {this.renderContent()}
+              </Collapse>
+            }
             <Dialog
               className="error"
               open={this.state.submitFail}
-              modal
-              actions={
-                <FlatButton
-                  className="ok"
-                  label="Ok"
-                  primary
-                  onTouchTap={this.handleClose}
-                />}
             >
-              {this.state.submitMessage}
+              <DialogTitle>Error</DialogTitle>
+              <DialogContent>{this.state.submitMessage}</DialogContent>
+              <DialogActions>
+                <Button
+                  className="ok"
+                  color="primary"
+                  onClick={this.handleClose}
+                >OK</Button>
+              </DialogActions>
             </Dialog>
           </div>
         </Paper>

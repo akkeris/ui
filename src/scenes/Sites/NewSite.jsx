@@ -1,20 +1,38 @@
 import React, { Component } from 'react';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
-import Paper from 'material-ui/Paper';
-import Dialog from 'material-ui/Dialog';
-import Toggle from 'material-ui/Toggle';
+
+import {
+  Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Switch,
+  Dialog, DialogContent, DialogTitle, DialogActions, DialogContentText,
+  FormControl, FormControlLabel, RadioGroup, Radio,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiStepper: {
+      root: {
+        padding: '24px 0px',
+      },
+    },
+    MuiButton: {
+      root: {
+        marginRight: '15px',
+      },
+    },
+    MuiFormControlLabel: {
+      root: {
+        marginLeft: '0px',
+      },
+    },
+  },
 });
 
 const style = {
@@ -28,14 +46,16 @@ const style = {
     },
   },
   paper: {
-    maxWidth: '1024px',
+    maxWidth: '1048px',
+    minWidth: '768px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
+    marginBottom: '12px',
   },
   div: {
-    width: '100%',
-    maxWidth: 700,
+    width: '90%',
+    maxWidth: 800,
     margin: 'auto',
   },
   radio: {
@@ -78,7 +98,15 @@ export default class NewSite extends Component {
       case 0:
         return (
           <div>
-            <TextField className="site-name" floatingLabelText="Domain name" value={this.state.domain} onChange={this.handleDomainChange} errorText={this.state.errorText} />
+            <TextField
+              className="site-name"
+              label="Domain Name"
+              value={this.state.domain}
+              onChange={this.handleDomainChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+              style={{ minWidth: '50%' }}
+            />
             <p>
                 The domain name of a site must only use alphanumerics, hyphens and periods.
             </p>
@@ -88,9 +116,17 @@ export default class NewSite extends Component {
         return (
           <div className="region">
             <h3>Region</h3>
-            <RadioButtonGroup className="radio" name="regionSelect" style={style.radio} onChange={this.handleRegionChange} valueSelected={this.state.region}>
-              {this.getRegions()}
-            </RadioButtonGroup>
+            <FormControl component="fieldset" className="radio-group">
+              <RadioGroup
+                aria-label="Select Region"
+                name="region-radio-group"
+                className="region-radio-group"
+                value={this.state.region}
+                onChange={this.handleRegionChange}
+              >
+                {this.getRegions()}
+              </RadioGroup>
+            </FormControl>
             {this.state.errorText !== '' && (
               <p style={style.error}>{this.state.errorText}</p>
             )}
@@ -99,11 +135,16 @@ export default class NewSite extends Component {
       case 2:
         return (
           <div>
-            <Toggle
-              className="toggle"
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={this.state.internal}
+                  onChange={this.handleToggleInternal}
+                  value="internal"
+                  className="toggle"
+                />
+              }
               label="Internal"
-              toggled={this.state.internal}
-              onToggle={this.handleToggleInternal}
             />
           </div>
         );
@@ -114,11 +155,12 @@ export default class NewSite extends Component {
 
   getRegions() {
     return this.state.regions.map(region => (
-      <RadioButton
+      <FormControlLabel
         className={region.name}
         key={region.name}
         value={region.name}
         label={region.name}
+        control={<Radio />}
       />
     ));
   }
@@ -197,7 +239,7 @@ export default class NewSite extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 33px', overflow: 'hidden' };
     if (finished) {
       this.submitSite();
     }
@@ -205,19 +247,20 @@ export default class NewSite extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            className="back"
-            label="Back"
-            disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
-            style={style.buttons.back}
-          />)}
-          <RaisedButton
+          {stepIndex > 0 && (
+            <Button
+              className="back-button"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >Back</Button>
+          )}
+          <Button
             className="next"
-            label={stepIndex === 2 ? 'Finish' : 'Next'}
-            primary
-            onTouchTap={this.handleNext}
-          />
+            color="primary"
+            variant="contained"
+            onClick={this.handleNext}
+          >{stepIndex === 2 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -226,7 +269,7 @@ export default class NewSite extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
@@ -240,22 +283,22 @@ export default class NewSite extends Component {
                 <StepLabel>Select Internal</StepLabel>
               </Step>
             </Stepper>
-            <ExpandTransition loading={loading} open>
+            <Collapse in={!loading}>
               {this.renderContent()}
-            </ExpandTransition>
+            </Collapse>
             <Dialog
               className="error"
               open={this.state.submitFail}
-              modal
-              actions={
-                <FlatButton
-                  className="ok"
-                  label="Ok"
-                  primary
-                  onTouchTap={this.handleClose}
-                />}
             >
-              {this.state.submitMessage}
+              <DialogTitle>Error</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  {this.state.submitMessage}
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button className="ok" color="primary" onClick={this.handleClose}>Ok</Button>
+              </DialogActions>
             </Dialog>
           </div>
         </Paper>

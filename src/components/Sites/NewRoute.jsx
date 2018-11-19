@@ -1,20 +1,37 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import Dialog from 'material-ui/Dialog';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
+import {
+  Step, Stepper, StepLabel, TextField, Collapse, Select, MenuItem, Button,
+  Dialog, DialogTitle, DialogActions, DialogContent,
+} from '@material-ui/core';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiStepper: {
+      root: {
+        padding: '24px 0px',
+      },
+    },
+    MuiButton: {
+      root: {
+        marginRight: '15px',
+      },
+    },
+    MuiFormControl: {
+      root: {
+        marginBottom: '15px',
+      },
+    },
+  },
 });
 
 const style = {
@@ -63,7 +80,7 @@ export default class NewRoute extends Component {
 
   getApps() {
     return this.state.apps.map(app => (
-      <MenuItem key={app.id} value={app} primaryText={app.name} />
+      <MenuItem className={app.id} key={app.id} value={app.id}>{app.name}</MenuItem>
     ));
   }
 
@@ -72,30 +89,40 @@ export default class NewRoute extends Component {
       case 0:
         return (
           <div>
-            <TextField floatingLabelText="Source Path" value={this.state.source} onChange={this.handleSourceChange} errorText={this.state.errorText} />
-            <p>
-              Path of route after domain ex. `/` or `/source`.
-            </p>
+            <TextField
+              className="source-path"
+              label="Source Path"
+              type="text"
+              value={this.state.source}
+              onChange={this.handleSourceChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>Path of route after domain ex. `/` or `/source`.</p>
           </div>
         );
       case 1:
         return (
           <div>
-            <DropDownMenu value={this.state.app} onChange={this.handleAppChange}>
+            <Select className="new-dropdown" value={this.state.app.id} onChange={this.handleAppChange}>
               {this.getApps()}
-            </DropDownMenu>
-            <p>
-                          The app to route to.
-            </p>
+            </Select>
+            <p>The app to route to.</p>
           </div>
         );
       case 2:
         return (
           <div>
-            <TextField floatingLabelText="Target Path" value={this.state.target} onChange={this.handleTargetChange} errorText={this.state.errorText} />
-            <p>
-              The path on the app to route to.
-            </p>
+            <TextField
+              className="target-path"
+              label="Target Path"
+              type="text"
+              value={this.state.target}
+              onChange={this.handleTargetChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>The path on the app to route to.</p>
           </div>
         );
       default:
@@ -140,14 +167,18 @@ export default class NewRoute extends Component {
     });
   }
 
-      handleTargetChange = (event) => {
-        this.setState({
-          target: event.target.value,
-        });
-      }
+  handleTargetChange = (event) => {
+    this.setState({
+      target: event.target.value,
+    });
+  }
 
-  handleAppChange = (event, index, value) => {
-    this.setState({ app: value });
+  handleAppChange = (event) => {
+    const { apps } = this.state;
+    const id = event.target.value;
+    this.setState({
+      app: apps.find(i => i.id === id),
+    });
   }
 
   submitRoute = () => {
@@ -175,7 +206,7 @@ export default class NewRoute extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
     if (finished) {
       this.submitRoute();
     }
@@ -184,17 +215,24 @@ export default class NewRoute extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            label="Back"
-            disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
-            style={style.buttons.back}
-          />)}
-          <RaisedButton
-            label={stepIndex === 2 ? 'Finish' : 'Next'}
-            primary
-            onTouchTap={this.handleNext}
-          />
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >
+              Back
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            className="next"
+            color="primary"
+            onClick={this.handleNext}
+          >
+            {stepIndex === 2 ? 'Finish' : 'Next'}
+          </Button>
         </div>
       </div>
     );
@@ -203,7 +241,7 @@ export default class NewRoute extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
@@ -217,22 +255,23 @@ export default class NewRoute extends Component {
             </Step>
           </Stepper>
           {
-            <ExpandTransition loading={loading} open>
+            <Collapse in={!loading}>
               {this.renderContent()}
-            </ExpandTransition>
+            </Collapse>
           }
           <Dialog
+            className="new-addon-error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                label="Ok"
-                primary
-                onTouchTap={this.handleClose}
-              />
-            }
           >
-            {this.state.submitMessage}
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>{this.state.submitMessage}</DialogContent>
+            <DialogActions>
+              <Button
+                className="ok"
+                color="primary"
+                onClick={this.handleClose}
+              >OK</Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>

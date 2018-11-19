@@ -1,27 +1,39 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import AppBar from 'material-ui/AppBar';
-import Drawer from 'material-ui/Drawer';
-import Subheader from 'material-ui/Subheader';
-import Divider from 'material-ui/Divider';
-import { List, ListItem } from 'material-ui/List';
-import HomeIcon from 'material-ui/svg-icons/action/home';
-import AppIcon from 'material-ui/svg-icons/hardware/developer-board';
-import SpacesIcon from 'material-ui/svg-icons/hardware/toys';
-import PipelinesIcon from 'material-ui/svg-icons/hardware/device-hub';
-import RouterIcon from 'material-ui/svg-icons/hardware/router';
-import OrgIcon from 'material-ui/svg-icons/action/face';
-import InvoiceIcon from 'material-ui/svg-icons/action/credit-card';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import {
+  AppBar, Drawer, Divider, List, ListItem, ListSubheader, ListItemIcon, ListItemText,
+  Toolbar, IconButton,
+} from '@material-ui/core';
+import HomeIcon from '@material-ui/icons/Home';
+import AppIcon from '@material-ui/icons/DeveloperBoard';
+import SpacesIcon from '@material-ui/icons/Toys';
+import PipelinesIcon from '@material-ui/icons/DeviceHub';
+import RouterIcon from '@material-ui/icons/Router';
+import OrgIcon from '@material-ui/icons/Face';
+import InvoiceIcon from '@material-ui/icons/CreditCard';
+import MenuIcon from '@material-ui/icons/Menu';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
 import AccountMenu from './AccountMenu';
 import api from '../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: 'ProximaNova',
+
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: 'ProximaNova',
+  },
+  overrides: {
+    MuiIconButton: {
+      root: {
+        margin: '0px 18px 0px 0px',
+      },
+    },
+  },
 });
 
 const style = {
@@ -33,6 +45,7 @@ const style = {
   },
   link: {
     textDecoration: 'none',
+    display: 'flex',
   },
   title: {
     div: {
@@ -43,7 +56,6 @@ const style = {
     img: {
       width: '32px',
       height: '32px',
-      marginTop: '16px',
     },
     app: {
       fontWeight: 400,
@@ -86,64 +98,98 @@ export default class Nav extends Component {
       accountMenu = (
         <AccountMenu
           className="account-menu"
-          src={this.state.account.thumbnailPhoto}
+          src={this.state.account.thumbnailPhoto ? this.state.account.thumbnailPhoto : ''}
+          accountName={this.state.account.name ? this.state.account.name : ''}
         />
       );
     }
 
     const title = (
-      <span style={style.title.div}>
+      <span style={{ flexGrow: '1', display: 'flex', alignItems: 'center' }}>
         <img alt="akkeris logo" src="images/akkeris.svg" style={style.title.img} />
       </span>
     );
 
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           <AppBar
             className="appbar"
-            onLeftIconButtonTouchTap={this.handleToggle}
-            title={title}
             style={style.header}
-            iconElementRight={accountMenu}
-          />
+            position="static"
+          >
+            <Toolbar>
+              <IconButton onClick={this.handleToggle}>
+                <MenuIcon nativeColor="white" />
+              </IconButton>
+              {title}
+              {accountMenu}
+            </Toolbar>
+          </AppBar>
           <Drawer
             className="drawer"
-            docked={false}
             open={this.state.open}
-            onRequestChange={open => this.setState({ open })}
+            onClose={this.handleToggle}
+            PaperProps={{ style: { width: '250px' } }}
           >
             <header>
               <AppBar
                 className="header"
-                title={title}
+                position="static"
                 style={style.nav}
-                onLeftIconButtonTouchTap={this.handleToggle}
-              />
+              >
+                <Toolbar>
+                  <IconButton onClick={this.handleToggle}>
+                    <MenuIcon nativeColor="white" />
+                  </IconButton>
+                  {title}
+                </Toolbar>
+              </AppBar>
             </header>
-            <List>
-              <Subheader>Navigation</Subheader>
-              <Link to="/" style={style.link}>
-                <ListItem primaryText="Dashboard" onTouchTap={this.handleClose} leftIcon={<HomeIcon />} />
-              </Link>
-              <Link to="/apps" style={style.link}>
-                <ListItem className="linktoapps" primaryText="Apps" onTouchTap={this.handleClose} leftIcon={<AppIcon />} />
-              </Link>
-              <Link to="/invoices" style={style.link}>
-                <ListItem className="linktoinvoices" primaryText="Invoices" onTouchTap={this.handleClose} leftIcon={<InvoiceIcon />} />
-              </Link>
-              <Link to="/orgs" style={style.link}>
-                <ListItem className="linktoorgs" primaryText="Organizations" onTouchTap={this.handleClose} leftIcon={<OrgIcon />} />
-              </Link>
-              <Link to="/pipelines" style={style.link}>
-                <ListItem className="linktopipelines"primaryText="Pipelines" onTouchTap={this.handleClose} leftIcon={<PipelinesIcon />} />
-              </Link>
-              <Link to="/sites" style={style.link}>
-                <ListItem className="linktosites" primaryText="Sites" onTouchTap={this.handleClose} leftIcon={<RouterIcon />} />
-              </Link>
-              <Link to="/spaces" style={style.link}>
-                <ListItem className="linktospaces" primaryText="Spaces" onTouchTap={this.handleClose} leftIcon={<SpacesIcon />} />
-              </Link>
+            <List component="nav">
+              <ListSubheader>Navigation</ListSubheader>
+              <ListItem button className="linktodashboard">
+                <Link to="/" style={style.link} onClick={this.handleClose}>
+                  <ListItemIcon><HomeIcon /></ListItemIcon>
+                  <ListItemText primary="Dashboard" />
+                </Link>
+              </ListItem>
+              <ListItem button className="linktoapps">
+                <Link to="/apps" style={style.link} onClick={this.handleClose}>
+                  <ListItemIcon><AppIcon /></ListItemIcon>
+                  <ListItemText primary="Apps" />
+                </Link>
+              </ListItem>
+              <ListItem button className="linktoinvoices">
+                <Link to="/invoices" style={style.link} onClick={this.handleClose}>
+                  <ListItemIcon><InvoiceIcon /></ListItemIcon>
+                  <ListItemText primary="Invoices" />
+                </Link>
+              </ListItem>
+              <ListItem button className="linktoorgs">
+                <Link to="/orgs" style={style.link} onClick={this.handleClose}>
+                  <ListItemIcon><OrgIcon /></ListItemIcon>
+                  <ListItemText primary="Organizations" />
+                </Link>
+              </ListItem>
+              <ListItem button className="linktopipelines">
+                <Link to="/pipelines" style={style.link} onClick={this.handleClose}>
+                  <ListItemIcon><PipelinesIcon /></ListItemIcon>
+                  <ListItemText primary="Pipelines" />
+                </Link>
+              </ListItem>
+              <ListItem button className="linktosites">
+                <Link to="/sites" style={style.link} onClick={this.handleClose}>
+                  <ListItemIcon><RouterIcon /></ListItemIcon>
+                  <ListItemText primary="Sites" />
+                </Link>
+              </ListItem>
+              <ListItem button className="linktospaces">
+                <Link to="/spaces" style={style.link} onClick={this.handleClose}>
+                  <ListItemIcon><SpacesIcon /></ListItemIcon>
+                  <ListItemText primary="Spaces" />
+                </Link>
+              </ListItem>
             </List>
             <Divider inset />
           </Drawer>

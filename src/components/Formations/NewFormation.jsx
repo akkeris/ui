@@ -1,21 +1,42 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
-import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import Dialog from 'material-ui/Dialog';
-
+import {
+  Step, Stepper, StepLabel, Radio, RadioGroup, Dialog, DialogActions,
+  FormControl, FormLabel, FormControlLabel, MenuItem,
+  Button, TextField, Select, DialogContent, Collapse,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiStepper: {
+      root: {
+        padding: '24px 0px',
+      },
+    },
+    MuiButton: {
+      root: {
+        marginRight: '15px',
+      },
+    },
+    MuiSwitchBase: {
+      root: {
+        padding: '8px',
+      },
+    },
+    MuiFormControlLabel: {
+      root: {
+        marginLeft: '-8px',
+      },
+    },
+  },
 });
 
 const style = {
@@ -50,9 +71,9 @@ export default class NewFormation extends Component {
       submitFail: false,
       submitMessage: '',
       sizes: [],
-      size: null,
-      quantity: null,
-      type: null,
+      size: '',
+      quantity: 1,
+      type: '',
       port: 9000,
       command: '',
       errorText: '',
@@ -81,18 +102,21 @@ export default class NewFormation extends Component {
 
   getSizes() {
     return this.state.sizes.map(size => (
-      <RadioButton
-        className={size.name}
+      <FormControlLabel
         key={size.name}
         value={size.name}
+        className={size.name}
         label={`${size.resources.limits.memory} (${size.name})`}
+        control={
+          <Radio color="primary" />
+        }
       />
     ));
   }
 
   getQuantity() {
     return this.quantities.map(quantity => (
-      <MenuItem className={`q${quantity}`} key={quantity} value={quantity} primaryText={quantity} />
+      <MenuItem className={`q${quantity}`} key={quantity} value={quantity}>{quantity}</MenuItem>
     ));
   }
 
@@ -101,9 +125,17 @@ export default class NewFormation extends Component {
       case 0:
         return (
           <div>
-            <h3 className="type-header" >Type</h3>
+            {/* <h3 className="type-header" >Type</h3> */}
             <div>
-              <TextField className="new-type" floatingLabelText="Type" type="text" value={this.state.type} onChange={this.handleTypeChange} errorText={this.state.errorText} />
+              <TextField
+                className="new-type"
+                label="Type"
+                type="text"
+                value={this.state.type}
+                onChange={this.handleChange('type')}
+                error={this.state.errorText.length > 0}
+                helperText={this.state.errorText}
+              />
               <p>
                 Enter a name for your new dyno.
               </p>
@@ -113,9 +145,9 @@ export default class NewFormation extends Component {
       case 1:
         return (
           <div>
-            <DropDownMenu className="new-dropdown" value={this.state.quantity} onChange={this.handleQuantityChange}>
+            <Select className="new-dropdown" value={this.state.quantity} onChange={this.handleChange('quantity')}>
               {this.getQuantity()}
-            </DropDownMenu>
+            </Select>
             <p>
               Select the amount of instances for your app.
             </p>
@@ -124,10 +156,22 @@ export default class NewFormation extends Component {
       case 2:
         return (
           <div>
-            <h3>Sizes</h3>
-            <RadioButtonGroup className="new-size" name="sizeSelect" style={style.radio} onChange={this.handleSizeChange} valueSelected={this.state.size}>
-              {this.getSizes()}
-            </RadioButtonGroup>
+            <FormControl component="fieldset">
+              <FormLabel
+                component="h1"
+                style={{ color: 'black' }}
+              >
+                Sizes
+              </FormLabel>
+              <RadioGroup
+                name="sizeSelect"
+                className="new-size"
+                value={this.state.size}
+                onChange={this.handleChange('size')}
+              >
+                {this.getSizes()}
+              </RadioGroup>
+            </FormControl>
           </div>
         );
       case 3:
@@ -135,7 +179,7 @@ export default class NewFormation extends Component {
           const port = this.state.port === null ? '' : this.state.port;
           return (
             <div>
-              <TextField className="new-port" floatingLabelText="Port" type="numeric" value={port} onChange={this.handlePortChange} errorText={this.state.errorText} />
+              <TextField className="new-port" label="Port" type="numeric" value={port} onChange={this.handleChange('port')} error={this.state.errorText.length > 0} helperText={this.state.errorText} />
               <p>
                 Specify the port that your app will run on
                 (If your app listens to $PORT, then leave default)
@@ -145,14 +189,16 @@ export default class NewFormation extends Component {
         }
         return (
           <div>
-            <TextField className="new-command" floatingLabelText="Command" value={this.state.command || ''} onChange={this.handleCommandChange} errorText={this.state.errorText} />
+            <TextField className="new-command" label="Command" value={this.state.command || ''} onChange={this.handleChange('command')} error={this.state.errorText.length > 0} helperText={this.state.errorText} />
             <p>
                 The command to run when the build image spins up,
                 this if left off will default to the RUN command in the docker image.
-            </p> Port
+            </p>
           </div>
         );
-
+      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
+      case 4:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -173,9 +219,11 @@ export default class NewFormation extends Component {
     } else if ((stepIndex === 3 && this.state.command === '' && this.state.type === 'worker') || (stepIndex === 3 && this.state.port === null && this.state.type === 'web')) {
       this.setState({ errorText: 'Field required' });
     } else if (!this.state.loading) {
+      if (stepIndex === 3) {
+        this.submitFormation();
+      }
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 3,
         loading: stepIndex >= 3,
         errorText: '',
       });
@@ -193,33 +241,23 @@ export default class NewFormation extends Component {
     }
   }
 
-  handleSizeChange = (event, value) => {
-    this.setState({
-      size: value,
-    });
-  }
-
-  handleTypeChange = (event, value) => {
-    this.setState({
-      type: value,
-    });
-  }
-
-  handleQuantityChange = (event, index, value) => {
-    this.setState({ quantity: value });
-  }
-
-  handlePortChange = (event) => {
-    const port = parseInt(event.target.value, 10);
-    this.setState({
-      port: Number.isNaN(port) ? (event.target.value === '' ? null : this.state.port) : port, // eslint-disable-line no-nested-ternary
-    });
-  }
-
-  handleCommandChange = (event) => {
-    this.setState({
-      command: event.target.value,
-    });
+  handleChange = name => (event) => {
+    if (name === 'port') {
+      const port = parseInt(event.target.value, 10);
+      if (Number.isNaN(port)) {
+        this.setState({
+          port: event.target.value === '' ? null : this.state.port,
+        });
+      } else {
+        this.setState({
+          port,
+        });
+      }
+    } else {
+      this.setState({
+        [name]: event.target.value,
+      });
+    }
   }
 
   submitFormation = () => {
@@ -233,9 +271,9 @@ export default class NewFormation extends Component {
         stepIndex: 0,
         loading: false,
         size: this.state.sizes[0].name,
-        type: null,
-        port: null,
-        command: null,
+        type: '',
+        port: '',
+        command: '',
         quantity: 1,
         errorText: '',
       });
@@ -243,29 +281,31 @@ export default class NewFormation extends Component {
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
-    if (finished) {
-      this.submitFormation();
-    }
+    const { stepIndex } = this.state;
+    const contentStyle = { margin: '0 32px', overflow: 'visible' };
 
     return (
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            className="back"
-            label="Back"
-            disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
-            style={style.buttons.back}
-          />)}
-          <RaisedButton
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >
+              Back
+            </Button>
+          )}
+          <Button
+            variant="contained"
             className="next"
-            label={stepIndex === 3 ? 'Finish' : 'Next'}
-            primary
-            onTouchTap={this.handleNext}
-          />
+            color="primary"
+            onClick={this.handleNext}
+          >
+            {stepIndex === 3 ? 'Finish' : 'Next'}
+          </Button>
         </div>
       </div>
     );
@@ -274,7 +314,7 @@ export default class NewFormation extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
@@ -291,23 +331,27 @@ export default class NewFormation extends Component {
             </Step>
           </Stepper>
           {
-            <ExpandTransition loading={loading} open>
+            <Collapse in={!loading}>
               {this.renderContent()}
-            </ExpandTransition>
+            </Collapse>
           }
           <Dialog
             className="new-error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
+          >
+            <DialogContent>
+              {this.state.submitMessage}
+            </DialogContent>
+            <DialogActions>
+              <Button
                 className="ok"
                 label="Ok"
-                primary
-                onTouchTap={this.handleClose}
-              />}
-          >
-            {this.state.submitMessage}
+                color="primary"
+                onClick={this.handleClose}
+              >
+                Ok
+              </Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>

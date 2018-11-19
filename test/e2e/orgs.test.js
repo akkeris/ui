@@ -31,20 +31,20 @@ test("Shouldn't be able to create duplicate org", async (t) => { // eslint-disab
     .click('.new-org')
 
     // field validation
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.org-name').innerText)
     .contains('field required')
 
     .typeText('.org-name input', 'testcafe')
-    .click('.next button')
+    .click('button.next')
 
     // field validation
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.org-description').innerText)
     .contains('field required')
 
     .typeText('.org-description input', 'testcafe')
-    .click('.next button')
+    .click('button.next')
 
     .expect(Selector('.error').innerText)
     .contains('The specified organization already exists.')

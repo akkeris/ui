@@ -4,6 +4,7 @@ const TransferWebpackPlugin = require('transfer-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
+  mode: 'production',
   entry: {
     main: [
       'babel-polyfill',

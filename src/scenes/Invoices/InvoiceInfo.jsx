@@ -1,24 +1,44 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import {
+  List, ListItem, ListItemText, CircularProgress, Button, Paper, ListSubheader, Divider,
+  Collapse,
+} from '@material-ui/core';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import LightbulbIcon from '@material-ui/docs/svgIcons/LightbulbOutline';
 import PropTypes from 'prop-types';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import { List, ListItem } from 'material-ui/List';
-import Paper from 'material-ui/Paper';
-import FlatButton from 'material-ui/FlatButton';
 import { ResponsiveContainer, Line, LineChart, XAxis, YAxis } from 'recharts';
-import Subheader from 'material-ui/Subheader';
-import Divider from 'material-ui/Divider';
-import LightBulbIcon from 'material-ui/svg-icons/action/lightbulb-outline';
-
 import api from '../../services/api';
 
 /* eslint-disable react/no-array-index-key */
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  tabs: {
-    backgroundColor: '#3c4146',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiTabs: {
+      root: {
+        backgroundColor: '#3c4146',
+        color: 'white',
+        maxWidth: '1024px',
+      },
+    },
+    MuiTab: {
+      root: {
+        minWidth: '120px !important',
+      },
+    },
+    MuiButton: {
+      root: {
+        margin: '0',
+        padding: '0px 8px',
+      },
+    },
   },
 });
 
@@ -29,11 +49,13 @@ const style = {
       marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '20%',
+      marginTop: '15%',
+      marginBottom: '5%',
     },
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   tabs: {
@@ -57,27 +79,32 @@ const style = {
     cursor: 'pointer',
   },
   header: {
-    main: {
+    container: {
       display: 'flex',
-      color: muiTheme.palette.accent1Color,
-      paddingTop: '2em',
+      flexDirection: 'column',
+      padding: '12px 6px 12px 24px',
+      backgroundColor: '#FFF',
+    },
+    row: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    title: {
+      flexGrow: 1,
       fontSize: '1.25em',
       fontWeight: 200,
       textTransform: 'uppercase',
-      paddingBottom: '1em',
       lineHeight: '1em',
+      color: muiTheme.palette.secondary.main,
     },
-  },
-  footer: {
-    main: {
-      color: muiTheme.palette.primary1Color,
+    subtitle: {
+      fontSize: '1.1em',
       fontWeight: 400,
       textTransform: 'uppercase',
-      marginLeft: 0,
-      marginTop: 0,
-      marginRight: 0,
-      marginBottom: '1em',
       lineHeight: '1em',
+      color: muiTheme.palette.primary.main,
+      paddingBottom: '12px',
     },
   },
 };
@@ -142,13 +169,13 @@ function getItems(month, items, name) {
           <LineChart key={`barchart_${name}`} data={data}>
             <defs>
               <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={muiTheme.palette.accent1Color} stopOpacity={0.25} />
+                <stop offset="0%" stopColor={muiTheme.palette.secondary.main} stopOpacity={0.25} />
               </linearGradient>
               <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={muiTheme.palette.primary1Color} stopOpacity={0.25} />
+                <stop offset="0%" stopColor={muiTheme.palette.primary.main} stopOpacity={0.25} />
               </linearGradient>
               <linearGradient id="colorRv" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={muiTheme.palette.primary2Color} stopOpacity={0.25} />
+                <stop offset="0%" stopColor={muiTheme.palette.primary.light} stopOpacity={0.25} />
               </linearGradient>
             </defs>
             <XAxis
@@ -184,54 +211,11 @@ function getItems(month, items, name) {
     const primaryText = `${item.description}`;
     const secondaryText = `Amount: ${item.quantity} Price: ${formatMoney(item.price_per_unit)} Total: ${formatMoney(item.billed_price)} Added: ${(new Date(item.created_at)).toLocaleString()} ${item.deleted_at ? `Removed: ${(new Date(item.deleted_at)).toLocaleString()}` : ''}`;
     return (
-      <ListItem
-        key={name + index}
-        secondaryText={secondaryText}
-        primaryText={primaryText}
-      />
+      <ListItem key={name + index}>
+        <ListItemText primary={primaryText} secondary={secondaryText} />
+      </ListItem>
     );
   }));
-}
-
-function getAppsInOrg(month, items, org) {
-  return (groupByApp(items, org).map((item, index) => (
-    <div key={`${org + index}container`}>
-      <Divider key={`${org + index}_divider`} />
-      <ListItem
-        key={org + index}
-        primaryTogglesNestedList
-        style={{ margin: 0, padding: 0 }}
-        hoverColor="transparent"
-        nestedItems={getItems(month, items, item)}
-        primaryText={item}
-        secondaryText={`Total: ${formatMoney(sumByApp(items, item))}`}
-      />
-    </div>
-
-  )));
-}
-
-function getOrgs(month, items) {
-  return group(items, 'organization').map(org => (
-    <List key={`list_org_${org}`}>
-      <Subheader style={style.header.main}>
-        <span style={{ flexGrow: 1, padding: '12px 5px' }}>{org}</span>
-
-        <FlatButton
-          style={{ flexGrow: 0, textAlign: 'right', margin: '0 15px' }}
-          href={`/#/invoices/${month}/${org}`}
-          target="_blank"
-          label="Cost Report >"
-          secondary
-          icon={<LightBulbIcon />}
-        />
-      </Subheader>
-      {getAppsInOrg(month, items, org)}
-      <Subheader style={style.footer.main}>
-        {org} Total: {formatMoney(sumByOrg(items, org))}
-      </Subheader>
-    </List>
-  ));
 }
 
 export default class InvoiceInfo extends Component {
@@ -240,6 +224,9 @@ export default class InvoiceInfo extends Component {
     this.state = {
       data: null,
       loading: true,
+      open: false,
+      currentItem: -1,
+      currentOrg: '',
     };
   }
 
@@ -252,20 +239,91 @@ export default class InvoiceInfo extends Component {
     });
   }
 
+  handleClick = (index, org) => {
+    const { open, currentItem, currentOrg } = this.state;
+    // All items closed, open current item
+    if (!open) {
+      this.setState({ open: true, currentItem: index, currentOrg: org });
+    } else if (currentItem === index && currentOrg === org) {
+      // Current item open, close it
+      this.setState({ open: false, currentItem: -1, currentOrg: '' });
+    } else {
+      // Different item open, close it and open index's item
+      this.setState({ currentItem: index, currentOrg: org });
+    }
+  }
+
+  renderOrgs = (month, items) => (
+    group(items, 'organization').map((org, index, arr) => (
+      <List
+        key={`list_org_${org}`}
+        subheader={
+          <ListSubheader component="div" disableGutters>
+            <div style={style.header.container}>
+              <div style={style.header.row}>
+                <span style={style.header.title}>{org}</span>
+                <Button
+                  style={{ flexGrow: 0, textAlign: 'right', margin: '0 15px' }}
+                  href={`/#/invoices/${month}/${org}`}
+                  target="_blank"
+                  color="secondary"
+                ><LightbulbIcon />{' Cost Report >'}</Button>
+              </div>
+              <div style={style.header.row}>
+                <span style={style.header.subtitle}>
+                Total: {formatMoney(sumByOrg(items, org))}
+                </span>
+              </div>
+            </div>
+            <Divider />
+          </ListSubheader>
+        }
+      >
+        {this.renderAppsInOrg(month, items, org)}
+        {index !== arr.length - 1 ? <Divider /> : null}
+      </List>
+    ))
+  )
+
+  renderAppsInOrg = (month, items, org) => {
+    const { open, currentOrg, currentItem } = this.state;
+    return (groupByApp(items, org).map((item, index) => (
+      <div key={`${org + index}container`}>
+        <ListItem button onClick={() => this.handleClick(index, org)}>
+          <ListItemText primary={item} secondary={`Total: ${formatMoney(sumByApp(items, item))}`} />
+          {(open && currentItem === index && currentOrg === org) ?
+            <ExpandLessIcon /> : <ExpandMoreIcon />
+          }
+        </ListItem>
+        <Collapse
+          in={open && currentItem === index && currentOrg === org}
+          unmountOnExit
+        >
+          <List disablePadding style={{ paddingBottom: '10px' }}>
+            {getItems(month, items, item)}
+          </List>
+        </Collapse>
+        <Divider key={`${org + index}_divider`} />
+      </div>
+    )));
+  }
+
   render() {
+    const { match } = this.props;
+    const { data } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div className="invoices">
           <Paper style={style.paper}>
-            {getOrgs(this.props.match.params.invoice, this.state.data.items)}
+            {this.renderOrgs(match.params.invoice, data.items)}
           </Paper>
         </div>
       </MuiThemeProvider>

@@ -1,13 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import { createMuiTheme } from '@material-ui/core/styles';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  tabs: {
-    backgroundColor: '#3c4146',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
   },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  // tabs: {
+  //   backgroundColor: '#3c4146',
+  // },
 });
 
 function hourformat(date) {
@@ -73,18 +78,18 @@ const Charts = (props) => {
         height={300}
         data={props.data}
         margin={{
- top: 16, right: 32, left: 32, bottom: 16,
-}}
+          top: 16, right: 32, left: 32, bottom: 16,
+        }}
       >
         <defs>
           <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muiTheme.palette.accent1Color} stopOpacity={0.25} />
+            <stop offset="0%" stopColor={muiTheme.palette.secondary.main} stopOpacity={0.25} />
           </linearGradient>
           <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muiTheme.palette.primary1Color} stopOpacity={0.25} />
+            <stop offset="0%" stopColor={muiTheme.palette.primary.main} stopOpacity={0.25} />
           </linearGradient>
           <linearGradient id="colorRv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muiTheme.palette.primary2Color} stopOpacity={0.25} />
+            <stop offset="0%" stopColor={muiTheme.palette.primary.dark} stopOpacity={0.25} />
           </linearGradient>
         </defs>
         <XAxis
@@ -102,7 +107,7 @@ const Charts = (props) => {
           tickLine={false}
           tickSize={0}
           axisLine={false}
-          tickFormatter={(x) => formatterData(props.unit, x)}
+          tickFormatter={x => formatterData(props.unit, x)}
           padding={{ top: 8, bottom: 8 }}
         />
         <Tooltip />
@@ -111,7 +116,7 @@ const Charts = (props) => {
           name={props.legend.x}
           type="step"
           dataKey="x"
-          stroke={muiTheme.palette.accent1Color}
+          stroke={muiTheme.palette.secondary.main}
           fill="url(#colorUv)"
           fillOpacity={1}
         />

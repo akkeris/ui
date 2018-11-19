@@ -1,24 +1,37 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import {
+  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, Button,
+  Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
+} from '@material-ui/core';
+import InfoIcon from '@material-ui/icons/Info';
+import MapIcon from '@material-ui/icons/Map';
 import PropTypes from 'prop-types';
-import { Card, CardHeader } from 'material-ui/Card';
-import { Tabs, Tab } from 'material-ui/Tabs';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import Snackbar from 'material-ui/Snackbar';
-import InfoIcon from 'material-ui/svg-icons/action/info';
-import MapIcon from 'material-ui/svg-icons/maps/place';
 
 import SiteOverView from '../../components/Sites/SiteOverview';
 import RouteList from '../../components/Sites/RouteList';
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  tabs: {
-    backgroundColor: '#3c4146',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiTabs: {
+      root: {
+        backgroundColor: '#3c4146',
+        color: 'white',
+        maxWidth: '1024px',
+      },
+    },
+    MuiTab: {
+      root: {
+        minWidth: '120px !important',
+      },
+    },
   },
 });
 
@@ -29,11 +42,13 @@ const style = {
       marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '20%',
+      marginTop: '15%',
+      marginBottom: '5%',
     },
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   tabs: {
@@ -138,85 +153,92 @@ export default class SiteInfo extends Component {
     });
   }
 
-  changeActiveTab = (newTab) => {
-    this.setState({
-      currentTab: newTab.props.value,
-    });
-    this.props.history.push(`${newTab.props.value}`);
+  changeActiveTab = (event, newTab) => {
+    if (this.state.currentTab !== newTab) {
+      this.setState({
+        currentTab: newTab,
+      });
+      this.props.history.push(`${newTab}`);
+    }
   }
 
   render() {
+    const { currentTab } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             <Dialog
               className="not-found-error"
               open={this.state.submitFail}
-              modal
-              actions={
-                <FlatButton
-                  className="ok"
-                  label="Ok"
-                  primary
-                  onTouchTap={this.handleNotFoundClose}
-                />}
             >
-              {this.state.submitMessage}
+              <DialogTitle>Error</DialogTitle>
+              <DialogContent>{this.state.submitMessage}</DialogContent>
+              <DialogActions>
+                <Button
+                  className="ok"
+                  color="primary"
+                  onClick={this.handleNotFoundClose}
+                >Ok</Button>
+              </DialogActions>
             </Dialog>
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           <Card className="card" style={style.card}>
             <CardHeader
               className="header"
               title={this.state.site.domain}
-              subtitle={this.state.site.region.name}
+              subheader={this.state.site.region.name}
             />
-            <Tabs value={this.state.currentTab}>
+            <Tabs
+              fullWidth
+              value={this.state.currentTab}
+              onChange={this.changeActiveTab}
+              scrollButtons="off"
+            >
               <Tab
                 className="info-tab"
                 icon={<InfoIcon />}
                 label="Info"
                 value="info"
-                onActive={this.changeActiveTab}
-              >
-                <SiteOverView site={this.state.site} />
-              </Tab>
+              />
               <Tab
                 className="routes-tab"
                 icon={<MapIcon />}
                 label="Routes"
                 value="routes"
-                onActive={this.changeActiveTab}
-              >
-                <RouteList site={this.state.site.domain} onError={this.handleError} />
-              </Tab>
+              />
             </Tabs>
+            {currentTab === 'info' && <SiteOverView site={this.state.site} />}
+            {currentTab === 'routes' && <RouteList site={this.state.site.domain} onError={this.handleError} />}
           </Card>
           <Dialog
             className="error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                className="ok"
-                label="Ok"
-                primary
-                onTouchTap={this.handleClose}
-              />}
           >
-            {this.state.submitMessage}
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{this.state.submitMessage}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                color="primary"
+                onClick={this.handleClose}
+              >
+              Ok
+              </Button>
+            </DialogActions>
           </Dialog>
           <Snackbar
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>
