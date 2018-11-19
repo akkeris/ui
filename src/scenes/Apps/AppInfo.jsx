@@ -28,7 +28,7 @@ import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: blue,
+    primary: {       main: '#0097a7',     },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
@@ -320,6 +320,7 @@ export default class AppInfo extends Component {
             {currentTab === 'releases' && (
               <Releases
                 app={this.state.app.name}
+                org={this.state.app.organization.name}
               />
             )}
             {currentTab === 'addons' && (

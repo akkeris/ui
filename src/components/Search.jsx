@@ -49,7 +49,7 @@ class Search extends Component {
 
     this.muiTheme = createMuiTheme({
       palette: {
-        primary: blue,
+        primary: {       main: '#0097a7',     },
       },
       overrides: {
         MuiInput: {

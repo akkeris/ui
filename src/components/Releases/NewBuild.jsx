@@ -3,15 +3,17 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, TextField, Typography,
   Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
-  Select, MenuItem, Collapse, CircularProgress,
+  Collapse,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { blue } from '@material-ui/core/colors';
+import { cyan } from '@material-ui/core/colors';
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: blue,
+    primary: {
+      main: '#0097a7',
+    },
   },
   typography: {
     // map old typography variants to v2 (still throws warnings)
@@ -58,61 +60,21 @@ export default class NewBuild extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      loading: true,
+      loading: false,
       finished: false,
       stepIndex: 0,
       submitFail: false,
       submitMessage: '',
       errorText: null,
-      orgs: [],
-      org: null,
-      checksum: '',
       url: '',
-      repo: '',
-      sha: '',
       branch: '',
       version: '',
     };
   }
 
-  componentDidMount() {
-    api.getOrgs().then((response) => {
-      const orgs = response.data.sort((a, b) => a.name > b.name);
-      this.setState({
-        orgs,
-        org: orgs[0].name,
-        loading: false,
-      });
-    });
-  }
-
-  getOrgs() {
-    return this.state.orgs.map(org => (
-      <MenuItem key={org.id} className={org.name} value={org.name}>
-        {org.name}
-      </MenuItem>
-    ));
-  }
-
   getStepContent(stepIndex) {
     switch (stepIndex) {
       case 0:
-        return (
-          <div>
-            <Select
-              className="org-menu"
-              // have to provide '' rather than null on empty: https://github.com/facebook/react/issues/11417
-              value={this.state.org || ''}
-              onChange={this.handleChange('org')}
-            >
-              {this.getOrgs()}
-            </Select>
-            <p>
-              Select the org for this build.
-            </p>
-          </div>
-        );
-      case 1:
         return (
           <div>
             <TextField
@@ -131,54 +93,7 @@ export default class NewBuild extends Component {
             </p>
           </div>
         );
-      case 2:
-        return (
-          <div>
-            <TextField
-              className="checksum"
-              label="Checksum (optional)"
-              value={this.state.checksum}
-              onChange={this.handleChange('checksum')}
-              helperText={this.state.errorText}
-              error={this.state.errorText && this.state.errorText.length > 0}
-            />
-            <p>
-              The sha 256 checksum (prepended with sha256:)
-              of the contents specified in the url parameter,
-              note if the URL is a base64 data URI then it is the content of
-              the base64 content DECODED.
-            </p>
-          </div>
-        );
-      case 3:
-        return (
-          <div>
-            <TextField
-              className="repo"
-              label="Repo (optional)"
-              value={this.state.repo}
-              onChange={this.handleChange('repo')}
-            />
-            <p>
-              The href of the repo that will show in the logs and build information.
-            </p>
-          </div>
-        );
-      case 4:
-        return (
-          <div>
-            <TextField
-              className="sha"
-              label="Sha (optional)"
-              value={this.state.sha}
-              onChange={this.handleChange('sha')}
-            />
-            <p>
-              SHA commit value (shown in logs and build info)
-            </p>
-          </div>
-        );
-      case 5:
+      case 1:
         return (
           <div>
             <TextField
@@ -192,7 +107,7 @@ export default class NewBuild extends Component {
             </p>
           </div>
         );
-      case 6:
+      case 2:
         return (
           <div>
             <TextField
@@ -207,7 +122,7 @@ export default class NewBuild extends Component {
           </div>
         );
       // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
-      case 7:
+      case 3:
         return '';
       default:
         return 'You\'re a long way from home sonny jim!';
@@ -220,13 +135,13 @@ export default class NewBuild extends Component {
 
   handleNext = () => {
     const { stepIndex } = this.state;
-    if (stepIndex === 1 && this.state.url === '') {
+    if (stepIndex === 0 && this.state.url === '') {
       this.setState({ errorText: 'field required' });
     } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 6,
-        loading: stepIndex >= 6,
+        finished: stepIndex >= 2,
+        loading: stepIndex >= 2,
         errorText: null,
       });
     }
@@ -250,8 +165,8 @@ export default class NewBuild extends Component {
 
   submitBuild = () => {
     api.createBuild(
-      this.props.app, this.state.org, this.state.checksum, this.state.url,
-      this.state.repo, this.state.sha, this.state.branch, this.state.version,
+      this.props.app, this.props.org, null, this.state.url,
+      null, null, this.state.branch, this.state.version,
     ).then(() => {
       this.props.onComplete('New Deployment Requested');
     }).catch((error) => {
@@ -262,11 +177,7 @@ export default class NewBuild extends Component {
         stepIndex: 0,
         loading: false,
         errorText: null,
-        org: null,
-        checksum: null,
         url: '',
-        repo: null,
-        sha: null,
         branch: null,
         version: null,
       });
@@ -308,19 +219,7 @@ export default class NewBuild extends Component {
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel className="select-org" >Select Org</StepLabel>
-            </Step>
-            <Step>
               <StepLabel>Url</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Checksum</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Repo</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Sha</StepLabel>
             </Step>
             <Step>
               <StepLabel>Branch</StepLabel>
@@ -357,5 +256,6 @@ export default class NewBuild extends Component {
 
 NewBuild.propTypes = {
   app: PropTypes.string.isRequired,
+  org: PropTypes.string.isRequired,
   onComplete: PropTypes.func.isRequired,
 };

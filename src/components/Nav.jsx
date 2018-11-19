@@ -23,7 +23,7 @@ import api from '../services/api';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: blue,
+    primary: {       main: '#0097a7',     },
   },
   typography: {
     fontFamily: 'ProximaNova',
