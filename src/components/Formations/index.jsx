@@ -16,7 +16,7 @@ import { blue } from '@material-ui/core/colors';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: blue,
+    primary: {       main: '#0097a7',     },
   },
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   overrides: {

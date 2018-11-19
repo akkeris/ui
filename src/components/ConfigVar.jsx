@@ -8,7 +8,7 @@ import SaveIcon from '@material-ui/icons/Save';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: blue,
+    primary: {       main: '#0097a7',     },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',

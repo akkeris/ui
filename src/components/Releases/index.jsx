@@ -27,7 +27,7 @@ import AutoBuildIcon from '../Icons/GitIcon';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: blue,
+    primary: {       main: '#0097a7',     },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
@@ -449,7 +449,7 @@ export default class Releases extends Component {
           {this.state.new && (
             <div>
               <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
-              <NewBuild app={this.props.app} onComplete={(message) => { this.reload(message); }} />
+              <NewBuild app={this.props.app} org={this.props.org} onComplete={(message) => { this.reload(message); }} />
             </div>
           )}
           {this.state.newAuto && (
@@ -481,4 +481,5 @@ export default class Releases extends Component {
 
 Releases.propTypes = {
   app: PropTypes.string.isRequired,
+  org: PropTypes.string.isRequired,
 };

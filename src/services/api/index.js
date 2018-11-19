@@ -197,10 +197,6 @@ function redoBuild(app, build) {
   return axios.put(`/api/apps/${app}/builds/${build}`);
 }
 
-function gitHubAuth() {
-  return axios.get('/github/gimme');
-}
-
 async function getReleases(app) {
   return Promise.all((await axios.get(`/api/apps/${app}/releases`))
     .data
@@ -420,7 +416,6 @@ export default {
   createRelease,
   patchConfig,
   createAutoBuild,
-  gitHubAuth,
   redoBuild,
   patchApp,
   restartFormation,
