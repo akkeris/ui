@@ -1,7 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
 const TransferWebpackPlugin = require('transfer-webpack-plugin');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
   mode: 'production',
