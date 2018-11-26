@@ -28,10 +28,6 @@ const config = {
         NODE_ENV: JSON.stringify('production'),
       },
     }),
-    // // Minify the bundle
-    new UglifyJSPlugin({
-      sourceMap: true,
-    }),
     // Transfer Files
     new TransferWebpackPlugin([
       { from: 'public' },
