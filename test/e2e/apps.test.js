@@ -75,6 +75,8 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .click('div.dropdown')
     .click('li.testcafe')
     .click('button.next')
+    .click('.space-dropdown')
+    .click('#menu-space .testcafe')
     .expect(Selector('.app-list .testcafe-testcafe').exists)
     .ok()
 
@@ -99,6 +101,8 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
 
     .navigateTo(`${baseUrl}/#/apps`)
     // check if app was created
+    .click('.space-dropdown')
+    .click('#menu-space .testcafe')
     .click('.app-list .testcafe-testcafe')
     .expect(Selector('.card .header').innerText)
     .contains('testcafe-testcafe')
@@ -137,6 +141,8 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .click('div.dropdown')
       .click('li.testcafe')
       .click('button.next')
+      .click('.space-dropdown')
+      .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok();
   })
@@ -308,26 +314,20 @@ test('Should be able to create view and release builds', async (t) => { // eslin
 
     // Check new component shows
     .click('button.new-build')
-    .expect(Selector('.select-org').innerText)
-    .contains('Select Org')
+    .expect(Selector('.url input').exists)
+    .ok()
 
     // Make sure we can cancel
     .click('button.build-cancel')
-    .expect(Selector('.select-org').exists)
+    .expect(Selector('.url input').exists)
     .notOk()
 
     // Create the new build
     .click('button.new-build')
-    .click('div.org-menu')
-    .click('.testcafe')
-    .click('button.next')
     .typeText('.url input', 'docker://registry.hub.docker.com/library/httpd:alpine')
-    .click('button.next') // checksum
     .click('button.next')
-    .click('button.next') // repo
-    .click('button.next') // sha
     .click('button.next') // branch
-    .click('button.next') // versiom
+    .click('button.next') // version
 
     .expect(Selector('.release-snack').innerText)
     .contains('New Deployment Requested')
@@ -364,6 +364,8 @@ test // eslint-disable-line no-undef
       .click('div.dropdown')
       .click('li.testcafe')
       .click('button.next')
+      .click('.space-dropdown')
+      .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok()
 
@@ -379,6 +381,8 @@ test // eslint-disable-line no-undef
       .click('div.dropdown')
       .click('li.testcafe')
       .click('button.next')
+      .click('.space-dropdown')
+      .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafe2-testcafe').exists)
       .ok();
   })('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef

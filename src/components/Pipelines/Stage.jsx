@@ -186,18 +186,18 @@ export default class Stage extends Component {
       this.setState({ promoteOpen: false });
       this.props.onError('No Promotion Targets', 404);
     } else {
+      this.setState({ loading:true })
       api.promotePipeline(
         this.props.pipeline.id,
         this.state.coupling.app.id,
         targets,
         this.state.safePromote,
-      )
-        .then(() => {
-          this.reload(`Promoted: ${this.state.coupling.app.name} to ${targets[0].stage}`);
-        }).catch((error) => {
-          this.setState({ promoteOpen: false });
-          this.props.onError(error.response.data);
-        });
+      ).then(() => {
+        this.reload(`Promoted: ${this.state.coupling.app.name} to ${targets[0].stage}`);
+      }).catch((error) => {
+        this.setState({ promoteOpen: false, loading: false });
+        this.props.onError(error.response.data);
+      });
     }
   }
 
@@ -325,6 +325,7 @@ export default class Stage extends Component {
             onCancel={this.handlePromoteCancelConfirmation}
             message="Are you sure you want to promote?"
             title="Promote"
+            loading={this.state.loading}
             actions={
               <FormControlLabel
                 control={

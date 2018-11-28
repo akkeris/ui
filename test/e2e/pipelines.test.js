@@ -94,6 +94,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('div.dropdown')
       .click('li.testcafe')
       .click('button.next')
+      .click('.space-dropdown')
+      .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafepipe1-testcafe').exists)
       .ok()
 
@@ -107,6 +109,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('div.dropdown')
       .click('li.testcafe')
       .click('button.next')
+      .click('.space-dropdown')
+      .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafepipe2-testcafe').exists)
       .ok()
 
@@ -120,6 +124,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('div.dropdown')
       .click('li.testcafe')
       .click('button.next')
+      .click('.space-dropdown')
+      .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafepipe3-testcafe').exists)
       .ok()
 
@@ -144,14 +150,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
 
       // Create new release
       .click('button.new-build')
-      .click('div.org-menu')
-      .click('.testcafe')
-      .click('button.next')
       .typeText('.url input', 'docker://registry.hub.docker.com/library/httpd:alpine')
-      .click('button.next') // checksum
       .click('button.next')
-      .click('button.next') // repo
-      .click('button.next') // sha
       .click('button.next') // branch
       .click('button.next') // versiom
 
@@ -176,6 +176,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.info-tab')
       .click('button.delete')
       .click('.delete-confirm .ok')
+      .click('.space-dropdown')
+      .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafepipe1').exists)
       .notOk()
 
@@ -184,6 +186,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.info-tab')
       .click('button.delete')
       .click('.delete-confirm .ok')
+      .click('.space-dropdown')
+      .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafepipe2').exists)
       .notOk()
 
@@ -192,6 +196,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.info-tab')
       .click('button.delete')
       .click('.delete-confirm .ok')
+      .click('.space-dropdown')
+      .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafepipe3').exists)
       .notOk()
 
