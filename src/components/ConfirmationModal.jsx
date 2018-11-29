@@ -31,6 +31,12 @@ export default class ConfirmationModal extends Component {
     };
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.open && !this.props.open) {
+      this.setState({ loading: false });
+    }
+  }
+
   onOk = () => {
     const { onOk } = this.props;
     this.setState({ loading: true }, () => onOk());
