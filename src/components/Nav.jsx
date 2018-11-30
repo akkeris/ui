@@ -148,48 +148,48 @@ export default class Nav extends Component {
             </header>
             <List component="nav">
               <ListSubheader>Navigation</ListSubheader>
-              <ListItem button className="linktodashboard">
-                <Link to="/" style={style.link} onClick={this.handleClose}>
+              <Link to="/" style={style.link} onClick={this.handleClose}>
+                <ListItem button className="linktodashboard">
                   <ListItemIcon><HomeIcon /></ListItemIcon>
                   <ListItemText primary="Dashboard" />
-                </Link>
-              </ListItem>
-              <ListItem button className="linktoapps">
-                <Link to="/apps" style={style.link} onClick={this.handleClose}>
+                </ListItem>
+              </Link>
+              <Link to="/apps" style={style.link} onClick={this.handleClose}>
+                <ListItem button className="linktoapps">
                   <ListItemIcon><AppIcon /></ListItemIcon>
                   <ListItemText primary="Apps" />
-                </Link>
-              </ListItem>
-              <ListItem button className="linktoinvoices">
-                <Link to="/invoices" style={style.link} onClick={this.handleClose}>
+                </ListItem>
+              </Link>
+              <Link to="/invoices" style={style.link} onClick={this.handleClose}>
+                <ListItem button className="linktoinvoices">
                   <ListItemIcon><InvoiceIcon /></ListItemIcon>
                   <ListItemText primary="Invoices" />
-                </Link>
-              </ListItem>
-              <ListItem button className="linktoorgs">
-                <Link to="/orgs" style={style.link} onClick={this.handleClose}>
+                </ListItem>
+              </Link>
+              <Link to="/orgs" style={style.link} onClick={this.handleClose}>
+                <ListItem button className="linktoorgs">
                   <ListItemIcon><OrgIcon /></ListItemIcon>
                   <ListItemText primary="Organizations" />
-                </Link>
-              </ListItem>
-              <ListItem button className="linktopipelines">
-                <Link to="/pipelines" style={style.link} onClick={this.handleClose}>
+                </ListItem>
+              </Link>
+              <Link to="/pipelines" style={style.link} onClick={this.handleClose}>
+                <ListItem button className="linktopipelines">
                   <ListItemIcon><PipelinesIcon /></ListItemIcon>
                   <ListItemText primary="Pipelines" />
-                </Link>
-              </ListItem>
-              <ListItem button className="linktosites">
-                <Link to="/sites" style={style.link} onClick={this.handleClose}>
+                </ListItem>
+              </Link>
+              <Link to="/sites" style={style.link} onClick={this.handleClose}>
+                <ListItem button className="linktosites">
                   <ListItemIcon><RouterIcon /></ListItemIcon>
                   <ListItemText primary="Sites" />
-                </Link>
-              </ListItem>
-              <ListItem button className="linktospaces">
-                <Link to="/spaces" style={style.link} onClick={this.handleClose}>
+                </ListItem>
+              </Link>
+              <Link to="/spaces" style={style.link} onClick={this.handleClose}>
+                <ListItem button className="linktospaces">
                   <ListItemIcon><SpacesIcon /></ListItemIcon>
                   <ListItemText primary="Spaces" />
-                </Link>
-              </ListItem>
+                </ListItem>
+              </Link>
             </List>
             <Divider inset />
           </Drawer>
