@@ -33,14 +33,12 @@ const style = {
   },
   paper: {
     maxWidth: '1024px',
-    minWidth: '768px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
   },
   div: {
     width: '100%',
-    maxWidth: 700,
     margin: 'auto',
   },
 };

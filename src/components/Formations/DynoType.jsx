@@ -271,7 +271,10 @@ export default class DynoType extends Component {
           style={{ ...style.tableRow, borderBottom: '1px solid rgb(224, 224, 224)' }}
         >
           <TableCell style={{ padding: '4px 24px' }}>
-            <ExpansionPanel style={{ boxShadow: 'none' }} onChange={() => this.setState({ edit: false })}>
+            <ExpansionPanel
+              style={{ boxShadow: 'none' }}
+              onChange={() => this.reset()}
+            >
               <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} style={{ padding: '0px' }}>
                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                   <div style={{ flexGrow: 1 }}>

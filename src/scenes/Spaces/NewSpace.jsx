@@ -36,7 +36,6 @@ const style = {
   },
   div: {
     width: '100%',
-    maxWidth: 700,
     margin: 'auto',
   },
   compliance: {

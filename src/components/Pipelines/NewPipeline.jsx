@@ -20,7 +20,6 @@ const muiTheme = createMuiTheme({
 const style = {
   stepper: {
     width: '100%',
-    maxWidth: 700,
     margin: 'auto',
   },
   buttons: {
