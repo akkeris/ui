@@ -14,23 +14,6 @@ const muiTheme = createMuiTheme({
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   },
-  overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
-    MuiButton: {
-      root: {
-        marginRight: '15px',
-      },
-    },
-    MuiFormControl: {
-      root: {
-        marginBottom: '15px',
-      },
-    },
-  },
 });
 
 const style = {
@@ -44,14 +27,13 @@ const style = {
     },
   },
   paper: {
-    width: '800px',
+    maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
-    marginBottom: '12px',
   },
   div: {
-    width: '90%',
+    width: '100%',
     margin: 'auto',
   },
   menu: {
@@ -251,7 +233,7 @@ export default class NewApp extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'visible' };
+    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
     if (finished) {
       this.submitApp();
     }
@@ -294,10 +276,12 @@ export default class NewApp extends Component {
               <Step>
                 <StepLabel>Select space</StepLabel>
               </Step>
-            </Stepper>
-            <Collapse in={!loading}>
-              {this.renderContent()}
-            </Collapse>
+            </Stepper>{
+
+              <Collapse in={!loading}>
+                {this.renderContent()}
+              </Collapse>
+            }
             <Dialog
               className="new-app-error"
               open={this.state.submitFail}

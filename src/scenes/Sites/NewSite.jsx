@@ -16,23 +16,6 @@ const muiTheme = createMuiTheme({
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
   },
-  overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
-    MuiButton: {
-      root: {
-        marginRight: '15px',
-      },
-    },
-    MuiFormControlLabel: {
-      root: {
-        marginLeft: '0px',
-      },
-    },
-  },
 });
 
 const style = {
@@ -46,16 +29,13 @@ const style = {
     },
   },
   paper: {
-    maxWidth: '1048px',
-    minWidth: '768px',
+    maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
-    marginBottom: '12px',
   },
   div: {
-    width: '90%',
-    maxWidth: 800,
+    width: '100%',
     margin: 'auto',
   },
   radio: {
@@ -239,7 +219,7 @@ export default class NewSite extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 33px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
     if (finished) {
       this.submitSite();
     }
