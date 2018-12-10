@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import SHA256 from 'crypto-js/sha256';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
-  CircularProgress, Table, TableHead, TableBody, TableRow, TableCell, Button,
+  CircularProgress, Table, TableHead, TableBody, TableRow, TableCell, Button, Typography,
   Dialog, DialogContent, DialogActions, DialogTitle,
 } from '@material-ui/core';
 
@@ -51,6 +51,10 @@ const style = {
       position: 'relative',
     },
   },
+  noResults: {
+    marginTop: '15px',
+    marginBottom: '15px',
+  },
 };
 
 function sillyfunc(prefix, input) {
@@ -91,11 +95,24 @@ export default class Audits extends Component {
         audits: response.data,
         loading: false,
       });
+      console.log(response.data);
     });
   }
 
   getAudits() {
-    return this.state.audits.map((audit) => {
+    const { audits } = this.state;
+    if (audits.length === 0) {
+      return (
+        <TableRow >
+          <TableCell />
+          <TableCell>
+            <Typography variant="body1" style={style.noResults}>No Recent Activity</Typography>
+          </TableCell>
+          <TableCell />
+        </TableRow>
+      );
+    }
+    return audits.map((audit) => {
       const id = SHA256(JSON.stringify(audit)).toString().substring(0, 7);
       return (
         <TableRow

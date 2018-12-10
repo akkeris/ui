@@ -5,7 +5,7 @@ import { grey, teal } from '@material-ui/core/colors';
 import {
   Paper, Snackbar, CircularProgress, Table, TableBody, TableRow, TableCell,
   IconButton, Dialog, Button, DialogActions, DialogContent, DialogTitle,
-  Tooltip,
+  Tooltip, TablePagination, TableFooter,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -158,6 +158,8 @@ export default class Releases extends Component {
       revert: null,
       revertOpen: false,
       newAuto: false,
+      rowsPerPage: 10,
+      page: 0,
     };
     this.loadReleases();
   }
@@ -169,8 +171,8 @@ export default class Releases extends Component {
     this._isMounted = false;
   }
 
-  getReleases() {
-    return this.state.releases.map((release, index) => {
+  getReleases(page, rowsPerPage) {
+    return this.state.releases.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((release, index) => {
       // release status indicator
       let releaseColor = grey[500];
       let StatusIcon = PendingIcon;
@@ -360,6 +362,14 @@ export default class Releases extends Component {
     this.setState({ snackOpen: false });
   }
 
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
   reload = (message) => {
     this.setState({
       loading: false,
@@ -372,6 +382,7 @@ export default class Releases extends Component {
   }
 
   render() {
+    const { releases, rowsPerPage, page } = this.state;
     const actions = [
       <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
         <RemoveIcon />
@@ -470,8 +481,23 @@ export default class Releases extends Component {
           )}
           <Table className="release-list" style={{ overflow: 'visible' }}>
             <TableBody>
-              {this.getReleases()}
+              {this.getReleases(page, rowsPerPage)}
             </TableBody>
+            {releases.length !== 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[10, 20, 30]}
+                    colSpan={3}
+                    count={releases.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
           </Table>
           <Snackbar
             className="release-snack"
