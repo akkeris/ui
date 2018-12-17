@@ -124,6 +124,50 @@ export default class Nav extends Component {
               </IconButton>
               {title}
               {accountMenu}
+              <ul className="lightrope">
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+                <li />
+              </ul>
             </Toolbar>
           </AppBar>
           <Drawer
