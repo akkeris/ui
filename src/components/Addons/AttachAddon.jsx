@@ -183,7 +183,7 @@ export default class AttachAddon extends Component {
   }
 
   submitAddonAttachment = () => {
-    api.attachAddon(this.props.app, this.state.addon.name).then(() => {
+    api.attachAddon(this.props.app, this.state.addon.id).then(() => {
       this.props.onComplete('Addon Attached');
     }).catch((error) => {
       this.setState({

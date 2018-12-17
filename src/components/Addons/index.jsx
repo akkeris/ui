@@ -290,7 +290,7 @@ export default class Addons extends Component {
         loading: false,
         new: false,
         confirmAddonOpen: false,
-        confirmaAttachmentOpen: false,
+        confirmAttachmentOpen: false,
         attach: false,
       });
     });
@@ -298,7 +298,7 @@ export default class Addons extends Component {
 
   handleRemoveAddonAttachment = () => {
     this.setState({ loading: true });
-    api.deleteAddonAttachment(this.props.app, this.state.attachment.name).then(() => {
+    api.deleteAddonAttachment(this.props.app, this.state.attachment.id).then(() => {
       this.reload('Attachment Deleted');
     }).catch((error) => {
       this.setState({
@@ -307,7 +307,7 @@ export default class Addons extends Component {
         loading: false,
         new: false,
         confirmAddonOpen: false,
-        confirmaAttachmentOpen: false,
+        confirmAttachmentOpen: false,
         attach: false,
       });
     });
