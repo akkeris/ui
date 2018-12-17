@@ -1,28 +1,28 @@
 import React from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import Loadable from 'react-loadable';
-import Loading from '../components/Loading'
+import Loading from '../components/Loading';
 
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
 
 const PageNotFound = Loadable({
   loader: () => import('../components/PageNotFound'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 
 const Apps = Loadable({
   loader: () => import('../scenes/Apps/Apps'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 const NewApp = Loadable({
   loader: () => import('../scenes/Apps/NewApp'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 const AppInfo = Loadable({
   loader: () => import('../scenes/Apps/AppInfo'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 
 const AppRoutes = () => (
   <Switch>
@@ -34,12 +34,12 @@ const AppRoutes = () => (
 
 const Pipelines = Loadable({
   loader: () => import('../scenes/Pipelines/Pipelines'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 const PipelineInfo = Loadable({
   loader: () => import('../scenes/Pipelines/PipelineInfo'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 
 const PipelineRoutes = () => (
   <Switch>
@@ -50,12 +50,12 @@ const PipelineRoutes = () => (
 
 const Orgs = Loadable({
   loader: () => import('../scenes/Orgs/Orgs'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 const NewOrg = Loadable({
   loader: () => import('../scenes/Orgs/NewOrg'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 
 const OrgRoutes = () => (
   <Switch>
@@ -66,12 +66,12 @@ const OrgRoutes = () => (
 
 const Spaces = Loadable({
   loader: () => import('../scenes/Spaces/Spaces'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 const NewSpace = Loadable({
   loader: () => import('../scenes/Spaces/NewSpace'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 
 const SpaceRoutes = () => (
   <Switch>
@@ -82,16 +82,16 @@ const SpaceRoutes = () => (
 
 const Invoices = Loadable({
   loader: () => import('../scenes/Invoices/Invoices'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 const InvoiceInfo = Loadable({
   loader: () => import('../scenes/Invoices/InvoiceInfo'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 const WasteReport = Loadable({
   loader: () => import('../scenes/Invoices/WasteReport'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 
 const InvoiceRoutes = () => (
   <Switch>
@@ -103,8 +103,8 @@ const InvoiceRoutes = () => (
 
 const AppSetups = Loadable({
   loader: () => import('../scenes/AppSetups/AppSetups'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 
 const AppSetupsRoutes = () => (
   <Switch>
@@ -114,16 +114,16 @@ const AppSetupsRoutes = () => (
 
 const Sites = Loadable({
   loader: () => import('../scenes/Sites/Sites'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 const NewSite = Loadable({
   loader: () => import('../scenes/Sites/NewSite'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 const SiteInfo = Loadable({
   loader: () => import('../scenes/Sites/SiteInfo'),
-  loading: Loading 
-})
+  loading: Loading,
+});
 
 const SitesRoutes = () => (
   <Switch>
@@ -136,9 +136,9 @@ const SitesRoutes = () => (
 const Router = () => (
   <div>
     <HashRouter>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
         <Nav />
-        <Switch style={{ flex: 1 }}>
+        <Switch style={{ flex: 1, background: 'linear-gradient(128deg,red 25%, green 75%)' }}>
           <Route exact path="/" render={() => <Redirect to="/apps" />} />
           <Route path="/app-setups" component={AppSetupsRoutes} />
           <Route path="/apps" component={AppRoutes} />
@@ -149,6 +149,7 @@ const Router = () => (
           <Route path="/sites" component={SitesRoutes} />
           <Route component={PageNotFound} />
         </Switch>
+        <canvas id="canv" style={{ position: 'fixed', top: '0', left: '0', zIndex: '-1' }} />
         <Footer />
       </div>
     </HashRouter>
