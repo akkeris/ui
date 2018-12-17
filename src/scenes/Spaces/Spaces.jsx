@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {
   Toolbar, Table, TableBody, TableHead, TableRow, TableCell, IconButton, CircularProgress, Paper,
+  TableFooter, TablePagination,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
@@ -41,6 +42,7 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   toolbar: {
@@ -86,6 +88,8 @@ export default class Spaces extends Component {
     this.state = {
       loading: true,
       spaces: [],
+      page: 0,
+      rowsPerPage: 15,
     };
   }
 
@@ -98,8 +102,8 @@ export default class Spaces extends Component {
     });
   }
 
-  getSpaces() {
-    return this.state.spaces.map(space => (
+  getSpaces(page, rowsPerPage) {
+    return this.state.spaces.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(space => (
       <TableRow hover className={space.name} key={space.id} style={style.tableRow}>
         <TableCell>
           <div style={style.tableCell.title}>{space.name}</div>
@@ -117,7 +121,17 @@ export default class Spaces extends Component {
       </TableRow>
     ));
   }
+
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
   render() {
+    const { spaces, page, rowsPerPage } = this.state;
     if (this.state.loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -145,8 +159,23 @@ export default class Spaces extends Component {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {this.getSpaces()}
+                {this.getSpaces(page, rowsPerPage)}
               </TableBody>
+              {spaces.length !== 0 && (
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      rowsPerPageOptions={[15, 25, 50]}
+                      colSpan={4}
+                      count={spaces.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onChangePage={this.handleChangePage}
+                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                    />
+                  </TableRow>
+                </TableFooter>
+              )}
             </Table>
           </Paper>
         </div>

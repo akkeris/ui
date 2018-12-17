@@ -46,7 +46,7 @@ export default class AppList extends Component {
 
   state = {
     page: 0,
-    rowsPerPage: 20,
+    rowsPerPage: 15,
   }
 
   getApps(page, rowsPerPage) {
@@ -91,7 +91,7 @@ export default class AppList extends Component {
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  rowsPerPageOptions={[10, 20, 30]}
+                  rowsPerPageOptions={[15, 25, 50]}
                   colSpan={3}
                   count={this.props.apps.length}
                   rowsPerPage={rowsPerPage}

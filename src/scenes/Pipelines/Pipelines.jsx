@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
   Toolbar, IconButton, CircularProgress, Paper, Table, TableBody, TableRow, TableCell,
-  Snackbar, Divider, Collapse,
+  Snackbar, Divider, Collapse, TableFooter, TablePagination,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
@@ -98,6 +98,8 @@ class Pipelines extends Component {
       new: false,
       open: false,
       message: '',
+      page: 0,
+      rowsPerPage: 15,
     };
   }
 
@@ -111,7 +113,8 @@ class Pipelines extends Component {
   }
 
   getPipelines() {
-    return this.state.pipelines.map((pipeline) => {
+    const { page, rowsPerPage, pipelines } = this.state;
+    return pipelines.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((pipeline) => {
       const date = new Date(pipeline.updated_at);
       return (
         <TableRow
@@ -162,11 +165,22 @@ class Pipelines extends Component {
         new: false,
         open: true,
         message,
+        page: 0,
+        rowsPerPage: 15,
       });
     });
   }
 
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
   render() {
+    const { page, rowsPerPage, pipelines } = this.state;
     if (this.state.loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -209,6 +223,21 @@ class Pipelines extends Component {
               <TableBody >
                 {this.getPipelines()}
               </TableBody>
+              {pipelines.length !== 0 && (
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      rowsPerPageOptions={[15, 25, 50]}
+                      colSpan={4}
+                      count={pipelines.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onChangePage={this.handleChangePage}
+                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                    />
+                  </TableRow>
+                </TableFooter>
+              )}
             </Table>
           </Paper>
           <Snackbar

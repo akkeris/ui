@@ -1,9 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Table, TableBody, TableHead, TableRow, TableCell,
+  Table, TableBody, TableHead, TableRow, TableCell, TableFooter, TablePagination,
 } from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+});
 
 const style = {
   tableRow: {
@@ -22,8 +31,16 @@ const style = {
 };
 
 export default class SitesList extends Component {
-  getSites() {
-    return this.props.sites.map((site) => {
+  constructor(props, context) {
+    super(props, context);
+    this.state = {
+      page: 0,
+      rowsPerPage: 15,
+    };
+  }
+
+  getSites(page, rowsPerPage) {
+    return this.props.sites.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((site) => {
       const date = new Date(site.updated_at);
       return (
         <TableRow
@@ -52,22 +69,49 @@ export default class SitesList extends Component {
     window.location = `#/sites/${id}/info`;
   }
 
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
   render() {
+    const { sites } = this.props;
+    const { page, rowsPerPage } = this.state;
     return (
-      <div>
-        <Table className="site-list">
-          <TableHead>
-            <TableRow>
-              <TableCell>Site</TableCell>
-              <TableCell>Updated</TableCell>
-              <TableCell>Region</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {this.getSites()}
-          </TableBody>
-        </Table>
-      </div>
+      <MuiThemeProvider theme={muiTheme}>
+        <div>
+          <Table className="site-list">
+            <TableHead>
+              <TableRow>
+                <TableCell>Site</TableCell>
+                <TableCell>Updated</TableCell>
+                <TableCell>Region</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {this.getSites(page, rowsPerPage)}
+            </TableBody>
+            {sites.length !== 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[15, 25, 50]}
+                    colSpan={3}
+                    count={sites.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
+          </Table>
+        </div>
+      </MuiThemeProvider>
     );
   }
 }

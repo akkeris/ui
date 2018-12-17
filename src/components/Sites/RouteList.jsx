@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import {
-  Table, TableHead, TableBody, TableRow, TableCell, Paper,
-  CircularProgress, Snackbar, IconButton, Tooltip,
+  Table, TableHead, TableBody, TableRow, TableCell, Paper, TablePagination,
+  CircularProgress, Snackbar, IconButton, Tooltip, TableFooter,
 } from '@material-ui/core';
 import ArrowIcon from '@material-ui/icons/ArrowForward';
 import AddIcon from '@material-ui/icons/Add';
@@ -66,6 +66,8 @@ export default class RouteList extends Component {
       new: false,
       message: '',
       confirmOpen: false,
+      page: 0,
+      rowsPerPage: 15,
     };
   }
 
@@ -78,8 +80,8 @@ export default class RouteList extends Component {
     });
   }
 
-  getRoutes() {
-    return this.state.routes.map(route => (
+  getRoutes(page, rowsPerPage) {
+    return this.state.routes.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(route => (
       <TableRow key={route.id} style={style.tableRow}>
         <TableCell>
           <div style={style.tableRowColumn.title}><a href={`https://${this.props.site.domain || this.props.site}${route.source_path}`}>{`https://${this.props.site.domain || this.props.site}${route.source_path}`}</a></div>
@@ -161,7 +163,16 @@ export default class RouteList extends Component {
     });
   }
 
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
   render() {
+    const { routes, page, rowsPerPage } = this.state;
     if (this.state.loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -197,8 +208,23 @@ export default class RouteList extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.getRoutes()}
+              {this.getRoutes(page, rowsPerPage)}
             </TableBody>
+            {routes.length !== 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[15, 25, 50]}
+                    colSpan={4}
+                    count={routes.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
           </Table>
           <ConfirmationModal open={this.state.confirmOpen} onOk={this.handleRemoveRoute} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this Route?" />
           <Snackbar
