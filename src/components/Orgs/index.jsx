@@ -24,7 +24,7 @@ export default class OrgList extends Component {
     super(props, context);
     this.state = {
       page: 0,
-      rowsPerPage: 20,
+      rowsPerPage: 15,
     };
   }
 
@@ -60,7 +60,7 @@ export default class OrgList extends Component {
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  rowsPerPageOptions={[10, 20, 30]}
+                  rowsPerPageOptions={[15, 25, 50]}
                   colSpan={3}
                   count={orgs.length}
                   rowsPerPage={rowsPerPage}

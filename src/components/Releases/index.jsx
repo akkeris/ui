@@ -158,7 +158,7 @@ export default class Releases extends Component {
       revert: null,
       revertOpen: false,
       newAuto: false,
-      rowsPerPage: 10,
+      rowsPerPage: 15,
       page: 0,
     };
     this.loadReleases();
@@ -487,7 +487,7 @@ export default class Releases extends Component {
               <TableFooter>
                 <TableRow>
                   <TablePagination
-                    rowsPerPageOptions={[10, 20, 30]}
+                    rowsPerPageOptions={[15, 25, 50]}
                     colSpan={3}
                     count={releases.length}
                     rowsPerPage={rowsPerPage}

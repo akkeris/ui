@@ -67,7 +67,7 @@ export default class RouteList extends Component {
       message: '',
       confirmOpen: false,
       page: 0,
-      rowsPerPage: 10,
+      rowsPerPage: 15,
     };
   }
 
@@ -214,7 +214,7 @@ export default class RouteList extends Component {
               <TableFooter>
                 <TableRow>
                   <TablePagination
-                    rowsPerPageOptions={[10, 20, 30]}
+                    rowsPerPageOptions={[15, 25, 50]}
                     colSpan={4}
                     count={routes.length}
                     rowsPerPage={rowsPerPage}

@@ -89,7 +89,7 @@ export default class Spaces extends Component {
       loading: true,
       spaces: [],
       page: 0,
-      rowsPerPage: 20,
+      rowsPerPage: 15,
     };
   }
 
@@ -165,7 +165,7 @@ export default class Spaces extends Component {
                 <TableFooter>
                   <TableRow>
                     <TablePagination
-                      rowsPerPageOptions={[10, 20, 30]}
+                      rowsPerPageOptions={[15, 25, 50]}
                       colSpan={4}
                       count={spaces.length}
                       rowsPerPage={rowsPerPage}
