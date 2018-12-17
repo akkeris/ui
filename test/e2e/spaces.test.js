@@ -21,8 +21,8 @@ test('Should show list of spaces', async (t) => { // eslint-disable-line no-unde
   await t
     .expect(Selector('.space-list tbody').childElementCount)
     .gt(0)
-    .expect(Selector('.space-list .test').innerText)
-    .contains('test');
+    .expect(Selector('.space-list .default').innerText)
+    .contains('default');
 });
 
 test("Shouldn't be able to create duplicate space", async (t) => { // eslint-disable-line no-undef
