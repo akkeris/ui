@@ -5,6 +5,14 @@ import {
 } from '@material-ui/core';
 import GitIcon from './Icons/GitIcon';
 
+/* Documentation Links */
+const wikiLink = 'https://docs.octanner.io/';
+const gettingStartedLink = 'https://docs.octanner.io/Overview/01.-Installing-and-Getting-Started/';
+const apiLink = 'https://docs.octanner.io/Apps%20API/API-Reference/';
+const releasesLink = '';
+const akkerisSupportLink = '';
+const kubernetesSupportLink = 'https://kubernetes.io/';
+
 const muiTheme = createMuiTheme({
   palette: {
     primary: { main: '#0097a7' },
@@ -110,7 +118,6 @@ const Footer = () => (
         <li />
         <li />
       </ul>
-
       <div style={style.div}>
         <Table style={style.table.body}>
           <TableHead>
@@ -129,30 +136,40 @@ const Footer = () => (
           <TableBody>
             <TableRow>
               <TableCell style={style.table.cell} padding="none">
-                <div style={style.link}>
-                    Wiki
-                </div>
-                <div style={style.link}>
-                    Getting Started
-                </div>
+                {wikiLink !== '' ? (
+                  <div><a href={wikiLink} style={style.link}>Wiki</a></div>
+                ) : (
+                  <div style={style.link}>Wiki</div>
+                )}
+                {gettingStartedLink !== '' ? (
+                  <div><a href={gettingStartedLink} style={style.link}>Getting Started</a></div>
+                ) : (
+                  <div style={style.link}>Getting Started</div>
+                )}
               </TableCell>
               <TableCell style={style.table.cell} padding="none">
-                <div style={style.link}>
-                    API
-                </div>
-                <div style={style.link}>
-                    Releases
-                </div>
+                {apiLink !== '' ? (
+                  <div><a href={apiLink} style={style.link}>API</a></div>
+                ) : (
+                  <div style={style.link}>API</div>
+                )}
+                {releasesLink !== '' ? (
+                  <div><a href={releasesLink} style={style.link}>Releases</a></div>
+                ) : (
+                  <div style={style.link}>Releases</div>
+                )}
               </TableCell>
               <TableCell style={style.table.cell} padding="none">
-                <div style={style.link}>
-                    Akkeris
-                </div>
-                <div>
-                  <a href="https://kubernetes.io" style={style.link}>
-                    Kubernetes
-                  </a>
-                </div>
+                {akkerisSupportLink !== '' ? (
+                  <div><a href={akkerisSupportLink} style={style.link}>Akkeris</a></div>
+                ) : (
+                  <div style={style.link}>Akkeris</div>
+                )}
+                {kubernetesSupportLink !== '' ? (
+                  <div><a href={kubernetesSupportLink} style={style.link}>Kubernetes</a></div>
+                ) : (
+                  <div style={style.link}>Kubernetes</div>
+                )}
               </TableCell>
             </TableRow>
           </TableBody>
