@@ -74,50 +74,6 @@ const style = {
 const Footer = () => (
   <MuiThemeProvider theme={muiTheme}>
     <Paper style={style.footer}>
-      <ul className="lightrope" style={{ position: 'relative', top: '0px' }}>
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-        <li />
-      </ul>
       <div style={style.div}>
         <Table style={style.table.body}>
           <TableHead>

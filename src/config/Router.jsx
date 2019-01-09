@@ -138,7 +138,7 @@ const Router = () => (
     <HashRouter>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
         <Nav />
-        <Switch style={{ flex: 1, background: 'linear-gradient(128deg,red 25%, green 75%)' }}>
+        <Switch style={{ flex: 1 }}>
           <Route exact path="/" render={() => <Redirect to="/apps" />} />
           <Route path="/app-setups" component={AppSetupsRoutes} />
           <Route path="/apps" component={AppRoutes} />
