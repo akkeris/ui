@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');// eslint-disable-line no-unused-vars
 
 const config = {
+  mode: 'development',
   cache: true,
   // Entry points to the project
   entry: {

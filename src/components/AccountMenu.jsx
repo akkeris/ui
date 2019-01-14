@@ -1,32 +1,25 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Avatar from 'material-ui/Avatar';
-import Popover from 'material-ui/Popover';
-import Menu from 'material-ui/Menu';
-import MenuItem from 'material-ui/MenuItem';
-import ArrowDropDown from 'material-ui/svg-icons/navigation/arrow-drop-down';
+import { Avatar, Menu, MenuItem } from '@material-ui/core';
+import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 
 const style = {
   avatar: {
-    marginTop: '8px',
     marginRight: '4px',
     height: '32px',
     width: '32px',
     cursor: 'pointer',
   },
-  menu: {
-    height: '32px',
-    marginRight: '14px',
+  arrowDropDown: {
     cursor: 'pointer',
-    color: 'rgba(255,255,255,0.5)',
   },
   anchorOrigin: {
+    vertical: 35,
     horizontal: 'right',
-    vertical: 'bottom',
   },
-  targetOrigin: {
-    horizontal: 'right',
+  transformOrigin: {
     vertical: 'top',
+    horizontal: 'right',
   },
 };
 
@@ -36,6 +29,7 @@ export default class AccountMenu extends Component {
     this.state = {
       open: false,
     };
+    this.divRef = React.createRef();
   }
 
   handleTouchTap = (event) => {
@@ -63,32 +57,40 @@ export default class AccountMenu extends Component {
   };
 
   render() {
+    const avatarProps = {
+      className: 'avatar',
+      onClick: this.handleTouchTap,
+      style: style.avatar,
+    };
+    if (this.props.src && this.props.src.length > 0) {
+      avatarProps.src = this.props.src;
+    }
+
     return (
       <div>
-        <Avatar
-          className="avatar"
-          onTouchTap={this.handleTouchTap}
-          src={this.props.src}
-          style={style.avatar}
-        />
-        <ArrowDropDown
-          className="dropdown"
-          onTouchTap={this.handleTouchTap}
-          style={style.menu}
-        />
-        <Popover
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }} ref={this.divRef}>
+          <Avatar {...avatarProps}>
+            {this.props.accountName.length > 0 ? this.props.accountName[0] : null}
+          </Avatar>
+          <ArrowDropDown
+            className="dropdown"
+            onClick={this.handleTouchTap}
+            nativeColor="rgba(255,255,255,0.5)"
+            style={style.arrowDropDown}
+          />
+        </div>
+        <Menu
           className="popover"
           open={this.state.open}
-          anchorEl={this.state.anchorEl}
+          anchorEl={this.divRef.current}
           anchorOrigin={style.anchorOrigin}
-          targetOrigin={style.targetOrigin}
-          onRequestClose={this.handleRequestClose}
+          transformOrigin={style.transformOrigin}
+          onClose={this.handleRequestClose}
+          getContentAnchorEl={null}
         >
-          <Menu>
-            <MenuItem className="account" onTouchTap={this.account} primaryText="Account" />
-            <MenuItem className="logout" onTouchTap={this.logout} primaryText="Logout" />
-          </Menu>
-        </Popover>
+          <MenuItem className="account" onClick={this.account}>Account</MenuItem>
+          <MenuItem className="logout" onClick={this.logout}>Logout</MenuItem>
+        </Menu>
       </div>
     );
   }

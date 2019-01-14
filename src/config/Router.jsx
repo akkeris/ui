@@ -1,18 +1,28 @@
 import React from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+import Loadable from 'react-loadable';
+import Loading from '../components/Loading';
+
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
-import { Apps, NewApp, AppInfo } from '../scenes/Apps';
-import { Orgs, NewOrg } from '../scenes/Orgs';
-import { Pipelines, PipelineInfo } from '../scenes/Pipelines';
-import { Spaces, NewSpace } from '../scenes/Spaces';
-import { Invoices, InvoiceInfo, WasteReport } from '../scenes/Invoices';
-import { AppSetups } from '../scenes/AppSetups';
-import { Sites, NewSite, SiteInfo } from '../scenes/Sites';
 
-const NotFound = () => (
-  <h1>404.. This page is not found!</h1>
-);
+const PageNotFound = Loadable({
+  loader: () => import('../components/PageNotFound'),
+  loading: Loading,
+});
+
+const Apps = Loadable({
+  loader: () => import('../scenes/Apps/Apps'),
+  loading: Loading,
+});
+const NewApp = Loadable({
+  loader: () => import('../scenes/Apps/NewApp'),
+  loading: Loading,
+});
+const AppInfo = Loadable({
+  loader: () => import('../scenes/Apps/AppInfo'),
+  loading: Loading,
+});
 
 const AppRoutes = () => (
   <Switch>
@@ -22,12 +32,30 @@ const AppRoutes = () => (
   </Switch>
 );
 
+const Pipelines = Loadable({
+  loader: () => import('../scenes/Pipelines/Pipelines'),
+  loading: Loading,
+});
+const PipelineInfo = Loadable({
+  loader: () => import('../scenes/Pipelines/PipelineInfo'),
+  loading: Loading,
+});
+
 const PipelineRoutes = () => (
   <Switch>
     <Route exact path="/pipelines" component={Pipelines} />
     <Route path="/pipelines/:pipeline" component={PipelineInfo} />
   </Switch>
 );
+
+const Orgs = Loadable({
+  loader: () => import('../scenes/Orgs/Orgs'),
+  loading: Loading,
+});
+const NewOrg = Loadable({
+  loader: () => import('../scenes/Orgs/NewOrg'),
+  loading: Loading,
+});
 
 const OrgRoutes = () => (
   <Switch>
@@ -36,12 +64,34 @@ const OrgRoutes = () => (
   </Switch>
 );
 
+const Spaces = Loadable({
+  loader: () => import('../scenes/Spaces/Spaces'),
+  loading: Loading,
+});
+const NewSpace = Loadable({
+  loader: () => import('../scenes/Spaces/NewSpace'),
+  loading: Loading,
+});
+
 const SpaceRoutes = () => (
   <Switch>
     <Route exact path="/spaces" component={Spaces} />
     <Route exact path="/spaces/new" component={NewSpace} />
   </Switch>
 );
+
+const Invoices = Loadable({
+  loader: () => import('../scenes/Invoices/Invoices'),
+  loading: Loading,
+});
+const InvoiceInfo = Loadable({
+  loader: () => import('../scenes/Invoices/InvoiceInfo'),
+  loading: Loading,
+});
+const WasteReport = Loadable({
+  loader: () => import('../scenes/Invoices/WasteReport'),
+  loading: Loading,
+});
 
 const InvoiceRoutes = () => (
   <Switch>
@@ -51,11 +101,29 @@ const InvoiceRoutes = () => (
   </Switch>
 );
 
+const AppSetups = Loadable({
+  loader: () => import('../scenes/AppSetups/AppSetups'),
+  loading: Loading,
+});
+
 const AppSetupsRoutes = () => (
   <Switch>
     <Route path="/app-setups" component={AppSetups} />
   </Switch>
 );
+
+const Sites = Loadable({
+  loader: () => import('../scenes/Sites/Sites'),
+  loading: Loading,
+});
+const NewSite = Loadable({
+  loader: () => import('../scenes/Sites/NewSite'),
+  loading: Loading,
+});
+const SiteInfo = Loadable({
+  loader: () => import('../scenes/Sites/SiteInfo'),
+  loading: Loading,
+});
 
 const SitesRoutes = () => (
   <Switch>
@@ -68,7 +136,7 @@ const SitesRoutes = () => (
 const Router = () => (
   <div>
     <HashRouter>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
         <Nav />
         <Switch style={{ flex: 1 }}>
           <Route exact path="/" render={() => <Redirect to="/apps" />} />
@@ -79,8 +147,9 @@ const Router = () => (
           <Route path="/spaces" component={SpaceRoutes} />
           <Route path="/invoices" component={InvoiceRoutes} />
           <Route path="/sites" component={SitesRoutes} />
-          <Route component={NotFound} />
+          <Route component={PageNotFound} />
         </Switch>
+        <canvas id="canv" style={{ position: 'fixed', top: '0', left: '0', zIndex: '-1' }} />
         <Footer />
       </div>
     </HashRouter>

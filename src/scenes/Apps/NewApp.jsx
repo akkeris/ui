@@ -1,27 +1,26 @@
 import React, { Component } from 'react';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import Paper from 'material-ui/Paper';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import Dialog from 'material-ui/Dialog';
+import {
+  Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Select, MenuItem,
+  Dialog, DialogContent, DialogTitle, DialogActions, DialogContentText, FormControl, InputLabel,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,
@@ -35,7 +34,6 @@ const style = {
   },
   div: {
     width: '100%',
-    maxWidth: 700,
     margin: 'auto',
   },
   menu: {
@@ -82,10 +80,11 @@ export default class NewApp extends Component {
           <div>
             <TextField
               className="app-name"
-              floatingLabelText="App name"
+              label="App name"
               value={this.state.app}
-              onChange={this.handleAppChange}
-              errorText={this.state.errorText}
+              onChange={this.handleChange('app')}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
             />
             <p>
               Create an akkeris app! Enter a name that will define your app.
@@ -97,9 +96,20 @@ export default class NewApp extends Component {
       case 1:
         return (
           <div>
-            <DropDownMenu className="dropdown" value={this.state.org} onChange={this.handleOrgChange}>
-              {this.getOrgs()}
-            </DropDownMenu>
+            <FormControl>
+              <InputLabel htmlFor="org-select">Org</InputLabel>
+              <Select
+                className="dropdown"
+                value={this.state.org}
+                onChange={this.handleChange('org')}
+                style={style.menu}
+                inputProps={{
+                  id: 'org-select',
+                }}
+              >
+                {this.getOrgs()}
+              </Select>
+            </FormControl>
             <p>
               Specify the organization this app belongs to. This will link attribution and alerting.
             </p>
@@ -108,14 +118,20 @@ export default class NewApp extends Component {
       case 2:
         return (
           <div>
-            <DropDownMenu
-              className="dropdown"
-              style={style.menu}
-              value={this.state.space}
-              onChange={this.handleSpaceChange}
-            >
-              {this.getSpaces()}
-            </DropDownMenu>
+            <FormControl>
+              <InputLabel htmlFor="space-select">Space</InputLabel>
+              <Select
+                className="dropdown"
+                value={this.state.space}
+                onChange={this.handleChange('space')}
+                style={style.menu}
+                inputProps={{
+                  id: 'space-select',
+                }}
+              >
+                {this.getSpaces()}
+              </Select>
+            </FormControl>
             <p>
               Specify the space your app will live in.
               Spaces contain multiple apps and configurations at a similar stage in a pipeline
@@ -123,6 +139,8 @@ export default class NewApp extends Component {
             </p>
           </div>
         );
+      case 3:
+        return null;
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -130,14 +148,18 @@ export default class NewApp extends Component {
 
   getSpaces() {
     return this.state.spaces.map(space => (
-      <MenuItem className={space.name} key={space.id} value={space.name} label={`Space: ${space.name}`} primaryText={space.name} />
+      <MenuItem className={space.name} key={space.id} value={space.name}>{space.name}</MenuItem>
     ));
   }
 
   getOrgs() {
     return this.state.orgs.map(org => (
-      <MenuItem className={org.name} key={org.id} value={org.name} label={`Org: ${org.name}`} primaryText={org.name} />
+      <MenuItem className={org.name} key={org.id} value={org.name}>{org.name}</MenuItem>
     ));
+  }
+
+  handleChange = name => (event) => {
+    this.setState({ [name]: event.target.value });
   }
 
   handleClose = () => {
@@ -211,7 +233,7 @@ export default class NewApp extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
     if (finished) {
       this.submitApp();
     }
@@ -219,19 +241,20 @@ export default class NewApp extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            className="back"
-            label="Back"
-            disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
-            style={style.buttons.back}
-          />)}
-          <RaisedButton
+          {stepIndex > 0 && (
+            <Button
+              className="back-button"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >Back</Button>
+          )}
+          <Button
             className="next"
-            label={stepIndex === 2 ? 'Finish' : 'Next'}
-            primary
-            onTouchTap={this.handleNext}
-          />
+            color="primary"
+            variant="contained"
+            onClick={this.handleNext}
+          >{stepIndex === 2 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -240,7 +263,7 @@ export default class NewApp extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
@@ -253,23 +276,25 @@ export default class NewApp extends Component {
               <Step>
                 <StepLabel>Select space</StepLabel>
               </Step>
-            </Stepper>
-            <ExpandTransition loading={loading} open>
-              {this.renderContent()}
-            </ExpandTransition>
+            </Stepper>{
+
+              <Collapse in={!loading}>
+                {this.renderContent()}
+              </Collapse>
+            }
             <Dialog
               className="new-app-error"
               open={this.state.submitFail}
-              modal
-              actions={
-                <FlatButton
-                  className="ok"
-                  label="Ok"
-                  primary
-                  onTouchTap={this.handleClose}
-                />}
             >
-              {this.state.submitMessage}
+              <DialogTitle>Error</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  {this.state.submitMessage}
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button className="ok" color="primary" onClick={this.handleClose}>Ok</Button>
+              </DialogActions>
             </Dialog>
           </div>
         </Paper>

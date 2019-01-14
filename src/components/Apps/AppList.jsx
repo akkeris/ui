@@ -1,6 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
+
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+});
 
 const style = {
   tableRow: {
@@ -34,30 +44,66 @@ export default class AppList extends Component {
     );
   }
 
-  getApps() {
-    return this.props.apps.map(app => (
-      <TableRow className={app.name} key={app.id} style={style.tableRow}>
-        <TableRowColumn style={style.tableRow}>
+  state = {
+    page: 0,
+    rowsPerPage: 15,
+  }
+
+  getApps(page, rowsPerPage) {
+    return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
+      <TableRow
+        className={app.name}
+        key={app.id}
+        style={style.tableRow}
+        hover
+        onClick={() => this.handleRowSelection(app)}
+      >
+        <TableCell style={style.tableRow}>
           <div style={style.tableRowColumn.main}>{app.name} {app.preview ? AppList.previewAnnotation(app.preview) : ''}</div>
           <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>
-        </TableRowColumn>
+        </TableCell>
       </TableRow>
     ));
   }
 
-  handleRowSelection = (selectedRows) => {
-    window.location = `#/apps/${this.props.apps[selectedRows].name}`;
+  handleRowSelection = (app) => {
+    window.location = `#/apps/${app.name}/info`;
   }
 
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+
   render() {
+    const { rowsPerPage, page } = this.state;
     return (
-      <div style={{ marginBottom: '12px' }}>
-        <Table className="app-list" onRowSelection={this.handleRowSelection} wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-          <TableBody displayRowCheckbox={false} showRowHover>
-            {this.getApps()}
-          </TableBody>
-        </Table>
-      </div>
+      <MuiThemeProvider theme={muiTheme}>
+        <div style={{ marginBottom: '12px' }}>
+          <Table className="app-list">
+            <TableBody>
+              {this.getApps(page, rowsPerPage)}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[15, 25, 50]}
+                  colSpan={3}
+                  count={this.props.apps.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onChangePage={this.handleChangePage}
+                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </div>
+      </MuiThemeProvider>
     );
   }
 }

@@ -1,16 +1,21 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, FormControl,
-  Select, MenuItem, Dialog, Button, Input,
-  DialogTitle, DialogActions, DialogContent,
+  Button, Step, Stepper, StepLabel, Select, MenuItem,
+  Dialog, DialogActions, DialogContent,
 } from '@material-ui/core';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+
+import ConfirmationModal from '../ConfirmationModal';
+import Search from '../Search';
 import api from '../../services/api';
+import util from '../../services/util';
 
 const muiTheme = createMuiTheme({
   palette: {
-    primary: { main: '#0097a7' },
+    primary: {
+      main: '#0097a7',
+    },
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
@@ -51,7 +56,7 @@ const style = {
   },
 };
 
-export default class NewAddon extends Component {
+export default class AttachAddon extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -60,20 +65,19 @@ export default class NewAddon extends Component {
       stepIndex: 0,
       submitFail: false,
       submitMessage: '',
-      services: [],
-      service: {},
-      serviceid: '',
-      plans: [],
-      plan: {},
-      planid: '',
+      apps: [],
+      app: '',
+      addons: [],
+      addon: {},
+      loadingError: false,
+      loadingErrorMessage: '',
     };
   }
 
   componentDidMount() {
-    api.getAddonServices().then((response) => {
+    api.getApps().then((response) => {
       this.setState({
-        services: response.data,
-        service: response.data[0],
+        apps: response.data,
         loading: false,
       });
     });
@@ -82,37 +86,26 @@ export default class NewAddon extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (this.state.stepIndex !== prevState.stepIndex && this.state.stepIndex === 1) {
       this.setState({ loading: true }); // eslint-disable-line react/no-did-update-set-state
-      api.getAddonServicePlans(this.state.service.name).then((response) => {
+      api.getAppAddons(this.state.app).then((response) => {
         this.setState({
-          plans: response.data,
-          plan: response.data[0],
-          planid: response.data[0].id,
+          addons: response.data,
+          addon: response.data[0],
           loading: false,
         });
+      }).catch(() => {
+        this.setState(prevState, () => this.setState({ loadingErrorMessage: 'Could not find specified app', loadingError: true }));
       });
     }
   }
 
-  getServices() {
-    return this.state.services.map(service => (
+  getAddons() {
+    return this.state.addons.map(addon => (
       <MenuItem
-        className={service.human_name}
-        key={service.id}
-        value={service.id}
+        className={addon.addon_service.name}
+        key={addon.name}
+        value={addon}
       >
-        {service.human_name}
-      </MenuItem>
-    ));
-  }
-
-  getPlans() {
-    return this.state.plans.map(plan => (
-      <MenuItem
-        className={plan.human_name}
-        key={plan.name}
-        value={plan.id}
-      >
-        {plan.name}
+        {addon.addon_service.name}
       </MenuItem>
     ));
   }
@@ -122,54 +115,27 @@ export default class NewAddon extends Component {
       case 0:
         return (
           <div>
-            <FormControl className="service-form">
-              <Select
-                autoWidth
-                className="service-menu"
-                value={this.state.service.id}
-                onChange={this.handleServiceChange}
-                input={<Input name="service" id="service-helper" />}
-              >
-                {this.getServices()}
-              </Select>
-            </FormControl>
+            <Search
+              className={'app-search'}
+              label="App"
+              data={util.filterName(this.state.apps)}
+              handleSearch={this.handleSearch}
+              errorText={this.state.errorText}
+              color="black"
+            />
             <p>
-              Select the akkeris addon you would like to attach to your app.
+              The application name that has an addon you want to attach. Ex. my-test-app-dev
             </p>
           </div>
         );
       case 1:
         return (
           <div>
-            <FormControl className="plan-form">
-              <Select
-                autoWidth
-                className="plan-menu"
-                value={this.state.planid}
-                onChange={this.handlePlanChange}
-                input={<Input name="plan" id="plan-helper" />}
-              >
-                {this.getPlans()}
-              </Select>
-            </FormControl>
-            <div className="plan-info" style={{ marginBottom: '15px' }}>
-              {this.state.plan.price && this.state.plan.price.cents !== 0 && (
-                <span className="plan-price">
-                  <b>{this.formatPrice(this.state.plan.price.cents)}/mo</b>
-                </span>
-              )}
-              {this.state.plan.price && this.state.plan.price.cents === 0 && (
-                <span className="plan-price">
-                  <b>{this.formatPrice(0)}/mo</b>
-                </span>
-              )}
-              <br />
-              <span className="plan-description">
-                {this.state.plan.description}
-              </span>
-            </div>
+            <Select className="addon-menu" value={this.state.addon} onChange={this.handleAddonChange}>
+              {this.getAddons()}
+            </Select>
             <p>
-              Select the plan for your addon (please only use larger plans for prod)
+              Select the addon you want to attach.
             </p>
           </div>
         );
@@ -178,9 +144,9 @@ export default class NewAddon extends Component {
     }
   }
 
-  formatPrice(cents) { // eslint-disable-line class-methods-use-this
-    const dollars = cents / 100;
-    return dollars.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  handleSearch = (searchText) => {
+    this.setState({ app: searchText });
+    this.handleNext();
   }
 
   handleClose = () => {
@@ -189,16 +155,10 @@ export default class NewAddon extends Component {
     });
   }
 
-  handleServiceChange = (event) => {
-    const serviceid = event.target.value;
-    const service = this.state.services.find(a => a.id === serviceid);
-    this.setState({ service, serviceid });
-  }
-
-  handlePlanChange = (event) => {
-    const planid = event.target.value;
-    const plan = this.state.plans.find(a => a.id === planid);
-    this.setState({ plan, planid });
+  handleAddonChange = (event) => {
+    this.setState({
+      addon: event.target.value,
+    });
   }
 
   handleNext = () => {
@@ -222,9 +182,9 @@ export default class NewAddon extends Component {
     }
   }
 
-  submitAddon = () => {
-    api.createAddon(this.props.app, this.state.plan.id).then(() => {
-      this.props.onComplete('Addon Created');
+  submitAddonAttachment = () => {
+    api.attachAddon(this.props.app, this.state.addon.id).then(() => {
+      this.props.onComplete('Addon Attached');
     }).catch((error) => {
       this.setState({
         submitMessage: error.response.data,
@@ -232,17 +192,18 @@ export default class NewAddon extends Component {
         finished: false,
         stepIndex: 0,
         loading: false,
-        plans: [],
-        plan: {},
+        addons: [],
+        addon: {},
+        app: '',
       });
     });
   }
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px' };
     if (finished) {
-      this.submitAddon();
+      this.submitAddonAttachment();
     } else {
       return (
         <div style={contentStyle}>
@@ -253,18 +214,21 @@ export default class NewAddon extends Component {
                 className="back"
                 disabled={stepIndex === 0}
                 onClick={this.handlePrev}
+                style={style.buttons.Back}
               >
                 Back
               </Button>
             )}
-            <Button
-              variant="contained"
-              className="next"
-              color="primary"
-              onClick={this.handleNext}
-            >
-              {stepIndex === 1 ? 'Finish' : 'Next'}
-            </Button>
+            {stepIndex > 0 && (
+              <Button
+                variant="contained"
+                className="next"
+                color="primary"
+                onClick={this.handleNext}
+              >
+                {stepIndex === 1 ? 'Finish' : 'Next'}
+              </Button>
+            )}
           </div>
         </div>
       );
@@ -291,26 +255,52 @@ export default class NewAddon extends Component {
             </div>
           )}
           <Dialog
-            className="new-addon-error"
+            className="attach-addon-error"
             open={this.state.submitFail}
           >
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>{this.state.submitMessage}</DialogContent>
+            <DialogContent>
+              {this.state.submitMessage}
+            </DialogContent>
             <DialogActions>
               <Button
                 className="ok"
                 color="primary"
                 onClick={this.handleClose}
-              >OK</Button>
+              >
+                Ok
+              </Button>
             </DialogActions>
           </Dialog>
+          <Dialog
+            className="load-app-error"
+            open={this.state.loadingError}
+          >
+            <DialogContent>
+              {this.state.loadingErrorMessage}
+            </DialogContent>
+            <DialogActions>
+              <Button
+                className="ok"
+                color="primary"
+                onClick={() => this.setState({ loadingError: false, loadingErrorMessage: '' })}
+              >
+                Ok
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <ConfirmationModal
+            open={this.state.loadingError}
+            onOk={() => this.setState({ loadingError: false, loadingErrorMessage: '' })}
+            message={this.state.loadingErrorMessage}
+            title="Error"
+          />
         </div>
       </MuiThemeProvider>
     );
   }
 }
 
-NewAddon.propTypes = {
+AttachAddon.propTypes = {
   app: PropTypes.string.isRequired,
   onComplete: PropTypes.func.isRequired,
 };

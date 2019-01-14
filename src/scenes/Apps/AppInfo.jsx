@@ -1,25 +1,22 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import {
+  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, CardContent,
+  Tooltip, Button, IconButton, Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
+} from '@material-ui/core';
 import PropTypes from 'prop-types';
-import { Card, CardHeader } from 'material-ui/Card';
-import FlatButton from 'material-ui/FlatButton';
-import { Tabs, Tab } from 'material-ui/Tabs';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import IconButton from 'material-ui/IconButton';
-import Dialog from 'material-ui/Dialog';
-import Snackbar from 'material-ui/Snackbar';
-import InfoIcon from 'material-ui/svg-icons/action/info';
-import CPUIcon from 'material-ui/svg-icons/hardware/memory';
-import MetricIcon from 'material-ui/svg-icons/action/track-changes';
-import AddonIcon from 'material-ui/svg-icons/action/shopping-basket';
-import LogIcon from 'material-ui/svg-icons/action/visibility';
-import ConfigIcon from 'material-ui/svg-icons/image/tune';
-import AppIcon from 'material-ui/svg-icons/action/exit-to-app';
-import ReleaseIcon from 'material-ui/svg-icons/file/cloud';
+import InfoIcon from '@material-ui/icons/Info';
+import CPUIcon from '@material-ui/icons/Memory';
+import MetricIcon from '@material-ui/icons/TrackChanges';
+import AddonIcon from '@material-ui/icons/ShoppingBasket';
+import LogIcon from '@material-ui/icons/Visibility';
+import ConfigIcon from '@material-ui/icons/Tune';
+import AppIcon from '@material-ui/icons/ExitToApp';
+import ReleaseIcon from '@material-ui/icons/Cloud';
 import GitIcon from '../../components/Icons/GitIcon';
-
+import WebhookIcon from '../../components/Icons/WebhookIcon';
 import Formations from '../../components/Formations';
+import Webhooks from '../../components/Webhooks';
 import Releases from '../../components/Releases';
 import Config from '../../components/ConfigVars';
 import Metrics from '../../components/Metrics';
@@ -28,14 +25,61 @@ import Logs from '../../components/Logs';
 import AppOverview from '../../components/Apps/AppOverview';
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  tabs: {
-    backgroundColor: '#3c4146',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiTabs: {
+      root: {
+        backgroundColor: '#3c4146',
+        color: 'white',
+        maxWidth: '1024px',
+      },
+    },
+    MuiTab: {
+      root: {
+        minWidth: '120px !important',
+      },
+    },
+    MuiCardContent: {
+      root: {
+        display: 'flex',
+        flexFlow: 'row-reverse',
+        padding: '0px 16px 0px 0px !important',
+      },
+    },
+    MuiCard: {
+      root: {
+        maxWidth: '1024px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        marginTop: '12px',
+      },
+    },
+    MuiCardHeader: {
+      root: {
+        padding: '16px 16px 0px 16px !important',
+      },
+      title: {
+        fontSize: '15px',
+        fontWeight: '500',
+      },
+      subheader: {
+        fontSize: '14px',
+        fontWeight: '500',
+      },
+    },
   },
 });
 
 const style = {
+  iconButton: {
+    color: 'black',
+  },
   refresh: {
     div: {
       marginLeft: 'auto',
@@ -47,22 +91,12 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
-  tabs: {
-    backgroundColor: '#3c4146',
-  },
-  card: {
-    maxWidth: '1024px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    marginTop: '12px',
-  },
-  rightIcon: {
-    float: 'right',
-    cursor: 'pointer',
-  },
 };
+
+const tabs = ['info', 'dynos', 'releases', 'addons', 'config', 'logs', 'metrics', 'webhooks'];
 
 export default class AppInfo extends Component {
   constructor(props) {
@@ -74,17 +108,22 @@ export default class AppInfo extends Component {
       submitFail: false,
       open: false,
       message: '',
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
+      currentTab: 'info',
+      baseHash: `#/apps/${this.props.match.params.app}/`,
+      basePath: `/apps/${this.props.match.params.app}`,
     };
   }
 
+
   componentDidMount() {
     api.getApp(this.props.match.params.app).then((response) => {
+      const hashPath = window.location.hash;
+      let currentTab = hashPath.replace(this.state.baseHash, '');
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'info';
+        window.location.hash = `${this.state.baseHash}info`;
+      }
+      this.setState({ currentTab });
       this.setState({
         app: response.data,
         loading: false,
@@ -95,6 +134,29 @@ export default class AppInfo extends Component {
         submitFail: true,
       });
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    // If we changed locations AND it was a 'pop' history event (back or forward button)
+    const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
+    if (routeHasChanged && this.props.history.action === 'POP') {
+      // If hitting back took us to the base path without a tab, hit back again
+      if (this.props.location.pathname === `${this.state.basePath}` ||
+          this.props.location.pathname === `${this.state.basePath}/`) {
+        window.history.back();
+        return;
+      }
+      const hashPath = window.location.hash;
+      if (hashPath.includes(this.state.baseHash)) {
+        let currentTab = hashPath.replace(this.state.baseHash, '');
+        if (!tabs.includes(currentTab)) {
+          currentTab = 'info';
+          window.location = `${this.state.baseHash}info`;
+        }
+        // Since we check conditions before setState we avoid infinite loops
+        this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
+      }
+    }
   }
 
   handleClose = () => {
@@ -116,233 +178,203 @@ export default class AppInfo extends Component {
     });
   }
 
-  infoTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-    });
-  }
-  dynosTabActive = () => {
-    this.setState({
-      dynosActive: true,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-    });
-  }
-  releasesTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: true,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-    });
-  }
-  addonsTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: true,
-      configActive: false,
-      logsActive: false,
-      metricsActive: false,
-    });
-  }
-  configTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: true,
-      logsActive: false,
-      metricsActive: false,
-    });
-  }
-  metricsTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: false,
-      metricsActive: true,
-    });
-  }
-  logsTabActive = () => {
-    this.setState({
-      dynosActive: false,
-      releasesActive: false,
-      addonsActive: false,
-      configActive: false,
-      logsActive: true,
-      metricsActive: false,
-    });
+  changeActiveTab = (event, newTab) => {
+    if (this.state.currentTab !== newTab) {
+      this.setState({
+        currentTab: newTab,
+      });
+      this.props.history.push(`${newTab}`);
+    }
   }
 
   render() {
+    const { currentTab } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             <Dialog
               className="not-found-error"
               open={this.state.submitFail}
-              modal
-              actions={
-                <FlatButton
-                  label="Ok"
-                  primary
-                  onTouchTap={this.handleNotFoundClose}
-                />}
             >
-              {this.state.submitMessage}
+              <DialogTitle>Error</DialogTitle>
+              <DialogContent>
+                <DialogContentText>{this.state.submitMessage}</DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={this.handleNotFoundClose}
+                  color="primary"
+                >
+                  Ok
+                </Button>
+              </DialogActions>
             </Dialog>
           </div>
         </MuiThemeProvider>);
     }
-    let git = (
-      <div style={style.rightIcon}>
-        <IconButton
-          className="github"
-          href={this.state.app.git_url}
-          tooltip="Github Repo"
-          tooltipPosition="top-left"
-        >
-          <GitIcon />
-        </IconButton>
-      </div>);
-    if (!this.state.app.git_url) {
-      git = null;
-    }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={{ marginBottom: '12px' }}>
-          <Card className="card" style={style.card}>
+          <Card className="card" style={{ overflow: 'visible' }}>
             <CardHeader
               className="header"
               title={this.state.app.name}
-              subtitle={this.state.app.organization.name}
+              subheader={this.state.app.organization.name}
+            />
+            <CardContent>
+              <Tooltip title="Live App" placement="top-end">
+                <IconButton
+                  style={style.iconButton}
+                  className="live-app"
+                  href={this.state.app.web_url}
+                >
+                  <AppIcon />
+                </IconButton>
+              </Tooltip>
+              {this.state.app.git_url && (
+                <Tooltip title="Github Repo" placement="top-end">
+                  <IconButton
+                    style={style.iconButton}
+                    className="github"
+                    href={this.state.app.git_url}
+                  >
+                    <GitIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </CardContent>
+            <Tabs
+              fullWidth
+              value={this.state.currentTab}
+              onChange={this.changeActiveTab}
+              scrollButtons="off"
             >
-              <IconButton
-                className="live-app"
-                style={style.rightIcon}
-                href={this.state.app.web_url}
-                tooltip="Live App"
-                tooltipPosition="top-left"
-              >
-                <AppIcon />
-              </IconButton>
-              {git}
-            </CardHeader>
-            <Tabs>
               <Tab
+                disableRipple
                 className="info-tab"
                 icon={<InfoIcon />}
                 label="Info"
-                onActive={this.infoTabActive}
-              >
-                <AppOverview app={this.state.app} onComplete={this.reload} />
-              </Tab>
+                value="info"
+              />
               <Tab
+                disableRipple
                 className="dynos-tab"
                 icon={<CPUIcon />}
                 label="Dynos"
-                onActive={this.dynosTabActive}
-              >
-                <Formations
-                  app={this.state.app.name}
-                  active={this.state.dynosActive}
-                />
-              </Tab>
+                value="dynos"
+              />
               <Tab
+                disableRipple
                 className="releases-tab"
                 icon={<ReleaseIcon />}
                 label="Activity"
-                onActive={this.releasesTabActive}
-              >
-                <Releases
-                  app={this.state.app.name}
-                  active={this.state.releasesActive}
-                />
-              </Tab>
+                value="releases"
+              />
               <Tab
+                disableRipple
                 className="addons-tab"
                 icon={<AddonIcon />}
                 label="Addons"
-                onActive={this.addonsTabActive}
-              >
-                <Addons
-                  app={this.state.app.name}
-                  active={this.state.addonsActive}
-                />
-              </Tab>
+                value="addons"
+              />
               <Tab
+                disableRipple
+                className="webhooks-tab"
+                icon={<WebhookIcon />}
+                label="Webhooks"
+                value="webhooks"
+              />
+              <Tab
+                disableRipple
                 className="config-tab"
                 icon={<ConfigIcon />}
                 label="Config"
-                onActive={this.configTabActive}
-              >
-                <Config
-                  app={this.state.app.name}
-                  active={this.state.configActive}
-                />
-              </Tab>
+                value="config"
+              />
               <Tab
+                disableRipple
                 className="metrics-tab"
                 icon={<MetricIcon />}
                 label="Metrics"
-                onActive={this.metricsTabActive}
-              >
-                <Metrics
-                  active={this.state.metricsActive}
-                  app={this.state.app.name}
-                  appName={this.state.app.simple_name}
-                  space={this.state.app.space.name}
-                />
-              </Tab>
+                value="metrics"
+              />
               <Tab
+                disableRipple
                 className="logs-tab"
                 icon={<LogIcon />}
                 label="Logs"
-                onActive={this.logsTabActive}
-              >
-                <Logs
-                  active={this.state.logsActive}
-                  app={this.state.app.name}
-                  appName={this.state.app.simple_name}
-                  space={this.state.app.space.name}
-                />
-              </Tab>
+                value="logs"
+              />
             </Tabs>
+            {currentTab === 'info' && (
+              <AppOverview app={this.state.app} onComplete={this.reload} />
+            )}
+            {currentTab === 'dynos' && (
+              <Formations
+                app={this.state.app.name}
+              />
+            )}
+            {currentTab === 'releases' && (
+              <Releases
+                app={this.state.app.name}
+                org={this.state.app.organization.name}
+              />
+            )}
+            {currentTab === 'addons' && (
+              <Addons
+                app={this.state.app.name}
+              />
+            )}
+            {currentTab === 'webhooks' && (
+              <Webhooks
+                app={this.state.app.name}
+              />
+            )}
+            {currentTab === 'config' && (
+              <Config
+                app={this.state.app.name}
+              />
+            )}
+            {currentTab === 'metrics' && (
+              <Metrics
+                app={this.state.app.name}
+                appName={this.state.app.simple_name}
+                space={this.state.app.space.name}
+              />
+            )}
+            {currentTab === 'logs' && (
+              <Logs
+                app={this.state.app.name}
+                appName={this.state.app.simple_name}
+                space={this.state.app.space.name}
+              />
+            )}
           </Card>
           <Dialog
             className="app-error"
             open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                label="Ok"
-                primary
-                onTouchTap={this.handleClose}
-              />}
           >
-            {this.state.submitMessage}
+            <DialogTitle>Error</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{this.state.submitMessage}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                color="primary"
+                onClick={this.handleClose}
+              >
+              Ok
+              </Button>
+            </DialogActions>
           </Dialog>
           <Snackbar
             className="app-snack"
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>
@@ -352,4 +384,6 @@ export default class AppInfo extends Component {
 
 AppInfo.propTypes = {
   match: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  location: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

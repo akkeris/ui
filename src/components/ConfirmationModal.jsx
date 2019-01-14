@@ -1,39 +1,86 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import {
+  Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress,
+} from '@material-ui/core';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
 
-const muiTheme = getMuiTheme();
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiPaper: {
+      root: {
+        width: '75%',
+        maxWidth: '768px',
+      },
+    },
+  },
+});
 
 /* eslint-disable react/prefer-stateless-function */
 export default class ConfirmationModal extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false,
+    };
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.open && !this.props.open) {
+      this.setState({ loading: false });
+    }
+  }
+
+  onOk = () => {
+    const { onOk } = this.props;
+    this.setState({ loading: true }, () => onOk());
+  }
+
   render() {
+    const { loading } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <Dialog
           className={this.props.className}
           open={this.props.open}
-          modal
-          title={this.props.title}
-          actions={[
-            this.props.actions,
-            <FlatButton
-              className="ok"
-              label="Ok"
-              primary
-              onTouchTap={this.props.onOk}
-            />,
-            <FlatButton
-              className="cancel"
-              label="Cancel"
-              secondary
-              onTouchTap={this.props.onCancel}
-            />,
-          ]}
         >
-          {this.props.message}
+          <DialogTitle>{this.props.title}</DialogTitle>
+          <DialogContent>
+            {!loading ? (
+              <DialogContentText>{this.props.message}</DialogContentText>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CircularProgress />
+              </div>
+            )}
+          </DialogContent>
+          <DialogActions>
+            {this.props.actions}
+            <Button
+              className="ok"
+              color="primary"
+              onClick={this.onOk}
+              disabled={loading}
+            >
+              Ok
+            </Button>
+            {this.props.onCancel !== null && (
+              <Button
+                className="cancel"
+                color="secondary"
+                onClick={this.props.onCancel}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+            )}
+          </DialogActions>
         </Dialog>
       </MuiThemeProvider>
     );
@@ -43,7 +90,7 @@ export default class ConfirmationModal extends Component {
 ConfirmationModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onOk: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  onCancel: PropTypes.func,
   message: PropTypes.string.isRequired,
   title: PropTypes.string,
   className: PropTypes.string,
@@ -53,5 +100,6 @@ ConfirmationModal.propTypes = {
 ConfirmationModal.defaultProps = {
   title: 'Confirm Delete',
   className: 'confirm',
+  onCancel: null,
   actions: null,
 };

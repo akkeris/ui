@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import Toggle from 'material-ui/Toggle';
-import Dialog from 'material-ui/Dialog';
+import {
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  Step, Stepper, StepLabel, Button, TextField, Collapse,
+  FormGroup, FormControlLabel, Switch, Typography, FormControl, Radio, RadioGroup, FormLabel,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#0097a7',
+    },
+  },
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
 });
 
@@ -37,31 +39,20 @@ export default class NewAutoBuild extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      loading: true,
+      loading: false,
       finished: false,
       stepIndex: 0,
       submitFail: false,
       submitMessage: '',
+      errorText: null,
       branch: '',
       repo: '',
       autoDeploy: true,
-      username: '',
+      username: null,
       token: null,
       statusCheck: true,
+      userSelection: 'bot',
     };
-  }
-
-  componentDidMount() {
-    api.gitHubAuth().then((response) => {
-      this.setState({
-        token: response.data.token,
-        loading: false,
-      });
-    }).catch((error) => {
-      if (error.response.status === 404) {
-        window.location = `/github/oauth?url=${encodeURIComponent(window.location)}`;
-      }
-    });
   }
 
   getStepContent(stepIndex) {
@@ -69,63 +60,118 @@ export default class NewAutoBuild extends Component {
       case 0:
         return (
           <div>
-            <TextField floatingLabelText="Repo" value={this.state.repo} onChange={this.handleRepoChange} />
-            <p>
+            <TextField
+              className="Repo"
+              label="Repo"
+              value={this.state.repo}
+              onChange={this.handleChange('repo')}
+              helperText={this.state.errorText}
+              error={this.state.errorText && this.state.errorText.length > 0}
+            />
+            <Typography variant="body">
               The repo URL (e.g., https://github.com/foo/bar)
-            </p>
+            </Typography>
           </div>
         );
       case 1:
         return (
           <div>
-            <TextField floatingLabelText="Branch (defaults Master)" value={this.state.branch} onChange={this.handleBranchChange} />
-            <p>
+            <TextField label="Master" value={this.state.branch} onChange={this.handleChange('branch')} />
+            <Typography variant="body">
               The branch on the repo to watch and deploy from
-            </p>
+            </Typography>
           </div>
         );
       case 2:
         return (
           <div>
-            <TextField floatingLabelText="User" value={this.state.username} onChange={this.handleUsernameChange} />
-            <p>
-              The username to access repo as
-            </p>
+            <FormControl component="fieldset" className="FormControl">
+              <FormLabel component="legend">GitHub User</FormLabel>
+              <RadioGroup
+                name="User Selection"
+                className="UserRadio"
+                value={this.state.userSelection}
+                onChange={this.handleChange('userSelection')}
+              >
+                <FormControlLabel value="bot" control={<Radio />} label="Service Account" />
+                <FormControlLabel value="user" control={<Radio />} label="User Account" />
+                {this.state.userSelection === 'user' && (
+                  <div>
+                    <TextField
+                      label="User"
+                      value={this.state.username}
+                      onChange={this.handleChange('username')}
+                      helperText={this.state.errorText}
+                      error={this.state.errorText && this.state.errorText.length > 0}
+                    />
+                    <Typography variant="body">
+                      The username to access repo as
+                    </Typography>
+                    <TextField
+                      label="Token"
+                      value={this.state.token}
+                      onChange={this.handleChange('token')}
+                      helperText={this.state.errorText}
+                      error={this.state.errorText && this.state.errorText.length > 0}
+                    />
+                    <Typography variant="body">
+                      The users token
+                    </Typography>
+                  </div>
+                )}
+              </RadioGroup>
+            </FormControl>
           </div>
         );
       case 3:
         return (
           <div>
-            <Toggle
-              label="Auto Deploy"
-              toggled={this.state.autoDeploy}
-              onToggle={this.handleAutoDeploy}
-            />
-            <Toggle
-              label="Status Check"
-              toggled={this.state.statusCheck}
-              onToggle={this.handleStatusCheck}
-            />
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={this.state.autoDeploy}
+                    onChange={this.handleAutoDeploy}
+                    color="primary"
+                  />
+                }
+                label="Auto Deploy"
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={this.state.statusCheck}
+                    onChange={this.handleStatusCheck}
+                    color="primary"
+                  />
+                }
+                label="Status Check"
+              />
+            </FormGroup>
           </div>
         );
+      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
+      case 4:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
   }
 
   handleClose = () => {
-    this.setState({
-      submitFail: false,
-    });
+    this.setState({ submitFail: false });
   }
 
   handleNext = () => {
     const { stepIndex } = this.state;
-    if (!this.state.loading) {
+    if ((stepIndex === 0 && this.state.repo === '') || (stepIndex === 2 && (this.state.userSelection === 'user' && (!this.state.username || !this.state.token)))) {
+      this.setState({ errorText: 'field required' });
+    } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
         finished: stepIndex >= 3,
         loading: stepIndex >= 3,
+        errorText: null,
       });
     }
   }
@@ -136,26 +182,22 @@ export default class NewAutoBuild extends Component {
       this.setState({
         stepIndex: stepIndex - 1,
         loading: false,
+        errorText: null,
       });
     }
   }
 
-  handleRepoChange = (event) => {
-    this.setState({
-      repo: event.target.value,
-    });
-  }
-
-  handleUsernameChange = (event) => {
-    this.setState({
-      username: event.target.value,
-    });
-  }
-
-  handleBranchChange = (event) => {
-    this.setState({
-      branch: event.target.value,
-    });
+  // Handles changes for repo, username, branch
+  handleChange = name => (event) => {
+    if (event.target.value === 'bot' && name === 'userSelection') {
+      this.setState({
+        [name]: event.target.value,
+        username: null,
+        token: null,
+      });
+    } else {
+      this.setState({ [name]: event.target.value });
+    }
   }
 
   handleAutoDeploy = (event, isInputChecked) => {
@@ -179,7 +221,7 @@ export default class NewAutoBuild extends Component {
         branch: '',
         repo: '',
         autoDeploy: true,
-        username: '',
+        username: null,
         statusCheck: true,
       });
     });
@@ -187,7 +229,7 @@ export default class NewAutoBuild extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
     if (finished) {
       this.submitBuild();
     }
@@ -196,17 +238,18 @@ export default class NewAutoBuild extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            label="Back"
+          {stepIndex > 0 && (<Button
+            className="back"
             disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
+            onClick={this.handlePrev}
             style={style.buttons.back}
-          />)}
-          <RaisedButton
-            label={stepIndex === 3 ? 'Finish' : 'Next'}
-            primary
-            onTouchTap={this.handleNext}
-          />
+          >Back</Button>)}
+          <Button
+            variant="contained"
+            className="next"
+            color="primary"
+            onClick={this.handleNext}
+          >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -215,7 +258,7 @@ export default class NewAutoBuild extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
@@ -225,29 +268,31 @@ export default class NewAutoBuild extends Component {
               <StepLabel>Input Branch</StepLabel>
             </Step>
             <Step>
-              <StepLabel>Input Git User</StepLabel>
+              <StepLabel>Input GitHub User</StepLabel>
             </Step>
             <Step>
               <StepLabel>Options</StepLabel>
             </Step>
           </Stepper>
           {
-            <ExpandTransition loading={loading} open>
+            <Collapse in={!loading}>
               {this.renderContent()}
-            </ExpandTransition>
+            </Collapse>
           }
-          <Dialog
-            open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                label="Ok"
-                primary
-                onTouchTap={this.handleClose}
-              />
-            }
-          >
-            {this.state.submitMessage}
+          <Dialog open={this.state.submitFail}>
+            <DialogTitle>
+              <Typography variant="h6">
+                Error
+              </Typography>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                {this.state.submitMessage}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>

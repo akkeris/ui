@@ -50,7 +50,6 @@ We use a redis cache for session storage.  Create an encryption secret and add i
 * AKKERIS_API (backend api server)
 
 ## Testing
-
 ---
 
 E2E testing are testcafe scripts in the test/e2e folder.

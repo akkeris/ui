@@ -1,18 +1,32 @@
 import React, { Component } from 'react';
-import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
+import {
+  Toolbar, Table, TableBody, TableHead, TableRow, TableCell, IconButton, CircularProgress, Paper,
+  TableFooter, TablePagination,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-import IconButton from 'material-ui/IconButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Paper from 'material-ui/Paper';
-import AddIcon from 'material-ui/svg-icons/content/add';
+import AddIcon from '@material-ui/icons/Add';
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiToolbar: {
+      root: {
+        minHeight: '48px !important',
+        maxHeight: '48px !important',
+      },
+    },
+    MuiIconButton: {
+      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
+    },
+  },
 });
 
 const style = {
@@ -22,11 +36,13 @@ const style = {
       marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '20%',
+      marginTop: '15%',
+      marginBottom: '5%',
     },
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   toolbar: {
@@ -34,21 +50,22 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '16px 0',
   },
   link: {
     textDecoration: 'none',
+    marginLeft: 'auto',
   },
   paper: {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
+    marginBottom: '12px',
   },
   tableRow: {
     height: '58px',
   },
-  tableRowColumn: {
+  tableCell: {
     title: {
       fontSize: '16px',
     },
@@ -63,9 +80,6 @@ const style = {
       width: '58px',
     },
   },
-  icon: {
-    color: 'white',
-  },
 };
 
 export default class Spaces extends Component {
@@ -74,6 +88,8 @@ export default class Spaces extends Component {
     this.state = {
       loading: true,
       spaces: [],
+      page: 0,
+      rowsPerPage: 15,
     };
   }
 
@@ -86,58 +102,80 @@ export default class Spaces extends Component {
     });
   }
 
-  getSpaces() {
-    return this.state.spaces.map(space => (
-      <TableRow className={space.name} key={space.id} style={style.tableRow} selectable={false}>
-        <TableRowColumn>
-          <div style={style.tableRowColumn.title}>{space.name}</div>
-          <div style={style.tableRowColumn.sub}>{space.id}</div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
-          <div style={style.tableRowColumn.title}>{space.apps}</div>
-        </TableRowColumn>
-        <TableRowColumn>
-          <div style={style.tableRowColumn.title}>{space.compliance.toString()}</div>
-        </TableRowColumn>
-        <TableRowColumn>
-          <div style={style.tableRowColumn.title}>{space.stack.name}</div>
-        </TableRowColumn>
+  getSpaces(page, rowsPerPage) {
+    return this.state.spaces.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(space => (
+      <TableRow hover className={space.name} key={space.id} style={style.tableRow}>
+        <TableCell>
+          <div style={style.tableCell.title}>{space.name}</div>
+          <div style={style.tableCell.sub}>{space.id}</div>
+        </TableCell>
+        <TableCell style={style.tableCell.icon}>
+          <div style={style.tableCell.title}>{space.apps}</div>
+        </TableCell>
+        <TableCell>
+          <div style={style.tableCell.title}>{space.compliance.toString()}</div>
+        </TableCell>
+        <TableCell>
+          <div style={style.tableCell.title}>{space.stack.name}</div>
+        </TableCell>
       </TableRow>
     ));
   }
+
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
   render() {
+    const { spaces, page, rowsPerPage } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
-          <Toolbar style={style.toolbar}>
-            <ToolbarGroup />
-            <ToolbarGroup>
-              <Link to="/spaces/new" style={style.link}>
-                <IconButton className="new-space" iconStyle={style.icon} ><AddIcon /></IconButton>
-              </Link>
-            </ToolbarGroup>
+          <Toolbar style={style.toolbar} disableGutters>
+            <Link to="/spaces/new" style={style.link}>
+              <IconButton className="new-space"><AddIcon /></IconButton>
+            </Link>
           </Toolbar>
           <Paper style={style.paper}>
             <Table className="space-list" >
-              <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+              <TableHead>
                 <TableRow>
-                  <TableHeaderColumn>Space</TableHeaderColumn>
-                  <TableHeaderColumn style={style.tableRowColumn.icon}>Apps</TableHeaderColumn>
-                  <TableHeaderColumn>Compliance</TableHeaderColumn>
-                  <TableHeaderColumn>Stack</TableHeaderColumn>
+                  <TableCell>Space</TableCell>
+                  <TableCell style={style.tableCell.icon}>Apps</TableCell>
+                  <TableCell>Compliance</TableCell>
+                  <TableCell>Stack</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
-                {this.getSpaces()}
+              </TableHead>
+              <TableBody>
+                {this.getSpaces(page, rowsPerPage)}
               </TableBody>
+              {spaces.length !== 0 && (
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      rowsPerPageOptions={[15, 25, 50]}
+                      colSpan={4}
+                      count={spaces.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onChangePage={this.handleChangePage}
+                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                    />
+                  </TableRow>
+                </TableFooter>
+              )}
             </Table>
           </Paper>
         </div>

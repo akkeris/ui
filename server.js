@@ -9,13 +9,12 @@ const webpack = require('webpack');
 const webpackMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 const config = require('./webpack-dev-server.config.js');
+const jsonminify = require('jsonminify');
 
 const port = process.env.PORT || 3000;
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const clientURI = process.env.CLIENT_URI || 'http://localhost:3000';
-const gitClientID = process.env.GIT_CLIENT_ID;
-const gitClientSecret = process.env.GIT_CLIENT_SECRET;
 const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
 const https = require('https');
@@ -73,39 +72,8 @@ app.get('/oauth/callback', (req, res) => {
   });
 });
 
-app.get('/github/callback', (req, res) => {
-  request.post({
-    url: 'https://github.com/login/oauth/access_token',
-    form: {
-      client_id: gitClientID,
-      client_secret: gitClientSecret,
-      code: req.query.code,
-    },
-    headers: {
-      Accept: 'application/json',
-    },
-  }, (err, response, body) => {
-    req.session.git_token = JSON.parse(body).access_token;
-    res.redirect(req.session.redirect || '/');
-  });
-});
 
-
-app.use('/github/oauth', (req, res) => {
-  req.session.redirect = req.query.url;
-  res.redirect(`https://github.com/login/oauth/authorize?client_id=${gitClientID}&scope=admin:repo_hook repo&redirect_uri=${encodeURIComponent(`${clientURI}/github/callback`)}`);
-});
-
-app.use('/github/gimme', (req, res) => {
-  if (req.session.git_token) {
-    res.send({
-      token: req.session.git_token,
-    });
-  } else {
-    res.status(404).send();
-  }
-});
-
+/* eslint-disable no-param-reassign */
 app.use('/account', proxy(`${authEndpoint}/user`, {
   proxyReqOptDecorator(reqOpts, srcReq) {
     reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`;
@@ -128,9 +96,17 @@ app.use('/api', proxy(`${akkerisApi}`, {
     return reqOpts;
   },
 }));
+/* eslint-enable no-param-reassign */
 
 app.use('/app-setups', (req, res) => {
-  res.redirect(`/?blueprint=${encodeURIComponent(req.query.blueprint)}#/app-setups`);
+  // If blueprint is a Base64 encoded string, decode it first.
+  let blueprint = req.query.blueprint;
+  if (/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(blueprint)) {
+    blueprint = Buffer.from(blueprint, 'base64').toString();
+  }
+  blueprint = jsonminify(blueprint);
+
+  res.redirect(`/?blueprint=${encodeURIComponent(blueprint)}#/app-setups`);
 });
 
 app.get('/logout', (req, res) => {

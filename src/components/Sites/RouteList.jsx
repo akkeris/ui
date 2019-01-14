@@ -1,22 +1,26 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+
+import {
+  Table, TableHead, TableBody, TableRow, TableCell, Paper, TablePagination,
+  CircularProgress, Snackbar, IconButton, Tooltip, TableFooter,
+} from '@material-ui/core';
+import ArrowIcon from '@material-ui/icons/ArrowForward';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Clear';
 import PropTypes from 'prop-types';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
-import Paper from 'material-ui/Paper';
-import IconButton from 'material-ui/IconButton';
-import Snackbar from 'material-ui/Snackbar';
-import ArrowIcon from 'material-ui/svg-icons/navigation/arrow-forward';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
 
 import api from '../../services/api';
 import NewRoute from './NewRoute';
 import ConfirmationModal from '../ConfirmationModal';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -26,7 +30,8 @@ const style = {
       marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '20%',
+      marginTop: '15%',
+      marginBottom: '5%',
     },
     indicator: {
       display: 'inline-block',
@@ -61,6 +66,8 @@ export default class RouteList extends Component {
       new: false,
       message: '',
       confirmOpen: false,
+      page: 0,
+      rowsPerPage: 15,
     };
   }
 
@@ -73,29 +80,29 @@ export default class RouteList extends Component {
     });
   }
 
-  getRoutes() {
-    return this.state.routes.map(route => (
+  getRoutes(page, rowsPerPage) {
+    return this.state.routes.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(route => (
       <TableRow key={route.id} style={style.tableRow}>
-        <TableRowColumn>
+        <TableCell>
           <div style={style.tableRowColumn.title}><a href={`https://${this.props.site.domain || this.props.site}${route.source_path}`}>{`https://${this.props.site.domain || this.props.site}${route.source_path}`}</a></div>
           <div style={style.tableRowColumn.sub}>{route.id}</div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
+        </TableCell>
+        <TableCell style={style.tableRowColumn.icon}>
           <ArrowIcon />
-        </TableRowColumn>
-        <TableRowColumn>
+        </TableCell>
+        <TableCell>
           <div style={style.tableRowColumn.title}>{route.target_path}</div>
           <div style={style.tableRowColumn.sub}>{route.app.name || route.app}</div>
-        </TableRowColumn>
-        <TableRowColumn style={style.tableRowColumn.icon}>
+        </TableCell>
+        <TableCell style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
             <IconButton
-              onTouchTap={() => this.handleConfirmation(route)}
+              onClick={() => this.handleConfirmation(route)}
             >
               <RemoveIcon />
             </IconButton>
           </div>
-        </TableRowColumn>
+        </TableCell>
       </TableRow>
     ));
   }
@@ -156,49 +163,75 @@ export default class RouteList extends Component {
     });
   }
 
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
   render() {
+    const { routes, page, rowsPerPage } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           {!this.state.new && (
-            <Paper zDepth={0}>
-              <IconButton onTouchTap={this.handleNewRoute} tooltip="New Route" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+            <Paper elevation={0}>
+              <Tooltip title="New Route" placement="bottom-start">
+                <IconButton onClick={this.handleNewRoute}><AddIcon /></IconButton>
+              </Tooltip>
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton onTouchTap={this.handleNewRouteCancel}><RemoveIcon /></IconButton>
+              <IconButton onClick={this.handleNewRouteCancel}><RemoveIcon /></IconButton>
               <NewRoute site={this.props.site} onComplete={this.reload} />
             </div>
           )}
-          <Table selectable={false} wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-            <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableHeaderColumn>Source</TableHeaderColumn>
-                <TableHeaderColumn style={style.tableRowColumn.icon} />
-                <TableHeaderColumn>Target</TableHeaderColumn>
-                <TableHeaderColumn style={style.tableRowColumn.icon} />
+                <TableCell>Source</TableCell>
+                <TableCell style={style.tableRowColumn.icon} />
+                <TableCell>Target</TableCell>
+                <TableCell style={style.tableRowColumn.icon} />
               </TableRow>
-            </TableHeader>
-            <TableBody displayRowCheckbox={false} showRowHover>
-              {this.getRoutes()}
+            </TableHead>
+            <TableBody>
+              {this.getRoutes(page, rowsPerPage)}
             </TableBody>
+            {routes.length !== 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[15, 25, 50]}
+                    colSpan={4}
+                    count={routes.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
           </Table>
           <ConfirmationModal open={this.state.confirmOpen} onOk={this.handleRemoveRoute} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this Route?" />
           <Snackbar
             open={this.state.open}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={this.handleRequestClose}
+            onClose={this.handleRequestClose}
           />
         </div>
       </MuiThemeProvider>

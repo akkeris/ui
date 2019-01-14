@@ -1,20 +1,34 @@
 import React, { Component } from 'react';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Paper from 'material-ui/Paper';
+import {
+  Toolbar, IconButton, CircularProgress, Paper,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-import IconButton from 'material-ui/IconButton';
-import AddIcon from 'material-ui/svg-icons/content/add';
+import AddIcon from '@material-ui/icons/Add';
 
 import api from '../../services/api';
 import util from '../../services/util';
 import Search from '../../components/Search';
 import OrgList from '../../components/Orgs';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiToolbar: {
+      root: {
+        minHeight: '48px !important',
+        maxHeight: '48px !important',
+      },
+    },
+    MuiIconButton: {
+      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
+    },
+  },
 });
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
@@ -26,11 +40,13 @@ const style = {
       marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '20%',
+      marginTop: '15%',
+      marginBottom: '5%',
     },
     indicator: {
       display: 'inline-block',
       position: 'relative',
+      color: 'white',
     },
   },
   toolbar: {
@@ -38,26 +54,17 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '16px 0',
   },
   link: {
     textDecoration: 'none',
+    marginLeft: 'auto',
   },
   paper: {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
-  },
-  icon: {
-    color: 'white',
-  },
-  search: {
-    color: 'white',
-    WebkitTextFillColor: 'white',
-  },
-  searchHint: {
-    color: 'rgba(255,255,255,0.3)',
+    marginBottom: '12px',
   },
 };
 
@@ -86,31 +93,25 @@ export default class Orgs extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           <Toolbar style={style.toolbar}>
-            <ToolbarGroup>
-              <Search
-                style={style.search}
-                hintStyle={style.searchHint}
-                className="search"
-                data={util.filterName(this.state.orgs)}
-                handleSearch={this.handleSearch}
-              />
-            </ToolbarGroup>
-            <ToolbarGroup>
-              <Link to="/orgs/new" style={style.link}>
-                <IconButton className="new-org" iconStyle={style.icon} ><AddIcon /></IconButton>
-              </Link>
-            </ToolbarGroup>
+            <Search
+              className="search"
+              data={util.filterName(this.state.orgs)}
+              handleSearch={this.handleSearch}
+            />
+            <Link to="/orgs/new" style={style.link}>
+              <IconButton className="new-org" ><AddIcon /></IconButton>
+            </Link>
           </Toolbar>
           <Paper style={style.paper}>
             <OrgList className="orgs" orgs={this.state.orgs} />

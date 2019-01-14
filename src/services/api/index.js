@@ -52,18 +52,41 @@ function createFormation(app, size, quantity, type, port, command) {
   });
 }
 
+function createWebHook(app, url, events, secret) {
+  return axios.post(`/api/apps/${app}/hooks`, {
+    url,
+    events,
+    active: true,
+    secret,
+  });
+}
+
 function deleteFormation(app, formation) {
   return axios.delete(`/api/apps/${app}/formation/${formation}`);
 }
 
-function patchFormation(app, type, size, quantity, command, port) {
+function patchFormation(app, type, size, quantity, command, port, healthcheck, removeHealthcheck) {
   return axios.patch(`/api/apps/${app}/formation`, [{
     type,
     size,
     quantity,
     command,
     port,
+    healthcheck,
+    removeHealthcheck,
   }]);
+}
+
+function patchWebhook(app, id, url, events, secret, active) {
+  return axios.patch(`/api/apps/${app}/hooks/${id}`, {
+    url,
+    events,
+    secret,
+    active,
+  });
+}
+function getWebhookResults(app, id) {
+  return axios.get(`/api/apps/${app}/hooks/${id}/results`);
 }
 
 function restartFormation(app, type) {
@@ -95,6 +118,14 @@ function getAppAddons(app) {
   return axios.get(`/api/apps/${app}/addons`);
 }
 
+function getAppsAttachedToAddon(app, addon) {
+  return axios.get(`/api/apps/${app}/addons/${addon}`);
+}
+
+function getAppWebhooks(app) {
+  return axios.get(`/api/apps/${app}/hooks`);
+}
+
 function getAddonServices() {
   return axios.get('/api/addon-services');
 }
@@ -109,8 +140,26 @@ function createAddon(app, plan) {
   });
 }
 
+function attachAddon(app, addon) {
+  return axios.post(`/api/apps/${app}/addon-attachments`, {
+    app,
+    addon,
+  });
+}
+
+function getAddonAttachments(app) {
+  return axios.get(`/api/apps/${app}/addon-attachments`);
+}
+
+function deleteAddonAttachment(app, attachment) {
+  return axios.delete(`/api/apps/${app}/addon-attachments/${attachment}`);
+}
 function deleteAddon(app, addon) {
   return axios.delete(`/api/apps/${app}/addons/${addon}`);
+}
+
+function deleteWebhook(app, webhookId) {
+  return axios.delete(`/api/apps/${app}/hooks/${webhookId}`);
 }
 
 function getBuilds(app) {
@@ -146,10 +195,6 @@ function createAutoBuild(app, repo, branch, statusCheck, autoDeploy, username, t
 
 function redoBuild(app, build) {
   return axios.put(`/api/apps/${app}/builds/${build}`);
-}
-
-function gitHubAuth() {
-  return axios.get('/github/gimme');
 }
 
 async function getReleases(app) {
@@ -344,7 +389,10 @@ export default {
   getFormationSizes,
   getDynos,
   getAppAddons,
+  getAppWebhooks,
+  patchWebhook,
   deleteAddon,
+  deleteWebhook,
   getBuilds,
   getConfig,
   getLogs,
@@ -359,13 +407,15 @@ export default {
   getAddonServices,
   getAddonServicePlans,
   createAddon,
+  attachAddon,
+  getAddonAttachments,
+  deleteAddonAttachment,
   createFormation,
   deleteFormation,
   createBuild,
   createRelease,
   patchConfig,
   createAutoBuild,
-  gitHubAuth,
   redoBuild,
   patchApp,
   restartFormation,
@@ -389,4 +439,7 @@ export default {
   getStacks,
   getRegions,
   getAudits,
+  createWebHook,
+  getWebhookResults,
+  getAppsAttachedToAddon,
 };

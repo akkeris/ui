@@ -8,6 +8,16 @@ function filterApps(apps, space) {
   return applist;
 }
 
+function filterAppsByRegion(apps, region) {
+  const applist = [];
+  apps.forEach((app) => {
+    if (app.region.name === region || region === 'all') {
+      applist.push(app);
+    }
+  });
+  return applist;
+}
+
 function filterDynosByFormation(dynos, formation) {
   const dynolist = [];
   dynos.forEach((dyno) => {
@@ -80,6 +90,7 @@ export default {
   filterCouplings,
   filterDomain,
   filterSpacesByRegion,
+  filterAppsByRegion,
   filterSpacesByStack,
   filterSites,
   filterDynosByFormation,

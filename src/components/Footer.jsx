@@ -1,14 +1,25 @@
 import React from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import { Table, TableBody, TableRow, TableRowColumn, TableHeader, TableHeaderColumn } from 'material-ui/Table';
-import Paper from 'material-ui/Paper';
-import IconButton from 'material-ui/IconButton';
-
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import {
+  Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Typography,
+} from '@material-ui/core';
 import GitIcon from './Icons/GitIcon';
 
-const muiTheme = getMuiTheme({
-  fontFamily: 'ProximaNova',
+/* Documentation Links */
+const wikiLink = 'https://docs.octanner.io/';
+const gettingStartedLink = 'https://docs.octanner.io/Overview/01.-Installing-and-Getting-Started/';
+const apiLink = 'https://docs.octanner.io/Apps%20API/API-Reference/';
+const releasesLink = '';
+const akkerisSupportLink = '';
+const kubernetesSupportLink = 'https://kubernetes.io/';
+
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: 'ProximaNova',
+  },
 });
 
 const style = {
@@ -21,6 +32,7 @@ const style = {
     backgroundColor: '#3c4146',
     textAlign: 'center',
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -43,67 +55,86 @@ const style = {
   table: {
     body: {
       backgroundColor: 'rgba(255,255,255,0)',
+      marginBottom: '10px',
     },
-    row: {
+    cell: {
       textAlign: 'center',
+      width: '33%',
+      borderBottom: 'none',
+    },
+    headerCell: {
+      textAlign: 'center',
+      color: 'rgb(158, 158, 158)',
+      width: '33%',
+      borderBottom: '1px solid rgba(224, 224, 224, 1)',
     },
   },
 };
 
 const Footer = () => (
-  <MuiThemeProvider muiTheme={muiTheme}>
+  <MuiThemeProvider theme={muiTheme}>
     <Paper style={style.footer}>
       <div style={style.div}>
-        <Table style={style.table.body} selectable={false}>
-          <TableHeader adjustForCheckbox={false} displaySelectAll={false} selectable={false}>
-            <TableRow displayBorder={false}>
-              <TableHeaderColumn style={style.table.row}>
+        <Table style={style.table.body}>
+          <TableHead>
+            <TableRow>
+              <TableCell style={style.table.headerCell} padding="none">
                 Documentation
-              </TableHeaderColumn >
-              <TableHeaderColumn style={style.table.row}>
+              </TableCell >
+              <TableCell style={style.table.headerCell} padding="none">
                 Contribution
-              </TableHeaderColumn>
-              <TableHeaderColumn style={style.table.row}>
+              </TableCell>
+              <TableCell style={style.table.headerCell} padding="none">
                 Support
-              </TableHeaderColumn>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody displayRowCheckbox={false}>
-            <TableRow displayBorder={false}>
-              <TableRowColumn style={style.table.row}>
-                <div style={style.link}>
-                    Wiki
-                </div>
-                <div style={style.link}>
-                    Getting Started
-                </div>
-              </TableRowColumn>
-              <TableRowColumn style={style.table.row}>
-                <div style={style.link}>
-                    API
-                </div>
-                <div style={style.link}>
-                    Releases
-                </div>
-              </TableRowColumn>
-              <TableRowColumn style={style.table.row}>
-                <div style={style.link}>
-                    Akkeris
-                </div>
-                <div>
-                  <a href="https://kubernetes.io" style={style.link}>
-                    Kubernetes
-                  </a>
-                </div>
-              </TableRowColumn>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell style={style.table.cell} padding="none">
+                {wikiLink !== '' ? (
+                  <div><a href={wikiLink} style={style.link}>Wiki</a></div>
+                ) : (
+                  <div style={style.link}>Wiki</div>
+                )}
+                {gettingStartedLink !== '' ? (
+                  <div><a href={gettingStartedLink} style={style.link}>Getting Started</a></div>
+                ) : (
+                  <div style={style.link}>Getting Started</div>
+                )}
+              </TableCell>
+              <TableCell style={style.table.cell} padding="none">
+                {apiLink !== '' ? (
+                  <div><a href={apiLink} style={style.link}>API</a></div>
+                ) : (
+                  <div style={style.link}>API</div>
+                )}
+                {releasesLink !== '' ? (
+                  <div><a href={releasesLink} style={style.link}>Releases</a></div>
+                ) : (
+                  <div style={style.link}>Releases</div>
+                )}
+              </TableCell>
+              <TableCell style={style.table.cell} padding="none">
+                {akkerisSupportLink !== '' ? (
+                  <div><a href={akkerisSupportLink} style={style.link}>Akkeris</a></div>
+                ) : (
+                  <div style={style.link}>Akkeris</div>
+                )}
+                {kubernetesSupportLink !== '' ? (
+                  <div><a href={kubernetesSupportLink} style={style.link}>Kubernetes</a></div>
+                ) : (
+                  <div style={style.link}>Kubernetes</div>
+                )}
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
-        <p style={style.paragraph}>
+        <Typography variant="body2" style={style.paragraph}>
           Akkeris is built with a little bit of love, and a lot of anger. <br />
           Brought to you by COBRA and our open source community.
-        </p>
-        <IconButton href="https://github.com/akkeris" ><GitIcon color="rgba(255,255,255,0.8)" /></IconButton>
+        </Typography>
+        <IconButton href="https://github.com/akkeris" ><GitIcon nativeColor="rgba(255,255,255,0.8)" /></IconButton>
       </div>
     </Paper>
   </MuiThemeProvider>

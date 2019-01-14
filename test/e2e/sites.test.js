@@ -47,18 +47,18 @@ test('Should be able to create and delete site', async (t) => { // eslint-disabl
     .click('.new-site')
 
     // field validation
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.site-name').innerText)
     .contains('field required')
 
     .typeText('.site-name input', 'testcafe')
-    .click('.next button')
+    .click('button.next')
 
     // field validation
     .click('.us-seattle')
-    .click('.next button')
+    .click('button.next')
 
-    .click('.next button')
+    .click('button.next')
 
     // check if app was created
     .click('.site-list .testcafe')
@@ -66,7 +66,7 @@ test('Should be able to create and delete site', async (t) => { // eslint-disabl
     .contains('testcafe')
 
     // delete the app
-    .click('.delete button')
+    .click('button.delete')
     .expect(Selector('.confirm').innerText)
     .contains('Are you sure you want to delete this site?')
 

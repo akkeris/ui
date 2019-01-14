@@ -1,9 +1,9 @@
 const webpack = require('webpack');
 const path = require('path');
 const TransferWebpackPlugin = require('transfer-webpack-plugin');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
+  mode: 'production',
   entry: {
     main: [
       'babel-polyfill',
@@ -26,10 +26,6 @@ const config = {
       'process.env': {
         NODE_ENV: JSON.stringify('production'),
       },
-    }),
-    // // Minify the bundle
-    new UglifyJSPlugin({
-      sourceMap: true,
     }),
     // Transfer Files
     new TransferWebpackPlugin([

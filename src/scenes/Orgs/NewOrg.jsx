@@ -1,18 +1,19 @@
 import React, { Component } from 'react';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import Dialog from 'material-ui/Dialog';
-import Paper from 'material-ui/Paper';
+import {
+  Step, Stepper, StepLabel, Button, TextField, Collapse, Paper,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
 });
 
 const style = {
@@ -38,7 +39,6 @@ const style = {
   },
   div: {
     width: '100%',
-    maxWidth: 700,
     margin: 'auto',
   },
 };
@@ -63,7 +63,14 @@ export default class NewOrg extends Component {
       case 0:
         return (
           <div>
-            <TextField className="org-name" floatingLabelText="Org name" value={this.state.org} onChange={this.handleOrgChange} errorText={this.state.errorText} />
+            <TextField
+              className="org-name"
+              label="Org name"
+              value={this.state.org}
+              onChange={this.handleOrgChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
             <p>
               Create an akkeris org! Enter a name that will define your org.
               This org will be used for attribution and grouping of apps/spaces.
@@ -73,14 +80,22 @@ export default class NewOrg extends Component {
       case 1:
         return (
           <div>
-            <TextField className="org-description" floatingLabelText="Org description" value={this.state.description} onChange={this.handleDescriptionChange} errorText={this.state.errorText} />
+            <TextField
+              className="org-description"
+              label="Org description"
+              value={this.state.description}
+              onChange={this.handleDescriptionChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
             <p>
-              Specify the space your app will live in.
-              Spaces contain multiple apps and configurations at a similar stage in a pipeline
-              (e.g. dev, qa, prod)
+              Give a description of your org.
             </p>
           </div>
         );
+      // need this otherwise "You're a long way ..." shows up when you hit finish
+      case 2:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -149,7 +164,7 @@ export default class NewOrg extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
 
     if (finished) {
       this.submitOrg();
@@ -159,20 +174,20 @@ export default class NewOrg extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
-            className="back"
-            label="Back"
-            disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
-            style={style.buttons.back}
-          />
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >Back</Button>
           )}
-          <RaisedButton
+          <Button
+            variant="contained"
             className="next"
-            label={stepIndex === 1 ? 'Submit' : 'Next'}
-            primary
-            onTouchTap={this.handleNext}
-          />
+            color="primary"
+            onClick={this.handleNext}
+          >{stepIndex === 1 ? 'Submit' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -182,7 +197,7 @@ export default class NewOrg extends Component {
     const { loading, stepIndex } = this.state;
 
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
@@ -193,22 +208,24 @@ export default class NewOrg extends Component {
                 <StepLabel>Describe org </StepLabel>
               </Step>
             </Stepper>
-            <ExpandTransition loading={loading} open>
-              {this.renderContent()}
-            </ExpandTransition>
+            {
+              <Collapse in={!loading}>
+                {this.renderContent()}
+              </Collapse>
+            }
             <Dialog
               className="error"
               open={this.state.submitFail}
-              modal
-              actions={
-                <FlatButton
-                  className="ok"
-                  label="Ok"
-                  primary
-                  onTouchTap={this.handleClose}
-                />}
             >
-              {this.state.submitMessage}
+              <DialogTitle>Error</DialogTitle>
+              <DialogContent>{this.state.submitMessage}</DialogContent>
+              <DialogActions>
+                <Button
+                  className="ok"
+                  color="primary"
+                  onClick={this.handleClose}
+                >OK</Button>
+              </DialogActions>
             </Dialog>
           </div>
         </Paper>

@@ -21,8 +21,8 @@ test('Should show list of spaces', async (t) => { // eslint-disable-line no-unde
   await t
     .expect(Selector('.space-list tbody').childElementCount)
     .gt(0)
-    .expect(Selector('.space-list .test').innerText)
-    .contains('test');
+    .expect(Selector('.space-list .default').innerText)
+    .contains('default');
 });
 
 test("Shouldn't be able to create duplicate space", async (t) => { // eslint-disable-line no-undef
@@ -31,26 +31,26 @@ test("Shouldn't be able to create duplicate space", async (t) => { // eslint-dis
     .click('.new-space')
 
     // field validation
-    .click('.next button')
+    .click('button.next')
     .expect(Selector('.space-name').innerText)
     .contains('field required')
 
     .typeText('.space-name input', 'testcafe')
-    .click('.next button')
+    .click('button.next')
 
     // select stack
-    .click('.dropdown button')
-    .expect(Selector('[role=menu] .maru').innerText)
+    .click('.stack-menu')
+    .expect(Selector('#menu-stack .maru').innerText)
     .contains('maru')
-    .click('[role=menu] .maru')
-    .click('.next button')
+    .click('#menu-stack .maru')
+    .click('button.next')
 
     // field validation
     .typeText('.space-description input', 'testcafe')
-    .click('.next button')
+    .click('button.next')
 
     .click('.checkbox-dev')
-    .click('.next button')
+    .click('button.next')
 
     .expect(Selector('.error').innerText)
     .contains('The specified space already exists.')

@@ -1,20 +1,41 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Step, Stepper, StepLabel } from 'material-ui/Stepper';
-import RaisedButton from 'material-ui/RaisedButton';
-import FlatButton from 'material-ui/FlatButton';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import TextField from 'material-ui/TextField';
-import ExpandTransition from 'material-ui/internal/ExpandTransition';
-import DropDownMenu from 'material-ui/DropDownMenu';
-import MenuItem from 'material-ui/MenuItem';
-import Dialog from 'material-ui/Dialog';
-
+import {
+  Step, Stepper, StepLabel, Button, TextField, Typography,
+  Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
+  Collapse,
+} from '@material-ui/core';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#0097a7',
+    },
+  },
+  typography: {
+    // map old typography variants to v2 (still throws warnings)
+    useNextVariants: true,
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiStepper: {
+      root: {
+        padding: '24px 0px',
+      },
+    },
+    MuiButton: {
+      root: {
+        marginRight: '15px',
+      },
+    },
+    MuiFormControl: {
+      root: {
+        marginBottom: '15px',
+      },
+    },
+  },
 });
 
 const style = {
@@ -38,38 +59,16 @@ export default class NewBuild extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      loading: true,
+      loading: false,
       finished: false,
       stepIndex: 0,
       submitFail: false,
       submitMessage: '',
       errorText: null,
-      orgs: [],
-      org: null,
-      checksum: '',
       url: '',
-      repo: '',
-      sha: '',
       branch: '',
       version: '',
     };
-  }
-
-  componentDidMount() {
-    api.getOrgs().then((response) => {
-      const orgs = response.data.sort((a, b) => a.name > b.name);
-      this.setState({
-        orgs,
-        org: orgs[0].name,
-        loading: false,
-      });
-    });
-  }
-
-  getOrgs() {
-    return this.state.orgs.map(org => (
-      <MenuItem className={org.name} key={org.id} value={org.name} primaryText={org.name} />
-    ));
   }
 
   getStepContent(stepIndex) {
@@ -77,18 +76,14 @@ export default class NewBuild extends Component {
       case 0:
         return (
           <div>
-            <DropDownMenu className="org-menu" value={this.state.org} onChange={this.handleOrgChange}>
-              {this.getOrgs()}
-            </DropDownMenu>
-            <p>
-              Select the org for this build.
-            </p>
-          </div>
-        );
-      case 1:
-        return (
-          <div>
-            <TextField className="url" floatingLabelText="URL" value={this.state.url} onChange={this.handleUrlChange} errorText={this.state.errorText} />
+            <TextField
+              className="url"
+              label="URL"
+              value={this.state.url}
+              onChange={this.handleChange('url')}
+              helperText={this.state.errorText}
+              error={this.state.errorText && this.state.errorText.length > 0}
+            />
             <p>
               The URI to fetch the image or sources for this build.
               If an image is provided no build will occur, but the image will be fetched.
@@ -97,54 +92,37 @@ export default class NewBuild extends Component {
             </p>
           </div>
         );
-      case 2:
+      case 1:
         return (
           <div>
-            <TextField className="checksum" floatingLabelText="Checksum (optional)" value={this.state.checksum} onChange={this.handleChecksumChange} errorText={this.state.errorText} />
-            <p>
-              The sha 256 checksum (prepended with sha256:)
-              of the contents specified in the url parameter,
-              note if the URL is a base64 data URI then it is the content of
-              the base64 content DECODED.
-            </p>
-          </div>
-        );
-      case 3:
-        return (
-          <div>
-            <TextField className="repo" floatingLabelText="Repo (optional)" value={this.state.repo} onChange={this.handleRepoChange} />
-            <p>
-              The href of the repo that will show in the logs and build information.
-            </p>
-          </div>
-        );
-      case 4:
-        return (
-          <div>
-            <TextField className="sha" floatingLabelText="Sha (optional)" value={this.state.sha} onChange={this.handleShaChange} />
-            <p>
-              SHA commit value (shown in logs and build info)
-            </p>
-          </div>
-        );
-      case 5:
-        return (
-          <div>
-            <TextField className="branch" floatingLabelText="Branch (optional)" value={this.state.branch} onChange={this.handleBranchChange} />
+            <TextField
+              className="branch"
+              label="Branch (optional)"
+              value={this.state.branch}
+              onChange={this.handleChange('branch')}
+            />
             <p>
               Branch of commit that caused the build (shown in logs and build info)
             </p>
           </div>
         );
-      case 6:
+      case 2:
         return (
           <div>
-            <TextField className="version" floatingLabelText="Version (optional)" value={this.state.version} onChange={this.handleVersionChange} />
+            <TextField
+              className="version"
+              label="Version (optional)"
+              value={this.state.version}
+              onChange={this.handleChange('version')}
+            />
             <p>
               An optional version to specify that will show in the logs
             </p>
           </div>
         );
+      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
+      case 3:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -156,13 +134,13 @@ export default class NewBuild extends Component {
 
   handleNext = () => {
     const { stepIndex } = this.state;
-    if (stepIndex === 1 && this.state.url === '') {
+    if (stepIndex === 0 && this.state.url === '') {
       this.setState({ errorText: 'field required' });
     } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 6,
-        loading: stepIndex >= 6,
+        finished: stepIndex >= 2,
+        loading: stepIndex >= 2,
         errorText: null,
       });
     }
@@ -179,50 +157,15 @@ export default class NewBuild extends Component {
     }
   }
 
-  handleOrgChange = (event, index, value) => {
-    this.setState({ org: value });
-  }
-
-  handleChecksumChange = (event) => {
-    this.setState({
-      checksum: event.target.value,
-    });
-  }
-
-  handleUrlChange = (event) => {
-    this.setState({
-      url: event.target.value,
-    });
-  }
-
-  handleRepoChange = (event) => {
-    this.setState({
-      repo: event.target.value,
-    });
-  }
-
-  handleShaChange = (event) => {
-    this.setState({
-      sha: event.target.value,
-    });
-  }
-
-  handleBranchChange = (event) => {
-    this.setState({
-      branch: event.target.value,
-    });
-  }
-
-  handleVersionChange = (event) => {
-    this.setState({
-      version: event.target.value,
-    });
+  // Handles changes for org, checksum, URL, repo, SHA, branch, and version.
+  handleChange = name => (event) => {
+    this.setState({ [name]: event.target.value });
   }
 
   submitBuild = () => {
     api.createBuild(
-      this.props.app, this.state.org, this.state.checksum, this.state.url,
-      this.state.repo, this.state.sha, this.state.branch, this.state.version,
+      this.props.app, this.props.org, null, this.state.url,
+      null, null, this.state.branch, this.state.version,
     ).then(() => {
       this.props.onComplete('New Deployment Requested');
     }).catch((error) => {
@@ -233,11 +176,7 @@ export default class NewBuild extends Component {
         stepIndex: 0,
         loading: false,
         errorText: null,
-        org: null,
-        checksum: null,
         url: '',
-        repo: null,
-        sha: null,
         branch: null,
         version: null,
       });
@@ -246,7 +185,7 @@ export default class NewBuild extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
     if (finished) {
       this.submitBuild();
     }
@@ -255,19 +194,18 @@ export default class NewBuild extends Component {
       <div style={contentStyle}>
         <div>{this.getStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<FlatButton
+          {stepIndex > 0 && (<Button
             className="back"
-            label="Back"
             disabled={stepIndex === 0}
-            onTouchTap={this.handlePrev}
+            onClick={this.handlePrev}
             style={style.buttons.back}
-          />)}
-          <RaisedButton
+          >Back</Button>)}
+          <Button
+            variant="contained"
             className="next"
-            label={stepIndex === 6 ? 'Finish' : 'Next'}
-            primary
-            onTouchTap={this.handleNext}
-          />
+            color="primary"
+            onClick={this.handleNext}
+          >{stepIndex === 6 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -276,23 +214,11 @@ export default class NewBuild extends Component {
   render() {
     const { loading, stepIndex } = this.state;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel className="select-org" >Select Org</StepLabel>
-            </Step>
-            <Step>
               <StepLabel>Url</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Checksum</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Repo</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Sha</StepLabel>
             </Step>
             <Step>
               <StepLabel>Branch</StepLabel>
@@ -302,21 +228,24 @@ export default class NewBuild extends Component {
             </Step>
           </Stepper>
           {
-            <ExpandTransition loading={loading} open>
+            <Collapse in={!loading}>
               {this.renderContent()}
-            </ExpandTransition>
+            </Collapse>
           }
-          <Dialog
-            open={this.state.submitFail}
-            modal
-            actions={
-              <FlatButton
-                label="Ok"
-                primary
-                onTouchTap={this.handleClose}
-              />}
-          >
-            {this.state.submitMessage}
+          <Dialog open={this.state.submitFail}>
+            <DialogTitle>
+              <Typography variant="h6">
+                Error
+              </Typography>
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                {this.state.submitMessage}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
+            </DialogActions>
           </Dialog>
         </div>
       </MuiThemeProvider>
@@ -326,5 +255,6 @@ export default class NewBuild extends Component {
 
 NewBuild.propTypes = {
   app: PropTypes.string.isRequired,
+  org: PropTypes.string.isRequired,
   onComplete: PropTypes.func.isRequired,
 };

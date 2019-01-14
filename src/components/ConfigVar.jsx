@@ -1,13 +1,18 @@
 import React, { Component } from 'react';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { IconButton, TextField } from '@material-ui/core';
 import PropTypes from 'prop-types';
-import IconButton from 'material-ui/IconButton';
-import TextField from 'material-ui/TextField';
-import EditIcon from 'material-ui/svg-icons/editor/mode-edit';
-import SaveIcon from 'material-ui/svg-icons/content/save';
+import EditIcon from '@material-ui/icons/Edit';
+import SaveIcon from '@material-ui/icons/Save';
 
-const muiTheme = getMuiTheme();
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+});
 
 const style = {
   container: {
@@ -88,7 +93,7 @@ export default class ConfigVar extends Component {
     const keyfield = this.state.keyedit ? (
       <TextField
         style={style.key}
-        hintText="KEY"
+        helperText="KEY"
         onChange={this.updateKey}
         value={this.state.name}
         disabled={disabled}
@@ -106,13 +111,13 @@ export default class ConfigVar extends Component {
       <div style={style.description}>{this.state.description}</div>
     ) : null;
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div style={style.container}>
           {keyfield}
           <TextField
-            floatingLabelText={!this.state.keyedit ? this.state.name : null}
+            label={!this.state.keyedit ? this.state.name : null}
             style={!this.state.keyedit ? style.key : style.value}
-            hintText="VALUE"
+            helperText="VALUE"
             onChange={this.updateValue}
             value={this.state.value}
             disabled={disabled}

@@ -1,25 +1,21 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import RefreshIndicator from 'material-ui/RefreshIndicator';
-import Paper from 'material-ui/Paper';
-import Snackbar from 'material-ui/Snackbar';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
-import IconButton from 'material-ui/IconButton';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import RemoveIcon from 'material-ui/svg-icons/content/clear';
-import { grey500, teal50 } from 'material-ui/styles/colors';
-import BuildOutputIcon from 'material-ui/svg-icons/action/assignment';
-import BuildIcon from 'material-ui/svg-icons/action/build';
-import ReleaseIcon from 'material-ui/svg-icons/action/backup';
-import RevertIcon from 'material-ui/svg-icons/av/replay';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import PendingIcon from 'material-ui/svg-icons/image/lens';
-import ErrorIcon from 'material-ui/svg-icons/navigation/cancel';
-import SuccessIcon from 'material-ui/svg-icons/action/check-circle';
-
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { grey, teal } from '@material-ui/core/colors';
+import {
+  Paper, Snackbar, CircularProgress, Table, TableBody, TableRow, TableCell,
+  IconButton, Dialog, Button, DialogActions, DialogContent, DialogTitle,
+  Tooltip, TablePagination, TableFooter,
+} from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Clear';
+import BuildOutputIcon from '@material-ui/icons/Assignment';
+import BuildIcon from '@material-ui/icons/Build';
+import ReleaseIcon from '@material-ui/icons/Backup';
+import RevertIcon from '@material-ui/icons/Replay';
+import PendingIcon from '@material-ui/icons/Lens';
+import ErrorIcon from '@material-ui/icons/Cancel';
+import SuccessIcon from '@material-ui/icons/CheckCircle';
 
 import Logs from './Logs';
 import api from '../../services/api';
@@ -28,13 +24,33 @@ import NewAutoBuild from './NewAutoBuild';
 
 import AutoBuildIcon from '../Icons/GitIcon';
 
-const muiTheme = getMuiTheme({
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: { main: '#0097a7' },
+  },
+  typography: {
+    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiDialog: {
+      paper: {
+        width: '80%',
+        maxWidth: 'none',
+      },
+      paperWidthSm: {
+        width: '80%',
+        maxWidth: 'none',
+      },
+    },
+  },
 });
 
 const releaseLimit = 20;
 
 const style = {
+  iconButton: {
+    color: 'black',
+  },
   tableRow: {
     height: '58px',
   },
@@ -42,7 +58,7 @@ const style = {
     fontSize: '12px',
     textTransform: 'uppercase',
   },
-  tableRowColumn: {
+  tableCell: {
     title: {
       fontSize: '16px',
     },
@@ -54,6 +70,7 @@ const style = {
       padding: '1px 12px',
       width: '52px',
       textAlign: 'center',
+      overflow: 'visible',
     },
     div: {
       width: '58px',
@@ -73,10 +90,6 @@ const style = {
       display: 'inline-block',
       position: 'relative',
     },
-  },
-  dialog: {
-    width: '80%',
-    maxWidth: 'none',
   },
   status: {
     position: 'absolute',
@@ -145,19 +158,23 @@ export default class Releases extends Component {
       revert: null,
       revertOpen: false,
       newAuto: false,
+      rowsPerPage: 15,
+      page: 0,
     };
+    this.loadReleases();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.active) {
-      this.loadReleases();
-    }
+  componentDidMount() {
+    this._isMounted = true;
+  }
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
-  getReleases() {
-    return this.state.releases.map((release, index) => {
+  getReleases(page, rowsPerPage) {
+    return this.state.releases.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((release, index) => {
       // release status indicator
-      let releaseColor = grey500;
+      let releaseColor = grey[500];
       let StatusIcon = PendingIcon;
       switch (release.status) {
         case 'succeeded':
@@ -172,12 +189,12 @@ export default class Releases extends Component {
           releaseColor = 'orange';
           break;
         default:
-          releaseColor = grey500;
+          releaseColor = grey[500];
           break;
       }
       let current = null;
       if (release.current) {
-        current = teal50;
+        current = teal[50];
       }
 
       const info1 = [
@@ -194,35 +211,39 @@ export default class Releases extends Component {
         color: releaseColor,
       }, style.status);
       return (
-        <TableRow className={`r${index}`} key={release.id} style={{ backgroundColor: current, height: '84px' }}>
-          <TableRowColumn style={{ width: '28px', paddingLeft: '24px', paddingRight: '0px' }}>
+        <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current, height: '84px' }}>
+          <TableCell style={{ width: '28px', paddingLeft: '24px', paddingRight: '0px' }}>
             <div style={{ position: 'relative', height: '100%' }}>
               {!release.release ? (<BuildIcon style={style.mainIcon} />) : (<ReleaseIcon style={{
-position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
-}}
+                position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
+              }}
               />)}
               <StatusIcon style={statusIconStyle} />
             </div>
-          </TableRowColumn>
-          <TableRowColumn>
+          </TableCell>
+          <TableCell>
             <div>
               {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `}
               {info1.join(' ')}
               <br />
               {info2.join(' ')}
-              <div style={style.tableRowColumn.sub}>
+              <div style={style.tableCell.sub}>
                 {getDateDiff(new Date(release.created_at))}
               </div>
             </div>
-          </TableRowColumn>
-          <TableRowColumn style={style.tableRowColumn.icon}>
+          </TableCell>
+          <TableCell style={style.tableCell.icon}>
             {!release.release &&
-              <IconButton className="logs" onTouchTap={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
+              <Tooltip title="Build Logs" placement="top-end">
+                <IconButton style={style.iconButton} className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
+              </Tooltip>
             }
             {!release.current && release.release &&
-              <IconButton className="revert" onTouchTap={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
+              <Tooltip title="Rollback" placement="top-end">
+                <IconButton style={style.iconButton} className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
+              </Tooltip>
             }
-          </TableRowColumn>
+          </TableCell>
         </TableRow>
       );
     });
@@ -262,10 +283,12 @@ position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
             if (releaseAndBuilds.length > releaseLimit) {
               releaseAndBuilds = releaseAndBuilds.slice(0, releaseLimit);
             }
-            this.setState({
-              releases: releaseAndBuilds,
-              loading: false,
-            });
+            if (this._isMounted) {
+              this.setState({
+                releases: releaseAndBuilds,
+                loading: false,
+              });
+            }
             resolve();
           });
         });
@@ -339,6 +362,14 @@ position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
     this.setState({ snackOpen: false });
   }
 
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
   reload = (message) => {
     this.setState({
       loading: false,
@@ -351,104 +382,129 @@ position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
   }
 
   render() {
+    const { releases, rowsPerPage, page } = this.state;
     const actions = [
-      <IconButton onTouchTap={() => { this.handleClose(); }}><RemoveIcon /></IconButton>,
+      <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
+        <RemoveIcon />
+      </IconButton>,
     ];
     const actionsRevert = [
-      <FlatButton
+      <Button
         className="ok"
-        label="Ok"
-        primary
-        onTouchTap={() => { this.handleRevertGo(); }}
-      />,
-      <FlatButton
+        color="primary"
+        onClick={() => { this.handleRevertGo(); }}
+      >Ok</Button>,
+      <Button
         className="cancel"
-        label="Cancel"
-        secondary
-        onTouchTap={() => { this.handleRevertClose(); }}
-      />,
+        color="secondary"
+        onClick={() => { this.handleRevertClose(); }}
+      >Cancel</Button>,
     ];
     if (this.state.loading) {
       return (
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <RefreshIndicator top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={muiTheme}>
         <div>
           {this.state.release && (
             <Dialog
               className="logs"
-              title={this.state.title}
-              actions={actions}
-              modal={false}
               open={this.state.logsOpen}
-              onRequestClose={() => { this.handleClose(); }}
-              contentStyle={style.dialog}
-              bodyStyle={{ padding: '0px', margin: '0px' }}
+              onClose={() => { this.handleClose(); }}
             >
-              <Logs
-                build={this.state.release.slug.id}
-                app={this.props.app}
-                open={this.state.logsOpen}
-              />
+              <DialogTitle>{this.state.title}</DialogTitle>
+              <DialogContent style={{ padding: '0px', margin: '0px' }}>
+                <Logs
+                  build={this.state.release.slug.id}
+                  app={this.props.app}
+                  open={this.state.logsOpen}
+                />
+              </DialogContent>
+              <DialogActions>{actions}</DialogActions>
             </Dialog>
           )}
           {this.state.revert && (
             <Dialog
               className="revert"
-              title={this.state.title}
-              actions={actionsRevert}
-              modal={false}
               open={this.state.revertOpen}
-              onRequestClose={() => { this.handleRevertClose(); }}
-              contentStyle={style.dialog}
+              onClose={() => { this.handleRevertClose(); }}
             >
-              <div>
-                {getDateDiff(new Date(this.state.revert.created_at))} - {[
-                  this.state.revert.description,
-                  this.state.revert.source_blob.author,
-                  this.state.revert.source_blob.commit ? `#${this.state.revert.source_blob.commit.substring(0, 7)}` : '',
-                  this.state.revert.source_blob.message ? this.state.revert.source_blob.message.replace(/\s+/g, ' ') : '',
-                ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' ')).join(' ')}
-              </div>
+              <DialogTitle>{this.state.title}</DialogTitle>
+              <DialogContent>
+                <div>
+                  {getDateDiff(new Date(this.state.revert.created_at))} - {[
+                    this.state.revert.description,
+                    this.state.revert.source_blob.author,
+                    this.state.revert.source_blob.commit ? `#${this.state.revert.source_blob.commit.substring(0, 7)}` : '',
+                    this.state.revert.source_blob.message ? this.state.revert.source_blob.message.replace(/\s+/g, ' ') : '',
+                  ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' ')).join(' ')}
+                </div>
+              </DialogContent>
+              <DialogActions>{actionsRevert}</DialogActions>
             </Dialog>
           )}
           {(!this.state.new && !this.state.newAuto) && (
-            <Paper zDepth={0}>
-              <IconButton className="new-autobuild" onTouchTap={() => { this.handleNewAutoBuild(); }} tooltip="Attach to Repo" tooltipPosition="bottom-left"><AutoBuildIcon /></IconButton>
-              <IconButton className="new-build" onTouchTap={() => { this.handleNewBuild(); }} tooltip="New Release" tooltipPosition="bottom-left"><AddIcon /></IconButton>
+            <Paper elevation={0}>
+              <Tooltip title="Attach to Repo" placement="bottom-end">
+                <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
+              </Tooltip>
+              <Tooltip title="New Release" placement="bottom-end">
+                <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleNewBuild(); }}><AddIcon /></IconButton>
+              </Tooltip>
             </Paper>
           )}
           {this.state.new && (
             <div>
-              <IconButton className="build-cancel" onTouchTap={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
-              <NewBuild app={this.props.app} onComplete={(message) => { this.reload(message); }} />
+              <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
+              <NewBuild
+                app={this.props.app}
+                org={this.props.org}
+                onComplete={
+                  (message) => { this.reload(message); }
+                }
+              />
             </div>
           )}
           {this.state.newAuto && (
             <div>
-              <IconButton className="auto-cancel" onTouchTap={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
+              <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
               <NewAutoBuild
                 app={this.props.app}
                 onComplete={(message) => { this.reload(message); }}
               />
             </div>
           )}
-          <Table className="release-list" wrapperStyle={{ overflow: 'visible' }} bodyStyle={{ overflow: 'visible' }}>
-            <TableBody displayRowCheckbox={false} showRowHover selectable={false}>
-              {this.getReleases()}
+          <Table className="release-list" style={{ overflow: 'visible' }}>
+            <TableBody>
+              {this.getReleases(page, rowsPerPage)}
             </TableBody>
+            {releases.length !== 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[15, 25, 50]}
+                    colSpan={3}
+                    count={releases.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
           </Table>
           <Snackbar
             className="release-snack"
             open={this.state.snackOpen}
             message={this.state.message}
             autoHideDuration={3000}
-            onRequestClose={() => { this.handleSnackClose(); }}
+            onClose={() => { this.handleSnackClose(); }}
           />
         </div>
       </MuiThemeProvider>
@@ -458,5 +514,5 @@ position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
 
 Releases.propTypes = {
   app: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
+  org: PropTypes.string.isRequired,
 };
