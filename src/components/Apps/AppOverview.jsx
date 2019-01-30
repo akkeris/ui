@@ -5,7 +5,7 @@ import {
   CircularProgress, Switch, List, ListItem, ListItemText, Button, Dialog,
   GridList, GridListTile, Table, TableBody, TableRow, TableCell,
   DialogActions, DialogContent, DialogContentText,
-  FormGroup, FormControlLabel,
+  FormGroup, FormControlLabel, Tooltip,
 } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Clear';
 
@@ -106,13 +106,30 @@ class AppOverview extends Component {
       submitFail: false,
       submitMessage: '',
       isMaintenance: false,
+      deleteDisabled: false,
     };
   }
 
   componentWillMount() {
+    const { app, accountInfo } = this.props;
+
+    // If this is a production app, check for the elevated_access role to determine
+    // whether or not to enable the delete app button.
+
+    // There is still an API call on the backend that controls access to the actual
+    // deletion of the app, this is merely for convienence.
+
+    let deleteDisabled = false;
+    if (app.space.compliance.includes('prod')) {
+      // If we don't have the elevated_access object in the accountInfo object,
+      // default to enabling the button (access will be controlled on the API)
+      deleteDisabled = accountInfo.elevated_access ? accountInfo.elevated_access : false;
+    }
+
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
-      isMaintenance: this.props.app.maintenance,
+      isMaintenance: app.maintenance,
       loading: false,
+      deleteDisabled,
     });
   }
 
@@ -170,6 +187,7 @@ class AppOverview extends Component {
   }
 
   render() {
+    const { deleteDisabled } = this.state;
     if (this.state.loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -179,6 +197,29 @@ class AppOverview extends Component {
         </MuiThemeProvider>
       );
     }
+
+    let deleteButton = (
+      <Button
+        variant="contained"
+        className="delete"
+        style={style.button}
+        onClick={this.handleConfirmation}
+        color="secondary"
+        disabled={deleteDisabled}
+      >
+        <RemoveIcon style={style.removeIcon} nativeColor={deleteDisabled ? undefined : 'white'} />
+        <span style={style.deleteButtonLabel}>Delete App</span>
+      </Button>
+    );
+    // Wrap the delete button in a tooltip to avoid confusion as to why the button is disabled
+    if (deleteDisabled) {
+      deleteButton = (
+        <Tooltip title="Elevated access required" placement="top">
+          <div>{deleteButton}</div>
+        </Tooltip>
+      );
+    }
+
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div>
@@ -241,12 +282,7 @@ class AppOverview extends Component {
                   </FormGroup>
                 </TableCell>
                 <TableCell >
-                  <div style={style.tableCell.end}>
-                    <Button variant="contained" className="delete" style={style.button} onClick={this.handleConfirmation} color="secondary">
-                      <RemoveIcon nativeColor="white" style={style.removeIcon} />
-                      <span style={style.deleteButtonLabel}>Delete App</span>
-                    </Button>
-                  </div>
+                  <div style={style.tableCell.end}>{deleteButton}</div>
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -284,6 +320,7 @@ class AppOverview extends Component {
 AppOverview.propTypes = {
   app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   onComplete: PropTypes.func.isRequired,
+  accountInfo: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
 export default AppOverview;

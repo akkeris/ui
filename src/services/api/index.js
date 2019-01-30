@@ -298,6 +298,10 @@ function getUser() {
   return axios.get('/account/user');
 }
 
+function getAccount() {
+  return axios.get('/api/account');
+}
+
 function getLogSession(app) {
   return axios.post(`/api/apps/${app}/log-sessions`, { lines: 10, tail: true });
 }
@@ -442,4 +446,5 @@ export default {
   createWebHook,
   getWebhookResults,
   getAppsAttachedToAddon,
+  getAccount,
 };
