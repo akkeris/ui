@@ -103,6 +103,7 @@ export default class AppInfo extends Component {
     super(props);
     this.state = {
       app: {},
+      accountInfo: {},
       loading: true,
       submitMessage: '',
       submitFail: false,
@@ -123,10 +124,13 @@ export default class AppInfo extends Component {
         currentTab = 'info';
         window.location.hash = `${this.state.baseHash}info`;
       }
-      this.setState({ currentTab });
-      this.setState({
-        app: response.data,
-        loading: false,
+      api.getAccount().then((response2) => {
+        this.setState({
+          currentTab,
+          app: response.data,
+          accountInfo: response2.data,
+          loading: false,
+        });
       });
     }).catch((error) => {
       this.setState({
@@ -325,7 +329,7 @@ export default class AppInfo extends Component {
               />
             </Tabs>
             {currentTab === 'info' && (
-              <AppOverview app={this.state.app} onComplete={this.reload} />
+              <AppOverview app={this.state.app} onComplete={this.reload} accountInfo={this.state.accountInfo} />
             )}
             {currentTab === 'dynos' && (
               <Formations
