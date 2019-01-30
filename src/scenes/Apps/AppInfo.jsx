@@ -188,19 +188,33 @@ export default class AppInfo extends Component {
   }
 
   render() {
-    const { currentTab } = this.state;
-    if (this.state.loading) {
+    const { currentTab, loading, submitMessage, submitFail } = this.state;
+    if (loading) {
+      let notFoundMessage;
+      if (submitFail) {
+        // Format the invalid application name in bold.
+        try {
+          const result = /(The specified application )(.*)( does not exist\.)/g.exec(submitMessage);
+          notFoundMessage = (
+            <span>
+              <span>{result[1]}</span>
+              <span style={{ fontWeight: 'bold' }}>{result[2]}</span>
+              <span>{result[3]}</span>
+            </span>
+          );
+        } catch (e) { notFoundMessage = submitMessage; }
+      }
       return (
         <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            { !submitFail && <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" /> }
             <Dialog
               className="not-found-error"
-              open={this.state.submitFail}
+              open={submitFail}
             >
               <DialogTitle>Error</DialogTitle>
               <DialogContent>
-                <DialogContentText>{this.state.submitMessage}</DialogContentText>
+                <DialogContentText>{notFoundMessage}</DialogContentText>
               </DialogContent>
               <DialogActions>
                 <Button
