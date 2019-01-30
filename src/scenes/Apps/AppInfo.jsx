@@ -220,6 +220,8 @@ export default class AppInfo extends Component {
                 <Button
                   onClick={this.handleNotFoundClose}
                   color="primary"
+                  autoFocus
+                  onKeyDown={e => ['Escape', 'Esc'].includes(e.key) && this.handleNotFoundClose()}
                 >
                   Ok
                 </Button>
