@@ -65,31 +65,20 @@ export default class NewAddon extends Component {
       serviceid: '',
       plans: [],
       plan: {},
-      planid: '',
     };
   }
 
-  componentDidMount() {
-    api.getAddonServices().then((response) => {
-      this.setState({
-        services: response.data,
-        service: response.data[0],
-        loading: false,
-      });
-    });
+  async componentDidMount() {
+    let { data: services } = await api.getAddonServices();
+    this.setState({ services, service: services[0], loading: false });
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(prevProps, prevState) {
     if (this.state.stepIndex !== prevState.stepIndex && this.state.stepIndex === 1) {
       this.setState({ loading: true }); // eslint-disable-line react/no-did-update-set-state
-      api.getAddonServicePlans(this.state.service.name).then((response) => {
-        this.setState({
-          plans: response.data,
-          plan: response.data[0],
-          planid: response.data[0].id,
-          loading: false,
-        });
-      });
+      let { data: plans } = await api.getAddonServicePlans(this.state.service.id);
+      plans = plans.filter((x) => x.state !== "deprecated")
+      this.setState({ plans, plan: plans[0], loading: false});
     }
   }
 
@@ -145,7 +134,7 @@ export default class NewAddon extends Component {
               <Select
                 autoWidth
                 className="plan-menu"
-                value={this.state.planid}
+                value={this.state.plan ? this.state.plan.id : ''}
                 onChange={this.handlePlanChange}
                 input={<Input name="plan" id="plan-helper" />}
               >
@@ -196,9 +185,8 @@ export default class NewAddon extends Component {
   }
 
   handlePlanChange = (event) => {
-    const planid = event.target.value;
-    const plan = this.state.plans.find(a => a.id === planid);
-    this.setState({ plan, planid });
+    const plan = this.state.plans.find(a => a.id === event.target.value);
+    this.setState({ plan });
   }
 
   handleNext = () => {

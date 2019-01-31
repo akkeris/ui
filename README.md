@@ -30,7 +30,7 @@ Connect an oauth provider with the following env info.
 
 * CLIENT_ID
 * CLIENT_SECRET
-* OAUTH_ENDPOINT (Provider url)
+* OAUTH_ENDPOINT (In the format schema://host no path is necessary, e.g., no /authorize etc.)
 
 We also connect to github for use of repo webhooks.  Register this app with your account or organization like explained [here](https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/).
 
