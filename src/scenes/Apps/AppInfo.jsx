@@ -329,7 +329,11 @@ export default class AppInfo extends Component {
               />
             </Tabs>
             {currentTab === 'info' && (
-              <AppOverview app={this.state.app} onComplete={this.reload} accountInfo={this.state.accountInfo} />
+              <AppOverview
+                app={this.state.app}
+                onComplete={this.reload}
+                accountInfo={this.state.accountInfo}
+              />
             )}
             {currentTab === 'dynos' && (
               <Formations
@@ -338,13 +342,15 @@ export default class AppInfo extends Component {
             )}
             {currentTab === 'releases' && (
               <Releases
-                app={this.state.app.name}
+                app={this.state.app}
                 org={this.state.app.organization.name}
+                accountInfo={this.state.accountInfo}
               />
             )}
             {currentTab === 'addons' && (
               <Addons
-                app={this.state.app.name}
+                app={this.state.app}
+                accountInfo={this.state.accountInfo}
               />
             )}
             {currentTab === 'webhooks' && (

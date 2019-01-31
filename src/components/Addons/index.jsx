@@ -23,6 +23,14 @@ function isEmpty(obj) {
   return empty;
 }
 
+function addRestrictedTooltip(title, placement, children) {
+  return (
+    <Tooltip title={title} placement={placement}>
+      <div style={{ opacity: 0.35 }}>{children}</div>
+    </Tooltip>
+  );
+}
+
 const muiTheme = createMuiTheme({
   palette: {
     primary: { main: '#0097a7' },
@@ -66,9 +74,6 @@ const style = {
       fontSize: '11px',
       textTransform: 'uppercase',
     },
-    end: {
-      float: 'right',
-    },
     icon: {
       width: '58px',
     },
@@ -109,80 +114,112 @@ export default class Addons extends Component {
       attachmentsLoaded: false,
       currentAddon: {},
       addonDialogOpen: false,
+      isElevated: false,
     };
     this.loadAddons();
   }
 
   componentDidMount() {
     this._isMounted = true;
+    const { app, accountInfo } = this.props;
+
+    // If this is a production app, check for the elevated_access role to determine
+    // whether or not to enable the delete addon button.
+
+    // There is still an API call on the backend that controls access to the actual
+    // deletion of the addon, this is merely for convienence.
+
+    let isElevated = false;
+    if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
+      // If we don't have the elevated_access object in the accountInfo object,
+      // default to enabling the button (access will be controlled on the API)
+      isElevated = accountInfo.elevated_access ? accountInfo.elevated_access : true;
+    }
+    this.setState({ isElevated }); // eslint-disable-line react/no-did-mount-set-state
   }
   componentWillUnmount() {
     this._isMounted = false;
   }
 
   getAddons() {
-    return this.state.addons.map(addon => (
-      <TableRow
-        hover
-        className={addon.addon_service.name}
-        key={addon.id}
-        style={style.tableRowPointer}
-      >
-        <TableCell
-          onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
+    const { isElevated } = this.state;
+    return this.state.addons.map((addon) => {
+      let deleteButton = (
+        <IconButton disabled={!isElevated} style={style.iconButton} className="addon-remove" onClick={() => this.handleAddonConfirmation(addon)}>
+          <RemoveIcon />
+        </IconButton>
+      );
+      if (!isElevated) {
+        // Wrap the delete controls in a tooltip to avoid confusion as to why they are disabled
+        deleteButton = addRestrictedTooltip('Elevated access required', 'right', deleteButton);
+      }
+      return (
+        <TableRow
+          hover
+          className={addon.addon_service.name}
+          key={addon.id}
+          style={style.tableRowPointer}
         >
-          <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
-          <div style={style.tableRowColumn.sub}>{addon.id}</div>
-        </TableCell>
-        <TableCell
-          onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
-        >
-          <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
-        </TableCell>
-        <TableCell style={style.tableRowColumn.icon}>
-          <div style={style.tableRowColumn.end}>
-            <IconButton style={style.iconButton} className="addon-remove" onClick={() => this.handleAddonConfirmation(addon)}>
-              <RemoveIcon />
-            </IconButton>
-          </div>
-        </TableCell>
-      </TableRow>
-    ));
+          <TableCell
+            onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
+          >
+            <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
+            <div style={style.tableRowColumn.sub}>{addon.id}</div>
+          </TableCell>
+          <TableCell
+            onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
+          >
+            <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
+          </TableCell>
+          <TableCell style={style.tableRowColumn.icon}>
+            {deleteButton}
+          </TableCell>
+        </TableRow>
+      );
+    });
   }
 
   getAddonAttachments() {
-    return this.state.addonAttachments.map((attachment, index) => (
-      <TableRow
-        hover
-        className={`${attachment.name} addon-attachment-list-${index}`}
-        key={attachment.id}
-        style={style.tableRowPointer}
-      >
-        <TableCell
-          onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+    const { isElevated } = this.state;
+    return this.state.addonAttachments.map((attachment, index) => {
+      let deleteButton = (
+        <IconButton disabled={!isElevated} style={style.iconButton} className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
+          <RemoveIcon />
+        </IconButton>
+      );
+      if (!isElevated) {
+        // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
+        deleteButton = addRestrictedTooltip('Elevated access required', 'right', deleteButton);
+      }
+      return (
+        <TableRow
+          hover
+          className={`${attachment.name} addon-attachment-list-${index}`}
+          key={attachment.id}
+          style={style.tableRowPointer}
         >
-          <div style={style.tableRowColumn.title}>{attachment.name}</div>
-          <div style={style.tableRowColumn.sub}>{attachment.id}</div>
-        </TableCell>
-        <TableCell
-          onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
-        >
-          <div style={style.tableRowColumn.title}>{attachment.addon.plan.name}</div>
-        </TableCell>
-        <TableCell
-          onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
-        >
-          <div style={style.tableRowColumn.title}>{attachment.addon.app.name}</div>
-        </TableCell>
-        <TableCell style={style.tableRowColumn.icon}>
-          <div style={style.tableRowColumn.end}>
-            <IconButton style={style.iconButton} className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
-              <RemoveIcon />
-            </IconButton>
-          </div>
-        </TableCell>
-      </TableRow>
-    ));
+          <TableCell
+            onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+          >
+            <div style={style.tableRowColumn.title}>{attachment.name}</div>
+            <div style={style.tableRowColumn.sub}>{attachment.id}</div>
+          </TableCell>
+          <TableCell
+            onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+          >
+            <div style={style.tableRowColumn.title}>{attachment.addon.plan.name}</div>
+          </TableCell>
+          <TableCell
+            onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
+          >
+            <div style={style.tableRowColumn.title}>{attachment.addon.app.name}</div>
+          </TableCell>
+          <TableCell style={style.tableRowColumn.icon}>
+            {deleteButton}
+          </TableCell>
+        </TableRow>
+      );
+    });
   }
 
   getDialogTitle() {
@@ -204,7 +241,7 @@ export default class Addons extends Component {
   getAppsAttachedToAddon() {
     const addons = this.state.addons;
     addons.forEach((addon, index) => {
-      api.getAppsAttachedToAddon(this.props.app, addon.id).then((res) => {
+      api.getAppsAttachedToAddon(this.props.app.name, addon.id).then((res) => {
         addons[index].attached_to = res.data.attached_to;
         if (addons.every(a => (a.attached_to))) {
           if (this._isMounted) {
@@ -216,7 +253,7 @@ export default class Addons extends Component {
 
     const addonAttachments = this.state.addonAttachments;
     addonAttachments.forEach((attachment, index) => {
-      api.getAppsAttachedToAddon(this.props.app, attachment.addon.id).then((res) => {
+      api.getAppsAttachedToAddon(this.props.app.name, attachment.addon.id).then((res) => {
         addonAttachments[index].attached_to = res.data.attached_to;
         if (addonAttachments.every(a => (a.attached_to))) {
           if (this._isMounted) {
@@ -229,8 +266,8 @@ export default class Addons extends Component {
 
   loadAddons() {
     Promise.all([
-      api.getAppAddons(this.props.app),
-      api.getAddonAttachments(this.props.app),
+      api.getAppAddons(this.props.app.name),
+      api.getAddonAttachments(this.props.app.name),
     ]).then(([r1, r2]) => {
       if (this._isMounted) {
         this.setState({
@@ -281,7 +318,7 @@ export default class Addons extends Component {
 
   handleRemoveAddon = () => {
     this.setState({ loading: true });
-    api.deleteAddon(this.props.app, this.state.addon.id).then(() => {
+    api.deleteAddon(this.props.app.name, this.state.addon.id).then(() => {
       this.reload('Addon Deleted');
     }).catch((error) => {
       this.setState({
@@ -298,7 +335,7 @@ export default class Addons extends Component {
 
   handleRemoveAddonAttachment = () => {
     this.setState({ loading: true });
-    api.deleteAddonAttachment(this.props.app, this.state.attachment.id).then(() => {
+    api.deleteAddonAttachment(this.props.app.name, this.state.attachment.id).then(() => {
       this.reload('Attachment Deleted');
     }).catch((error) => {
       this.setState({
@@ -352,8 +389,8 @@ export default class Addons extends Component {
   reload = (message) => {
     this.setState({ loading: true });
     Promise.all([
-      api.getAppAddons(this.props.app),
-      api.getAddonAttachments(this.props.app),
+      api.getAppAddons(this.props.app.name),
+      api.getAddonAttachments(this.props.app.name),
     ]).then(([r1, r2]) => {
       this.setState({
         addons: r1.data,
@@ -408,13 +445,13 @@ export default class Addons extends Component {
           {this.state.new && (
             <div>
               <IconButton style={style.iconButton} className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
-              <NewAddon app={this.props.app} onComplete={this.reload} />
+              <NewAddon app={this.props.app.name} onComplete={this.reload} />
             </div>
           )}
           {this.state.attach && (
             <div>
               <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
-              <AttachAddon app={this.props.app} onComplete={this.reload} />
+              <AttachAddon app={this.props.app.name} onComplete={this.reload} />
             </div>
           )}
           <Table className="addon-list">
@@ -527,5 +564,6 @@ export default class Addons extends Component {
 }
 
 Addons.propTypes = {
-  app: PropTypes.string.isRequired,
+  app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  accountInfo: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
