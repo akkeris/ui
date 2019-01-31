@@ -127,7 +127,7 @@ class AppOverview extends Component {
     // There is still an API call on the backend that controls access to the actual
     // deletion of the app, this is merely for convienence.
 
-    let isElevated = false;
+    let isElevated = true;
     if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
       // If we don't have the elevated_access object in the accountInfo object,
       // default to enabling the button (access will be controlled on the API)
