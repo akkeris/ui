@@ -115,6 +115,7 @@ class AppOverview extends Component {
       submitMessage: '',
       isMaintenance: false,
       isElevated: false,
+      restrictedSpace: false,
     };
   }
 
@@ -127,17 +128,20 @@ class AppOverview extends Component {
     // There is still an API call on the backend that controls access to the actual
     // deletion of the app, this is merely for convienence.
 
-    let isElevated = true;
+    let isElevated = false;
+    let restrictedSpace = false;
     if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
       // If we don't have the elevated_access object in the accountInfo object,
       // default to enabling the button (access will be controlled on the API)
       isElevated = accountInfo.elevated_access ? accountInfo.elevated_access : true;
+      restrictedSpace = true;
     }
 
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       isMaintenance: app.maintenance,
       loading: false,
       isElevated,
+      restrictedSpace,
     });
   }
 
@@ -195,7 +199,7 @@ class AppOverview extends Component {
   }
 
   render() {
-    const { isElevated } = this.state;
+    const { isElevated, restrictedSpace } = this.state;
     if (this.state.loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -213,7 +217,7 @@ class AppOverview extends Component {
         style={style.button}
         onClick={this.handleConfirmation}
         color="secondary"
-        disabled={!isElevated}
+        disabled={(restrictedSpace && !isElevated)}
       >
         <RemoveIcon style={style.removeIcon} nativeColor={isElevated ? 'white' : undefined} />
         <span style={style.deleteButtonLabel}>Delete App</span>
@@ -221,7 +225,7 @@ class AppOverview extends Component {
     );
 
     // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
-    if (!isElevated) {
+    if (restrictedSpace && !isElevated) {
       deleteButton = addRestrictedTooltip('Elevated access required', deleteButton);
     }
 
