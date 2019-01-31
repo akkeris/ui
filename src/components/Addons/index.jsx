@@ -115,6 +115,7 @@ export default class Addons extends Component {
       currentAddon: {},
       addonDialogOpen: false,
       isElevated: false,
+      restrictedSpace: false,
     };
     this.loadAddons();
   }
@@ -129,30 +130,40 @@ export default class Addons extends Component {
     // There is still an API call on the backend that controls access to the actual
     // deletion of the addon, this is merely for convienence.
 
-    let isElevated = true;
+    let isElevated = false;
+    let restrictedSpace = false;
     if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
       // If we don't have the elevated_access object in the accountInfo object,
       // default to enabling the button (access will be controlled on the API)
       isElevated = accountInfo.elevated_access ? accountInfo.elevated_access : true;
+      restrictedSpace = true;
     }
-    this.setState({ isElevated }); // eslint-disable-line react/no-did-mount-set-state
+    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line react/no-did-mount-set-state
   }
   componentWillUnmount() {
     this._isMounted = false;
   }
 
   getAddons() {
-    const { isElevated } = this.state;
+    const { isElevated, restrictedSpace } = this.state;
     return this.state.addons.map((addon) => {
       let deleteButton = (
-        <IconButton disabled={!isElevated} style={style.iconButton} className="addon-remove" onClick={() => this.handleAddonConfirmation(addon)}>
+        <IconButton
+          disabled={(restrictedSpace && !isElevated)}
+          style={style.iconButton}
+          className="addon-remove"
+          onClick={() => this.handleAddonConfirmation(addon)}
+        >
           <RemoveIcon />
         </IconButton>
       );
-      if (!isElevated) {
+
+      // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
+      if (restrictedSpace && !isElevated) {
         // Wrap the delete controls in a tooltip to avoid confusion as to why they are disabled
         deleteButton = addRestrictedTooltip('Elevated access required', 'right', deleteButton);
       }
+
       return (
         <TableRow
           hover
@@ -180,17 +191,20 @@ export default class Addons extends Component {
   }
 
   getAddonAttachments() {
-    const { isElevated } = this.state;
+    const { isElevated, restrictedSpace } = this.state;
     return this.state.addonAttachments.map((attachment, index) => {
-      let deleteButton = (
-        <IconButton disabled={!isElevated} style={style.iconButton} className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
-          <RemoveIcon />
-        </IconButton>
-      );
-      if (!isElevated) {
+      let deleteButton;
+      if (!restrictedSpace || isElevated) {
+        deleteButton = (
+          <IconButton disabled={!isElevated} style={style.iconButton} className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
+            <RemoveIcon />
+          </IconButton>
+        );
+      } else {
         // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
         deleteButton = addRestrictedTooltip('Elevated access required', 'right', deleteButton);
       }
+
       return (
         <TableRow
           hover

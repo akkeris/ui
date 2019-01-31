@@ -169,6 +169,7 @@ export default class Releases extends Component {
       rowsPerPage: 15,
       page: 0,
       isElevated: false,
+      restrictedSpace: false,
     };
     this.loadReleases();
   }
@@ -184,14 +185,16 @@ export default class Releases extends Component {
     // There is still an API call on the backend that controls access to the actual
     // creation of a build, this is merely for convienence.
 
-    let isElevated = true;
+    let isElevated = false;
+    let restrictedSpace = false;
     if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
       // If we don't have the elevated_access object in the accountInfo object,
       // default to enabling the button (access will be controlled on the API)
       isElevated = accountInfo.elevated_access ? accountInfo.elevated_access : true;
+      restrictedSpace = true;
     }
 
-    this.setState({ isElevated }); // eslint-disable-line react/no-did-mount-set-state
+    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line react/no-did-mount-set-state
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -408,7 +411,7 @@ export default class Releases extends Component {
   }
 
   render() {
-    const { releases, rowsPerPage, page, isElevated } = this.state;
+    const { releases, rowsPerPage, page, isElevated, restrictedSpace } = this.state;
     const actions = [
       <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
         <RemoveIcon />
@@ -428,7 +431,7 @@ export default class Releases extends Component {
     ];
 
     let newReleaseButton;
-    if (isElevated) {
+    if (!restrictedSpace || isElevated) {
       newReleaseButton = (
         <Tooltip title="New Release" placement="bottom-end">
           <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleNewBuild(); }}><AddIcon /></IconButton>
