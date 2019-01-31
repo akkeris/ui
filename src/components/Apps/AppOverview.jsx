@@ -13,6 +13,14 @@ import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
 
+function addRestrictedTooltip(title, children) {
+  return (
+    <Tooltip title={title} placement="top">
+      <div>{children}</div>
+    </Tooltip>
+  );
+}
+
 const muiTheme = createMuiTheme({
   palette: {
     primary: { main: '#0097a7' },
@@ -106,7 +114,7 @@ class AppOverview extends Component {
       submitFail: false,
       submitMessage: '',
       isMaintenance: false,
-      deleteDisabled: false,
+      isElevated: false,
     };
   }
 
@@ -119,17 +127,17 @@ class AppOverview extends Component {
     // There is still an API call on the backend that controls access to the actual
     // deletion of the app, this is merely for convienence.
 
-    let deleteDisabled = false;
-    if (app.space.compliance.includes('prod')) {
+    let isElevated = false;
+    if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
       // If we don't have the elevated_access object in the accountInfo object,
       // default to enabling the button (access will be controlled on the API)
-      deleteDisabled = accountInfo.elevated_access ? accountInfo.elevated_access : false;
+      isElevated = accountInfo.elevated_access ? accountInfo.elevated_access : true;
     }
 
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       isMaintenance: app.maintenance,
       loading: false,
-      deleteDisabled,
+      isElevated,
     });
   }
 
@@ -187,7 +195,7 @@ class AppOverview extends Component {
   }
 
   render() {
-    const { deleteDisabled } = this.state;
+    const { isElevated } = this.state;
     if (this.state.loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -205,19 +213,16 @@ class AppOverview extends Component {
         style={style.button}
         onClick={this.handleConfirmation}
         color="secondary"
-        disabled={deleteDisabled}
+        disabled={!isElevated}
       >
-        <RemoveIcon style={style.removeIcon} nativeColor={deleteDisabled ? undefined : 'white'} />
+        <RemoveIcon style={style.removeIcon} nativeColor={isElevated ? 'white' : undefined} />
         <span style={style.deleteButtonLabel}>Delete App</span>
       </Button>
     );
-    // Wrap the delete button in a tooltip to avoid confusion as to why the button is disabled
-    if (deleteDisabled) {
-      deleteButton = (
-        <Tooltip title="Elevated access required" placement="top">
-          <div>{deleteButton}</div>
-        </Tooltip>
-      );
+
+    // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
+    if (!isElevated) {
+      deleteButton = addRestrictedTooltip('Elevated access required', deleteButton);
     }
 
     return (

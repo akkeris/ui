@@ -24,6 +24,14 @@ import NewAutoBuild from './NewAutoBuild';
 
 import AutoBuildIcon from '../Icons/GitIcon';
 
+function addRestrictedTooltip(title, placement, children) {
+  return (
+    <Tooltip title={title} placement={placement}>
+      <div style={{ display: 'inline' }}>{children}</div>
+    </Tooltip>
+  );
+}
+
 const muiTheme = createMuiTheme({
   palette: {
     primary: { main: '#0097a7' },
@@ -160,12 +168,30 @@ export default class Releases extends Component {
       newAuto: false,
       rowsPerPage: 15,
       page: 0,
+      isElevated: false,
     };
     this.loadReleases();
   }
 
   componentDidMount() {
     this._isMounted = true;
+
+    const { app, accountInfo } = this.props;
+
+    // If this is a production app, check for the elevated_access role to determine
+    // whether or not to enable creating arbitrary builds
+
+    // There is still an API call on the backend that controls access to the actual
+    // creation of a build, this is merely for convienence.
+
+    let isElevated = false;
+    if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
+      // If we don't have the elevated_access object in the accountInfo object,
+      // default to enabling the button (access will be controlled on the API)
+      isElevated = accountInfo.elevated_access ? accountInfo.elevated_access : true;
+    }
+
+    this.setState({ isElevated }); // eslint-disable-line react/no-did-mount-set-state
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -251,10 +277,10 @@ export default class Releases extends Component {
 
   loadReleases() {
     return new Promise((resolve) => {
-      api.getApp(this.props.app).then(() => {
-        api.getBuilds(this.props.app).then((buildResponse) => {
+      api.getApp(this.props.app.name).then(() => {
+        api.getBuilds(this.props.app.name).then((buildResponse) => {
           let builds = buildResponse.data;
-          api.getReleases(this.props.app).then((releaseResponse) => {
+          api.getReleases(this.props.app.name).then((releaseResponse) => {
             const releases = releaseResponse
               .sort((a, b) => (
                 new Date(a.created_at).getTime() > new Date(b.created_at).getTime() ? 1 : -1
@@ -306,7 +332,7 @@ export default class Releases extends Component {
 
   handleRevertGo() {
     api.createRelease(
-      this.props.app,
+      this.props.app.name,
       null,
       this.state.revert.id,
       `Rollback to release v${this.state.revert.version}`,
@@ -382,7 +408,7 @@ export default class Releases extends Component {
   }
 
   render() {
-    const { releases, rowsPerPage, page } = this.state;
+    const { releases, rowsPerPage, page, isElevated } = this.state;
     const actions = [
       <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
         <RemoveIcon />
@@ -400,6 +426,28 @@ export default class Releases extends Component {
         onClick={() => { this.handleRevertClose(); }}
       >Cancel</Button>,
     ];
+
+    let newReleaseButton;
+    if (isElevated) {
+      newReleaseButton = (
+        <Tooltip title="New Release" placement="bottom-end">
+          <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleNewBuild(); }}><AddIcon /></IconButton>
+        </Tooltip>
+      );
+    } else {
+      // Wrap the new release button in a tooltip to avoid confusion as to why it is disabled
+      newReleaseButton = addRestrictedTooltip('Elevated access required', 'right', (
+        <IconButton
+          disabled
+          style={{ ...style.iconButton, opacity: 0.35 }}
+          className="new-build"
+          onClick={() => { this.handleNewBuild(); }}
+        >
+          <AddIcon />
+        </IconButton>
+      ));
+    }
+
     if (this.state.loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -421,7 +469,7 @@ export default class Releases extends Component {
               <DialogContent style={{ padding: '0px', margin: '0px' }}>
                 <Logs
                   build={this.state.release.slug.id}
-                  app={this.props.app}
+                  app={this.props.app.name}
                   open={this.state.logsOpen}
                 />
               </DialogContent>
@@ -453,16 +501,14 @@ export default class Releases extends Component {
               <Tooltip title="Attach to Repo" placement="bottom-end">
                 <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
               </Tooltip>
-              <Tooltip title="New Release" placement="bottom-end">
-                <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleNewBuild(); }}><AddIcon /></IconButton>
-              </Tooltip>
+              {newReleaseButton}
             </Paper>
           )}
           {this.state.new && (
             <div>
               <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
               <NewBuild
-                app={this.props.app}
+                app={this.props.app.name}
                 org={this.props.org}
                 onComplete={
                   (message) => { this.reload(message); }
@@ -474,7 +520,7 @@ export default class Releases extends Component {
             <div>
               <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
               <NewAutoBuild
-                app={this.props.app}
+                app={this.props.app.name}
                 onComplete={(message) => { this.reload(message); }}
               />
             </div>
@@ -513,6 +559,7 @@ export default class Releases extends Component {
 }
 
 Releases.propTypes = {
-  app: PropTypes.string.isRequired,
+  app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  accountInfo: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   org: PropTypes.string.isRequired,
 };
