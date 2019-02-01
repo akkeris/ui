@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, FormControl,
+  Step, Stepper, StepLabel, FormControl, CircularProgress, LinearProgress,
   Select, MenuItem, Dialog, Button, Input,
   DialogTitle, DialogActions, DialogContent,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
@@ -49,6 +50,20 @@ const style = {
       marginRight: 12,
     },
   },
+
+  refresh: {
+    div: {
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      width: '40px',
+      height: '350px',
+      marginTop: '20%',
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
+    },
+  },
 };
 
 export default class NewAddon extends Component {
@@ -56,9 +71,11 @@ export default class NewAddon extends Component {
     super(props, context);
     this.state = {
       loading: true,
-      finished: false,
       stepIndex: 0,
       submitFail: false,
+      provisioning: false,
+      provisionStatus: 0,
+      provisionMessage: '',
       submitMessage: '',
       services: [],
       service: {},
@@ -194,7 +211,6 @@ export default class NewAddon extends Component {
     if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 1,
         loading: stepIndex >= 1,
       });
     }
@@ -210,61 +226,98 @@ export default class NewAddon extends Component {
     }
   }
 
-  submitAddon = () => {
-    api.createAddon(this.props.app, this.state.plan.id).then(() => {
-      this.props.onComplete('Addon Created');
-    }).catch((error) => {
+  submitAddon = async () => {
+    try {
+      this.setState({ loading: true })
+      let {data: addon} = await api.createAddon(this.props.app, this.state.plan.id);
+
+      for(let i=0; i < 2000; i++) {
+        if (i % 20 === 0) {
+          ({data: addon} = await api.getAddon(this.props.app, addon.id))
+        }
+        if(i === 1999) {
+          throw new Error('It seems this addon is taking too long to complete its task. When the provisioning finishes your application will automatically be restarted with the new addon.')
+        }
+        if(addon.state !== 'provisioning') {
+          this.props.onComplete('Addon Created');
+          this.setState({ provisioning:false, provisionStatus:0, provisionMessage:'', loading:false });
+          return
+       } else {
+          this.setState({ provisioning:true, provisionStatus:Math.atan(Math.sqrt(i)) / (Math.PI/2), provisionMessage:addon.state_description || "Provisioning...", loading:false });
+        }
+        await new Promise((res, rej) => setTimeout(res, 500))
+      }
+    } catch (error) {
+      if(!error.response) {
+        console.error(error)
+      }
       this.setState({
-        submitMessage: error.response.data,
+        submitMessage: error.response ? error.response.data : error.message,
         submitFail: true,
-        finished: false,
         stepIndex: 0,
         loading: false,
         plans: [],
         plan: {},
       });
-    });
+    }
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
+    const { stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'hidden' };
-    if (finished) {
-      this.submitAddon();
-    } else {
-      return (
-        <div style={contentStyle}>
-          <div>{this.getStepContent(stepIndex)}</div>
-          <div style={style.buttons.div}>
-            {stepIndex > 0 && (
-              <Button
-                className="back"
-                disabled={stepIndex === 0}
-                onClick={this.handlePrev}
-              >
-                Back
-              </Button>
-            )}
+    return (
+      <div style={contentStyle}>
+        <div>{this.getStepContent(stepIndex)}</div>
+        <div style={style.buttons.div}>
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+            >
+              Back
+            </Button>
+          )}
+          {stepIndex === 0 && (
             <Button
               variant="contained"
               className="next"
               color="primary"
               onClick={this.handleNext}
             >
-              {stepIndex === 1 ? 'Finish' : 'Next'}
+              Next
             </Button>
-          </div>
+          )}
+
+          {stepIndex > 0 && (
+            <Button
+              variant="contained"
+              className="next"
+              color="primary"
+              onClick={this.submitAddon}
+            >
+              Finish
+            </Button>
+          )}
         </div>
-      );
-    }
+      </div>
+    );
     return null;
   }
 
   render() {
-    const { loading, stepIndex, finished } = this.state;
+    const { loading, stepIndex  } = this.state;
+    let provisionStyle = {display:'block', ...style.stepper};
+    let provisioningStyle = {display:'none', ...style.stepper};
+
+    if(this.state.provisioning) {
+      provisionStyle.display = 'none';
+      provisioningStyle.display = 'block';
+    }
+
     return (
       <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
+        <div style={provisionStyle}>
           <Stepper activeStep={stepIndex}>
             <Step>
               <StepLabel>Select Addon Service</StepLabel>
@@ -273,9 +326,14 @@ export default class NewAddon extends Component {
               <StepLabel>Select Plan</StepLabel>
             </Step>
           </Stepper>
-          {(!loading || finished) && (
+          {(!loading) && (
             <div>
               {this.renderContent()}
+            </div>
+          )}
+          {(loading) && (
+            <div style={style.refresh.div}>
+              <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             </div>
           )}
           <Dialog
@@ -292,6 +350,10 @@ export default class NewAddon extends Component {
               >OK</Button>
             </DialogActions>
           </Dialog>
+        </div>
+        <div style={provisioningStyle}>
+          <label>{this.state.provisionMessage}</label>
+          <LinearProgress variant="determinate" value={this.state.provisionStatus * 100} />
         </div>
       </MuiThemeProvider>
     );
