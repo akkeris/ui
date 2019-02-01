@@ -243,7 +243,7 @@ export default class NewAddon extends Component {
           this.setState({ provisioning:false, provisionStatus:0, provisionMessage:'', loading:false });
           return
        } else {
-          this.setState({ provisioning:true, provisionStatus:Math.atan(Math.sqrt(i)) / (Math.PI/2), provisionMessage:addon.state_description || "Provisioning...", loading:false });
+          this.setState({ provisioning:true, provisionStatus:Math.atan(0.2 * i) / (Math.PI/2), provisionMessage:addon.state_description || "Provisioning...", loading:false });
         }
         await new Promise((res, rej) => setTimeout(res, 500))
       }
