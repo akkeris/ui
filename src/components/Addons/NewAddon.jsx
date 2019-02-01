@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, FormControl, CircularProgress,
+  Step, Stepper, StepLabel, FormControl, CircularProgress, LinearProgress,
   Select, MenuItem, Dialog, Button, Input,
   DialogTitle, DialogActions, DialogContent,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import LinearProgress from '@material-ui/core/LinearProgress';
 
 import api from '../../services/api';
 
