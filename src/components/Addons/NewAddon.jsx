@@ -6,6 +6,8 @@ import {
   DialogTitle, DialogActions, DialogContent,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import LinearProgress from '@material-ui/core/LinearProgress';
+
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
@@ -59,6 +61,9 @@ export default class NewAddon extends Component {
       finished: false,
       stepIndex: 0,
       submitFail: false,
+      provisioning: false,
+      provisionStatus: 0,
+      provisionMessage: '',
       submitMessage: '',
       services: [],
       service: {},
@@ -210,12 +215,34 @@ export default class NewAddon extends Component {
     }
   }
 
-  submitAddon = () => {
-    api.createAddon(this.props.app, this.state.plan.id).then(() => {
-      this.props.onComplete('Addon Created');
-    }).catch((error) => {
+  submitAddon = async () => {
+    try {
+      let {data: addon} = await api.createAddon(this.props.app, this.state.plan.id);
+      addon.state = 'provisioning';
+
+      this.setState({ finished:false, provisioning:true, provisionStatus:0, provisionMessage:addon.state_description || "Provisioning ..." })
+      for(let i=0; i < 2000; i++) {
+        if(i === 1999) {
+          throw new Error('It seems this addon is taking too long to complete its task, you should contact your system administrator to see if everything is alright.')
+        }
+        if(addon.state !== 'provisioning') {
+          this.props.onComplete('Addon Created');
+          this.setState({ provisioning:false, provisionStatus:0, provisionMessage:'' });
+          return
+       } else {
+          this.setState({ provisioning:true, provisionStatus:Math.atan(i/85)/Math.atan(100000000), provisionMessage:addon.state_description || "Provisioning..." });
+        }
+        await new Promise((res, rej) => setTimeout(res, 500))
+        if (i % 20 === 0) {
+          ({data: addon} = await api.getAddon(this.props.app, addon.id))
+        }
+      }
+    } catch (error) {
+      if(!error.response) {
+        console.error(error)
+      }
       this.setState({
-        submitMessage: error.response.data,
+        submitMessage: error.response ? error.response.data : error.message,
         submitFail: true,
         finished: false,
         stepIndex: 0,
@@ -223,14 +250,14 @@ export default class NewAddon extends Component {
         plans: [],
         plan: {},
       });
-    });
+    }
   }
 
   renderContent() {
     const { finished, stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'hidden' };
     if (finished) {
-      this.submitAddon();
+      setTimeout(this.submitAddon.bind(this), 100);
     } else {
       return (
         <div style={contentStyle}>
@@ -262,9 +289,17 @@ export default class NewAddon extends Component {
 
   render() {
     const { loading, stepIndex, finished } = this.state;
+    let provisionStyle = {display:'block', ...style.stepper};
+    let provisioningStyle = {display:'none', ...style.stepper};
+
+    if(this.state.provisioning) {
+      provisionStyle.display = 'none';
+      provisioningStyle.display = 'block';
+    }
+
     return (
       <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
+        <div style={provisionStyle}>
           <Stepper activeStep={stepIndex}>
             <Step>
               <StepLabel>Select Addon Service</StepLabel>
@@ -292,6 +327,10 @@ export default class NewAddon extends Component {
               >OK</Button>
             </DialogActions>
           </Dialog>
+        </div>
+        <div style={provisioningStyle}>
+          <label>{this.state.provisionMessage}</label>
+          <LinearProgress variant="determinate" value={this.state.provisionStatus * 100} />
         </div>
       </MuiThemeProvider>
     );

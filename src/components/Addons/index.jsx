@@ -132,7 +132,7 @@ export default class Addons extends Component {
           onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
-          <div style={style.tableRowColumn.sub}>{addon.id}</div>
+          <div style={style.tableRowColumn.sub}>{addon.id} {addon.state === 'provisioning' ? '- provisioning' : ''}</div>
         </TableCell>
         <TableCell
           onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
@@ -141,8 +141,12 @@ export default class Addons extends Component {
         </TableCell>
         <TableCell style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton style={style.iconButton} className="addon-remove" onClick={() => this.handleAddonConfirmation(addon)}>
-              <RemoveIcon />
+            <IconButton 
+              disabled={addon.state === 'provisioning' ? true : false} 
+              style={style.iconButton} 
+              className="addon-remove" 
+              onClick={() => this.handleAddonConfirmation(addon)}>
+                <RemoveIcon color={addon.state === 'provisioning' ? 'disabled' : 'inherit'} />
             </IconButton>
           </div>
         </TableCell>
@@ -162,7 +166,7 @@ export default class Addons extends Component {
           onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
         >
           <div style={style.tableRowColumn.title}>{attachment.name}</div>
-          <div style={style.tableRowColumn.sub}>{attachment.id}</div>
+          <div style={style.tableRowColumn.sub}>{attachment.id} {attachment.state === 'provisioning' ? '- provisioning' : ''}</div>
         </TableCell>
         <TableCell
           onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
@@ -176,8 +180,8 @@ export default class Addons extends Component {
         </TableCell>
         <TableCell style={style.tableRowColumn.icon}>
           <div style={style.tableRowColumn.end}>
-            <IconButton style={style.iconButton} className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
-              <RemoveIcon />
+            <IconButton disabled={attachment.state === 'provisioning' ? true : false} style={style.iconButton} className="attachment-remove" onClick={() => this.handleAddonAttachmentConfirmation(attachment)}>
+              <RemoveIcon color={attachment.state === 'provisioning' ? 'disabled' : 'inherit'} />
             </IconButton>
           </div>
         </TableCell>
