@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, FormControl,
+  Step, Stepper, StepLabel, FormControl, CircularProgress,
   Select, MenuItem, Dialog, Button, Input,
   DialogTitle, DialogActions, DialogContent,
 } from '@material-ui/core';
@@ -51,6 +51,20 @@ const style = {
       marginRight: 12,
     },
   },
+
+  refresh: {
+    div: {
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      width: '40px',
+      height: '350px',
+      marginTop: '20%',
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
+    },
+  },
 };
 
 export default class NewAddon extends Component {
@@ -58,7 +72,6 @@ export default class NewAddon extends Component {
     super(props, context);
     this.state = {
       loading: true,
-      finished: false,
       stepIndex: 0,
       submitFail: false,
       provisioning: false,
@@ -199,7 +212,6 @@ export default class NewAddon extends Component {
     if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 1,
         loading: stepIndex >= 1,
       });
     }
@@ -217,25 +229,24 @@ export default class NewAddon extends Component {
 
   submitAddon = async () => {
     try {
+      this.setState({ loading: true })
       let {data: addon} = await api.createAddon(this.props.app, this.state.plan.id);
-      addon.state = 'provisioning';
 
-      this.setState({ finished:false, provisioning:true, provisionStatus:0, provisionMessage:addon.state_description || "Provisioning ..." })
       for(let i=0; i < 2000; i++) {
-        if(i === 1999) {
-          throw new Error('It seems this addon is taking too long to complete its task, you should contact your system administrator to see if everything is alright.')
-        }
-        if(addon.state !== 'provisioning') {
-          this.props.onComplete('Addon Created');
-          this.setState({ provisioning:false, provisionStatus:0, provisionMessage:'' });
-          return
-       } else {
-          this.setState({ provisioning:true, provisionStatus:Math.atan(i/85)/Math.atan(100000000), provisionMessage:addon.state_description || "Provisioning..." });
-        }
-        await new Promise((res, rej) => setTimeout(res, 500))
         if (i % 20 === 0) {
           ({data: addon} = await api.getAddon(this.props.app, addon.id))
         }
+        if(i === 1999) {
+          throw new Error('It seems this addon is taking too long to complete its task. When the provisioning finishes your application will automatically be restarted with the new addon.')
+        }
+        if(addon.state !== 'provisioning') {
+          this.props.onComplete('Addon Created');
+          this.setState({ provisioning:false, provisionStatus:0, provisionMessage:'', loading:false });
+          return
+       } else {
+          this.setState({ provisioning:true, provisionStatus:Math.atan(Math.sqrt(i)) / (Math.PI/2), provisionMessage:addon.state_description || "Provisioning...", loading:false });
+        }
+        await new Promise((res, rej) => setTimeout(res, 500))
       }
     } catch (error) {
       if(!error.response) {
@@ -244,7 +255,6 @@ export default class NewAddon extends Component {
       this.setState({
         submitMessage: error.response ? error.response.data : error.message,
         submitFail: true,
-        finished: false,
         stepIndex: 0,
         loading: false,
         plans: [],
@@ -254,41 +264,50 @@ export default class NewAddon extends Component {
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
+    const { stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'hidden' };
-    if (finished) {
-      setTimeout(this.submitAddon.bind(this), 100);
-    } else {
-      return (
-        <div style={contentStyle}>
-          <div>{this.getStepContent(stepIndex)}</div>
-          <div style={style.buttons.div}>
-            {stepIndex > 0 && (
-              <Button
-                className="back"
-                disabled={stepIndex === 0}
-                onClick={this.handlePrev}
-              >
-                Back
-              </Button>
-            )}
+    return (
+      <div style={contentStyle}>
+        <div>{this.getStepContent(stepIndex)}</div>
+        <div style={style.buttons.div}>
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+            >
+              Back
+            </Button>
+          )}
+          {stepIndex === 0 && (
             <Button
               variant="contained"
               className="next"
               color="primary"
               onClick={this.handleNext}
             >
-              {stepIndex === 1 ? 'Finish' : 'Next'}
+              Next
             </Button>
-          </div>
+          )}
+
+          {stepIndex > 0 && (
+            <Button
+              variant="contained"
+              className="next"
+              color="primary"
+              onClick={this.submitAddon}
+            >
+              Finish
+            </Button>
+          )}
         </div>
-      );
-    }
+      </div>
+    );
     return null;
   }
 
   render() {
-    const { loading, stepIndex, finished } = this.state;
+    const { loading, stepIndex  } = this.state;
     let provisionStyle = {display:'block', ...style.stepper};
     let provisioningStyle = {display:'none', ...style.stepper};
 
@@ -308,9 +327,14 @@ export default class NewAddon extends Component {
               <StepLabel>Select Plan</StepLabel>
             </Step>
           </Stepper>
-          {(!loading || finished) && (
+          {(!loading) && (
             <div>
               {this.renderContent()}
+            </div>
+          )}
+          {(loading) && (
+            <div style={style.refresh.div}>
+              <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             </div>
           )}
           <Dialog
