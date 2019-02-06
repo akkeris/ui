@@ -197,7 +197,7 @@ export default class Addons extends Component {
         <IconButton
           disabled={(restrictedSpace && !isElevated) || attachment.state === 'provisioning'}
           style={style.iconButton}
-          className="addon-remove"
+          className="attachment-remove"
           onClick={() => this.handleAddonAttachmentConfirmation(attachment)}
         >
           <RemoveIcon color={((restrictedSpace && !isElevated) || attachment.state === 'provisioning') ? 'disabled' : 'inherit'} />

@@ -116,28 +116,20 @@ export default class AppInfo extends Component {
   }
 
 
-  componentDidMount() {
-    api.getApp(this.props.match.params.app).then((response) => {
+  async componentDidMount() {
+    try {
+      const appResponse = await api.getApp(this.props.match.params.app);
+      const accountResponse = await api.getAccount();
       const hashPath = window.location.hash;
       let currentTab = hashPath.replace(this.state.baseHash, '');
       if (!tabs.includes(currentTab)) {
         currentTab = 'info';
         window.location.hash = `${this.state.baseHash}info`;
       }
-      api.getAccount().then((response2) => {
-        this.setState({
-          currentTab,
-          app: response.data,
-          accountInfo: response2.data,
-          loading: false,
-        });
-      });
-    }).catch((error) => {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-      });
-    });
+      this.setState({ currentTab, app: appResponse.data, accountInfo: accountResponse.data, loading: false });
+    } catch (err) {
+      this.setState({ submitMessage: err.response.data, submitFail: true });
+    }
   }
 
   componentDidUpdate(prevProps) {
