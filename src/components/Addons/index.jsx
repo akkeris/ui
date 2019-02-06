@@ -154,7 +154,7 @@ export default class Addons extends Component {
           className="addon-remove"
           onClick={() => this.handleAddonConfirmation(addon)}
         >
-          <RemoveIcon color={(!isElevated || addon.state === 'provisioning') ? 'disabled' : 'inherit'} />
+          <RemoveIcon color={((restrictedSpace && !isElevated) || addon.state === 'provisioning') ? 'disabled' : 'inherit'} />
         </IconButton>
       );
 
@@ -193,20 +193,20 @@ export default class Addons extends Component {
   getAddonAttachments() {
     const { isElevated, restrictedSpace } = this.state;
     return this.state.addonAttachments.map((attachment, index) => {
-      let deleteButton;
-      if (!restrictedSpace || isElevated) {
-        deleteButton = (
-          <IconButton
-            disabled={!isElevated || attachment.state === 'provisioning'}
-            style={style.iconButton}
-            className="attachment-remove"
-            onClick={() => this.handleAddonAttachmentConfirmation(attachment)}
-          >
-            <RemoveIcon color={(!isElevated || attachment.state === 'provisioning') ? 'disabled' : 'inherit'} />
-          </IconButton>
-        );
-      } else {
-        // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
+      let deleteButton = (
+        <IconButton
+          disabled={(restrictedSpace && !isElevated) || attachment.state === 'provisioning'}
+          style={style.iconButton}
+          className="addon-remove"
+          onClick={() => this.handleAddonAttachmentConfirmation(attachment)}
+        >
+          <RemoveIcon color={((restrictedSpace && !isElevated) || attachment.state === 'provisioning') ? 'disabled' : 'inherit'} />
+        </IconButton>
+      );
+
+      // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
+      if (restrictedSpace && !isElevated) {
+        // Wrap the delete controls in a tooltip to avoid confusion as to why they are disabled
         deleteButton = addRestrictedTooltip('Elevated access required', 'right', deleteButton);
       }
 
