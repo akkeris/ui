@@ -133,7 +133,7 @@ class AppOverview extends Component {
     if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
       // If we don't have the elevated_access object in the accountInfo object,
       // default to enabling the button (access will be controlled on the API)
-      isElevated = accountInfo.elevated_access ? accountInfo.elevated_access : true;
+      isElevated = (accountInfo && 'elevated_access' in accountInfo) ? accountInfo.elevated_access : true;
       restrictedSpace = true;
     }
 
