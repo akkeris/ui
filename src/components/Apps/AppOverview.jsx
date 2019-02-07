@@ -5,13 +5,21 @@ import {
   CircularProgress, Switch, List, ListItem, ListItemText, Button, Dialog,
   GridList, GridListTile, Table, TableBody, TableRow, TableCell,
   DialogActions, DialogContent, DialogContentText,
-  FormGroup, FormControlLabel,
+  FormGroup, FormControlLabel, Tooltip,
 } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Clear';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
+
+function addRestrictedTooltip(title, children) {
+  return (
+    <Tooltip title={title} placement="top">
+      <div>{children}</div>
+    </Tooltip>
+  );
+}
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -106,13 +114,34 @@ class AppOverview extends Component {
       submitFail: false,
       submitMessage: '',
       isMaintenance: false,
+      isElevated: false,
+      restrictedSpace: false,
     };
   }
 
   componentWillMount() {
+    const { app, accountInfo } = this.props;
+
+    // If this is a production app, check for the elevated_access role to determine
+    // whether or not to enable the delete app button.
+
+    // There is still an API call on the backend that controls access to the actual
+    // deletion of the app, this is merely for convienence.
+
+    let isElevated = false;
+    let restrictedSpace = false;
+    if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
+      // If we don't have the elevated_access object in the accountInfo object,
+      // default to enabling the button (access will be controlled on the API)
+      isElevated = accountInfo.elevated_access ? accountInfo.elevated_access : true;
+      restrictedSpace = true;
+    }
+
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
-      isMaintenance: this.props.app.maintenance,
+      isMaintenance: app.maintenance,
       loading: false,
+      isElevated,
+      restrictedSpace,
     });
   }
 
@@ -170,6 +199,7 @@ class AppOverview extends Component {
   }
 
   render() {
+    const { isElevated, restrictedSpace } = this.state;
     if (this.state.loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -179,6 +209,26 @@ class AppOverview extends Component {
         </MuiThemeProvider>
       );
     }
+
+    let deleteButton = (
+      <Button
+        variant="contained"
+        className="delete"
+        style={style.button}
+        onClick={this.handleConfirmation}
+        color="secondary"
+        disabled={(restrictedSpace && !isElevated)}
+      >
+        <RemoveIcon style={style.removeIcon} nativeColor={isElevated ? 'white' : undefined} />
+        <span style={style.deleteButtonLabel}>Delete App</span>
+      </Button>
+    );
+
+    // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
+    if (restrictedSpace && !isElevated) {
+      deleteButton = addRestrictedTooltip('Elevated access required', deleteButton);
+    }
+
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div>
@@ -241,12 +291,7 @@ class AppOverview extends Component {
                   </FormGroup>
                 </TableCell>
                 <TableCell >
-                  <div style={style.tableCell.end}>
-                    <Button variant="contained" className="delete" style={style.button} onClick={this.handleConfirmation} color="secondary">
-                      <RemoveIcon nativeColor="white" style={style.removeIcon} />
-                      <span style={style.deleteButtonLabel}>Delete App</span>
-                    </Button>
-                  </div>
+                  <div style={style.tableCell.end}>{deleteButton}</div>
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -284,6 +329,7 @@ class AppOverview extends Component {
 AppOverview.propTypes = {
   app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   onComplete: PropTypes.func.isRequired,
+  accountInfo: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
 export default AppOverview;

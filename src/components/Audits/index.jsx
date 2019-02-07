@@ -95,7 +95,6 @@ export default class Audits extends Component {
         audits: response.data,
         loading: false,
       });
-      console.log(response.data);
     });
   }
 
