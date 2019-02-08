@@ -112,3 +112,7 @@ body {
 #app, #app > div {
     height:100%;
 }
+
+.ansi {
+    font-size: 14px;
+}
