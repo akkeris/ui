@@ -88,7 +88,7 @@ export default class ConfigVar extends Component {
   }
 
   getConfigVars() {
-    return Object.keys(this.state.config).map(key => (
+    return Object.keys(this.state.config).sort().map(key => (
       <TableRow hover className={key} key={key} style={style.tableRow}>
         <TableCell style={style.configVar}>
           <div style={style.configVar.key}>{key}</div>
