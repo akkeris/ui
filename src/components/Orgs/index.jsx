@@ -29,14 +29,17 @@ export default class OrgList extends Component {
   }
 
   getOrgs(page, rowsPerPage) {
-    return this.props.orgs.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(org => (
-      <TableRow className={org.name} key={org.id} style={style.tableRow} hover>
-        <TableCell>
-          <div style={style.tableRowColumn.title}>{org.name}</div>
-          <div style={style.tableRowColumn.sub}>{org.role}</div>
-        </TableCell>
-      </TableRow>
-    ));
+    return this.props.orgs
+      .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(org => (
+        <TableRow className={org.name} key={org.id} style={style.tableRow} hover>
+          <TableCell>
+            <div style={style.tableRowColumn.title}>{org.name}</div>
+            <div style={style.tableRowColumn.sub}>{org.role}</div>
+          </TableCell>
+        </TableRow>
+      ));
   }
 
   handleChangePage = (event, page) => {
