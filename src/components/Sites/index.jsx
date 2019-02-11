@@ -40,29 +40,32 @@ export default class SitesList extends Component {
   }
 
   getSites(page, rowsPerPage) {
-    return this.props.sites.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((site) => {
-      const date = new Date(site.updated_at);
-      return (
-        <TableRow
-          className={site.domain}
-          key={site.id}
-          style={style.tableRow}
-          hover
-          onClick={() => this.handleRowSelection(site.id)}
-        >
-          <TableCell>
-            <div style={style.tableCell.title}>{site.domain}</div>
-            <div style={style.tableCell.sub}>{site.id}</div>
-          </TableCell>
-          <TableCell>
-            <div>{date.toLocaleString()}</div>
-          </TableCell>
-          <TableCell>
-            <div style={style.tableCell.title}>{site.region.name}</div>
-          </TableCell>
-        </TableRow>
-      );
-    });
+    return this.props.sites
+      .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
+      .sort((a, b) => a.domain.localeCompare(b.domain))
+      .map((site) => {
+        const date = new Date(site.updated_at);
+        return (
+          <TableRow
+            className={site.domain}
+            key={site.id}
+            style={style.tableRow}
+            hover
+            onClick={() => this.handleRowSelection(site.id)}
+          >
+            <TableCell>
+              <div style={style.tableCell.title}>{site.domain}</div>
+              <div style={style.tableCell.sub}>{site.id}</div>
+            </TableCell>
+            <TableCell>
+              <div>{date.toLocaleString()}</div>
+            </TableCell>
+            <TableCell>
+              <div style={style.tableCell.title}>{site.region.name}</div>
+            </TableCell>
+          </TableRow>
+        );
+      });
   }
 
   handleRowSelection = (id) => {
