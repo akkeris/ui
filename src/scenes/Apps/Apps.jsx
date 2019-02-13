@@ -119,6 +119,7 @@ export default class Apps extends Component {
       space: '',
       region: '',
       apps: [],
+      favorites: [],
       filteredApps: [],
       filteredSpaces: [],
       spaces: [],
@@ -137,6 +138,11 @@ export default class Apps extends Component {
     api.getRegions().then((response) => {
       this.setState({
         regions: response.data,
+      });
+    });
+    api.getFavorites().then((response) => {
+      this.setState({
+        favorites: response.data,
       });
     });
     this.getApps();
@@ -243,7 +249,7 @@ export default class Apps extends Component {
             </Link>
           </Toolbar>
           <Paper style={style.paper}>
-            <AppList className="apps" apps={this.state.filteredApps} />
+            <AppList className="apps" apps={this.state.filteredApps} favorites={this.state.favorites} />
           </Paper>
         </div>
       </MuiThemeProvider>
