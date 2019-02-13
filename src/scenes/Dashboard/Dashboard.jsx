@@ -10,7 +10,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import RecentIcon from '@material-ui/icons/AccessTime';
 
 import api from '../../services/api';
-import AppList from '../../components/Apps/AppList';
+import FavoritesList from '../../components/Apps/FavoritesList';
 
 
 const muiTheme = createMuiTheme({
@@ -114,7 +114,7 @@ export default class Dashboard extends Component {
       }
       this.setState({
         currentTab,
-        app: favoriteResponse.data,
+        apps: favoriteResponse.data,
         loading: false,
       });
     } catch (err) {
@@ -165,41 +165,36 @@ export default class Dashboard extends Component {
       <MuiThemeProvider theme={muiTheme}>
         <div style={{ marginBottom: '12px' }}>
           <Card className="card" style={{ overflow: 'visible' }}>
-            <CardHeader
-              className="header"
-              title="Merp"
-              subheader="Derp"
-            />
             <Tabs
               fullWidth
               value={this.state.currentTab}
               onChange={this.changeActiveTab}
               scrollButtons="off"
-            />
-            <Tab
-              disableRipple
-              className="favorites-tab"
-              icon={<FavoriteIcon />}
-              label="Favorites"
-              value="favorites"
-            />
-            <Tab
-              disableRipple
-              className="recent-tab"
-              icon={<RecentIcon />}
-              label="Recent"
-              value="recent"
-            />
+            >
+              <Tab
+                className="favorites-tab"
+                icon={<FavoriteIcon />}
+                label="Favorites"
+                value="favorites"
+              />
+              <Tab
+                className="recent-tab"
+                icon={<RecentIcon />}
+                label="Recent"
+                value="recent"
+              />
+            </Tabs>
             {currentTab === 'favorites' && (
               <Paper>
-                <AppList className="apps" apps={this.state.apps} />
+                <FavoritesList className="apps" apps={this.state.apps} />
               </Paper>
             )}
             {currentTab === 'recent' && (
               <div>
-                <d>HJello</d>
+                Hello
               </div>
             )}
+
           </Card>
         </div>
       </MuiThemeProvider>
