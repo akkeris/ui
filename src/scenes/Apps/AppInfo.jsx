@@ -7,6 +7,8 @@ import {
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
 import CPUIcon from '@material-ui/icons/Memory';
+import FavoriteIcon from '@material-ui/icons/FavoriteBorder';
+import IsFavoriteIcon from '@material-ui/icons/Favorite';
 import MetricIcon from '@material-ui/icons/TrackChanges';
 import AddonIcon from '@material-ui/icons/ShoppingBasket';
 import LogIcon from '@material-ui/icons/Visibility';
@@ -80,6 +82,10 @@ const style = {
   iconButton: {
     color: 'black',
   },
+  favoriteButton: {
+    color: 'black',
+    marginRight: '21px',
+  },
   refresh: {
     div: {
       marginLeft: 'auto',
@@ -102,6 +108,7 @@ export default class AppInfo extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isFavorite: false,
       app: {},
       accountInfo: {},
       loading: true,
@@ -119,6 +126,7 @@ export default class AppInfo extends Component {
   async componentDidMount() {
     try {
       const appResponse = await api.getApp(this.props.match.params.app);
+      const favoriteResponse = await api.getFavorites(this.props.match.params.app);
       const accountResponse = await api.getAccount();
       const hashPath = window.location.hash;
       let currentTab = hashPath.replace(this.state.baseHash, '');
@@ -126,9 +134,18 @@ export default class AppInfo extends Component {
         currentTab = 'info';
         window.location.hash = `${this.state.baseHash}info`;
       }
-      this.setState({ currentTab, app: appResponse.data, accountInfo: accountResponse.data, loading: false });
+      this.setState({
+        currentTab,
+        app: appResponse.data,
+        accountInfo: accountResponse.data,
+        isFavorite: favoriteResponse.data.findIndex(x => x.name === appResponse.data.name) > -1,
+        loading: false,
+      });
     } catch (err) {
-      this.setState({ submitMessage: err.response.data, submitFail: true });
+      this.setState({
+        submitMessage: err.response.message,
+        submitFail: true,
+      });
     }
   }
 
@@ -155,8 +172,32 @@ export default class AppInfo extends Component {
     }
   }
 
+  getFavoriteIcon() {
+    console.log(this.state.isFavorite);
+    return (
+      <Tooltip title="Favorite" placement="top-end">
+        <IconButton
+          style={style.favoriteButton}
+          className="live-app"
+          onClick={this.handleFavorite}
+        >
+          {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
+        </IconButton>
+      </Tooltip>
+    );
+  }
   handleClose = () => {
     this.setState({ submitFail: false });
+  }
+
+  handleFavorite = () => {
+    if (this.state.isFavorite) {
+      api.deleteFavorite(this.state.app.name);
+      this.setState({ isFavorite: false });
+    } else {
+      api.createFavorite(this.state.app.name);
+      this.setState({ isFavorite: true });
+    }
   }
 
   handleNotFoundClose = () => {
@@ -234,6 +275,9 @@ export default class AppInfo extends Component {
               className="header"
               title={this.state.app.name}
               subheader={this.state.app.organization.name}
+              action={
+                this.getFavoriteIcon()
+              }
             />
             <CardContent>
               <Tooltip title="Live App" placement="top-end">
