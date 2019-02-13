@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
+import FavoriteIcon from '@material-ui/icons/Favorite';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -74,6 +75,9 @@ export default class AppList extends Component {
           <div style={style.tableRowColumn.main}>{app.name} {app.preview ? AppList.previewAnnotation(app.preview) : ''}</div>
           <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>
         </TableCell>
+        <TableCell style={style.tableRow}>
+          {this.props.favorites.findIndex(x => x.name === app.name) > -1 ? <FavoriteIcon style={{ float: 'right' }} /> : null}
+        </TableCell>
       </TableRow>
     ));
   }
@@ -109,4 +113,5 @@ export default class AppList extends Component {
 
 AppList.propTypes = {
   apps: PropTypes.arrayOf(PropTypes.object).isRequired,
+  favorites: PropTypes.arrayOf(PropTypes.object).isRequired,
 };

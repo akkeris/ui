@@ -35,11 +35,13 @@ const style = {
   },
   paper: {
     maxWidth: '1024px',
+    minWidth: '800px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
   },
 };
+
 export default class Dashboard extends Component {
   constructor(props, context) {
     super(props, context);
