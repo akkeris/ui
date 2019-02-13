@@ -12,6 +12,7 @@ import Forward from '@material-ui/icons/ArrowForward';
 import RemoveIcon from '@material-ui/icons/Clear';
 
 import api from '../../services/api';
+import util from '../../services/util';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { Stage } from '../../components/Pipelines';
 
@@ -127,6 +128,7 @@ export default class PipelineInfo extends Component {
         submitMessage: error.response.data,
       });
     });
+    util.updateHistory('pipeline', this.props.match.params.pipeline);
   }
 
   componentDidUpdate(prevProps) {

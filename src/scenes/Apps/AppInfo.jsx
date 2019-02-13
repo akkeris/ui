@@ -24,6 +24,7 @@ import Addons from '../../components/Addons';
 import Logs from '../../components/Logs';
 import AppOverview from '../../components/Apps/AppOverview';
 import api from '../../services/api';
+import util from '../../services/util';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -130,6 +131,7 @@ export default class AppInfo extends Component {
     } catch (err) {
       this.setState({ submitMessage: err.response.data, submitFail: true });
     }
+    util.updateHistory('app', this.props.match.params.app);
   }
 
   componentDidUpdate(prevProps) {

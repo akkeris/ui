@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import SiteOverView from '../../components/Sites/SiteOverview';
 import RouteList from '../../components/Sites/RouteList';
 import api from '../../services/api';
+import util from '../../services/util';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -103,6 +104,7 @@ export default class SiteInfo extends Component {
         submitMessage: error.response.data,
       });
     });
+    util.updateHistory('site', this.props.match.params.site);
   }
 
   componentDidUpdate(prevProps) {
