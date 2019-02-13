@@ -106,6 +106,10 @@ function getHistory() {
   return recentItems;
 }
 
+function clearHistory() {
+  localStorage.removeItem('akkeris_history');
+}
+
 export default {
   filterApps,
   filterName,
@@ -118,4 +122,5 @@ export default {
   filterDynosByFormation,
   updateHistory,
   getHistory,
+  clearHistory,
 };
