@@ -76,7 +76,9 @@ export default class AppList extends Component {
           <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>
         </TableCell>
         <TableCell style={style.tableRow}>
-          {this.props.favorites.findIndex(x => x.name === app.name) > -1 ? <FavoriteIcon style={{ float: 'right' }} /> : null}
+          {this.props.favorites && (
+            this.props.favorites.findIndex(x => x.name === app.name) > -1 ? <FavoriteIcon style={{ float: 'right' }} /> : null
+          )}
         </TableCell>
       </TableRow>
     ));
@@ -113,5 +115,9 @@ export default class AppList extends Component {
 
 AppList.propTypes = {
   apps: PropTypes.arrayOf(PropTypes.object).isRequired,
-  favorites: PropTypes.arrayOf(PropTypes.object).isRequired,
+  favorites: PropTypes.arrayOf(PropTypes.object),
+};
+
+AppList.defaultProps = {
+  favorites: null,
 };

@@ -126,7 +126,7 @@ export default class AppInfo extends Component {
   async componentDidMount() {
     try {
       const appResponse = await api.getApp(this.props.match.params.app);
-      const favoriteResponse = await api.getFavorites(this.props.match.params.app);
+      const favoriteResponse = await api.getFavorites();
       const accountResponse = await api.getAccount();
 
       // If current tab not provided or invalid, rewrite it to be /info
@@ -177,6 +177,7 @@ export default class AppInfo extends Component {
       </Tooltip>
     );
   }
+  
   handleClose = () => {
     this.setState({ submitFail: false });
   }
