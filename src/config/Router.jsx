@@ -39,7 +39,7 @@ const Dashboard = Loadable({
 
 const DashboardRoutes = () => (
   <Switch>
-    <Route exact path="/dashboard" component={Dashboard} />
+    <Route path="/dashboard" component={Dashboard} />
   </Switch>
 );
 
