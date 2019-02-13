@@ -126,7 +126,7 @@ export default class AppInfo extends Component {
   async componentDidMount() {
     try {
       const appResponse = await api.getApp(this.props.match.params.app);
-      const favoriteResponse = await api.getFavorites(this.props.match.params.app);
+      const favoriteResponse = await api.getFavorites();
       const accountResponse = await api.getAccount();
       const hashPath = window.location.hash;
       let currentTab = hashPath.replace(this.state.baseHash, '');
@@ -186,6 +186,7 @@ export default class AppInfo extends Component {
       </Tooltip>
     );
   }
+  
   handleClose = () => {
     this.setState({ submitFail: false });
   }
