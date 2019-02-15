@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, FormControl, CircularProgress, LinearProgress,
-  Select, MenuItem, Dialog, Button, Input,
-  DialogTitle, DialogActions, DialogContent,
+  Step, Stepper, StepLabel, CircularProgress, LinearProgress,
+  Dialog, Button, Typography, DialogTitle, DialogActions, DialogContent,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-
+import Select from '../Select';
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
@@ -50,7 +49,6 @@ const style = {
       marginRight: 12,
     },
   },
-
   refresh: {
     div: {
       marginLeft: 'auto',
@@ -64,7 +62,12 @@ const style = {
       position: 'relative',
     },
   },
+  selectContainer: {
+    maxWidth: '400px',
+  },
 };
+
+const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
 export default class NewAddon extends Component {
   constructor(props, context) {
@@ -82,106 +85,35 @@ export default class NewAddon extends Component {
       serviceid: '',
       plans: [],
       plan: {},
+      groupedServices: [],
     };
   }
 
-  async componentDidMount() {
-    let { data: services } = await api.getAddonServices();
-    this.setState({ services, service: services[0], loading: false });
+  componentDidMount() {
+    this.getServices();
   }
 
-  async componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.state.stepIndex !== prevState.stepIndex && this.state.stepIndex === 1) {
-      this.setState({ loading: true }); // eslint-disable-line react/no-did-update-set-state
-      let { data: plans } = await api.getAddonServicePlans(this.state.service.id);
-      plans = plans.filter((x) => x.state !== "deprecated")
-      this.setState({ plans, plan: plans[0], loading: false});
+      this.getPlans();
     }
   }
 
-  getServices() {
-    return this.state.services.map(service => (
-      <MenuItem
-        className={service.human_name}
-        key={service.id}
-        value={service.id}
-      >
-        {service.human_name}
-      </MenuItem>
-    ));
+  async getServices() {
+    const { data: services } = await api.getAddonServices();
+    const groupedServices = [{ label: 'Services', options: [] }, { label: 'Credentials', options: [] }];
+    services.forEach((addon) => {
+      const formattedAddon = { value: addon.id, label: addon.human_name };
+      groupedServices[addon.human_name.toLowerCase().includes('credential') ? 1 : 0].options.push(formattedAddon);
+    });
+    this.setState({ services, groupedServices, loading: false });
   }
 
-  getPlans() {
-    return this.state.plans.map(plan => (
-      <MenuItem
-        className={plan.human_name}
-        key={plan.name}
-        value={plan.id}
-      >
-        {plan.name}
-      </MenuItem>
-    ));
-  }
-
-  getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return (
-          <div>
-            <FormControl className="service-form">
-              <Select
-                autoWidth
-                className="service-menu"
-                value={this.state.service.id}
-                onChange={this.handleServiceChange}
-                input={<Input name="service" id="service-helper" />}
-              >
-                {this.getServices()}
-              </Select>
-            </FormControl>
-            <p>
-              Select the akkeris addon you would like to attach to your app.
-            </p>
-          </div>
-        );
-      case 1:
-        return (
-          <div>
-            <FormControl className="plan-form">
-              <Select
-                autoWidth
-                className="plan-menu"
-                value={this.state.plan ? this.state.plan.id : ''}
-                onChange={this.handlePlanChange}
-                input={<Input name="plan" id="plan-helper" />}
-              >
-                {this.getPlans()}
-              </Select>
-            </FormControl>
-            <div className="plan-info" style={{ marginBottom: '15px' }}>
-              {this.state.plan.price && this.state.plan.price.cents !== 0 && (
-                <span className="plan-price">
-                  <b>{this.formatPrice(this.state.plan.price.cents)}/mo</b>
-                </span>
-              )}
-              {this.state.plan.price && this.state.plan.price.cents === 0 && (
-                <span className="plan-price">
-                  <b>{this.formatPrice(0)}/mo</b>
-                </span>
-              )}
-              <br />
-              <span className="plan-description">
-                {this.state.plan.description}
-              </span>
-            </div>
-            <p>
-              Select the plan for your addon (please only use larger plans for prod)
-            </p>
-          </div>
-        );
-      default:
-        return 'You\'re a long way from home sonny jim!';
-    }
+  async getPlans() {
+    this.setState({ loading: true });
+    let { data: plans } = await api.getAddonServicePlans(this.state.serviceid);
+    plans = plans.filter(x => x.state !== 'deprecated').map(x => ({ value: x.id, label: x.name, price: x.price, description: x.description }));
+    this.setState({ plans, loading: false });
   }
 
   formatPrice(cents) { // eslint-disable-line class-methods-use-this
@@ -196,13 +128,13 @@ export default class NewAddon extends Component {
   }
 
   handleServiceChange = (event) => {
-    const serviceid = event.target.value;
-    const service = this.state.services.find(a => a.id === serviceid);
-    this.setState({ service, serviceid });
+    const { groupedServices } = this.state;
+    const service = groupedServices[event.label.toLowerCase().includes('credential') ? 1 : 0].options.find(a => a.value === event.value);
+    this.setState({ service, serviceid: event.value });
   }
 
   handlePlanChange = (event) => {
-    const plan = this.state.plans.find(a => a.id === event.target.value);
+    const plan = this.state.plans.find(a => a.value === event.value);
     this.setState({ plan });
   }
 
@@ -228,28 +160,28 @@ export default class NewAddon extends Component {
 
   submitAddon = async () => {
     try {
-      this.setState({ loading: true })
-      let {data: addon} = await api.createAddon(this.props.app, this.state.plan.id);
+      this.setState({ loading: true });
+      let { data: addon } = await api.createAddon(this.props.app, this.state.plan.value);
 
-      for(let i=0; i < 2000; i++) {
+      for (let i = 0; i < 2000; i++) {
         if (i % 20 === 0) {
-          ({data: addon} = await api.getAddon(this.props.app, addon.id))
+          ({ data: addon } = await api.getAddon(this.props.app, addon.id)); // eslint-disable-line
         }
-        if(i === 1999) {
-          throw new Error('It seems this addon is taking too long to complete its task. When the provisioning finishes your application will automatically be restarted with the new addon.')
+        if (i === 1999) {
+          throw new Error('It seems this addon is taking too long to complete its task. When the provisioning finishes your application will automatically be restarted with the new addon.');
         }
-        if(addon.state !== 'provisioning') {
+        if (addon.state !== 'provisioning') {
           this.props.onComplete('Addon Created');
-          this.setState({ provisioning:false, provisionStatus:0, provisionMessage:'', loading:false });
-          return
-       } else {
-          this.setState({ provisioning:true, provisionStatus:Math.atan(0.2 * i) / (Math.PI/2), provisionMessage:addon.state_description || "Provisioning...", loading:false });
+          this.setState({ provisioning: false, provisionStatus: 0, provisionMessage: '', loading: false });
+          return;
         }
-        await new Promise((res, rej) => setTimeout(res, 500))
+        this.setState({ provisioning: true, provisionStatus: Math.atan(0.2 * i) / (Math.PI / 2), provisionMessage: addon.state_description || 'Provisioning...', loading: false });
+
+        await new Promise((res, rej) => setTimeout(res, 500)); // eslint-disable-line
       }
     } catch (error) {
-      if(!error.response) {
-        console.error(error)
+      if (!error.response) {
+        console.error(error);
       }
       this.setState({
         submitMessage: error.response ? error.response.data : error.message,
@@ -262,12 +194,69 @@ export default class NewAddon extends Component {
     }
   }
 
+  renderStep(stepIndex) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <div>
+            <div style={style.selectContainer}>
+              <Select
+                options={this.state.groupedServices}
+                value={this.state.service}
+                onChange={this.handleServiceChange}
+                placeholder="Search for an Addon"
+              />
+            </div>
+            <Typography variant="body1">
+              Select the akkeris addon you would like to attach to your app.
+            </Typography>
+          </div>
+        );
+      case 1:
+        return (
+          <div>
+            <div style={style.selectContainer}>
+              <Select
+                options={this.state.plans}
+                value={this.state.plan ? this.state.plan.id : ''}
+                onChange={this.handlePlanChange}
+                placeholder="Search for a Plan"
+              />
+            </div>
+            {!isEmpty(this.state.plan) && (
+              <div className="plan-info" style={{ marginBottom: '12px' }}>
+                {this.state.plan.price && this.state.plan.price.cents !== 0 && (
+                  <span className="plan-price">
+                    <b>{this.formatPrice(this.state.plan.price.cents)}/mo</b>
+                  </span>
+                )}
+                {this.state.plan.price && this.state.plan.price.cents === 0 && (
+                  <span className="plan-price">
+                    <b>{this.formatPrice(0)}/mo</b>
+                  </span>
+                )}
+                <br />
+                <span className="plan-description">
+                  {this.state.plan.description}
+                </span>
+              </div>
+            )}
+            <Typography variant="body1">
+              Select the plan for your addon (please only use larger plans for prod)
+            </Typography>
+          </div>
+        );
+      default:
+        return 'You\'re a long way from home sonny jim!';
+    }
+  }
+
   renderContent() {
     const { stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px' };
     return (
       <div style={contentStyle}>
-        <div>{this.getStepContent(stepIndex)}</div>
+        <div>{this.renderStep(stepIndex)}</div>
         <div style={style.buttons.div}>
           {stepIndex > 0 && (
             <Button
@@ -284,11 +273,11 @@ export default class NewAddon extends Component {
               className="next"
               color="primary"
               onClick={this.handleNext}
+              disabled={this.state.serviceid === ''}
             >
               Next
             </Button>
           )}
-
           {stepIndex > 0 && (
             <Button
               variant="contained"
@@ -302,15 +291,14 @@ export default class NewAddon extends Component {
         </div>
       </div>
     );
-    return null;
   }
 
   render() {
-    const { loading, stepIndex  } = this.state;
-    let provisionStyle = {display:'block', ...style.stepper};
-    let provisioningStyle = {display:'none', ...style.stepper};
+    const { loading, stepIndex } = this.state;
+    const provisionStyle = { display: 'block', ...style.stepper };
+    const provisioningStyle = { display: 'none', ...style.stepper };
 
-    if(this.state.provisioning) {
+    if (this.state.provisioning) {
       provisionStyle.display = 'none';
       provisioningStyle.display = 'block';
     }
@@ -352,7 +340,7 @@ export default class NewAddon extends Component {
           </Dialog>
         </div>
         <div style={provisioningStyle}>
-          <label>{this.state.provisionMessage}</label>
+          <label>{this.state.provisionMessage}</label> {/* eslint-disable-line */}
           <LinearProgress variant="determinate" value={this.state.provisionStatus * 100} />
         </div>
       </MuiThemeProvider>
