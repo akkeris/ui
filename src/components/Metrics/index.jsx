@@ -128,25 +128,21 @@ export default class Metrics extends Component {
     this._isMounted = false;
   }
 
-  loadMetrics() {
-    api.getFormationSizes().then((sizesResp) => {
-      api.getFormations(this.props.app).then((formationResp) => {
-        api.getMetrics(this.props.app).then((metricResp) => {
-          api.getAppAddons(this.props.app).then((addonResp) => {
-            if (this._isMounted) {
-              this.setState({
-                sizes: sizesResp.data,
-                formations: formationResp.data,
-                metrics: metricResp.data,
-                addons: addonResp.data,
-                loading: false,
-                reading: true,
-              });
-            }
-          });
-        });
+  loadMetrics = async () => {
+    const { data: sizes } = await api.getFormationSizes();
+    const { data: formations } = await api.getFormations(this.props.app);
+    const { data: metrics } = await api.getMetrics(this.props.app);
+    const { data: addons } = await api.getAppAddons(this.props.app);
+    if (this._isMounted) {
+      this.setState({
+        sizes,
+        formations,
+        metrics,
+        addons,
+        loading: false,
+        reading: true,
       });
-    });
+    }
   }
 
   render() {

@@ -171,7 +171,7 @@ export default class Releases extends Component {
       isElevated: false,
       restrictedSpace: false,
     };
-    this.loadReleases();
+    this.getReleases();
   }
 
   componentDidMount() {
@@ -200,7 +200,125 @@ export default class Releases extends Component {
     this._isMounted = false;
   }
 
-  getReleases(page, rowsPerPage) {
+  getReleases = async () => {
+    await api.getApp(this.props.app.name);
+    let { data: builds } = await api.getBuilds(this.props.app.name);
+    let releases = await api.getReleases(this.props.app.name);
+    releases = releases.sort((a, b) => (
+      new Date(a.created_at).getTime() > new Date(b.created_at).getTime() ? 1 : -1
+    )).map(x => Object.assign(x.slug, {
+      id: x.id,
+      created_at: x.created_at,
+      version: x.version,
+      description: x.description,
+      release: true,
+      current: x.current,
+    }));
+    // fitler out builds with a release
+    // builds = builds.filter((a) => !releases.some((x) => x.slug.id === a.id));
+    builds = builds.map(a => Object.assign({
+      releases: releases.filter(b => b.slug.id === a.id),
+    }, a));
+
+    let releaseAndBuilds = builds.concat(releases).sort((a, b) => (
+      new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1
+    ));
+
+    if (releaseAndBuilds.length > releaseLimit) {
+      releaseAndBuilds = releaseAndBuilds.slice(0, releaseLimit);
+    }
+    if (this._isMounted) {
+      this.setState({
+        releases: releaseAndBuilds,
+        loading: false,
+      });
+    }
+  }
+
+  handleRevertOpen(release) {
+    this.setState({
+      revertOpen: true,
+      revert: release,
+      title: `Rollback to release v${release.version}`,
+    });
+  }
+
+  handleRevertGo = async () => {
+    this.setState({ revert: null, revertOpen: false, loading: true });
+    await api.createRelease(
+      this.props.app.name,
+      null,
+      this.state.revert.id,
+      `Rollback to release v${this.state.revert.version}`,
+    );
+    this.getReleases();
+    this.setState({ loading: false });
+  }
+
+  handleClose() {
+    this.setState({ logsOpen: false });
+  }
+
+  handleRevertClose() {
+    this.setState({ revert: null, revertOpen: false });
+  }
+
+  handleNewBuild() {
+    this.setState({ new: true });
+  }
+
+  handleNewBuildCancel() {
+    this.setState({ new: false });
+  }
+
+  handleNewAutoBuild = () => {
+    this.setState({ newAuto: true });
+  }
+
+  handleNewAutoBuildCancel = () => {
+    this.setState({ newAuto: false });
+  }
+
+  handleOpen(release) {
+    this.setState({
+      logsOpen: true,
+      release,
+      title: `Logs for v${release.id}`,
+    });
+  }
+
+  handleNewRelease() {
+    this.setState({ new: true });
+  }
+
+  handleNewReleaseCancel() {
+    this.setState({ new: false });
+  }
+
+  handleSnackClose() {
+    this.setState({ snackOpen: false });
+  }
+
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+  reload = (message) => {
+    this.setState({
+      loading: false,
+      new: false,
+      newAuto: false,
+      snackOpen: true,
+      message,
+    });
+    this.getReleases();
+  }
+
+  renderReleases(page, rowsPerPage) {
     return this.state.releases.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((release, index) => {
       // release status indicator
       let releaseColor = grey[500];
@@ -276,138 +394,6 @@ export default class Releases extends Component {
         </TableRow>
       );
     });
-  }
-
-  loadReleases() {
-    return new Promise((resolve) => {
-      api.getApp(this.props.app.name).then(() => {
-        api.getBuilds(this.props.app.name).then((buildResponse) => {
-          let builds = buildResponse.data;
-          api.getReleases(this.props.app.name).then((releaseResponse) => {
-            const releases = releaseResponse
-              .sort((a, b) => (
-                new Date(a.created_at).getTime() > new Date(b.created_at).getTime() ? 1 : -1
-              ))
-              .map(x => Object.assign(x.slug, {
-                id: x.id,
-                created_at: x.created_at,
-                version: x.version,
-                description: x.description,
-                release: true,
-                current: x.current,
-              }));
-
-            // fitler out builds with a release
-            // builds = builds.filter((a) => !releases.some((x) => x.slug.id === a.id));
-            builds = builds.map(a => Object.assign({
-              releases: releases.filter(b => b.slug.id === a.id),
-            }, a));
-
-            let releaseAndBuilds = builds.concat(releases)
-              .sort((a, b) => (
-                new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1
-              ));
-
-
-            if (releaseAndBuilds.length > releaseLimit) {
-              releaseAndBuilds = releaseAndBuilds.slice(0, releaseLimit);
-            }
-            if (this._isMounted) {
-              this.setState({
-                releases: releaseAndBuilds,
-                loading: false,
-              });
-            }
-            resolve();
-          });
-        });
-      });
-    });
-  }
-
-  handleRevertOpen(release) {
-    this.setState({
-      revertOpen: true,
-      revert: release,
-      title: `Rollback to release v${release.version}`,
-    });
-  }
-
-  handleRevertGo() {
-    api.createRelease(
-      this.props.app.name,
-      null,
-      this.state.revert.id,
-      `Rollback to release v${this.state.revert.version}`,
-    )
-      .then(() => {
-        this.loadReleases();
-        this.setState({ loading: false });
-      });
-    this.setState({ revert: null, revertOpen: false, loading: true });
-  }
-
-  handleClose() {
-    this.setState({ logsOpen: false });
-  }
-
-  handleRevertClose() {
-    this.setState({ revert: null, revertOpen: false });
-  }
-
-  handleNewBuild() {
-    this.setState({ new: true });
-  }
-
-  handleNewBuildCancel() {
-    this.setState({ new: false });
-  }
-
-  handleNewAutoBuild = () => {
-    this.setState({ newAuto: true });
-  }
-
-  handleNewAutoBuildCancel = () => {
-    this.setState({ newAuto: false });
-  }
-
-  handleOpen(release) {
-    this.setState({
-      logsOpen: true,
-      release,
-      title: `Logs for v${release.id}`,
-    });
-  }
-
-  handleNewRelease() {
-    this.setState({ new: true });
-  }
-
-  handleNewReleaseCancel() {
-    this.setState({ new: false });
-  }
-
-  handleSnackClose() {
-    this.setState({ snackOpen: false });
-  }
-
-  handleChangePage = (event, page) => {
-    this.setState({ page });
-  };
-
-  handleChangeRowsPerPage = (event) => {
-    this.setState({ rowsPerPage: event.target.value });
-  };
-
-  reload = (message) => {
-    this.setState({
-      loading: false,
-      new: false,
-      newAuto: false,
-      snackOpen: true,
-      message,
-    });
-    this.loadReleases();
   }
 
   render() {
@@ -530,7 +516,7 @@ export default class Releases extends Component {
           )}
           <Table className="release-list" style={{ overflow: 'visible' }}>
             <TableBody>
-              {this.getReleases(page, rowsPerPage)}
+              {this.renderReleases(page, rowsPerPage)}
             </TableBody>
             {releases.length !== 0 && (
               <TableFooter>

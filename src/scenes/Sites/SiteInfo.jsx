@@ -86,24 +86,7 @@ export default class SiteInfo extends Component {
   }
 
   componentDidMount() {
-    api.getSite(this.props.match.params.site).then((response) => {
-      const hashPath = window.location.hash;
-      let currentTab = hashPath.replace(this.state.baseHash, '');
-      if (!tabs.includes(currentTab)) {
-        currentTab = 'info';
-        window.location.hash = `${this.state.baseHash}info`;
-      }
-      this.setState({ currentTab });
-      this.setState({
-        site: response.data,
-        loading: false,
-      });
-    }).catch((error) => {
-      this.setState({
-        submitFail: true,
-        submitMessage: error.response.data,
-      });
-    });
+    this.getSite();
     util.updateHistory('site', this.props.match.params.site);
   }
 
@@ -127,6 +110,24 @@ export default class SiteInfo extends Component {
         // Since we check conditions before setState we avoid infinite loops
         this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
       }
+    }
+  }
+
+  getSite = async () => {
+    try {
+      const { data: site } = await api.getSite(this.props.match.params.site);
+      const hashPath = window.location.hash;
+      let currentTab = hashPath.replace(this.state.baseHash, '');
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'info';
+        window.location.hash = `${this.state.baseHash}info`;
+      }
+      this.setState({ currentTab, site, loading: false });
+    } catch (error) {
+      this.setState({
+        submitFail: true,
+        submitMessage: error.response.data,
+      });
     }
   }
 

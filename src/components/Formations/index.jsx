@@ -70,7 +70,7 @@ export default class Formations extends Component {
       message: '',
       new: false,
     };
-    this.loadFormations();
+    this.getFormations();
   }
 
   componentDidMount() {
@@ -80,56 +80,30 @@ export default class Formations extends Component {
     this._isMounted = false;
   }
 
-  getSizes() {
-    return this.state.sizes.map(size =>
-      (<MenuItem
-        className={size.name}
-        key={size.name}
-        value={size.name}
-      >{size.resources.limits.memory}</MenuItem>));
-  }
-
-  getFormations() {
-    return this.state.formations.map(formation => (
-      <DynoType
-        formation={formation}
-        dynos={util.filterDynosByFormation(this.state.dynos, formation)}
-        onComplete={this.reload}
-        onAlert={this.info}
-        key={formation.id}
-        sizeList={this.getSizes()}
-        onError={this.handleError}
-        app={this.props.app}
-      />
-    ));
-  }
-
-  loadFormations() {
-    Promise.all([
+  getFormations = async () => {
+    const [r1, r2, r3] = await Promise.all([
       api.getFormations(this.props.app),
       api.getFormationSizes(),
       api.getDynos(this.props.app),
-    ])
-      .then(([r1, r2, r3]) => {
-        const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
-        const dynos = r3.data;
-        let sizes = [];
-        r2.data.forEach((size) => {
-          if (size.name.indexOf('prod') === -1) {
-            sizes.push(size);
-          }
-        });
-        sizes = sizes.sort((a, b) =>
-          parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10));
-        if (this._isMounted) {
-          this.setState({
-            sizes,
-            dynos,
-            formations,
-            loading: false,
-          });
-        }
+    ]);
+    const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
+    const dynos = r3.data;
+    let sizes = [];
+    r2.data.forEach((size) => {
+      if (size.name.indexOf('prod') === -1) {
+        sizes.push(size);
+      }
+    });
+    sizes = sizes.sort((a, b) =>
+      parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10));
+    if (this._isMounted) {
+      this.setState({
+        sizes,
+        dynos,
+        formations,
+        loading: false,
       });
+    }
   }
 
   handleError = (message) => {
@@ -165,26 +139,48 @@ export default class Formations extends Component {
     });
   }
 
-  reload = (message) => {
+  reload = async (message) => {
     this.setState({ loading: true });
-    Promise.all([
+    const [r1, r2] = await Promise.all([
       api.getFormations(this.props.app),
       api.getDynos(this.props.app),
-    ])
-      .then(([r1, r2]) => {
-        const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
-        const dynos = r2.data;
-        if (this._isMounted) {
-          this.setState({
-            formations,
-            dynos,
-            loading: false,
-            new: false,
-            open: true,
-            message,
-          });
-        }
+    ]);
+    const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
+    const dynos = r2.data;
+    if (this._isMounted) {
+      this.setState({
+        formations,
+        dynos,
+        loading: false,
+        new: false,
+        open: true,
+        message,
       });
+    }
+  }
+
+  renderSizes() {
+    return this.state.sizes.map(size =>
+      (<MenuItem
+        className={size.name}
+        key={size.name}
+        value={size.name}
+      >{size.resources.limits.memory}</MenuItem>));
+  }
+
+  renderFormations() {
+    return this.state.formations.map(formation => (
+      <DynoType
+        formation={formation}
+        dynos={util.filterDynosByFormation(this.state.dynos, formation)}
+        onComplete={this.reload}
+        onAlert={this.info}
+        key={formation.id}
+        sizeList={this.renderSizes()}
+        onError={this.handleError}
+        app={this.props.app}
+      />
+    ));
   }
 
   render() {
@@ -221,7 +217,7 @@ export default class Formations extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.getFormations()}
+              {this.renderFormations()}
             </TableBody>
           </Table>
           <Dialog

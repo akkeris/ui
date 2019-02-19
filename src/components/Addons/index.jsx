@@ -144,7 +144,174 @@ export default class Addons extends Component {
     this._isMounted = false;
   }
 
-  getAddons() {
+  getAppsAttachedToAddon() {
+    const addons = this.state.addons;
+    addons.forEach(async (addon, index) => {
+      const { data } = await api.getAppsAttachedToAddon(this.props.app.name, addon.id);
+      addons[index].attached_to = data.attached_to;
+      if (addons.every(a => (a.attached_to))) {
+        if (this._isMounted) {
+          this.setState({ addons, addonsLoaded: true });
+        }
+      }
+    });
+
+    const addonAttachments = this.state.addonAttachments;
+    addonAttachments.forEach(async (attachment, index) => {
+      const { data } = await api.getAppsAttachedToAddon(this.props.app.name, attachment.addon.id);
+      addonAttachments[index].attached_to = data.attached_to;
+      if (addonAttachments.every(a => (a.attached_to))) {
+        if (this._isMounted) {
+          this.setState({ addonAttachments, attachmentsLoaded: true });
+        }
+      }
+    });
+  }
+
+  loadAddons = async () => {
+    const [r1, r2] = await Promise.all([
+      api.getAppAddons(this.props.app.name),
+      api.getAddonAttachments(this.props.app.name),
+    ]);
+    if (this._isMounted) {
+      this.setState({
+        addons: r1.data,
+        addonAttachments: r2.data,
+        loading: false,
+      });
+      this.getAppsAttachedToAddon();
+    }
+  }
+
+  formatAttachment(attachment, index) { // eslint-disable-line class-methods-use-this
+    return (
+      <TableRow className={`attachment-${index}`} style={style.tableRow} key={attachment.id}>
+        <TableCell colSpan="2">
+          <div className="attachment-name" style={style.tableRowColumn.title}>{attachment.name}</div>
+          <div style={style.tableRowColumn.sub}>{attachment.id}</div>
+        </TableCell>
+        <TableCell>
+          {attachment.owner && (
+            <div className="attachment-owner" style={{ color: muiTheme.palette.secondary.main }}>Owner</div>
+          )}
+        </TableCell>
+      </TableRow>
+    );
+  }
+
+  handleAddonDialogClose = () => {
+    this.setState({ addonDialogOpen: false });
+  }
+
+  handleNewAddon = () => {
+    this.setState({ new: true });
+  }
+
+  handleNewAddonCancel = () => {
+    this.setState({ new: false });
+  }
+
+  handleAttachAddon = () => {
+    this.setState({ attach: true });
+  }
+
+  handleAttachAddonCancel = () => {
+    this.setState({ attach: false });
+  }
+
+  handleRemoveAddon = async () => {
+    this.setState({ loading: true });
+    try {
+      await api.deleteAddon(this.props.app.name, this.state.addon.id);
+      this.reload('Addon Deleted');
+    } catch (error) {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        loading: false,
+        new: false,
+        confirmAddonOpen: false,
+        confirmAttachmentOpen: false,
+        attach: false,
+      });
+    }
+  }
+
+  handleRemoveAddonAttachment = async () => {
+    this.setState({ loading: true });
+    try {
+      await api.deleteAddonAttachment(this.props.app.name, this.state.attachment.id);
+      this.reload('Attachment Deleted');
+    } catch (error) {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        loading: false,
+        new: false,
+        confirmAddonOpen: false,
+        confirmAttachmentOpen: false,
+        attach: false,
+      });
+    }
+  }
+
+  handleAddonConfirmation = (addon) => {
+    this.setState({
+      confirmAddonOpen: true,
+      addon,
+    });
+  }
+
+  handleCancelAddonConfirmation = () => {
+    this.setState({
+      confirmAddonOpen: false,
+      addon: null,
+    });
+  }
+
+  handleAddonAttachmentConfirmation = (attachment) => {
+    this.setState({
+      confirmAttachmentOpen: true,
+      attachment,
+    });
+  }
+
+  handleCancelAddonAttachmentConfirmation = () => {
+    this.setState({
+      confirmAttachmentOpen: false,
+      attachment: null,
+    });
+  }
+
+  handleRequestClose = () => {
+    this.setState({ open: false });
+  }
+
+  handleDialogClose= () => {
+    this.setState({ submitFail: false });
+  }
+
+  reload = async (message) => {
+    this.setState({ loading: true });
+    const [r1, r2] = await Promise.all([
+      api.getAppAddons(this.props.app.name),
+      api.getAddonAttachments(this.props.app.name),
+    ]);
+    this.setState({
+      addons: r1.data,
+      addonAttachments: r2.data,
+      loading: false,
+      new: false,
+      message,
+      open: true,
+      confirmAddonOpen: false,
+      confirmAttachmentOpen: false,
+      attach: false,
+    });
+    this.getAppsAttachedToAddon();
+  }
+
+  renderAddons() {
     const { isElevated, restrictedSpace } = this.state;
     return this.state.addons.map((addon) => {
       let deleteButton = (
@@ -190,7 +357,7 @@ export default class Addons extends Component {
     });
   }
 
-  getAddonAttachments() {
+  renderAddonAttachments() {
     const { isElevated, restrictedSpace } = this.state;
     return this.state.addonAttachments.map((attachment, index) => {
       let deleteButton = (
@@ -241,8 +408,8 @@ export default class Addons extends Component {
     });
   }
 
-  getDialogTitle() {
-    if (this.state.addonsLoaded && this.state.currentAddon) {
+  renderDialogTitle() {
+    if ((this.state.addonsLoaded || this.state.attachmentsLoaded) && this.state.currentAddon) {
       const currentAddon = this.state.currentAddon;
       return (
         <div>
@@ -255,175 +422,6 @@ export default class Addons extends Component {
       );
     }
     return '';
-  }
-
-  getAppsAttachedToAddon() {
-    const addons = this.state.addons;
-    addons.forEach((addon, index) => {
-      api.getAppsAttachedToAddon(this.props.app.name, addon.id).then((res) => {
-        addons[index].attached_to = res.data.attached_to;
-        if (addons.every(a => (a.attached_to))) {
-          if (this._isMounted) {
-            this.setState({ addons, addonsLoaded: true });
-          }
-        }
-      });
-    });
-
-    const addonAttachments = this.state.addonAttachments;
-    addonAttachments.forEach((attachment, index) => {
-      api.getAppsAttachedToAddon(this.props.app.name, attachment.addon.id).then((res) => {
-        addonAttachments[index].attached_to = res.data.attached_to;
-        if (addonAttachments.every(a => (a.attached_to))) {
-          if (this._isMounted) {
-            this.setState({ addonAttachments, attachmentsLoaded: true });
-          }
-        }
-      });
-    });
-  }
-
-  loadAddons() {
-    Promise.all([
-      api.getAppAddons(this.props.app.name),
-      api.getAddonAttachments(this.props.app.name),
-    ]).then(([r1, r2]) => {
-      if (this._isMounted) {
-        this.setState({
-          addons: r1.data,
-          addonAttachments: r2.data,
-          loading: false,
-        });
-        this.getAppsAttachedToAddon();
-      }
-    });
-  }
-
-  formatAttachment(attachment, index) { // eslint-disable-line class-methods-use-this
-    return (
-      <TableRow className={`attachment-${index}`} style={style.tableRow} key={attachment.id}>
-        <TableCell colSpan="2">
-          <div className="attachment-name" style={style.tableRowColumn.title}>{attachment.name}</div>
-          <div style={style.tableRowColumn.sub}>{attachment.id}</div>
-        </TableCell>
-        <TableCell>
-          {attachment.owner && (
-            <div className="attachment-owner" style={{ color: muiTheme.palette.secondary.main }}>Owner</div>
-          )}
-        </TableCell>
-      </TableRow>
-    );
-  }
-
-  handleAddonDialogClose = () => {
-    this.setState({ addonDialogOpen: false });
-  }
-
-  handleNewAddon = () => {
-    this.setState({ new: true });
-  }
-
-  handleNewAddonCancel = () => {
-    this.setState({ new: false });
-  }
-
-  handleAttachAddon = () => {
-    this.setState({ attach: true });
-  }
-
-  handleAttachAddonCancel = () => {
-    this.setState({ attach: false });
-  }
-
-  handleRemoveAddon = () => {
-    this.setState({ loading: true });
-    api.deleteAddon(this.props.app.name, this.state.addon.id).then(() => {
-      this.reload('Addon Deleted');
-    }).catch((error) => {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        loading: false,
-        new: false,
-        confirmAddonOpen: false,
-        confirmAttachmentOpen: false,
-        attach: false,
-      });
-    });
-  }
-
-  handleRemoveAddonAttachment = () => {
-    this.setState({ loading: true });
-    api.deleteAddonAttachment(this.props.app.name, this.state.attachment.id).then(() => {
-      this.reload('Attachment Deleted');
-    }).catch((error) => {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        loading: false,
-        new: false,
-        confirmAddonOpen: false,
-        confirmAttachmentOpen: false,
-        attach: false,
-      });
-    });
-  }
-
-  handleAddonConfirmation = (addon) => {
-    this.setState({
-      confirmAddonOpen: true,
-      addon,
-    });
-  }
-
-  handleCancelAddonConfirmation = () => {
-    this.setState({
-      confirmAddonOpen: false,
-      addon: null,
-    });
-  }
-
-  handleAddonAttachmentConfirmation = (attachment) => {
-    this.setState({
-      confirmAttachmentOpen: true,
-      attachment,
-    });
-  }
-
-  handleCancelAddonAttachmentConfirmation = () => {
-    this.setState({
-      confirmAttachmentOpen: false,
-      attachment: null,
-    });
-  }
-
-  handleRequestClose = () => {
-    this.setState({ open: false });
-  }
-
-  handleDialogClose= () => {
-    this.setState({ submitFail: false });
-  }
-
-  reload = (message) => {
-    this.setState({ loading: true });
-    Promise.all([
-      api.getAppAddons(this.props.app.name),
-      api.getAddonAttachments(this.props.app.name),
-    ]).then(([r1, r2]) => {
-      this.setState({
-        addons: r1.data,
-        addonAttachments: r2.data,
-        loading: false,
-        new: false,
-        message,
-        open: true,
-        confirmAddonOpen: false,
-        confirmAttachmentOpen: false,
-        attach: false,
-      });
-      this.getAppsAttachedToAddon();
-    });
   }
 
   render() {
@@ -482,7 +480,7 @@ export default class Addons extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.state.addons.length > 0 ? this.getAddons() : (
+              {this.state.addons.length > 0 ? this.renderAddons() : (
                 <TableRow><TableCell /><TableCell>No Results</TableCell><TableCell /></TableRow>
               )}
             </TableBody>
@@ -498,7 +496,7 @@ export default class Addons extends Component {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {this.getAddonAttachments()}
+                {this.renderAddonAttachments()}
               </TableBody>
             </Table>
           )}
@@ -508,7 +506,7 @@ export default class Addons extends Component {
             open={this.state.addonDialogOpen}
           >
             <DialogTitle>
-              {this.getDialogTitle()}
+              {this.renderDialogTitle()}
             </DialogTitle>
             <DialogContent>
               {!isEmpty(this.state.currentAddon) && (

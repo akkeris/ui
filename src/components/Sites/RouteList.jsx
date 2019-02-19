@@ -72,15 +72,79 @@ export default class RouteList extends Component {
   }
 
   componentDidMount() {
-    api.getRoutes(this.props.site).then((response) => {
+    this.getRoutes();
+  }
+
+  getRoutes = async () => {
+    const { data: routes } = await api.getRoutes(this.props.site);
+    this.setState({ routes, loading: false });
+  }
+
+  handleNewRoute = () => {
+    this.setState({ new: true });
+  }
+
+  handleNewRouteCancel = () => {
+    this.setState({ new: false });
+  }
+
+  handleRemoveRoute = async () => {
+    this.setState({ loading: true });
+    try {
+      await api.deleteRoute(this.state.route.id);
+      this.reload('Route Deleted');
+    } catch (error) {
       this.setState({
-        routes: response.data,
+        new: false,
         loading: false,
+        open: false,
+        route: null,
+        confirmOpen: false,
       });
+      this.props.onError(error.response.data);
+    }
+  }
+
+  handleRequestClose = () => {
+    this.setState({ open: false });
+  }
+
+  handleConfirmation = (route) => {
+    this.setState({
+      confirmOpen: true,
+      route,
     });
   }
 
-  getRoutes(page, rowsPerPage) {
+  handleCancelConfirmation = () => {
+    this.setState({
+      confirmOpen: false,
+    });
+  }
+
+  reload = async (message) => {
+    this.setState({ loading: true });
+    const { data: routes } = await api.getRoutes(this.props.site);
+    this.setState({
+      routes,
+      loading: false,
+      new: false,
+      message,
+      open: true,
+      confirmOpen: false,
+      route: null,
+    });
+  }
+
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+  renderRoutes(page, rowsPerPage) {
     return this.state.routes.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(route => (
       <TableRow key={route.id} style={style.tableRow}>
         <TableCell>
@@ -106,70 +170,6 @@ export default class RouteList extends Component {
       </TableRow>
     ));
   }
-
-  handleNewRoute = () => {
-    this.setState({ new: true });
-  }
-
-  handleNewRouteCancel = () => {
-    this.setState({ new: false });
-  }
-
-  handleRemoveRoute = () => {
-    this.setState({ loading: true });
-    api.deleteRoute(this.state.route.id).then(() => {
-      this.reload('Route Deleted');
-    }).catch((error) => {
-      this.setState({
-        new: false,
-        loading: false,
-        open: false,
-        route: null,
-        confirmOpen: false,
-      });
-      this.props.onError(error.response.data);
-    });
-  }
-
-  handleRequestClose = () => {
-    this.setState({ open: false });
-  }
-
-  handleConfirmation = (route) => {
-    this.setState({
-      confirmOpen: true,
-      route,
-    });
-  }
-
-  handleCancelConfirmation = () => {
-    this.setState({
-      confirmOpen: false,
-    });
-  }
-
-  reload = (message) => {
-    this.setState({ loading: true });
-    api.getRoutes(this.props.site).then((response) => {
-      this.setState({
-        routes: response.data,
-        loading: false,
-        new: false,
-        message,
-        open: true,
-        confirmOpen: false,
-        route: null,
-      });
-    });
-  }
-
-  handleChangePage = (event, page) => {
-    this.setState({ page });
-  };
-
-  handleChangeRowsPerPage = (event) => {
-    this.setState({ rowsPerPage: event.target.value });
-  };
 
   render() {
     const { routes, page, rowsPerPage } = this.state;
@@ -208,7 +208,7 @@ export default class RouteList extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.getRoutes(page, rowsPerPage)}
+              {this.renderRoutes(page, rowsPerPage)}
             </TableBody>
             {routes.length !== 0 && (
               <TableFooter>

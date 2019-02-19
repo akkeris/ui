@@ -55,7 +55,85 @@ export default class NewAutoBuild extends Component {
     };
   }
 
-  getStepContent(stepIndex) {
+  handleClose = () => {
+    this.setState({ submitFail: false });
+  }
+
+  handleNext = () => {
+    const { stepIndex } = this.state;
+    if ((stepIndex === 0 && this.state.repo === '') || (stepIndex === 2 && (this.state.userSelection === 'user' && (!this.state.username || !this.state.token)))) {
+      this.setState({ errorText: 'field required' });
+    } else if (!this.state.loading) {
+      this.setState({
+        stepIndex: stepIndex + 1,
+        finished: stepIndex >= 3,
+        loading: stepIndex >= 3,
+        errorText: null,
+      });
+    }
+  }
+
+  handlePrev = () => {
+    const { stepIndex } = this.state;
+    if (!this.state.loading) {
+      this.setState({
+        stepIndex: stepIndex - 1,
+        loading: false,
+        errorText: null,
+      });
+    }
+  }
+
+  // Handles changes for repo, username, branch
+  handleChange = name => (event) => {
+    if (event.target.value === 'bot' && name === 'userSelection') {
+      this.setState({
+        [name]: event.target.value,
+        username: null,
+        token: null,
+      });
+    } else {
+      this.setState({ [name]: event.target.value });
+    }
+  }
+
+  handleAutoDeploy = (event, isInputChecked) => {
+    this.setState({ autoDeploy: isInputChecked });
+  }
+
+  handleStatusCheck = (event, isInputChecked) => {
+    this.setState({ statusCheck: isInputChecked });
+  }
+
+  submitBuild = async () => {
+    try {
+      await api.createAutoBuild(
+        this.props.app,
+        this.state.repo,
+        (this.state.branch === '' ? 'master' : this.state.branch),
+        this.state.statusCheck,
+        this.state.autoDeploy,
+        this.state.username,
+        this.state.token,
+      );
+      this.props.onComplete('Auto Build Connected');
+    } catch (error) {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        finished: false,
+        stepIndex: 0,
+        loading: false,
+        branch: '',
+        repo: '',
+        autoDeploy: true,
+        username: null,
+        statusCheck: true,
+      });
+    }
+  }
+
+  renderStepContent(stepIndex) {
     switch (stepIndex) {
       case 0:
         return (
@@ -158,75 +236,6 @@ export default class NewAutoBuild extends Component {
     }
   }
 
-  handleClose = () => {
-    this.setState({ submitFail: false });
-  }
-
-  handleNext = () => {
-    const { stepIndex } = this.state;
-    if ((stepIndex === 0 && this.state.repo === '') || (stepIndex === 2 && (this.state.userSelection === 'user' && (!this.state.username || !this.state.token)))) {
-      this.setState({ errorText: 'field required' });
-    } else if (!this.state.loading) {
-      this.setState({
-        stepIndex: stepIndex + 1,
-        finished: stepIndex >= 3,
-        loading: stepIndex >= 3,
-        errorText: null,
-      });
-    }
-  }
-
-  handlePrev = () => {
-    const { stepIndex } = this.state;
-    if (!this.state.loading) {
-      this.setState({
-        stepIndex: stepIndex - 1,
-        loading: false,
-        errorText: null,
-      });
-    }
-  }
-
-  // Handles changes for repo, username, branch
-  handleChange = name => (event) => {
-    if (event.target.value === 'bot' && name === 'userSelection') {
-      this.setState({
-        [name]: event.target.value,
-        username: null,
-        token: null,
-      });
-    } else {
-      this.setState({ [name]: event.target.value });
-    }
-  }
-
-  handleAutoDeploy = (event, isInputChecked) => {
-    this.setState({ autoDeploy: isInputChecked });
-  }
-
-  handleStatusCheck = (event, isInputChecked) => {
-    this.setState({ statusCheck: isInputChecked });
-  }
-
-  submitBuild = () => {
-    api.createAutoBuild(this.props.app, this.state.repo, (this.state.branch === '' ? 'master' : this.state.branch), this.state.statusCheck, this.state.autoDeploy, this.state.username, this.state.token).then(() => {
-      this.props.onComplete('Auto Build Connected');
-    }).catch((error) => {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        loading: false,
-        branch: '',
-        repo: '',
-        autoDeploy: true,
-        username: null,
-        statusCheck: true,
-      });
-    });
-  }
-
   renderContent() {
     const { finished, stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'hidden' };
@@ -236,7 +245,7 @@ export default class NewAutoBuild extends Component {
 
     return (
       <div style={contentStyle}>
-        <div>{this.getStepContent(stepIndex)}</div>
+        <div>{this.renderStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
           {stepIndex > 0 && (<Button
             className="back"

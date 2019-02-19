@@ -86,15 +86,16 @@ export default class SiteOverview extends Component {
     this.setState({ submitFail: false });
   }
 
-  handleRemoveSite = () => {
-    api.deleteSite(this.props.site.domain).then(() => {
+  handleRemoveSite = async () => {
+    try {
+      await api.deleteSite(this.props.site.domain);
       window.location = '#/sites';
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
       });
-    });
+    }
   }
 
   render() {

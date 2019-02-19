@@ -69,65 +69,12 @@ export default class NewRoute extends Component {
   }
 
   componentDidMount() {
-    api.getApps().then((response) => {
-      this.setState({
-        apps: response.data,
-        app: response.data[0],
-        loading: false,
-      });
-    });
+    this.getApps();
   }
 
-  getApps() {
-    return this.state.apps.map(app => (
-      <MenuItem className={app.id} key={app.id} value={app.id}>{app.name}</MenuItem>
-    ));
-  }
-
-  getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return (
-          <div>
-            <TextField
-              className="source-path"
-              label="Source Path"
-              type="text"
-              value={this.state.source}
-              onChange={this.handleSourceChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-            />
-            <p>Path of route after domain ex. `/` or `/source`.</p>
-          </div>
-        );
-      case 1:
-        return (
-          <div>
-            <Select className="new-dropdown" value={this.state.app.id} onChange={this.handleAppChange}>
-              {this.getApps()}
-            </Select>
-            <p>The app to route to.</p>
-          </div>
-        );
-      case 2:
-        return (
-          <div>
-            <TextField
-              className="target-path"
-              label="Target Path"
-              type="text"
-              value={this.state.target}
-              onChange={this.handleTargetChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-            />
-            <p>The path on the app to route to.</p>
-          </div>
-        );
-      default:
-        return 'You\'re a long way from home sonny jim!';
-    }
+  getApps = async () => {
+    const { data: apps } = await api.getApps();
+    this.setState({ apps, app: apps[0], loading: false });
   }
 
   handleClose = () => {
@@ -181,15 +128,16 @@ export default class NewRoute extends Component {
     });
   }
 
-  submitRoute = () => {
-    api.createRoute(
-      this.props.site,
-      this.state.app.id,
-      this.state.source,
-      this.state.target,
-    ).then(() => {
+  submitRoute = async () => {
+    try {
+      await api.createRoute(
+        this.props.site,
+        this.state.app.id,
+        this.state.source,
+        this.state.target,
+      );
       this.props.onComplete('Route Created');
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -201,7 +149,59 @@ export default class NewRoute extends Component {
         target: '',
         app: null,
       });
-    });
+    }
+  }
+
+  renderApps() {
+    return this.state.apps.map(app => (
+      <MenuItem className={app.id} key={app.id} value={app.id}>{app.name}</MenuItem>
+    ));
+  }
+
+  renderStepContent(stepIndex) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <div>
+            <TextField
+              className="source-path"
+              label="Source Path"
+              type="text"
+              value={this.state.source}
+              onChange={this.handleSourceChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>Path of route after domain ex. `/` or `/source`.</p>
+          </div>
+        );
+      case 1:
+        return (
+          <div>
+            <Select className="new-dropdown" value={this.state.app.id} onChange={this.handleAppChange}>
+              {this.renderApps()}
+            </Select>
+            <p>The app to route to.</p>
+          </div>
+        );
+      case 2:
+        return (
+          <div>
+            <TextField
+              className="target-path"
+              label="Target Path"
+              type="text"
+              value={this.state.target}
+              onChange={this.handleTargetChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>The path on the app to route to.</p>
+          </div>
+        );
+      default:
+        return 'You\'re a long way from home sonny jim!';
+    }
   }
 
   renderContent() {
@@ -213,7 +213,7 @@ export default class NewRoute extends Component {
 
     return (
       <div style={contentStyle}>
-        <div>{this.getStepContent(stepIndex)}</div>
+        <div>{this.renderStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
           {stepIndex > 0 && (
             <Button

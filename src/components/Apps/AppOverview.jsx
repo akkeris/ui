@@ -171,31 +171,33 @@ class AppOverview extends Component {
     this.setState({ submitFail: false });
   }
 
-  handleRemoveApp = () => {
-    api.deleteApp(this.props.app.name).then(() => {
+  handleRemoveApp = async () => {
+    try {
+      await api.deleteApp(this.props.app.name);
       window.location = '#/apps';
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
         open: false,
       });
-    });
+    }
   }
 
-  handleMaintenanceToggle = () => {
+  handleMaintenanceToggle = async () => {
     this.setState({ loading: true });
-    api.patchApp(this.props.app.name, this.state.isMaintenance).then(() => {
+    try {
+      await api.patchApp(this.props.app.name, this.state.isMaintenance);
       this.props.onComplete('Maintenance Mode Updated');
       this.setState({ mOpen: false, loading: false });
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
         loading: false,
         mOpen: false,
       });
-    });
+    }
   }
 
   render() {

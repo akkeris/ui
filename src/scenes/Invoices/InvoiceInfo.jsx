@@ -231,12 +231,12 @@ export default class InvoiceInfo extends Component {
   }
 
   componentDidMount() {
-    api.getInvoice(this.props.match.params.invoice).then((response) => {
-      this.setState({
-        data: response.data,
-        loading: false,
-      });
-    });
+    this.getInvoice();
+  }
+
+  getInvoice = async () => {
+    const { data } = await api.getInvoice(this.props.match.params.invoice);
+    this.setState({ data, loading: false });
   }
 
   handleClick = (index, org) => {
