@@ -253,48 +253,13 @@ export default class Webhook extends Component {
     };
   }
 
-  getEventCheckboxes() { // eslint-disable-line class-methods-use-this
-    return defaultEvents.map(event => (
-      <Grid item xs={6} key={event}>
-        <FormControlLabel
-          label={event}
-          control={
-            <Checkbox
-              className={`checkbox-${event}`}
-              key={event}
-              value={event}
-              checked={this.state.events.includes(event)}
-              onChange={this.handleCheck}
-              disabled={!this.state.edit}
-            />}
-        />
-      </Grid>
-    ));
-  }
-
-  getEvents() {
-    return this.props.webhook.events.map((event, idx) =>
-      (<span key={event} style={style.eventSpan}>
-        {event}{idx === this.props.webhook.events.length - 1 ? '' : ','}
-      </span>));
-  }
-
-  getDialogTitle() {
-    return (
-      <div style={style.dialogTitleContainer}>
-        <span style={style.dialogTitle}>Webhook History</span>
-        <br />
-        <span style={style.dialogSubtitle} className="history-dialog-subtitle">{this.state.dialogSubtitle}</span>
-      </div>
-    );
-  }
-
-  getHookHistory() {
-    api.getWebhookResults(this.props.app, this.props.webhook.id).then(result => (
-      this.setState({ history: result.data, loading: false })
-    )).catch((error) => {
+  getHookHistory = async () => {
+    try {
+      const { data: history } = await api.getWebhookResults(this.props.app, this.props.webhook.id);
+      this.setState({ history, loading: false });
+    } catch (error) {
       this.props.onError(error);
-    });
+    }
   }
 
   handleHistoryDialogBack= () => {
@@ -327,15 +292,16 @@ export default class Webhook extends Component {
     this.setState({ open: false });
   }
 
-  handleRemoveWebhook = () => {
-    api.deleteWebhook(this.props.app, this.props.webhook.id).then(() => {
+  handleRemoveWebhook = async () => {
+    try {
+      await api.deleteWebhook(this.props.app, this.props.webhook.id);
       this.props.onComplete('Webhook Deleted');
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         loading: false,
         errorMessage: error.response.data,
       });
-    });
+    }
   }
 
   handleChange = name => (event) => {
@@ -371,20 +337,21 @@ export default class Webhook extends Component {
     this.reset(this.props.webhook.events);
   }
 
-  patchWebhook = () => {
-    api.patchWebhook(
-      this.props.app,
-      this.props.webhook.id,
-      /^(HTTP|HTTP|http(s)?:\/\/)/.test(this.state.url) ? this.state.url : `http://${this.state.url}`,
-      this.state.events,
-      this.state.secret === '' ? null : this.state.secret,
-      this.state.active,
-    ).then(() => {
+  patchWebhook = async () => {
+    try {
+      await api.patchWebhook(
+        this.props.app,
+        this.props.webhook.id,
+        /^(HTTP|HTTP|http(s)?:\/\/)/.test(this.state.url) ? this.state.url : `http://${this.state.url}`,
+        this.state.events,
+        this.state.secret === '' ? null : this.state.secret,
+        this.state.active,
+      );
       this.props.onComplete('Updated Webhook');
-    }).catch((error) => {
+    } catch (error) {
       this.reset(this.props.webhook.events);
       this.props.onError(error.response.data);
-    });
+    }
   }
 
   handleSave = () => {
@@ -440,6 +407,42 @@ export default class Webhook extends Component {
     });
   }
 
+  renderEventCheckboxes() { // eslint-disable-line class-methods-use-this
+    return defaultEvents.map(event => (
+      <Grid item xs={6} key={event}>
+        <FormControlLabel
+          label={event}
+          control={
+            <Checkbox
+              className={`checkbox-${event}`}
+              key={event}
+              value={event}
+              checked={this.state.events.includes(event)}
+              onChange={this.handleCheck}
+              disabled={!this.state.edit}
+            />}
+        />
+      </Grid>
+    ));
+  }
+
+  renderEvents() {
+    return this.props.webhook.events.map((event, idx) =>
+      (<span key={event} style={style.eventSpan}>
+        {event}{idx === this.props.webhook.events.length - 1 ? '' : ','}
+      </span>));
+  }
+
+  renderDialogTitle() {
+    return (
+      <div style={style.dialogTitleContainer}>
+        <span style={style.dialogTitle}>Webhook History</span>
+        <br />
+        <span style={style.dialogSubtitle} className="history-dialog-subtitle">{this.state.dialogSubtitle}</span>
+      </div>
+    );
+  }
+
   renderEventsInfoDialog() {
     return (
       <Dialog
@@ -485,7 +488,7 @@ export default class Webhook extends Component {
         </Grid>
         <Grid item xs={6} style={style.titleGrid.right}>
           <div style={style.eventsContainer}>
-            {this.getEvents(this.props.webhook)}
+            {this.renderEvents(this.props.webhook)}
           </div>
         </Grid>
       </Grid>
@@ -625,7 +628,7 @@ export default class Webhook extends Component {
                 {this.renderEventsInfoDialog()}
                 <div style={style.eventsTwoColumns} className="events">
                   <Grid container spacing={8} style={style.gridContainer}>
-                    {this.getEventCheckboxes(this.props.webhook)}
+                    {this.renderEventCheckboxes(this.props.webhook)}
                     <Grid
                       item
                       xs={12}
@@ -672,7 +675,7 @@ export default class Webhook extends Component {
         maxWidth="md"
       >
         <DialogTitle>
-          {this.getDialogTitle()}
+          {this.renderDialogTitle()}
         </DialogTitle>
         <DialogContent>
           {this.state.loading ? (

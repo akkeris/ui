@@ -28,7 +28,15 @@ export default class OrgList extends Component {
     };
   }
 
-  getOrgs(page, rowsPerPage) {
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+  renderOrgs(page, rowsPerPage) {
     return this.props.orgs
       .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -42,14 +50,6 @@ export default class OrgList extends Component {
       ));
   }
 
-  handleChangePage = (event, page) => {
-    this.setState({ page });
-  };
-
-  handleChangeRowsPerPage = (event) => {
-    this.setState({ rowsPerPage: event.target.value });
-  };
-
   render() {
     const { orgs } = this.props;
     const { page, rowsPerPage } = this.state;
@@ -57,7 +57,7 @@ export default class OrgList extends Component {
       <div>
         <Table className="org-list">
           <TableBody>
-            {this.getOrgs(page, rowsPerPage)}
+            {this.renderOrgs(page, rowsPerPage)}
           </TableBody>
           {orgs.length !== 0 && (
             <TableFooter>

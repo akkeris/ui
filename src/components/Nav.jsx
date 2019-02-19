@@ -73,11 +73,12 @@ export default class Nav extends Component {
   }
 
   componentDidMount() {
-    api.getUser().then((response) => {
-      this.setState({
-        account: response.data,
-      });
-    });
+    this.getUser();
+  }
+
+  getUser = async () => {
+    const { data: account } = await api.getUser();
+    this.setState({ account });
   }
 
   handleToggle = () => this.setState({ open: !this.state.open });
@@ -191,7 +192,7 @@ export default class Nav extends Component {
                 </ListItem>
               </Link>
             </List>
-            <Divider inset />
+            <Divider variant="inset" />
           </Drawer>
         </div>
       </MuiThemeProvider>

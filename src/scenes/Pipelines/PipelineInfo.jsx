@@ -110,24 +110,7 @@ export default class PipelineInfo extends Component {
   }
 
   componentDidMount() {
-    api.getPipeline(this.props.match.params.pipeline).then((response) => {
-      const hashPath = window.location.hash;
-      let currentTab = hashPath.replace(this.state.baseHash, '');
-      if (!tabs.includes(currentTab)) {
-        currentTab = 'review';
-        window.location.hash = `${this.state.baseHash}review`;
-      }
-      this.setState({ currentTab });
-      this.setState({
-        pipeline: response.data,
-        loading: false,
-      });
-    }).catch((error) => {
-      this.setState({
-        submitFail: true,
-        submitMessage: error.response.data,
-      });
-    });
+    this.getPipeline();
     util.updateHistory('pipeline', this.props.match.params.pipeline);
   }
 
@@ -156,12 +139,31 @@ export default class PipelineInfo extends Component {
     }
   }
 
-  handleRemovePipeline = () => {
-    api.deletePipeline(this.props.match.params.pipeline).then(() => {
+  getPipeline = async () => {
+    try {
+      const { data: pipeline } = await api.getPipeline(this.props.match.params.pipeline);
+      const hashPath = window.location.hash;
+      let currentTab = hashPath.replace(this.state.baseHash, '');
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'review';
+        window.location.hash = `${this.state.baseHash}review`;
+      }
+      this.setState({ currentTab, pipeline, loading: false });
+    } catch (error) {
+      this.setState({
+        submitFail: true,
+        submitMessage: error.response.data,
+      });
+    }
+  }
+
+  handleRemovePipeline = async () => {
+    try {
+      await api.deletePipeline(this.props.match.params.pipeline);
       window.location = '#/pipelines';
-    }).catch((error) => {
+    } catch (error) {
       this.handleError(error.response.data);
-    });
+    }
   }
 
   handleClose = () => {

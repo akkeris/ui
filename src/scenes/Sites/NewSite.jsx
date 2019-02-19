@@ -64,85 +64,12 @@ export default class NewSite extends Component {
   }
 
   componentDidMount() {
-    api.getRegions().then((response) => {
-      this.setState({
-        regions: response.data,
-        loading: false,
-        region: response.data[0].name,
-      });
-    });
+    this.getRegions();
   }
 
-  getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return (
-          <div>
-            <TextField
-              className="site-name"
-              label="Domain Name"
-              value={this.state.domain}
-              onChange={this.handleDomainChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-              style={{ minWidth: '50%' }}
-            />
-            <p>
-                The domain name of a site must only use alphanumerics, hyphens and periods.
-            </p>
-          </div>
-        );
-      case 1:
-        return (
-          <div className="region">
-            <h3>Region</h3>
-            <FormControl component="fieldset" className="radio-group">
-              <RadioGroup
-                aria-label="Select Region"
-                name="region-radio-group"
-                className="region-radio-group"
-                value={this.state.region}
-                onChange={this.handleRegionChange}
-              >
-                {this.getRegions()}
-              </RadioGroup>
-            </FormControl>
-            {this.state.errorText !== '' && (
-              <p style={style.error}>{this.state.errorText}</p>
-            )}
-          </div>
-        );
-      case 2:
-        return (
-          <div>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={this.state.internal}
-                  onChange={this.handleToggleInternal}
-                  value="internal"
-                  className="toggle"
-                />
-              }
-              label="Internal"
-            />
-          </div>
-        );
-      default:
-        return 'You\'re a long way from home sonny jim!';
-    }
-  }
-
-  getRegions() {
-    return this.state.regions.map(region => (
-      <FormControlLabel
-        className={region.name}
-        key={region.name}
-        value={region.name}
-        label={region.name}
-        control={<Radio />}
-      />
-    ));
+  getRegions = async () => {
+    const { data: regions } = await api.getRegions();
+    this.setState({ regions, loading: false, region: regions[0].name });
   }
 
   handleClose = () => {
@@ -199,10 +126,11 @@ export default class NewSite extends Component {
     }
   }
 
-  submitSite = () => {
-    api.createSite(this.state.domain, this.state.region, this.state.internal).then(() => {
+  submitSite = async () => {
+    try {
+      await api.createSite(this.state.domain, this.state.region, this.state.internal);
       window.location = '#/sites';
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -214,8 +142,80 @@ export default class NewSite extends Component {
         internal: false,
         loading: false,
       });
-    });
+    }
   };
+
+  renderStepContent(stepIndex) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <div>
+            <TextField
+              className="site-name"
+              label="Domain Name"
+              value={this.state.domain}
+              onChange={this.handleDomainChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+              style={{ minWidth: '50%' }}
+            />
+            <p>
+                The domain name of a site must only use alphanumerics, hyphens and periods.
+            </p>
+          </div>
+        );
+      case 1:
+        return (
+          <div className="region">
+            <h3>Region</h3>
+            <FormControl component="fieldset" className="radio-group">
+              <RadioGroup
+                aria-label="Select Region"
+                name="region-radio-group"
+                className="region-radio-group"
+                value={this.state.region}
+                onChange={this.handleRegionChange}
+              >
+                {this.renderRegions()}
+              </RadioGroup>
+            </FormControl>
+            {this.state.errorText !== '' && (
+              <p style={style.error}>{this.state.errorText}</p>
+            )}
+          </div>
+        );
+      case 2:
+        return (
+          <div>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={this.state.internal}
+                  onChange={this.handleToggleInternal}
+                  value="internal"
+                  className="toggle"
+                />
+              }
+              label="Internal"
+            />
+          </div>
+        );
+      default:
+        return 'You\'re a long way from home sonny jim!';
+    }
+  }
+
+  renderRegions() {
+    return this.state.regions.map(region => (
+      <FormControlLabel
+        className={region.name}
+        key={region.name}
+        value={region.name}
+        label={region.name}
+        control={<Radio />}
+      />
+    ));
+  }
 
   renderContent() {
     const { finished, stepIndex } = this.state;
@@ -225,7 +225,7 @@ export default class NewSite extends Component {
     }
     return (
       <div style={contentStyle}>
-        <div>{this.getStepContent(stepIndex)}</div>
+        <div>{this.renderStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
           {stepIndex > 0 && (
             <Button

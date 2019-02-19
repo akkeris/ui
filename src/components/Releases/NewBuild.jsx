@@ -71,7 +71,63 @@ export default class NewBuild extends Component {
     };
   }
 
-  getStepContent(stepIndex) {
+  handleClose = () => {
+    this.setState({ submitFail: false });
+  }
+
+  handleNext = () => {
+    const { stepIndex } = this.state;
+    if (stepIndex === 0 && this.state.url === '') {
+      this.setState({ errorText: 'field required' });
+    } else if (!this.state.loading) {
+      this.setState({
+        stepIndex: stepIndex + 1,
+        finished: stepIndex >= 2,
+        loading: stepIndex >= 2,
+        errorText: null,
+      });
+    }
+  }
+
+  handlePrev = () => {
+    const { stepIndex } = this.state;
+    if (!this.state.loading) {
+      this.setState({
+        stepIndex: stepIndex - 1,
+        loading: false,
+        errorText: null,
+      });
+    }
+  }
+
+  // Handles changes for org, checksum, URL, repo, SHA, branch, and version.
+  handleChange = name => (event) => {
+    this.setState({ [name]: event.target.value });
+  }
+
+  submitBuild = async () => {
+    try {
+      await api.createBuild(
+        this.props.app, this.props.org, null, this.state.url,
+        null, null, this.state.branch, this.state.version,
+      );
+      this.props.onComplete('New Deployment Requested');
+    } catch (error) {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        finished: false,
+        stepIndex: 0,
+        loading: false,
+        errorText: null,
+        url: '',
+        branch: null,
+        version: null,
+      });
+    }
+  }
+
+  renderStepContent(stepIndex) {
     switch (stepIndex) {
       case 0:
         return (
@@ -128,61 +184,6 @@ export default class NewBuild extends Component {
     }
   }
 
-  handleClose = () => {
-    this.setState({ submitFail: false });
-  }
-
-  handleNext = () => {
-    const { stepIndex } = this.state;
-    if (stepIndex === 0 && this.state.url === '') {
-      this.setState({ errorText: 'field required' });
-    } else if (!this.state.loading) {
-      this.setState({
-        stepIndex: stepIndex + 1,
-        finished: stepIndex >= 2,
-        loading: stepIndex >= 2,
-        errorText: null,
-      });
-    }
-  }
-
-  handlePrev = () => {
-    const { stepIndex } = this.state;
-    if (!this.state.loading) {
-      this.setState({
-        stepIndex: stepIndex - 1,
-        loading: false,
-        errorText: null,
-      });
-    }
-  }
-
-  // Handles changes for org, checksum, URL, repo, SHA, branch, and version.
-  handleChange = name => (event) => {
-    this.setState({ [name]: event.target.value });
-  }
-
-  submitBuild = () => {
-    api.createBuild(
-      this.props.app, this.props.org, null, this.state.url,
-      null, null, this.state.branch, this.state.version,
-    ).then(() => {
-      this.props.onComplete('New Deployment Requested');
-    }).catch((error) => {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        loading: false,
-        errorText: null,
-        url: '',
-        branch: null,
-        version: null,
-      });
-    });
-  }
-
   renderContent() {
     const { finished, stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'hidden' };
@@ -192,7 +193,7 @@ export default class NewBuild extends Component {
 
     return (
       <div style={contentStyle}>
-        <div>{this.getStepContent(stepIndex)}</div>
+        <div>{this.renderStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
           {stepIndex > 0 && (<Button
             className="back"

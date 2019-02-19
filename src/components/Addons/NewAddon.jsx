@@ -99,7 +99,7 @@ export default class NewAddon extends Component {
     }
   }
 
-  async getServices() {
+  getServices = async () => {
     const { data: services } = await api.getAddonServices();
     const groupedServices = [{ label: 'Services', options: [] }, { label: 'Credentials', options: [] }];
     services.forEach((addon) => {
@@ -109,7 +109,7 @@ export default class NewAddon extends Component {
     this.setState({ services, groupedServices, loading: false });
   }
 
-  async getPlans() {
+  getPlans = async () => {
     this.setState({ loading: true });
     let { data: plans } = await api.getAddonServicePlans(this.state.serviceid);
     plans = plans.filter(x => x.state !== 'deprecated').map(x => ({ value: x.id, label: x.name, price: x.price, description: x.description }));

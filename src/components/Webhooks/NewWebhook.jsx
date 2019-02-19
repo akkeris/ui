@@ -94,115 +94,6 @@ export default class NewWebhook extends Component {
     };
   }
 
-  getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return (
-          <div>
-            <TextField
-              className="webhook-url"
-              label="URL"
-              type="text"
-              value={this.state.url}
-              onChange={this.handleChange('url')}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-              error={!!this.state.errorText}
-            />
-            <p>
-              Enter a URL for the new webhook (defaults to http).
-            </p>
-          </div>
-        );
-      case 1:
-        return (
-          <div>
-            <div style={style.eventsHeader}>
-              <p style={style.eventsLabel}>Events</p>
-              <Tooltip placement="right" title="Click for Descriptions">
-                <IconButton
-                  className="events-info-button"
-                  onClick={this.openEventsInfoDialog}
-                  style={style.eventsInfoButton}
-                >
-                  <HelpIcon style={style.eventsInfoIcon} color="secondary" />
-                </IconButton>
-              </Tooltip>
-            </div>
-            {this.renderEventsInfoDialog()}
-            <div className="events">
-              <Grid container spacing={8} style={style.gridContainer}>
-                {this.getEventCheckboxes(this.webhook)}
-                <Grid item xs={12} style={style.checkAllContainer}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        value="Check All"
-                        key="Check All"
-                        className="checkbox-check-all"
-                        checked={this.state.checkedAll}
-                        onChange={this.handleCheckAll}
-                      />
-                    }
-                    label="Check All"
-                  />
-                </Grid>
-              </Grid>
-            </div>
-            {this.state.errorText && (
-              <div style={style.eventsError} className="events-errorText">
-                {this.state.errorText}
-              </div>
-            )}
-          </div>
-        );
-      case 2:
-        return (
-          <div>
-            <TextField
-              className="webhook-secret"
-              label="Secret"
-              type="password"
-              value={this.state.secret}
-              onChange={this.handleChange('secret')}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-              errorText={this.state.errorText}
-            />
-            <p>
-              Define a secret for calculation of SHA (optional).
-            </p>
-          </div>
-        );
-        // Have to have this otherwise it displays "Error- Captain Hook not found" on submit
-      case 3:
-        return '';
-      default:
-        return 'Error- Captain Hook not found';
-    }
-  }
-
-  getEventCheckboxes() { // eslint-disable-line class-methods-use-this
-    return defaultEvents.map(event => (
-      <Grid key={`checkbox-${event}`} item xs={6}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              className={`checkbox-${event}`}
-              key={event}
-              value={event}
-              checked={this.state.events.includes(event)}
-              onChange={this.handleCheck}
-            />
-          }
-          label={event}
-        />
-      </Grid>
-    ));
-  }
-
-  getEvents() {
-    return this.state.events.map((event, idx) => <span key={event} style={style.tableRow.column.event}>{event}{idx === this.state.events.length - 1 ? '' : ','} </span>);
-  }
-
   openEventsInfoDialog = () => {
     this.setState({ eventsDialogOpen: true });
   }
@@ -282,13 +173,11 @@ export default class NewWebhook extends Component {
     });
   }
 
-  submitWebHook = () => {
-    if (!this.state.secret) {
-      this.state.secret = ' ';
-    }
-    api.createWebHook(this.props.app, this.state.url, this.state.events, this.state.secret).then(() => { // eslint-disable-line
+  submitWebHook = async () => {
+    try {
+      await api.createWebHook(this.props.app, this.state.url, this.state.events, this.state.secret ? this.state.secret : ' ');
       this.props.onComplete('Webhook Created');
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data || 'Tick tock, Captain Hook!',
         submitFail: true,
@@ -298,7 +187,116 @@ export default class NewWebhook extends Component {
         url: '',
         secret: '',
       });
-    });
+    }
+  }
+
+  renderStepContent(stepIndex) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <div>
+            <TextField
+              className="webhook-url"
+              label="URL"
+              type="text"
+              value={this.state.url}
+              onChange={this.handleChange('url')}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+              error={!!this.state.errorText}
+            />
+            <p>
+              Enter a URL for the new webhook (defaults to http).
+            </p>
+          </div>
+        );
+      case 1:
+        return (
+          <div>
+            <div style={style.eventsHeader}>
+              <p style={style.eventsLabel}>Events</p>
+              <Tooltip placement="right" title="Click for Descriptions">
+                <IconButton
+                  className="events-info-button"
+                  onClick={this.openEventsInfoDialog}
+                  style={style.eventsInfoButton}
+                >
+                  <HelpIcon style={style.eventsInfoIcon} color="secondary" />
+                </IconButton>
+              </Tooltip>
+            </div>
+            {this.renderEventsInfoDialog()}
+            <div className="events">
+              <Grid container spacing={8} style={style.gridContainer}>
+                {this.renderEventCheckboxes(this.webhook)}
+                <Grid item xs={12} style={style.checkAllContainer}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        value="Check All"
+                        key="Check All"
+                        className="checkbox-check-all"
+                        checked={this.state.checkedAll}
+                        onChange={this.handleCheckAll}
+                      />
+                    }
+                    label="Check All"
+                  />
+                </Grid>
+              </Grid>
+            </div>
+            {this.state.errorText && (
+              <div style={style.eventsError} className="events-errorText">
+                {this.state.errorText}
+              </div>
+            )}
+          </div>
+        );
+      case 2:
+        return (
+          <div>
+            <TextField
+              className="webhook-secret"
+              label="Secret"
+              type="password"
+              value={this.state.secret}
+              onChange={this.handleChange('secret')}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+              errorText={this.state.errorText}
+            />
+            <p>
+              Define a secret for calculation of SHA (optional).
+            </p>
+          </div>
+        );
+        // Have to have this otherwise it displays "Error- Captain Hook not found" on submit
+      case 3:
+        return '';
+      default:
+        return 'Error- Captain Hook not found';
+    }
+  }
+
+  renderEventCheckboxes() { // eslint-disable-line class-methods-use-this
+    return defaultEvents.map(event => (
+      <Grid key={`checkbox-${event}`} item xs={6}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              className={`checkbox-${event}`}
+              key={event}
+              value={event}
+              checked={this.state.events.includes(event)}
+              onChange={this.handleCheck}
+            />
+          }
+          label={event}
+        />
+      </Grid>
+    ));
+  }
+
+  renderEvents() {
+    return this.state.events.map((event, idx) => <span key={event} style={style.tableRow.column.event}>{event}{idx === this.state.events.length - 1 ? '' : ','} </span>);
   }
 
   renderEventsInfoDialog() {
@@ -331,7 +329,7 @@ export default class NewWebhook extends Component {
     } else {
       return (
         <div style={contentStyle}>
-          <div>{this.getStepContent(stepIndex)}</div>
+          <div>{this.renderStepContent(stepIndex)}</div>
           <div style={style.buttons.div}>
             {stepIndex > 0 && (
               <Button

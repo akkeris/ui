@@ -84,78 +84,83 @@ export default class WasteReport extends Component {
   }
 
   componentDidMount() {
-    api.getFormationSizes().then((sResp) => {
-      api.getApps().then((response) => {
-        const apps = response.data.filter(x => x.organization.name === this.props.match.params.org);
-        this.setState({
-          sizes: sResp.data,
-          apps,
-          loading: false,
-          analyzing: true,
-          progress: 0,
-        });
-        const totalRequests = apps.length * 3;
-        const queue = apps.map(x => api.getMetrics.bind(api, x.name))
-          .concat(apps.map(x => api.getFormations.bind(api, x.name)))
-          .concat(apps.map(x => api.getAppAddons.bind(api, x.name)));
-        const results = [];
-        const errors = [];
-        const done = () => {
-          results.forEach((x) => {
-            let app = x.config.url.match(/\/api\/apps\/([A-z0-9-]+)\/.*/);
-            console.assert(app[1], 'Application name cannot be found in the config uri from axios');
-            app = app[1]; // eslint-disable-line prefer-destructuring
-            if (x.config.url.indexOf('/formation') !== -1) {
-              // formation
-              apps.forEach((y) => {
-                if (y.name === app) {
-                  y.formations = x.data; // eslint-disable-line no-param-reassign
-                }
-              });
-            } else if (x.config.url.indexOf('/metrics?') !== -1) {
-              // metric
-              apps.forEach((y) => {
-                if (y.name === app) {
-                  y.metrics = x.data; // eslint-disable-line no-param-reassign
-                }
-              });
-            } else if (x.config.url.indexOf('/addons') !== -1) {
-              // addons
-              apps.forEach((y) => {
-                if (y.name === app) {
-                  y.addons = x.data; // eslint-disable-line no-param-reassign
-                }
-              });
-            }
-          });
-          this.setState({ analyzing: false, progress: 100 });
-        };
-        const progress = () => {
-          this.setState({ progress: ((totalRequests - queue.length) / totalRequests) * 100 });
-        };
-        const next = () => {
-          progress();
-          if (queue.length === 0) {
-            console.assert(queue.length === 0 && totalRequests === (results.length + errors.length), 'We did not hear back from everyone.');
-            done();
-            return;
-          }
-          queue.shift()().then(process).catch(error); // eslint-disable-line no-use-before-define
-        };
-        let process = (result) => {
-          results.push(result);
-          next();
-        };
-        let error = (err) => {
-          errors.push(err);
-          next();
-        };
-        next();
-      });
-    });
+    this.getData();
   }
 
-  getAppRecommendations() {
+  getData = async () => {
+    const { data: sizes } = await api.getFormationSizes();
+    let { data: apps } = await api.getApps();
+    apps = apps.filter(x => x.organization.name === this.props.match.params.org);
+    this.setState({
+      sizes,
+      apps,
+      loading: false,
+      analyzing: true,
+      progress: 0,
+    });
+
+    const totalRequests = apps.length * 3;
+    const queue = apps.map(x => api.getMetrics.bind(api, x.name))
+      .concat(apps.map(x => api.getFormations.bind(api, x.name)))
+      .concat(apps.map(x => api.getAppAddons.bind(api, x.name)));
+    const results = [];
+    const errors = [];
+
+    const done = () => {
+      results.forEach((x) => {
+        let app = x.config.url.match(/\/api\/apps\/([A-z0-9-]+)\/.*/);
+        console.assert(app[1], 'Application name cannot be found in the config uri from axios');
+        app = app[1]; // eslint-disable-line prefer-destructuring
+        if (x.config.url.indexOf('/formation') !== -1) {
+          // formation
+          apps.forEach((y) => {
+            if (y.name === app) {
+              y.formations = x.data; // eslint-disable-line no-param-reassign
+            }
+          });
+        } else if (x.config.url.indexOf('/metrics?') !== -1) {
+          // metric
+          apps.forEach((y) => {
+            if (y.name === app) {
+              y.metrics = x.data; // eslint-disable-line no-param-reassign
+            }
+          });
+        } else if (x.config.url.indexOf('/addons') !== -1) {
+          // addons
+          apps.forEach((y) => {
+            if (y.name === app) {
+              y.addons = x.data; // eslint-disable-line no-param-reassign
+            }
+          });
+        }
+      });
+      this.setState({ analyzing: false, progress: 100 });
+    };
+
+    const next = () => {
+      this.setState({ progress: ((totalRequests - queue.length) / totalRequests) * 100 });
+      if (queue.length === 0) {
+        console.assert(queue.length === 0 && totalRequests === (results.length + errors.length), 'We did not hear back from everyone.');
+        done();
+        return;
+      }
+      queue.shift()().then(process).catch(error); // eslint-disable-line no-use-before-define
+    };
+
+    let process = (result) => {
+      results.push(result);
+      next();
+    };
+
+    let error = (err) => {
+      errors.push(err);
+      next();
+    };
+
+    next();
+  }
+
+  renderAppRecommendations() {
     const results = [];
     this.state.apps.forEach((app) => {
       const notes = recommendations.execute(
@@ -215,7 +220,7 @@ export default class WasteReport extends Component {
           <Paper style={style.paper}>
             <div style={style.header}>Cost Report for {this.props.match.params.org}</div>
             <List>
-              {this.getAppRecommendations()}
+              {this.renderAppRecommendations()}
             </List>
           </Paper>
         </div>

@@ -104,36 +104,12 @@ class Pipelines extends Component {
   }
 
   componentDidMount() {
-    api.getPipelines().then((response) => {
-      this.setState({
-        loading: false,
-        pipelines: response.data,
-      });
-    });
+    this.getPipelines();
   }
 
-  getPipelines() {
-    const { page, rowsPerPage, pipelines } = this.state;
-    return pipelines.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((pipeline) => {
-      const date = new Date(pipeline.updated_at);
-      return (
-        <TableRow
-          className={pipeline.name}
-          key={pipeline.id}
-          style={style.tableRow}
-          hover
-          onClick={() => this.handleRowSelection(pipeline.id)}
-        >
-          <TableCell>
-            <div style={style.tableRowColumn.title}>{pipeline.name}</div>
-            <div style={style.tableRowColumn.sub}>{pipeline.id}</div>
-          </TableCell>
-          <TableCell>
-            <div style={style.tableRowColumn.title}>{date.toLocaleString()}</div>
-          </TableCell>
-        </TableRow>
-      );
-    });
+  getPipelines = async () => {
+    const { data: pipelines } = await api.getPipelines();
+    this.setState({ pipelines, loading: false });
   }
 
   handleRowSelection = (id) => {
@@ -156,18 +132,11 @@ class Pipelines extends Component {
     this.setState({ open: false });
   }
 
-  reload = (message) => {
+  reload = async (message) => {
     this.setState({ loading: true });
-    api.getPipelines().then((response) => {
-      this.setState({
-        loading: false,
-        pipelines: response.data,
-        new: false,
-        open: true,
-        message,
-        page: 0,
-        rowsPerPage: 15,
-      });
+    const { data: pipelines } = await api.getPipelines();
+    this.setState({
+      pipelines, message, loading: false, new: false, open: true, page: 0, rowsPerPage: 15,
     });
   }
 
@@ -178,6 +147,30 @@ class Pipelines extends Component {
   handleChangeRowsPerPage = (event) => {
     this.setState({ rowsPerPage: event.target.value });
   };
+
+  renderPipelines() {
+    const { page, rowsPerPage, pipelines } = this.state;
+    return pipelines.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((pipeline) => {
+      const date = new Date(pipeline.updated_at);
+      return (
+        <TableRow
+          className={pipeline.name}
+          key={pipeline.id}
+          style={style.tableRow}
+          hover
+          onClick={() => this.handleRowSelection(pipeline.id)}
+        >
+          <TableCell>
+            <div style={style.tableRowColumn.title}>{pipeline.name}</div>
+            <div style={style.tableRowColumn.sub}>{pipeline.id}</div>
+          </TableCell>
+          <TableCell>
+            <div style={style.tableRowColumn.title}>{date.toLocaleString()}</div>
+          </TableCell>
+        </TableRow>
+      );
+    });
+  }
 
   render() {
     const { page, rowsPerPage, pipelines } = this.state;
@@ -221,7 +214,7 @@ class Pipelines extends Component {
 
             <Table className="pipeline-list">
               <TableBody >
-                {this.getPipelines()}
+                {this.renderPipelines()}
               </TableBody>
               {pipelines.length !== 0 && (
                 <TableFooter>

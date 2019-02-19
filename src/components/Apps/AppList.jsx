@@ -49,7 +49,19 @@ export default class AppList extends Component {
     rowsPerPage: 15,
   }
 
-  getApps(page, rowsPerPage) {
+  handleRowSelection = (app) => {
+    window.location = `#/apps/${app.name}/info`;
+  }
+
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+  renderApps(page, rowsPerPage) {
     return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
       <TableRow
         className={app.name}
@@ -66,19 +78,6 @@ export default class AppList extends Component {
     ));
   }
 
-  handleRowSelection = (app) => {
-    window.location = `#/apps/${app.name}/info`;
-  }
-
-  handleChangePage = (event, page) => {
-    this.setState({ page });
-  };
-
-  handleChangeRowsPerPage = (event) => {
-    this.setState({ rowsPerPage: event.target.value });
-  };
-
-
   render() {
     const { rowsPerPage, page } = this.state;
     return (
@@ -86,7 +85,7 @@ export default class AppList extends Component {
         <div style={{ marginBottom: '12px' }}>
           <Table className="app-list">
             <TableBody>
-              {this.getApps(page, rowsPerPage)}
+              {this.renderApps(page, rowsPerPage)}
             </TableBody>
             <TableFooter>
               <TableRow>

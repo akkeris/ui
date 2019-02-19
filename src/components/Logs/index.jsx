@@ -49,13 +49,12 @@ export default class Logs extends Component {
     this.loadLogs('constructor');
   }
 
-  loadLogs(mode) {
+  loadLogs = async (mode) => {
     if (mode !== 'constructor') {
       this.setState({ logs: this.state.logs });
     }
-    api.getLogSession(this.props.app).then((response) => {
-      this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(response.data.logplex_url)}` });
-    });
+    const { data: logSession } = await api.getLogSession(this.props.app);
+    this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(logSession.logplex_url)}` });
   }
 
   render() {

@@ -117,16 +117,10 @@ export default class Stage extends Component {
     return null;
   }
 
-  loadPipelineCouplings() {
-    // this.setState({ couplings: [], stageCouplings: [] });
-    api.getPipelineCouplings(this.props.pipeline.name).then((response) => {
-      const stageCouplings = util.filterCouplings(response.data, this.props.stage);
-      this.setState({
-        couplings: response.data,
-        stageCouplings,
-        loading: false,
-      });
-    });
+  loadPipelineCouplings = async () => {
+    const { data: couplings } = await api.getPipelineCouplings(this.props.pipeline.name);
+    const stageCouplings = util.filterCouplings(couplings, this.props.stage);
+    this.setState({ couplings, stageCouplings, loading: false });
   }
 
   handleConfirmation = (coupling) => {
@@ -163,13 +157,14 @@ export default class Stage extends Component {
     });
   }
 
-  handleRemoveCoupling = () => {
+  handleRemoveCoupling = async () => {
     this.setState({ loading: true });
-    api.deletePipelineCoupling(this.state.coupling.id).then(() => {
+    try {
+      await api.deletePipelineCoupling(this.state.coupling.id);
       this.reload('Removed Coupling');
-    }).catch((error) => {
+    } catch (error) {
       this.props.onError(error.response.data);
-    });
+    }
   }
 
   handleNewCoupling = () => {
@@ -180,24 +175,25 @@ export default class Stage extends Component {
     this.setState({ safePromote: !isInputChecked });
   }
 
-  handlePromote = () => {
+  handlePromote = async () => {
     const targets = this.getTargets(this.state.coupling.stage);
     if (targets.length === 0) {
       this.setState({ promoteOpen: false });
       this.props.onError('No Promotion Targets', 404);
     } else {
-      this.setState({ loading:true })
-      api.promotePipeline(
-        this.props.pipeline.id,
-        this.state.coupling.app.id,
-        targets,
-        this.state.safePromote,
-      ).then(() => {
+      this.setState({ loading: true });
+      try {
+        await api.promotePipeline(
+          this.props.pipeline.id,
+          this.state.coupling.app.id,
+          targets,
+          this.state.safePromote,
+        );
         this.reload(`Promoted: ${this.state.coupling.app.name} to ${targets[0].stage}`);
-      }).catch((error) => {
+      } catch (error) {
         this.setState({ promoteOpen: false, loading: false });
         this.props.onError(error.response.data);
-      });
+      }
     }
   }
 
@@ -209,20 +205,19 @@ export default class Stage extends Component {
     this.setState({ new: false });
   }
 
-  reload = (message) => {
-    api.getPipelineCouplings(this.props.pipeline.name).then((response) => {
-      const stageCouplings = util.filterCouplings(response.data, this.props.stage);
-      this.setState({
-        couplings: response.data,
-        stageCouplings,
-        loading: false,
-        new: false,
-        open: false,
-        promoteOpen: false,
-        safePromote: true,
-      });
-      this.props.onAlert(message);
+  reload = async (message) => {
+    const { data: couplings } = await api.getPipelineCouplings(this.props.pipeline.name);
+    const stageCouplings = util.filterCouplings(couplings, this.props.stage);
+    this.setState({
+      couplings,
+      stageCouplings,
+      loading: false,
+      new: false,
+      open: false,
+      promoteOpen: false,
+      safePromote: true,
     });
+    this.props.onAlert(message);
   }
 
   render() {

@@ -39,7 +39,19 @@ export default class SitesList extends Component {
     };
   }
 
-  getSites(page, rowsPerPage) {
+  handleRowSelection = (id) => {
+    window.location = `#/sites/${id}/info`;
+  }
+
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+  renderSites(page, rowsPerPage) {
     return this.props.sites
       .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
       .sort((a, b) => a.domain.localeCompare(b.domain))
@@ -68,18 +80,6 @@ export default class SitesList extends Component {
       });
   }
 
-  handleRowSelection = (id) => {
-    window.location = `#/sites/${id}/info`;
-  }
-
-  handleChangePage = (event, page) => {
-    this.setState({ page });
-  };
-
-  handleChangeRowsPerPage = (event) => {
-    this.setState({ rowsPerPage: event.target.value });
-  };
-
   render() {
     const { sites } = this.props;
     const { page, rowsPerPage } = this.state;
@@ -95,7 +95,7 @@ export default class SitesList extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.getSites(page, rowsPerPage)}
+              {this.renderSites(page, rowsPerPage)}
             </TableBody>
             {sites.length !== 0 && (
               <TableFooter>

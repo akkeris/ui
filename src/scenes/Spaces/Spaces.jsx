@@ -94,15 +94,23 @@ export default class Spaces extends Component {
   }
 
   componentDidMount() {
-    api.getSpaces().then((response) => {
-      this.setState({
-        spaces: response.data,
-        loading: false,
-      });
-    });
+    this.getSpaces();
   }
 
-  getSpaces(page, rowsPerPage) {
+  getSpaces = async () => {
+    const { data: spaces } = await api.getSpaces();
+    this.setState({ spaces, loading: false });
+  }
+
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+  renderSpaces(page, rowsPerPage) {
     return this.state.spaces.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(space => (
       <TableRow hover className={space.name} key={space.id} style={style.tableRow}>
         <TableCell>
@@ -121,14 +129,6 @@ export default class Spaces extends Component {
       </TableRow>
     ));
   }
-
-  handleChangePage = (event, page) => {
-    this.setState({ page });
-  };
-
-  handleChangeRowsPerPage = (event) => {
-    this.setState({ rowsPerPage: event.target.value });
-  };
 
   render() {
     const { spaces, page, rowsPerPage } = this.state;
@@ -159,7 +159,7 @@ export default class Spaces extends Component {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {this.getSpaces(page, rowsPerPage)}
+                {this.renderSpaces(page, rowsPerPage)}
               </TableBody>
               {spaces.length !== 0 && (
                 <TableFooter>

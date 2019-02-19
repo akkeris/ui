@@ -125,24 +125,18 @@ class Sites extends Component {
   }
 
   componentDidMount() {
-    api.getSites().then((response) => {
-      this.setState({
-        sites: response.data.sort((a, b) => a.domain > b.domain),
-        filteredSites: response.data.sort((a, b) => a.domain > b.domain),
-        loading: false,
-      });
-    });
-    api.getRegions().then((response) => {
-      this.setState({
-        regions: response.data,
-      });
-    });
+    this.getData();
   }
 
-  getRegions() {
-    return this.state.regions.map(region => (
-      <MenuItem className={region.name} key={region.id} value={region.name}>{region.name}</MenuItem>
-    ));
+  getData = async () => {
+    const { data: sites } = await api.getSites();
+    const { data: regions } = await api.getRegions();
+    this.setState({
+      sites: sites.sort((a, b) => a.domain > b.domain),
+      filteredSites: sites.sort((a, b) => a.domain > b.domain),
+      regions,
+      loading: false,
+    });
   }
 
   handleSearch = (searchText) => {
@@ -156,6 +150,12 @@ class Sites extends Component {
       region,
       filteredSites: sites,
     });
+  }
+
+  renderRegions() {
+    return this.state.regions.map(region => (
+      <MenuItem className={region.name} key={region.id} value={region.name}>{region.name}</MenuItem>
+    ));
   }
 
   render() {
@@ -188,7 +188,7 @@ class Sites extends Component {
                 }}
               >
                 <MenuItem className="all" value="all">All</MenuItem>
-                {this.getRegions()}
+                {this.renderRegions()}
               </Select>
             </FormControl>
             <Link to="/sites/new" style={style.link}>

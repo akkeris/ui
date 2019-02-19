@@ -93,7 +93,100 @@ export default class DynoType extends Component {
     this.reset();
   }
 
-  getDynos() {
+  handleEditToggle = () => {
+    this.setState({ edit: !this.state.edit });
+  }
+
+  handleEditBack = () => {
+    this.reset();
+  }
+
+  handleExpandClick = () => {
+    this.setState({ expanded: !this.state.expanded });
+  }
+
+  handleChange = name => (event) => {
+    if (name === 'port') {
+      const port = parseInt(event.target.value, 10);
+      if (Number.isNaN(port)) {
+        this.setState({
+          port: event.target.value === '' ? null : this.state.port,
+        });
+      } else {
+        this.setState({
+          port,
+        });
+      }
+    } else {
+      this.setState({
+        [name]: event.target.value,
+      });
+    }
+  }
+
+  handleConfirmation = () => {
+    this.setState({ open: true });
+  }
+
+  handleCancelConfirmation = () => {
+    this.setState({ open: false });
+  }
+
+  handleRemoveFormation = async () => {
+    try {
+      await api.deleteFormation(this.props.app, this.props.formation.type);
+      this.props.onComplete('Removed Formation');
+    } catch (error) {
+      this.reset();
+      this.props.onError(error.response.data);
+    }
+  }
+
+  handleRestart = async () => {
+    try {
+      await api.restartFormation(this.props.app, this.props.formation.type);
+      this.props.onAlert('Formation Restarted');
+    } catch (error) {
+      this.reset();
+      this.props.onError(error.response.data);
+    }
+  }
+
+  handlePatchFormation = async () => {
+    try {
+      await api.patchFormation(
+        this.props.app,
+        this.props.formation.type,
+        this.state.size,
+        this.state.quantity,
+        this.state.command === '' ? null : this.state.command,
+        this.state.port === '' ? null : this.state.port,
+        this.state.healthcheck === '' ? null : this.state.healthcheck,
+        this.state.healthcheck === '',
+      );
+      this.props.onComplete('Updated Formation');
+    } catch (error) {
+      this.reset();
+      this.props.onError(error.response.data);
+    }
+  }
+
+  reset = () => {
+    let { size } = this.props.formation;
+    if (this.props.formation.size.indexOf('prod') !== -1) {
+      size = size.replace('-prod', '');
+    }
+    this.setState({
+      port: this.props.formation.port,
+      command: this.props.formation.command,
+      quantity: this.props.formation.quantity,
+      size,
+      healthcheck: this.props.formation.healthcheck,
+      edit: false,
+    });
+  }
+
+  renderDynos() {
     return this.props.dynos.map((dyno, i) => {
       let health = dyno.state;
       const date = new Date(dyno.updated_at);
@@ -166,7 +259,7 @@ export default class DynoType extends Component {
     });
   }
 
-  getFormationHealth() {
+  renderFormationHealth() {
     let alert = null;
     if (this.props.dynos.filter(dyno => dyno.state.toLowerCase() === 'start-failure' || dyno.state.toLowerCase() === 'app-crashed').length > 0) {
       alert = <WarningIcon className="status-critical" nativeColor={red[700]} />;
@@ -176,87 +269,6 @@ export default class DynoType extends Component {
     return (
       alert
     );
-  }
-
-  handleEditToggle = () => {
-    this.setState({ edit: !this.state.edit });
-  }
-
-  handleEditBack = () => {
-    this.reset();
-  }
-
-  handleExpandClick = () => {
-    this.setState({ expanded: !this.state.expanded });
-  }
-
-  handleChange = name => (event) => {
-    if (name === 'port') {
-      const port = parseInt(event.target.value, 10);
-      if (Number.isNaN(port)) {
-        this.setState({
-          port: event.target.value === '' ? null : this.state.port,
-        });
-      } else {
-        this.setState({
-          port,
-        });
-      }
-    } else {
-      this.setState({
-        [name]: event.target.value,
-      });
-    }
-  }
-
-  handleConfirmation = () => {
-    this.setState({ open: true });
-  }
-
-  handleCancelConfirmation = () => {
-    this.setState({ open: false });
-  }
-
-  handleRemoveFormation = () => {
-    api.deleteFormation(this.props.app, this.props.formation.type).then(() => {
-      this.props.onComplete('Removed Formation');
-    }).catch((error) => {
-      this.reset();
-      this.props.onError(error.response.data);
-    });
-  }
-
-  handleRestart = () => {
-    api.restartFormation(this.props.app, this.props.formation.type).then(() => {
-      this.props.onAlert('Formation Restarted');
-    }).catch((error) => {
-      this.reset();
-      this.props.onError(error.response.data);
-    });
-  }
-
-  handlePatchFormation = () => {
-    api.patchFormation(this.props.app, this.props.formation.type, this.state.size, this.state.quantity, this.state.command === '' ? null : this.state.command, this.state.port === '' ? null : this.state.port, this.state.healthcheck === '' ? null : this.state.healthcheck, this.state.healthcheck === '').then(() => {
-      this.props.onComplete('Updated Formation');
-    }).catch((error) => {
-      this.reset();
-      this.props.onError(error.response.data);
-    });
-  }
-
-  reset = () => {
-    let { size } = this.props.formation;
-    if (this.props.formation.size.indexOf('prod') !== -1) {
-      size = size.replace('-prod', '');
-    }
-    this.setState({
-      port: this.props.formation.port,
-      command: this.props.formation.command,
-      quantity: this.props.formation.quantity,
-      size,
-      healthcheck: this.props.formation.healthcheck,
-      edit: false,
-    });
   }
 
   render() {
@@ -285,7 +297,7 @@ export default class DynoType extends Component {
                       {date.toLocaleString()}
                     </Typography>
                   </div>
-                  <span style={{ paddingLeft: '48px' }}>{this.getFormationHealth()}</span>
+                  <span style={{ paddingLeft: '48px' }}>{this.renderFormationHealth()}</span>
                 </div>
               </ExpansionPanelSummary>
               <ExpansionPanelDetails style={{ flexDirection: 'column', padding: '8px 12px 24px' }}>
@@ -404,7 +416,7 @@ export default class DynoType extends Component {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {this.getDynos()}
+                    {this.renderDynos()}
                   </TableBody>
                 </Table>
               </ExpansionPanelDetails>

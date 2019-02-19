@@ -49,50 +49,6 @@ export default class NewConfigVar extends Component {
     };
   }
 
-  getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return (
-          <div>
-            <TextField
-              className="config-key"
-              label="Key"
-              value={this.state.key}
-              onChange={this.handleKeyTextChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-            />
-            <p>
-              Config Var Key
-            </p>
-          </div>
-        );
-      case 1:
-        return (
-          <div>
-            <TextField
-              className="config-value"
-              label="Value"
-              multiline
-              fullWidth
-              value={this.state.value}
-              onChange={this.handleValueChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-            />
-            <p>
-              Config Var Value
-            </p>
-          </div>
-        );
-        // need this otherwise "You're a long way ..." shows up when you hit finish
-      case 2:
-        return '';
-      default:
-        return 'You\'re a long way from home sonny jim!';
-    }
-  }
-
   handleClose = () => {
     this.setState({
       submitFail: false,
@@ -136,10 +92,11 @@ export default class NewConfigVar extends Component {
     });
   }
 
-  submitConfig = () => {
-    api.patchConfig(this.props.app, this.state.key, this.state.value).then(() => {
+  submitConfig = async () => {
+    try {
+      await api.patchConfig(this.props.app, this.state.key, this.state.value);
       this.props.onComplete('Added Config Var');
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -150,7 +107,51 @@ export default class NewConfigVar extends Component {
         key: '',
         value: '',
       });
-    });
+    }
+  }
+
+  renderStepContent(stepIndex) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <div>
+            <TextField
+              className="config-key"
+              label="Key"
+              value={this.state.key}
+              onChange={this.handleKeyTextChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>
+              Config Var Key
+            </p>
+          </div>
+        );
+      case 1:
+        return (
+          <div>
+            <TextField
+              className="config-value"
+              label="Value"
+              multiline
+              fullWidth
+              value={this.state.value}
+              onChange={this.handleValueChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>
+              Config Var Value
+            </p>
+          </div>
+        );
+        // need this otherwise "You're a long way ..." shows up when you hit finish
+      case 2:
+        return '';
+      default:
+        return 'You\'re a long way from home sonny jim!';
+    }
   }
 
   renderContent() {
@@ -162,7 +163,7 @@ export default class NewConfigVar extends Component {
 
     return (
       <div style={contentStyle}>
-        <div>{this.getStepContent(stepIndex)}</div>
+        <div>{this.renderStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
           {stepIndex > 0 && (
             <Button

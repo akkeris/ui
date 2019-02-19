@@ -181,16 +181,7 @@ export default class AppSetups extends Component {
       return;
     }
     this.setState({ blueprint }); // eslint-disable-line react/no-did-mount-set-state
-
-    api.getOrgs().then((orgResp) => {
-      api.getSpaces().then((spaceResp) => {
-        this.setState({
-          spaces: spaceResp.data,
-          orgs: orgResp.data,
-          loading: false,
-        });
-      });
-    });
+    this.getData();
   }
 
   onConfigVarChange = (originKey, event, key, value) => {
@@ -199,28 +190,10 @@ export default class AppSetups extends Component {
     this.setState({ blueprint: bp });
   }
 
-  getSpaces() {
-    return this.state.spaces.map(space => (
-      <MenuItem
-        className={`${space.name}-space`}
-        key={space.id}
-        value={space.name}
-      >
-        {space.name}
-      </MenuItem>
-    ));
-  }
-
-  getOrgs() {
-    return this.state.orgs.map(org => (
-      <MenuItem
-        className={`${org.name}-org`}
-        key={org.id}
-        value={org.name}
-      >
-        {org.name}
-      </MenuItem>
-    ));
+  getData = async () => {
+    const { data: orgs } = await api.getOrgs();
+    const { data: spaces } = await api.getSpaces();
+    this.setState({ spaces, orgs, loading: false });
   }
 
   handleOrgChange = (event) => {
@@ -265,46 +238,59 @@ export default class AppSetups extends Component {
     }
   }
 
-  handleOnClick = () => {
+  handleOnClick = async () => {
     let previousMessage = '';
-    api.appSetup(this.state.blueprint).then((response) => {
-      this.setState({ status: response.data, panel: 'running', progress: 0 });
-      const intv = setInterval(() => {
-        api.getAppSetup(this.state.status.id).then((statusResp) => {
-          if (statusResp.data.progress === 1) {
-            if (statusResp.data.build && (statusResp.data.build.status === 'pending' || statusResp.data.build.status === 'queued')) {
-              this.setState({ progress: statusResp.data.progress * 100, logs: statusResp.data.build.lines.join('\n') });
-              this.scrollBuildDown();
-            } else {
-              clearInterval(intv);
-              api.getApp(`${this.state.blueprint.app.name}-${this.state.blueprint.app.space}`).then((appInfo) => {
-                this.setState({ panel: 'ready', progress: statusResp.data.progress * 100, appInfo });
-                setTimeout(() => {
-                  this.setState({ panel: 'done', progress: statusResp.data.progress * 100, appInfo });
-                }, 5000);
-                this.scrollBuildDown();
-              }).catch((e) => {
-                this.setState({ panel: 'error', error: (e.response ? (`${e.response.status} ${e.response.data}`) : e.message) });
-                this.scrollBuildDown();
-              });
-            }
-          } else {
-            let { logs } = this.state;
-            if (statusResp.data.status_message !== previousMessage) {
-              logs += `${statusResp.data.status_message}\n`;
-              previousMessage = statusResp.data.status_message;
-            }
-            this.setState({ progress: statusResp.data.progress * 100, logs });
-            this.scrollBuildDown();
-          }
-        }).catch((e) => {
-          clearInterval(intv);
-          this.setState({ panel: 'error', error: (e.response ? (`${e.response.status} ${e.response.data}`) : e.message) });
-        });
-      }, 500);
-    }).catch((e) => {
+
+    const printError = (e) => {
       this.setState({ panel: 'error', error: (e.response ? (`${e.response.status} ${e.response.data}`) : e.message) });
-    });
+    };
+
+    const handleFinished = async (statusResp) => {
+      try {
+        const appInfo = await api.getApp(`${this.state.blueprint.app.name}-${this.state.blueprint.app.space}`);
+        this.setState({ panel: 'ready', progress: statusResp.data.progress * 100, appInfo });
+        setTimeout(() => {
+          this.setState({ panel: 'done', progress: statusResp.data.progress * 100, appInfo });
+        }, 5000);
+        this.scrollBuildDown();
+      } catch (error) {
+        printError(error);
+        this.scrollBuildDown();
+      }
+    };
+
+    try {
+      const { data: status } = await api.appSetup(this.state.blueprint);
+      this.setState({ status, panel: 'running', progress: 0 });
+    } catch (error) {
+      printError(error);
+    }
+
+    const intv = setInterval(async () => {
+      try {
+        const statusResp = await api.getAppSetup(this.state.status.id);
+        if (statusResp.data.progress === 1) {
+          if (statusResp.data.build && (statusResp.data.build.status === 'pending' || statusResp.data.build.status === 'queued')) {
+            this.setState({ progress: statusResp.data.progress * 100, logs: statusResp.data.build.lines.join('\n') });
+            this.scrollBuildDown();
+          } else {
+            clearInterval(intv);
+            handleFinished(statusResp);
+          }
+        } else {
+          let { logs } = this.state;
+          if (statusResp.data.status_message !== previousMessage) {
+            logs += `${statusResp.data.status_message}\n`;
+            previousMessage = statusResp.data.status_message;
+          }
+          this.setState({ progress: statusResp.data.progress * 100, logs });
+          this.scrollBuildDown();
+        }
+      } catch (error) {
+        clearInterval(intv);
+        printError(error);
+      }
+    }, 500);
   }
 
   renderErrorMessage = msg => (
@@ -319,6 +305,30 @@ export default class AppSetups extends Component {
       </div>
     </MuiThemeProvider>
   )
+
+  renderSpaces() {
+    return this.state.spaces.map(space => (
+      <MenuItem
+        className={`${space.name}-space`}
+        key={space.id}
+        value={space.name}
+      >
+        {space.name}
+      </MenuItem>
+    ));
+  }
+
+  renderOrgs() {
+    return this.state.orgs.map(org => (
+      <MenuItem
+        className={`${org.name}-org`}
+        key={org.id}
+        value={org.name}
+      >
+        {org.name}
+      </MenuItem>
+    ));
+  }
 
   render() {
     if (this.state.loading) {
@@ -400,7 +410,7 @@ export default class AppSetups extends Component {
                         id: 'space-field',
                       }}
                     >
-                      {this.getSpaces()}
+                      {this.renderSpaces()}
                     </Select>
                   </FormControl>
                   <br />
@@ -415,7 +425,7 @@ export default class AppSetups extends Component {
                         id: 'org-field',
                       }}
                     >
-                      {this.getOrgs()}
+                      {this.renderOrgs()}
                     </Select>
                   </FormControl>
                   <br />
@@ -485,7 +495,7 @@ export default class AppSetups extends Component {
                       </ListItem>
                     ) : null
                 }
-                <Divider inset style={style.divider} />
+                <Divider variant="inset" style={style.divider} />
                 <ListItem >
                   <ListItemText primary="Building app" />
                   {(isBuilding && (this.state.panel === 'ready' || this.state.panel === 'done')) ? (
@@ -500,20 +510,20 @@ export default class AppSetups extends Component {
                       </ListItem>
                     ) : null
                 }
-                <Divider inset style={style.divider} />
+                <Divider variant="inset" style={style.divider} />
                 <ListItem>
                   <ListItemText primary="Provisioning" />
                   {(this.state.panel === 'ready' || this.state.panel === 'done') ? <ListItemIcon><DoneBox /></ListItemIcon> : null}
                 </ListItem>
-                <Divider inset style={style.divider} />
+                <Divider variant="inset" style={style.divider} />
                 <ListItem>
                   <ListItemText primary="Deploying" />
                   {(this.state.panel === 'ready' || this.state.panel === 'done') ? <ListItemIcon><DoneBox /></ListItemIcon> : null}
                 </ListItem>
-                <Divider inset style={style.divider} />
+                <Divider variant="inset" style={style.divider} />
                 {
                   (this.state.panel === 'ready' || this.state.panel === 'done') ?
-                    ([<Divider key="done1" inset style={style.divider} />,
+                    ([<Divider variant="inset" key="done1" style={style.divider} />,
                       <ListItem key="done2">
                         <ListItemText
                           style={{
