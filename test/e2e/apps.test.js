@@ -392,20 +392,20 @@ test // eslint-disable-line no-undef
 
     // Check new component shows
       .click('button.new-addon')
-      .expect(Selector('[class*="Select-valueContainer"]').exists)
+      .expect(Selector('.select-textfield').exists)
       .ok()
 
     // Make sure we can cancel
       .click('button.addon-cancel')
-      .expect(Selector('[class*="Select-valueContainer"]').exists)
+      .expect(Selector('.select-textfield').exists)
       .notOk()
 
     // Test compliance
       .click('button.new-addon')
-      .typeText(Selector('[class*="Select-valueContainer"]'), 'Lids Db Credentials')
+      .typeText(Selector('.select-textfield'), 'Lids Db Credentials')
       .pressKey('enter')
       .click('button.next')
-      .typeText(Selector('[class*="Select-valueContainer"]'), 'lids-db:prod')
+      .typeText(Selector('.select-textfield'), 'lids-db:prod')
       .pressKey('enter')
       .click('button.next')
       .expect(Selector('.new-addon-error').innerText)
@@ -413,10 +413,10 @@ test // eslint-disable-line no-undef
       .click('.ok')
 
     // create addon
-      .typeText(Selector('[class*="Select-valueContainer"]'), 'Lids Db Credentials')
+      .typeText(Selector('.select-textfield'), 'Lids Db Credentials')
       .pressKey('enter')
       .click('button.next')
-      .typeText(Selector('[class*="Select-valueContainer"]'), 'lids-db:dev')
+      .typeText(Selector('.select-textfield'), 'lids-db:dev')
       .pressKey('enter')
 
       // Test addon plan description
@@ -426,7 +426,7 @@ test // eslint-disable-line no-undef
       .contains('credentials')
       .click('button.back')
       .click('button.next')
-      .typeText(Selector('[class*="Select-valueContainer"]'), 'lids-db:dev')
+      .typeText(Selector('.select-textfield'), 'lids-db:dev')
       .pressKey('enter')
       .expect(Selector('.plan-price').exists)
       .ok()
@@ -440,10 +440,10 @@ test // eslint-disable-line no-undef
 
     // Test duplicate
       .click('button.new-addon')
-      .typeText(Selector('[class*="Select-valueContainer"]'), 'Lids Db Credentials')
+      .typeText(Selector('.select-textfield'), 'Lids Db Credentials')
       .pressKey('enter')
       .click('button.next')
-      .typeText(Selector('[class*="Select-valueContainer"]'), 'lids-db:dev')
+      .typeText(Selector('.select-textfield'), 'lids-db:dev')
       .pressKey('enter')
       .click('button.next')
       .expect(Selector('.new-addon-error').innerText)
@@ -462,10 +462,10 @@ test // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
       .click('.addons-tab')
       .click('button.new-addon')
-      .typeText(Selector('[class*="Select-valueContainer"]'), 'Akkeris PostgreSQL')
+      .typeText(Selector('.select-textfield'), 'Akkeris PostgreSQL')
       .pressKey('enter')
       .click('button.next')
-      .typeText(Selector('[class*="Select-valueContainer"]'), 'akkeris-postgresql:standard-0')
+      .typeText(Selector('.select-textfield'), 'akkeris-postgresql:standard-0')
       .pressKey('enter')
       .expect(Selector('.plan-price').exists)
       .ok()
