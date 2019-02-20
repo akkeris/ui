@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { CircularProgress } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import Ansi from 'ansi-to-react';
 
 import api from '../../services/api';
 
@@ -94,7 +95,7 @@ export default class Logs extends Component {
     }
     return (
       <MuiThemeProvider theme={muiTheme}>
-        <pre style={style.logs}><code>{this.state.logs}</code></pre>
+        <pre style={style.logs}><Ansi>{this.state.logs}</Ansi></pre>
       </MuiThemeProvider>
     );
   }

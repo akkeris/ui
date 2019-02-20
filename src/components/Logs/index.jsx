@@ -32,8 +32,7 @@ const style = {
   },
 };
 
-// TODO: make it actually highlight, not currently used
-function highlight(data) { // eslint-disable-line no-unused-vars
+function highlight(data) {
   return <Ansi className="ansi">{data.replace(/^([A-z0-9\:\-\+\.]+Z) ([A-z\-0-9]+) ([A-z\.0-9\/\[\]\-]+)\: /gm, '\u001b[36m$1\u001b[0m $2 \u001b[38;5;104m$3:\u001b[0m ')}</Ansi>; // eslint-disable-line
 }
 
