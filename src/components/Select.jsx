@@ -56,7 +56,7 @@ const Control = props => (
     InputProps={{
       inputComponent,
       inputProps: {
-        className: props.selectProps.classes.input,
+        className: `${props.selectProps.classes.input} select-textfield`,
         inputRef: props.inputRef,
         children: props.children,
         ...props.innerProps,
