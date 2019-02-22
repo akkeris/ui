@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core';
 import DoneBox from '@material-ui/icons/Done';
 import OpenInNewBox from '@material-ui/icons/OpenInNew';
+import jsonminify from 'jsonminify';
 import ConfigVar from '../../components/ConfigVar';
 import api from '../../services/api';
 
@@ -109,39 +110,6 @@ const style = {
   },
 };
 
-// https://stackoverflow.com/a/8486188
-// Parses query parameters from a URL (including hashes)
-function getJsonFromUrl(hashBased) {
-  let query;
-  if (hashBased) {
-    const pos = location.href.indexOf('?');
-    if (pos === -1) return [];
-    query = location.href.substr(pos + 1);
-  } else {
-    query = location.search.substr(1);
-  }
-  const result = {};
-  query.split('&').forEach((part) => {
-    if (!part) return;
-    // replace every + with space, regexp-free version
-    part = part.split('+').join(' '); // eslint-disable-line
-    const eq = part.indexOf('=');
-    let key = eq > -1 ? part.substr(0, eq) : part;
-    const val = eq > -1 ? decodeURIComponent(part.substr(eq + 1)) : '';
-    const from = key.indexOf('[');
-    if (from === -1) result[decodeURIComponent(key)] = val;
-    else {
-      const to = key.indexOf(']', from);
-      const index = decodeURIComponent(key.substring(from + 1, to));
-      key = decodeURIComponent(key.substring(0, from));
-      if (!result[key]) result[key] = [];
-      if (!index) result[key].push(val);
-      else result[key][index] = val;
-    }
-  });
-  return result;
-}
-
 export default class AppSetups extends Component {
   constructor(props, context) {
     super(props, context);
@@ -162,15 +130,23 @@ export default class AppSetups extends Component {
 
   componentDidMount() {
     const params = new URLSearchParams(window.location.search);
-    let blueprint = '';
+    let blueprint = params.get('blueprint');
+    if (!blueprint) {
+      this.setState({ // eslint-disable-line react/no-did-mount-set-state
+        panel: 'error',
+        error: 'Blueprint was not provided!',
+        loading: false,
+      });
+      return;
+    }
+
     try {
-      if (!params.get('blueprint')) {
-        // Parse the blueprint JSON from the hash portion of the current location
-        const newParams = getJsonFromUrl(window.location.hash);
-        blueprint = JSON.parse(newParams.blueprint);
-      } else {
-        blueprint = JSON.parse(params.get('blueprint'));
+      // If blueprint is a Base64 encoded string, decode it first.
+      if (/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(blueprint)) {
+        blueprint = Buffer.from(blueprint, 'base64').toString();
+        blueprint = jsonminify(blueprint);
       }
+      blueprint = JSON.parse(blueprint);
       blueprint.app.name = '';
     } catch (error) {
       this.setState({ // eslint-disable-line react/no-did-mount-set-state
@@ -180,6 +156,7 @@ export default class AppSetups extends Component {
       });
       return;
     }
+
     this.setState({ blueprint }); // eslint-disable-line react/no-did-mount-set-state
     this.getData();
   }
@@ -228,7 +205,7 @@ export default class AppSetups extends Component {
   }
 
   handleDone = () => {
-    window.location = `/#/apps/${this.state.blueprint.app.name}-${this.state.blueprint.app.space}/info`;
+    window.location = `/apps/${this.state.blueprint.app.name}-${this.state.blueprint.app.space}/info`;
   }
 
   scrollBuildDown = () => {
@@ -542,7 +519,7 @@ export default class AppSetups extends Component {
         </MuiThemeProvider>
       );
     } else if (this.state.panel === 'error' && this.state.loading === false) {
-      this.renderErrorMessage(this.state.error);
+      return this.renderErrorMessage(this.state.error);
     }
     return null;
   }

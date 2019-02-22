@@ -127,7 +127,7 @@ export default class InvoiceList extends Component {
   }
 
   handleRowSelection = (id) => {
-    window.location = `#/invoices/${id}`;
+    window.location = `/invoices/${id}`;
   }
 
   render() {

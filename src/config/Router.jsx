@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import Loading from '../components/Loading';
 
@@ -28,7 +28,7 @@ const AppRoutes = () => (
   <Switch>
     <Route exact path="/apps" component={Apps} />
     <Route exact path="/apps/new" component={NewApp} />
-    <Route path="/apps/:app" component={AppInfo} />
+    <Route path="/apps/:app/:tab?" component={AppInfo} />
   </Switch>
 );
 
@@ -44,7 +44,7 @@ const PipelineInfo = Loadable({
 const PipelineRoutes = () => (
   <Switch>
     <Route exact path="/pipelines" component={Pipelines} />
-    <Route path="/pipelines/:pipeline" component={PipelineInfo} />
+    <Route path="/pipelines/:pipeline/:tab?" component={PipelineInfo} />
   </Switch>
 );
 
@@ -129,13 +129,13 @@ const SitesRoutes = () => (
   <Switch>
     <Route exact path="/sites" component={Sites} />
     <Route exact path="/sites/new" component={NewSite} />
-    <Route path="/sites/:site" component={SiteInfo} />
+    <Route path="/sites/:site/:tab?" component={SiteInfo} />
   </Switch>
 );
 
 const Router = () => (
   <div>
-    <HashRouter>
+    <BrowserRouter>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
         <Nav />
         <Switch style={{ flex: 1 }}>
@@ -152,7 +152,7 @@ const Router = () => (
         <canvas id="canv" style={{ position: 'fixed', top: '0', left: '0', zIndex: '-1' }} />
         <Footer />
       </div>
-    </HashRouter>
+    </BrowserRouter>
   </div>
 );
 

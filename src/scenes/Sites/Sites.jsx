@@ -140,7 +140,7 @@ class Sites extends Component {
   }
 
   handleSearch = (searchText) => {
-    window.location = `#/sites/${searchText}/info`;
+    window.location = `/sites/${searchText}/info`;
   }
 
   handleRegionChange = (event) => {

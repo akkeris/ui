@@ -111,7 +111,6 @@ export default class AppInfo extends Component {
       open: false,
       message: '',
       currentTab: 'info',
-      baseHash: `#/apps/${this.props.match.params.app}/`,
       basePath: `/apps/${this.props.match.params.app}`,
     };
   }
@@ -121,13 +120,16 @@ export default class AppInfo extends Component {
     try {
       const appResponse = await api.getApp(this.props.match.params.app);
       const accountResponse = await api.getAccount();
-      const hashPath = window.location.hash;
-      let currentTab = hashPath.replace(this.state.baseHash, '');
-      if (!tabs.includes(currentTab)) {
+
+      // If current tab not provided or invalid, rewrite it to be /info
+      let currentTab = this.props.match.params.tab;
+      if (!currentTab || !tabs.includes(currentTab)) {
         currentTab = 'info';
-        window.location.hash = `${this.state.baseHash}info`;
+        history.replaceState(null, '', `${this.state.basePath}/info`);
       }
-      this.setState({ currentTab, app: appResponse.data, accountInfo: accountResponse.data, loading: false });
+      this.setState({
+        currentTab, app: appResponse.data, accountInfo: accountResponse.data, loading: false,
+      });
     } catch (err) {
       this.setState({ submitMessage: err.response.data, submitFail: true });
     }
@@ -135,25 +137,14 @@ export default class AppInfo extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    // If we changed locations AND it was a 'pop' history event (back or forward button)
-    const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
-    if (routeHasChanged && this.props.history.action === 'POP') {
-      // If hitting back took us to the base path without a tab, hit back again
-      if (this.props.location.pathname === `${this.state.basePath}` ||
-          this.props.location.pathname === `${this.state.basePath}/`) {
-        window.history.back();
-        return;
+    // If we changed tabs through the back or forward button, update currentTab
+    if (prevProps.match.params.tab !== this.props.match.params.tab && this.props.history.action === 'POP') {
+      let currentTab = this.props.match.params.tab;
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'info';
+        history.replaceState(null, '', `${this.state.basePath}/info`);
       }
-      const hashPath = window.location.hash;
-      if (hashPath.includes(this.state.baseHash)) {
-        let currentTab = hashPath.replace(this.state.baseHash, '');
-        if (!tabs.includes(currentTab)) {
-          currentTab = 'info';
-          window.location = `${this.state.baseHash}info`;
-        }
-        // Since we check conditions before setState we avoid infinite loops
-        this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
-      }
+      this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
     }
   }
 
@@ -162,7 +153,7 @@ export default class AppInfo extends Component {
   }
 
   handleNotFoundClose = () => {
-    window.location = '/#/apps';
+    window.location = '/apps';
   }
 
   handleRequestClose = () => {
@@ -181,7 +172,7 @@ export default class AppInfo extends Component {
       this.setState({
         currentTab: newTab,
       });
-      this.props.history.push(`${newTab}`);
+      history.pushState(null, '', `${this.state.basePath}/${newTab}`);
     }
   }
 
@@ -404,6 +395,5 @@ export default class AppInfo extends Component {
 
 AppInfo.propTypes = {
   match: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  location: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

@@ -81,7 +81,6 @@ export default class SiteInfo extends Component {
       message: '',
       currentTab: 'info',
       basePath: `/sites/${this.props.match.params.site}`,
-      baseHash: `#/sites/${this.props.match.params.site}/`,
     };
   }
 
@@ -91,36 +90,25 @@ export default class SiteInfo extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    // If we changed locations AND it was a 'pop' history event (back or forward button)
-    const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
-    if (routeHasChanged && this.props.history.action === 'POP') {
-      // If hitting back took us to the base path without a tab, hit back again
-      if (this.props.location.pathname === `${this.state.basePath}` ||
-          this.props.location.pathname === `${this.state.basePath}/`) {
-        window.history.back();
-        return;
+    // If we changed tabs through the back or forward button, update currentTab
+    if (prevProps.match.params.tab !== this.props.match.params.tab && this.props.history.action === 'POP') {
+      let currentTab = this.props.match.params.tab;
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'info';
+        history.replaceState(null, '', `${this.state.basePath}/info`);
       }
-      const hashPath = window.location.hash;
-      if (hashPath.includes(this.state.baseHash)) {
-        let currentTab = hashPath.replace(this.state.baseHash, '');
-        if (!tabs.includes(currentTab)) {
-          currentTab = 'info';
-          window.location = `${this.state.baseHash}info`;
-        }
-        // Since we check conditions before setState we avoid infinite loops
-        this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
-      }
+      this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
     }
   }
 
   getSite = async () => {
     try {
       const { data: site } = await api.getSite(this.props.match.params.site);
-      const hashPath = window.location.hash;
-      let currentTab = hashPath.replace(this.state.baseHash, '');
-      if (!tabs.includes(currentTab)) {
+      // If current tab not provided or invalid, rewrite it to be /info
+      let currentTab = this.props.match.params.tab;
+      if (!currentTab || !tabs.includes(currentTab)) {
         currentTab = 'info';
-        window.location.hash = `${this.state.baseHash}info`;
+        history.replaceState(null, '', `${this.state.basePath}/info`);
       }
       this.setState({ currentTab, site, loading: false });
     } catch (error) {
@@ -146,7 +134,7 @@ export default class SiteInfo extends Component {
   }
 
   handleNotFoundClose = () => {
-    window.location = '/#/sites';
+    window.location = '/sites';
   }
 
   reload = (message) => {
@@ -161,7 +149,7 @@ export default class SiteInfo extends Component {
       this.setState({
         currentTab: newTab,
       });
-      this.props.history.push(`${newTab}`);
+      history.pushState(null, '', `${this.state.basePath}/${newTab}`);
     }
   }
 
@@ -252,5 +240,4 @@ export default class SiteInfo extends Component {
 SiteInfo.propTypes = {
   match: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  location: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

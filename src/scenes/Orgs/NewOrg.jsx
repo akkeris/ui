@@ -106,7 +106,7 @@ export default class NewOrg extends Component {
   submitOrg = async () => {
     try {
       await api.createOrg(this.state.org, this.state.description);
-      window.location = '#/orgs';
+      window.location = '/orgs';
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

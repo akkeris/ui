@@ -107,7 +107,7 @@ export default class Nav extends Component {
 
     const title = (
       <span style={{ flexGrow: '1', display: 'flex', alignItems: 'center' }}>
-        <img alt="akkeris logo" src="images/akkeris.svg" style={style.title.img} />
+        <img alt="akkeris logo" src="/images/akkeris.svg" style={style.title.img} />
       </span>
     );
 

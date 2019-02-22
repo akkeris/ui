@@ -14,7 +14,7 @@ fixture('Orgs Page') // eslint-disable-line no-undef
       .typeText('#password', botPassword)
 
       .click('button.login')
-      .navigateTo(`${baseUrl}/#/orgs`);
+      .navigateTo(`${baseUrl}/orgs`);
   });
 
 test('Should show list of orgs', async (t) => { // eslint-disable-line no-undef

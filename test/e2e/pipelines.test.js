@@ -14,7 +14,7 @@ fixture('Pipelines Page') // eslint-disable-line no-undef
       .typeText('#password', botPassword)
 
       .click('button.login')
-      .navigateTo(`${baseUrl}/#/pipelines`);
+      .navigateTo(`${baseUrl}/pipelines`);
   });
 
 test('Should show list of pipelines', async (t) => { // eslint-disable-line no-undef
@@ -130,7 +130,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .ok()
 
       // Config for app 3
-      .navigateTo(`${baseUrl}/#/apps/testcafepipe3-testcafe`)
+      .navigateTo(`${baseUrl}/apps/testcafepipe3-testcafe`)
       .click('.config-tab')
       .click('button.new-config')
       .click('.next')
@@ -144,8 +144,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .contains('DERP')
 
       // Build and Release for app 1
-      .navigateTo(`${baseUrl}/#/apps`)
-      .navigateTo(`${baseUrl}/#/apps/testcafepipe1-testcafe`)
+      .navigateTo(`${baseUrl}/apps`)
+      .navigateTo(`${baseUrl}/apps/testcafepipe1-testcafe`)
       .click('.releases-tab')
 
       // Create new release
@@ -161,7 +161,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .gt(0)
       .wait(20000)
 
-      .navigateTo(`${baseUrl}/#/pipelines`)
+      .navigateTo(`${baseUrl}/pipelines`)
       .click('.new-pipeline')
       .typeText('.pipeline-name input', 'testcafe')
       .click('button.next')
@@ -172,7 +172,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
   .afterEach(async (t) => { // Cleanup
     await t
       // App 1
-      .navigateTo(`${baseUrl}/#/apps/testcafepipe1-testcafe`)
+      .navigateTo(`${baseUrl}/apps/testcafepipe1-testcafe`)
       .click('.info-tab')
       .click('button.delete')
       .click('.delete-confirm .ok')
@@ -182,7 +182,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .notOk()
 
       // App 2
-      .navigateTo(`${baseUrl}/#/apps/testcafepipe2-testcafe`)
+      .navigateTo(`${baseUrl}/apps/testcafepipe2-testcafe`)
       .click('.info-tab')
       .click('button.delete')
       .click('.delete-confirm .ok')
@@ -192,7 +192,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .notOk()
 
       // App 3
-      .navigateTo(`${baseUrl}/#/apps/testcafepipe3-testcafe`)
+      .navigateTo(`${baseUrl}/apps/testcafepipe3-testcafe`)
       .click('.info-tab')
       .click('button.delete')
       .click('.delete-confirm .ok')
@@ -202,7 +202,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .notOk()
 
       // Pipeline
-      .navigateTo(`${baseUrl}/#/pipelines/testcafe`)
+      .navigateTo(`${baseUrl}/pipelines/testcafe`)
       .click('button.delete-pipeline')
       .click('.confirm .ok')
       .expect(Selector('.pipeline-list .testcafe').exists)

@@ -145,7 +145,7 @@ export default class NewApp extends Component {
         this.state.compliance,
         this.state.stack,
       );
-      window.location = '#/spaces';
+      window.location = '/spaces';
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

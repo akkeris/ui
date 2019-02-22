@@ -14,7 +14,7 @@ fixture('Spaces Page') // eslint-disable-line no-undef
       .typeText('#password', botPassword)
 
       .click('button.login')
-      .navigateTo(`${baseUrl}/#/spaces`);
+      .navigateTo(`${baseUrl}/spaces`);
   });
 
 test('Should show list of spaces', async (t) => { // eslint-disable-line no-undef

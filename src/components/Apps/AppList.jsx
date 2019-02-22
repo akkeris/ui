@@ -50,7 +50,7 @@ export default class AppList extends Component {
   }
 
   handleRowSelection = (app) => {
-    window.location = `#/apps/${app.name}/info`;
+    window.location = `/apps/${app.name}/info`;
   }
 
   handleChangePage = (event, page) => {

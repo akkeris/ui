@@ -40,7 +40,7 @@ export default class SitesList extends Component {
   }
 
   handleRowSelection = (id) => {
-    window.location = `#/sites/${id}/info`;
+    window.location = `/sites/${id}/info`;
   }
 
   handleChangePage = (event, page) => {
