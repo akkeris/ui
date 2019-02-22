@@ -19,6 +19,7 @@ const config = {
   output: {
     path: path.resolve(__dirname, 'build'), // Path of output file
     filename: 'app.js', // Name of output file
+    publicPath: '/',
   },
   plugins: [
     // Define production build to allow React to strip out unnecessary checks

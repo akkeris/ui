@@ -120,16 +120,20 @@ if (process.env.NODE_ENV === 'dev') {
   app.use(middleware);
   app.use(webpackHotMiddleware(compiler));
   app.use(express.static('public'));
+  // Required for <BrowserRouter> - fallback to index.html on 404
+  app.get('/*', (req, res) => {
+    res.sendFile(path.resolve('public', 'index.html'));
+  });
 } else {
   console.log(`${process.env.NODE_ENV} ENVIRONMENT`);
   // Production needs physical files! (built via separate process)
   app.use(express.static('build'));
+  // Required for <BrowserRouter> - fallback to index.html on 404
+  app.get('/*', (req, res) => {
+    res.sendFile(path.resolve('build', 'index.html'));
+  });
 }
 
-// Required for <BrowserRouter> - fallback to index.html on 404
-app.get('/*', (req, res) => {
-  res.sendFile(path.resolve('public', 'index.html'));
-});
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) {
