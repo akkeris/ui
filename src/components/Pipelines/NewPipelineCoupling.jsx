@@ -49,15 +49,48 @@ export default class NewPipelineCoupling extends Component {
   }
 
   componentDidMount() {
-    api.getApps().then((response) => {
-      this.setState({
-        apps: response.data,
-        loading: false,
-      });
-    });
+    this.getApps();
   }
 
-  getStepContent(stepIndex) {
+  getApps = async () => {
+    const { data: apps } = await api.getApps();
+    this.setState({ apps, loading: false });
+  }
+
+  handleSearch = (searchText) => {
+    this.setState({ app: searchText });
+    this.handleNext();
+  }
+
+  handleNext = () => {
+    const { stepIndex } = this.state;
+    if (!this.state.loading) {
+      this.setState({
+        loading: stepIndex >= 0,
+        stepIndex: stepIndex + 1,
+        finished: stepIndex >= 0,
+        errorText: null,
+      });
+    }
+  };
+
+  submitPipelineCoupling = async () => {
+    try {
+      await api.createPipelineCoupling(this.props.pipeline, this.state.app, this.props.stage);
+      this.props.onComplete('Coupling Added');
+    } catch (error) {
+      this.setState({
+        finished: false,
+        stepIndex: 0,
+        errorText: null,
+        app: '',
+        loading: false,
+      });
+      this.props.onError(error.response.data);
+    }
+  };
+
+  renderStepContent(stepIndex) {
     switch (stepIndex) {
       case 0:
         return (
@@ -82,38 +115,6 @@ export default class NewPipelineCoupling extends Component {
     }
   }
 
-  handleSearch = (searchText) => {
-    this.setState({ app: searchText });
-    this.handleNext();
-  }
-
-  handleNext = () => {
-    const { stepIndex } = this.state;
-    if (!this.state.loading) {
-      this.setState({
-        loading: stepIndex >= 0,
-        stepIndex: stepIndex + 1,
-        finished: stepIndex >= 0,
-        errorText: null,
-      });
-    }
-  };
-
-  submitPipelineCoupling = () => {
-    api.createPipelineCoupling(this.props.pipeline, this.state.app, this.props.stage).then(() => {
-      this.props.onComplete('Coupling Added');
-    }).catch((error) => {
-      this.setState({
-        finished: false,
-        stepIndex: 0,
-        errorText: null,
-        app: '',
-        loading: false,
-      });
-      this.props.onError(error.response.data);
-    });
-  };
-
   renderContent() {
     const { finished, stepIndex } = this.state;
     const contentStyle = { margin: '0 0 40px 57px' };
@@ -124,7 +125,7 @@ export default class NewPipelineCoupling extends Component {
 
     return (
       <div style={contentStyle}>
-        <div>{this.getStepContent(stepIndex)}</div>
+        <div>{this.renderStepContent(stepIndex)}</div>
       </div>
     );
   }

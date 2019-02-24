@@ -75,72 +75,27 @@ export default class AttachAddon extends Component {
   }
 
   componentDidMount() {
-    api.getApps().then((response) => {
-      this.setState({
-        apps: response.data,
-        loading: false,
-      });
-    });
+    this.getApps();
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (this.state.stepIndex !== prevState.stepIndex && this.state.stepIndex === 1) {
-      this.setState({ loading: true }); // eslint-disable-line react/no-did-update-set-state
-      api.getAppAddons(this.state.app).then((response) => {
-        this.setState({
-          addons: response.data,
-          addon: response.data[0],
-          loading: false,
-        });
-      }).catch(() => {
-        this.setState(prevState, () => this.setState({ loadingErrorMessage: 'Could not find specified app', loadingError: true }));
-      });
+      this.getAddons(prevState);
     }
   }
 
-  getAddons() {
-    return this.state.addons.map(addon => (
-      <MenuItem
-        className={addon.addon_service.name}
-        key={addon.name}
-        value={addon}
-      >
-        {addon.addon_service.name}
-      </MenuItem>
-    ));
+  getApps = async () => {
+    const response = await api.getApps();
+    this.setState({ apps: response.data, loading: false });
   }
 
-  getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return (
-          <div>
-            <Search
-              className={'app-search'}
-              label="App"
-              data={util.filterName(this.state.apps)}
-              handleSearch={this.handleSearch}
-              errorText={this.state.errorText}
-              color="black"
-            />
-            <p>
-              The application name that has an addon you want to attach. Ex. my-test-app-dev
-            </p>
-          </div>
-        );
-      case 1:
-        return (
-          <div>
-            <Select className="addon-menu" value={this.state.addon} onChange={this.handleAddonChange}>
-              {this.getAddons()}
-            </Select>
-            <p>
-              Select the addon you want to attach.
-            </p>
-          </div>
-        );
-      default:
-        return 'You\'re a long way from home sonny jim!';
+  getAddons = async (prevState) => {
+    this.setState({ loading: true }); // eslint-disable-line react/no-did-update-set-state
+    try {
+      const response = await api.getAppAddons(this.state.app);
+      this.setState({ addons: response.data, addon: response.data[0], loading: false });
+    } catch (err) {
+      this.setState(prevState, () => this.setState({ loadingErrorMessage: 'Could not find specified app', loadingError: true }));
     }
   }
 
@@ -182,10 +137,11 @@ export default class AttachAddon extends Component {
     }
   }
 
-  submitAddonAttachment = () => {
-    api.attachAddon(this.props.app, this.state.addon.id).then(() => {
+  submitAddonAttachment = async () => {
+    try {
+      await api.attachAddon(this.props.app, this.state.addon.id);
       this.props.onComplete('Addon Attached');
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -196,7 +152,53 @@ export default class AttachAddon extends Component {
         addon: {},
         app: '',
       });
-    });
+    }
+  }
+
+  renderAddons = () => (
+    this.state.addons.map(addon => (
+      <MenuItem
+        className={addon.addon_service.name}
+        key={addon.name}
+        value={addon}
+      >
+        {addon.addon_service.name}
+      </MenuItem>
+    ))
+  )
+
+  renderStep(stepIndex) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <div>
+            <Search
+              className={'app-search'}
+              label="App"
+              data={util.filterName(this.state.apps)}
+              handleSearch={this.handleSearch}
+              errorText={this.state.errorText}
+              color="black"
+            />
+            <p>
+              The application name that has an addon you want to attach. Ex. my-test-app-dev
+            </p>
+          </div>
+        );
+      case 1:
+        return (
+          <div>
+            <Select className="addon-menu" value={this.state.addon} onChange={this.handleAddonChange}>
+              {this.renderAddons()}
+            </Select>
+            <p>
+              Select the addon you want to attach.
+            </p>
+          </div>
+        );
+      default:
+        return 'You\'re a long way from home sonny jim!';
+    }
   }
 
   renderContent() {
@@ -207,7 +209,7 @@ export default class AttachAddon extends Component {
     } else {
       return (
         <div style={contentStyle}>
-          <div>{this.getStepContent(stepIndex)}</div>
+          <div>{this.renderStep(stepIndex)}</div>
           <div style={style.buttons.div}>
             {stepIndex > 0 && (
               <Button
@@ -243,10 +245,10 @@ export default class AttachAddon extends Component {
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel>Select Addon Service</StepLabel>
+              <StepLabel>Select App</StepLabel>
             </Step>
             <Step>
-              <StepLabel>Select Plan</StepLabel>
+              <StepLabel>Select Addon</StepLabel>
             </Step>
           </Stepper>
           {(!loading || finished) && (

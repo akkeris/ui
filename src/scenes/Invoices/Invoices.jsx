@@ -62,12 +62,12 @@ export default class Invoices extends Component {
   }
 
   componentDidMount() {
-    api.getInvoices(true).then((response) => {
-      this.setState({
-        invoices: response,
-        loading: false,
-      });
-    });
+    this.getInvoices();
+  }
+
+  getInvoices = async () => {
+    const invoices = await api.getInvoices(true);
+    this.setState({ invoices, loading: false });
   }
 
   render() {

@@ -59,7 +59,7 @@ export default class Webhooks extends Component {
       submitMessage: '',
       events: [],
     };
-    this.loadWebhooks();
+    this.getWebhooks();
   }
 
   componentDidMount() {
@@ -69,32 +69,11 @@ export default class Webhooks extends Component {
     this._isMounted = false;
   }
 
-  getWebhooks() {
-    return this.state.webhooks.map((webhook, rowindex) => (
-      <TableRow key="webhook.id">
-        <TableCell style={{ padding: 0 }}>
-          <Webhook
-            webhook={webhook}
-            rowindex={rowindex}
-            app={this.props.app}
-            onComplete={this.reload}
-            onError={this.handleError}
-            key={webhook.id}
-          />
-        </TableCell>
-      </TableRow>
-    ));
-  }
-
-  loadWebhooks() {
-    api.getAppWebhooks(this.props.app).then((response) => {
-      if (this._isMounted) {
-        this.setState({
-          webhooks: response.data,
-          loading: false,
-        });
-      }
-    });
+  getWebhooks = async () => {
+    const { data: webhooks } = await api.getAppWebhooks(this.props.app);
+    if (this._isMounted) {
+      this.setState({ webhooks, loading: false });
+    }
   }
 
   handleError = (message) => {
@@ -123,18 +102,34 @@ export default class Webhooks extends Component {
     this.setState({ submitFail: false });
   }
 
-  reload = (message) => {
+  reload = async (message) => {
     this.setState({ loading: true });
-    api.getAppWebhooks(this.props.app).then((response) => {
-      this.setState({
-        webhooks: response.data,
-        loading: false,
-        new: false,
-        message,
-        open: true,
-        confirmWebhookOpen: false,
-      });
+    const { data: webhooks } = await api.getAppWebhooks(this.props.app);
+    this.setState({
+      webhooks,
+      loading: false,
+      new: false,
+      message,
+      open: true,
+      confirmWebhookOpen: false,
     });
+  }
+
+  renderWebhooks() {
+    return this.state.webhooks.map((webhook, rowindex) => (
+      <TableRow key="webhook.id">
+        <TableCell style={{ padding: 0 }}>
+          <Webhook
+            webhook={webhook}
+            rowindex={rowindex}
+            app={this.props.app}
+            onComplete={this.reload}
+            onError={this.handleError}
+            key={webhook.id}
+          />
+        </TableCell>
+      </TableRow>
+    ));
   }
 
   render() {
@@ -180,7 +175,7 @@ export default class Webhooks extends Component {
             </TableHead>
             {this.state.webhooks && this.state.webhooks.length > 0 && (
               <TableBody className="webhook-list">
-                {this.getWebhooks()}
+                {this.renderWebhooks()}
               </TableBody>
             )}
           </Table>

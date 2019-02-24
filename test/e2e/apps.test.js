@@ -392,32 +392,32 @@ test // eslint-disable-line no-undef
 
     // Check new component shows
       .click('button.new-addon')
-      .expect(Selector('.service-menu').exists)
+      .expect(Selector('.select-textfield').exists)
       .ok()
 
     // Make sure we can cancel
       .click('button.addon-cancel')
-      .expect(Selector('.service-menu').exists)
+      .expect(Selector('.select-textfield').exists)
       .notOk()
 
     // Test compliance
       .click('button.new-addon')
-      .click('.service-menu')
-      .click('.Lids.Db.Credentials')
+      .typeText(Selector('.select-textfield'), 'Lids Db Credentials')
+      .pressKey('enter')
       .click('button.next')
-      .click('.plan-menu')
-      .click('.Lids.Prod.Credentials')
+      .typeText(Selector('.select-textfield'), 'lids-db:prod')
+      .pressKey('enter')
       .click('button.next')
       .expect(Selector('.new-addon-error').innerText)
       .contains('The specified addon may not be attached to this app. It requires these necessary compliances in the space')
       .click('.ok')
 
     // create addon
-      .click('.service-menu')
-      .click('.Lids.Db.Credentials')
+      .typeText(Selector('.select-textfield'), 'Lids Db Credentials')
+      .pressKey('enter')
       .click('button.next')
-      .click('.plan-menu')
-      .click('.Lids.Dev.Credentials')
+      .typeText(Selector('.select-textfield'), 'lids-db:dev')
+      .pressKey('enter')
 
       // Test addon plan description
       .expect(Selector('.plan-price').innerText)
@@ -426,8 +426,8 @@ test // eslint-disable-line no-undef
       .contains('credentials')
       .click('button.back')
       .click('button.next')
-      .click('.plan-menu')
-      .click('.Lids.Dev.Credentials')
+      .typeText(Selector('.select-textfield'), 'lids-db:dev')
+      .pressKey('enter')
       .expect(Selector('.plan-price').exists)
       .ok()
       .expect(Selector('.plan-description').exists)
@@ -440,11 +440,11 @@ test // eslint-disable-line no-undef
 
     // Test duplicate
       .click('button.new-addon')
-      .click('.service-menu')
-      .click('.Lids.Db.Credentials')
+      .typeText(Selector('.select-textfield'), 'Lids Db Credentials')
+      .pressKey('enter')
       .click('button.next')
-      .click('.plan-menu')
-      .click('.Lids.Dev.Credentials')
+      .typeText(Selector('.select-textfield'), 'lids-db:dev')
+      .pressKey('enter')
       .click('button.next')
       .expect(Selector('.new-addon-error').innerText)
       .contains('This addon is already created and attached to this application and cannot be used twice.')
@@ -462,11 +462,11 @@ test // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
       .click('.addons-tab')
       .click('button.new-addon')
-      .click('.service-menu')
-      .click('.Akkeris.PostgreSQL')
+      .typeText(Selector('.select-textfield'), 'Akkeris PostgreSQL')
+      .pressKey('enter')
       .click('button.next')
-      .click('.plan-menu')
-      .click('.Standard-0')
+      .typeText(Selector('.select-textfield'), 'akkeris-postgresql:standard-0')
+      .pressKey('enter')
       .expect(Selector('.plan-price').exists)
       .ok()
       .expect(Selector('.plan-description').exists)
@@ -561,7 +561,6 @@ test // eslint-disable-line no-undef
       .expect(Selector('.app-list .testcafe2-testcafe').exists)
       .notOk();
   });
-
 
 test('Should be able to create edit and remove webhooks', async (t) => { // eslint-disable-line no-undef
   await t

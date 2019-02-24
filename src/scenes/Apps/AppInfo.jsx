@@ -24,6 +24,7 @@ import Addons from '../../components/Addons';
 import Logs from '../../components/Logs';
 import AppOverview from '../../components/Apps/AppOverview';
 import api from '../../services/api';
+import util from '../../services/util';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -103,6 +104,7 @@ export default class AppInfo extends Component {
     super(props);
     this.state = {
       app: {},
+      accountInfo: {},
       loading: true,
       submitMessage: '',
       submitFail: false,
@@ -115,25 +117,21 @@ export default class AppInfo extends Component {
   }
 
 
-  componentDidMount() {
-    api.getApp(this.props.match.params.app).then((response) => {
+  async componentDidMount() {
+    try {
+      const appResponse = await api.getApp(this.props.match.params.app);
+      const accountResponse = await api.getAccount();
       const hashPath = window.location.hash;
       let currentTab = hashPath.replace(this.state.baseHash, '');
       if (!tabs.includes(currentTab)) {
         currentTab = 'info';
         window.location.hash = `${this.state.baseHash}info`;
       }
-      this.setState({ currentTab });
-      this.setState({
-        app: response.data,
-        loading: false,
-      });
-    }).catch((error) => {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-      });
-    });
+      this.setState({ currentTab, app: appResponse.data, accountInfo: accountResponse.data, loading: false });
+    } catch (err) {
+      this.setState({ submitMessage: err.response.data, submitFail: true });
+    }
+    util.updateHistory('app', this.props.match.params.app);
   }
 
   componentDidUpdate(prevProps) {
@@ -188,24 +186,40 @@ export default class AppInfo extends Component {
   }
 
   render() {
-    const { currentTab } = this.state;
-    if (this.state.loading) {
+    const { currentTab, loading, submitMessage, submitFail } = this.state;
+    if (loading) {
+      let notFoundMessage;
+      if (submitFail) {
+        // Format the invalid application name in bold.
+        try {
+          const result = /(The specified application )(.*)( does not exist\.)/g.exec(submitMessage);
+          notFoundMessage = (
+            <span>
+              <span>{result[1]}</span>
+              <span style={{ fontWeight: 'bold' }}>{result[2]}</span>
+              <span>{result[3]}</span>
+            </span>
+          );
+        } catch (e) { notFoundMessage = submitMessage; }
+      }
       return (
         <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            { !submitFail && <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" /> }
             <Dialog
               className="not-found-error"
-              open={this.state.submitFail}
+              open={submitFail}
             >
               <DialogTitle>Error</DialogTitle>
               <DialogContent>
-                <DialogContentText>{this.state.submitMessage}</DialogContentText>
+                <DialogContentText>{notFoundMessage}</DialogContentText>
               </DialogContent>
               <DialogActions>
                 <Button
                   onClick={this.handleNotFoundClose}
                   color="primary"
+                  autoFocus
+                  onKeyDown={e => ['Escape', 'Esc'].includes(e.key) && this.handleNotFoundClose()}
                 >
                   Ok
                 </Button>
@@ -309,7 +323,11 @@ export default class AppInfo extends Component {
               />
             </Tabs>
             {currentTab === 'info' && (
-              <AppOverview app={this.state.app} onComplete={this.reload} />
+              <AppOverview
+                app={this.state.app}
+                onComplete={this.reload}
+                accountInfo={this.state.accountInfo}
+              />
             )}
             {currentTab === 'dynos' && (
               <Formations
@@ -318,13 +336,15 @@ export default class AppInfo extends Component {
             )}
             {currentTab === 'releases' && (
               <Releases
-                app={this.state.app.name}
+                app={this.state.app}
                 org={this.state.app.organization.name}
+                accountInfo={this.state.accountInfo}
               />
             )}
             {currentTab === 'addons' && (
               <Addons
-                app={this.state.app.name}
+                app={this.state.app}
+                accountInfo={this.state.accountInfo}
               />
             )}
             {currentTab === 'webhooks' && (

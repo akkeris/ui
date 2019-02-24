@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { CircularProgress } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import Ansi from 'ansi-to-react';
 
 import api from '../../services/api';
 
@@ -51,24 +52,21 @@ export default class Logs extends Component {
   }
 
   componentDidMount() {
-    intv = setInterval(() => {
-      api.getBuildResult(this.props.app, this.props.build)
-        .then((response) => {
-          const logs = response.data.lines.join('\n');
-          if (!this.props.open || !response.data.build || (response.data.build.status !== 'pending' && response.data.build.status !== 'queued')) {
-            clearInterval(intv);
-          }
-          this.setState({
-            logs,
-            loading: false,
-          });
-          this.scrollBuildDown();
-        }).catch(() => {
+    intv = setInterval(async () => {
+      try {
+        const { data: buildResult } = await api.getBuildResult(this.props.app, this.props.build);
+        const logs = buildResult.lines.join('\n');
+        if (!this.props.open || !buildResult.build || (buildResult.build.status !== 'pending' && buildResult.build.status !== 'queued')) {
           clearInterval(intv);
-          this.setState({
-            loading: false,
-          });
+        }
+        this.setState({ logs, loading: false });
+        this.scrollBuildDown();
+      } catch (error) {
+        clearInterval(intv);
+        this.setState({
+          loading: false,
         });
+      }
     }, 1000);
   }
 
@@ -97,7 +95,7 @@ export default class Logs extends Component {
     }
     return (
       <MuiThemeProvider theme={muiTheme}>
-        <pre style={style.logs}><code>{this.state.logs}</code></pre>
+        <pre style={style.logs}><Ansi>{this.state.logs}</Ansi></pre>
       </MuiThemeProvider>
     );
   }

@@ -84,6 +84,32 @@ function filterCouplings(couplings, filter) {
   return filteredCouplings;
 }
 
+function updateHistory(type, item) {
+  let recentItems;
+  try {
+    recentItems = JSON.parse(localStorage.getItem('akkeris_history'));
+    recentItems.unshift({ type, item });
+    if (recentItems.length > 20) { recentItems.pop(); } // Only keep the most recent 20 items
+  } catch (err) {
+    recentItems = [{ type, item }];
+  }
+  localStorage.setItem('akkeris_history', JSON.stringify(recentItems));
+}
+
+function getHistory() {
+  let recentItems;
+  try {
+    recentItems = JSON.parse(localStorage.getItem('akkeris_history'));
+  } catch (err) {
+    recentItems = [];
+  }
+  return recentItems;
+}
+
+function clearHistory() {
+  localStorage.removeItem('akkeris_history');
+}
+
 export default {
   filterApps,
   filterName,
@@ -94,4 +120,7 @@ export default {
   filterSpacesByStack,
   filterSites,
   filterDynosByFormation,
+  updateHistory,
+  getHistory,
+  clearHistory,
 };

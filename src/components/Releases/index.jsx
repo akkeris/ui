@@ -24,6 +24,14 @@ import NewAutoBuild from './NewAutoBuild';
 
 import AutoBuildIcon from '../Icons/GitIcon';
 
+function addRestrictedTooltip(title, placement, children) {
+  return (
+    <Tooltip title={title} placement={placement}>
+      <div style={{ display: 'inline' }}>{children}</div>
+    </Tooltip>
+  );
+}
+
 const muiTheme = createMuiTheme({
   palette: {
     primary: { main: '#0097a7' },
@@ -160,18 +168,157 @@ export default class Releases extends Component {
       newAuto: false,
       rowsPerPage: 15,
       page: 0,
+      isElevated: false,
+      restrictedSpace: false,
     };
-    this.loadReleases();
+    this.getReleases();
   }
 
   componentDidMount() {
     this._isMounted = true;
+
+    const { app, accountInfo } = this.props;
+
+    // If this is a production app, check for the elevated_access role to determine
+    // whether or not to enable creating arbitrary builds
+
+    // There is still an API call on the backend that controls access to the actual
+    // creation of a build, this is merely for convienence.
+
+    let isElevated = false;
+    let restrictedSpace = false;
+    if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
+      // If we don't have the elevated_access object in the accountInfo object,
+      // default to enabling the button (access will be controlled on the API)
+      isElevated = (accountInfo && 'elevated_access' in accountInfo) ? accountInfo.elevated_access : true;
+      restrictedSpace = true;
+    }
+
+    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line react/no-did-mount-set-state
   }
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  getReleases(page, rowsPerPage) {
+  getReleases = async () => {
+    await api.getApp(this.props.app.name);
+    let { data: builds } = await api.getBuilds(this.props.app.name);
+    let releases = await api.getReleases(this.props.app.name);
+    releases = releases.sort((a, b) => (
+      new Date(a.created_at).getTime() > new Date(b.created_at).getTime() ? 1 : -1
+    )).map(x => Object.assign(x.slug, {
+      id: x.id,
+      created_at: x.created_at,
+      version: x.version,
+      description: x.description,
+      release: true,
+      current: x.current,
+    }));
+    // fitler out builds with a release
+    // builds = builds.filter((a) => !releases.some((x) => x.slug.id === a.id));
+    builds = builds.map(a => Object.assign({
+      releases: releases.filter(b => b.slug.id === a.id),
+    }, a));
+
+    let releaseAndBuilds = builds.concat(releases).sort((a, b) => (
+      new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1
+    ));
+
+    if (releaseAndBuilds.length > releaseLimit) {
+      releaseAndBuilds = releaseAndBuilds.slice(0, releaseLimit);
+    }
+    if (this._isMounted) {
+      this.setState({
+        releases: releaseAndBuilds,
+        loading: false,
+      });
+    }
+  }
+
+  handleRevertOpen(release) {
+    this.setState({
+      revertOpen: true,
+      revert: release,
+      title: `Rollback to release v${release.version}`,
+    });
+  }
+
+  handleRevertGo = async () => {
+    this.setState({ revert: null, revertOpen: false, loading: true });
+    await api.createRelease(
+      this.props.app.name,
+      null,
+      this.state.revert.id,
+      `Rollback to release v${this.state.revert.version}`,
+    );
+    this.getReleases();
+    this.setState({ loading: false });
+  }
+
+  handleClose() {
+    this.setState({ logsOpen: false });
+  }
+
+  handleRevertClose() {
+    this.setState({ revert: null, revertOpen: false });
+  }
+
+  handleNewBuild() {
+    this.setState({ new: true });
+  }
+
+  handleNewBuildCancel() {
+    this.setState({ new: false });
+  }
+
+  handleNewAutoBuild = () => {
+    this.setState({ newAuto: true });
+  }
+
+  handleNewAutoBuildCancel = () => {
+    this.setState({ newAuto: false });
+  }
+
+  handleOpen(release) {
+    this.setState({
+      logsOpen: true,
+      release,
+      title: `Logs for v${release.id}`,
+    });
+  }
+
+  handleNewRelease() {
+    this.setState({ new: true });
+  }
+
+  handleNewReleaseCancel() {
+    this.setState({ new: false });
+  }
+
+  handleSnackClose() {
+    this.setState({ snackOpen: false });
+  }
+
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
+  reload = (message) => {
+    this.setState({
+      loading: false,
+      new: false,
+      newAuto: false,
+      snackOpen: true,
+      message,
+    });
+    this.getReleases();
+  }
+
+  renderReleases(page, rowsPerPage) {
     return this.state.releases.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((release, index) => {
       // release status indicator
       let releaseColor = grey[500];
@@ -249,140 +396,8 @@ export default class Releases extends Component {
     });
   }
 
-  loadReleases() {
-    return new Promise((resolve) => {
-      api.getApp(this.props.app).then(() => {
-        api.getBuilds(this.props.app).then((buildResponse) => {
-          let builds = buildResponse.data;
-          api.getReleases(this.props.app).then((releaseResponse) => {
-            const releases = releaseResponse
-              .sort((a, b) => (
-                new Date(a.created_at).getTime() > new Date(b.created_at).getTime() ? 1 : -1
-              ))
-              .map(x => Object.assign(x.slug, {
-                id: x.id,
-                created_at: x.created_at,
-                version: x.version,
-                description: x.description,
-                release: true,
-                current: x.current,
-              }));
-
-            // fitler out builds with a release
-            // builds = builds.filter((a) => !releases.some((x) => x.slug.id === a.id));
-            builds = builds.map(a => Object.assign({
-              releases: releases.filter(b => b.slug.id === a.id),
-            }, a));
-
-            let releaseAndBuilds = builds.concat(releases)
-              .sort((a, b) => (
-                new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1
-              ));
-
-
-            if (releaseAndBuilds.length > releaseLimit) {
-              releaseAndBuilds = releaseAndBuilds.slice(0, releaseLimit);
-            }
-            if (this._isMounted) {
-              this.setState({
-                releases: releaseAndBuilds,
-                loading: false,
-              });
-            }
-            resolve();
-          });
-        });
-      });
-    });
-  }
-
-  handleRevertOpen(release) {
-    this.setState({
-      revertOpen: true,
-      revert: release,
-      title: `Rollback to release v${release.version}`,
-    });
-  }
-
-  handleRevertGo() {
-    api.createRelease(
-      this.props.app,
-      null,
-      this.state.revert.id,
-      `Rollback to release v${this.state.revert.version}`,
-    )
-      .then(() => {
-        this.loadReleases();
-        this.setState({ loading: false });
-      });
-    this.setState({ revert: null, revertOpen: false, loading: true });
-  }
-
-  handleClose() {
-    this.setState({ logsOpen: false });
-  }
-
-  handleRevertClose() {
-    this.setState({ revert: null, revertOpen: false });
-  }
-
-  handleNewBuild() {
-    this.setState({ new: true });
-  }
-
-  handleNewBuildCancel() {
-    this.setState({ new: false });
-  }
-
-  handleNewAutoBuild = () => {
-    this.setState({ newAuto: true });
-  }
-
-  handleNewAutoBuildCancel = () => {
-    this.setState({ newAuto: false });
-  }
-
-  handleOpen(release) {
-    this.setState({
-      logsOpen: true,
-      release,
-      title: `Logs for v${release.id}`,
-    });
-  }
-
-  handleNewRelease() {
-    this.setState({ new: true });
-  }
-
-  handleNewReleaseCancel() {
-    this.setState({ new: false });
-  }
-
-  handleSnackClose() {
-    this.setState({ snackOpen: false });
-  }
-
-  handleChangePage = (event, page) => {
-    this.setState({ page });
-  };
-
-  handleChangeRowsPerPage = (event) => {
-    this.setState({ rowsPerPage: event.target.value });
-  };
-
-  reload = (message) => {
-    this.setState({
-      loading: false,
-      new: false,
-      newAuto: false,
-      snackOpen: true,
-      message,
-    });
-    this.loadReleases();
-  }
-
   render() {
-    const { releases, rowsPerPage, page } = this.state;
+    const { releases, rowsPerPage, page, isElevated, restrictedSpace } = this.state;
     const actions = [
       <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
         <RemoveIcon />
@@ -400,6 +415,28 @@ export default class Releases extends Component {
         onClick={() => { this.handleRevertClose(); }}
       >Cancel</Button>,
     ];
+
+    let newReleaseButton;
+    if (!restrictedSpace || isElevated) {
+      newReleaseButton = (
+        <Tooltip title="New Release" placement="bottom-end">
+          <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleNewBuild(); }}><AddIcon /></IconButton>
+        </Tooltip>
+      );
+    } else {
+      // Wrap the new release button in a tooltip to avoid confusion as to why it is disabled
+      newReleaseButton = addRestrictedTooltip('Elevated access required', 'right', (
+        <IconButton
+          disabled
+          style={{ ...style.iconButton, opacity: 0.35 }}
+          className="new-build"
+          onClick={() => { this.handleNewBuild(); }}
+        >
+          <AddIcon />
+        </IconButton>
+      ));
+    }
+
     if (this.state.loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -421,7 +458,7 @@ export default class Releases extends Component {
               <DialogContent style={{ padding: '0px', margin: '0px' }}>
                 <Logs
                   build={this.state.release.slug.id}
-                  app={this.props.app}
+                  app={this.props.app.name}
                   open={this.state.logsOpen}
                 />
               </DialogContent>
@@ -453,16 +490,14 @@ export default class Releases extends Component {
               <Tooltip title="Attach to Repo" placement="bottom-end">
                 <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
               </Tooltip>
-              <Tooltip title="New Release" placement="bottom-end">
-                <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleNewBuild(); }}><AddIcon /></IconButton>
-              </Tooltip>
+              {newReleaseButton}
             </Paper>
           )}
           {this.state.new && (
             <div>
               <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
               <NewBuild
-                app={this.props.app}
+                app={this.props.app.name}
                 org={this.props.org}
                 onComplete={
                   (message) => { this.reload(message); }
@@ -474,14 +509,14 @@ export default class Releases extends Component {
             <div>
               <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
               <NewAutoBuild
-                app={this.props.app}
+                app={this.props.app.name}
                 onComplete={(message) => { this.reload(message); }}
               />
             </div>
           )}
           <Table className="release-list" style={{ overflow: 'visible' }}>
             <TableBody>
-              {this.getReleases(page, rowsPerPage)}
+              {this.renderReleases(page, rowsPerPage)}
             </TableBody>
             {releases.length !== 0 && (
               <TableFooter>
@@ -513,6 +548,7 @@ export default class Releases extends Component {
 }
 
 Releases.propTypes = {
-  app: PropTypes.string.isRequired,
+  app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  accountInfo: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   org: PropTypes.string.isRequired,
 };

@@ -58,49 +58,6 @@ export default class NewOrg extends Component {
     };
   }
 
-  getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return (
-          <div>
-            <TextField
-              className="org-name"
-              label="Org name"
-              value={this.state.org}
-              onChange={this.handleOrgChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-            />
-            <p>
-              Create an akkeris org! Enter a name that will define your org.
-              This org will be used for attribution and grouping of apps/spaces.
-            </p>
-          </div>
-        );
-      case 1:
-        return (
-          <div>
-            <TextField
-              className="org-description"
-              label="Org description"
-              value={this.state.description}
-              onChange={this.handleDescriptionChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-            />
-            <p>
-              Give a description of your org.
-            </p>
-          </div>
-        );
-      // need this otherwise "You're a long way ..." shows up when you hit finish
-      case 2:
-        return '';
-      default:
-        return 'You\'re a long way from home sonny jim!';
-    }
-  }
-
   handleNext = () => {
     if ((this.state.stepIndex === 0 && this.state.org === '') || (this.state.stepIndex === 1 && this.state.description === '')) {
       this.setState({ errorText: 'field required' });
@@ -146,10 +103,11 @@ export default class NewOrg extends Component {
     });
   };
 
-  submitOrg = () => {
-    api.createOrg(this.state.org, this.state.description).then(() => {
+  submitOrg = async () => {
+    try {
+      await api.createOrg(this.state.org, this.state.description);
       window.location = '#/orgs';
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -159,8 +117,51 @@ export default class NewOrg extends Component {
         description: '',
         loading: false,
       });
-    });
+    }
   };
+
+  renderStepContent(stepIndex) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <div>
+            <TextField
+              className="org-name"
+              label="Org name"
+              value={this.state.org}
+              onChange={this.handleOrgChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>
+              Create an akkeris org! Enter a name that will define your org.
+              This org will be used for attribution and grouping of apps/spaces.
+            </p>
+          </div>
+        );
+      case 1:
+        return (
+          <div>
+            <TextField
+              className="org-description"
+              label="Org description"
+              value={this.state.description}
+              onChange={this.handleDescriptionChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>
+              Give a description of your org.
+            </p>
+          </div>
+        );
+      // need this otherwise "You're a long way ..." shows up when you hit finish
+      case 2:
+        return '';
+      default:
+        return 'You\'re a long way from home sonny jim!';
+    }
+  }
 
   renderContent() {
     const { finished, stepIndex } = this.state;
@@ -172,7 +173,7 @@ export default class NewOrg extends Component {
 
     return (
       <div style={contentStyle}>
-        <div>{this.getStepContent(stepIndex)}</div>
+        <div>{this.renderStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
           {stepIndex > 0 && (
             <Button

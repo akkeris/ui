@@ -77,7 +77,7 @@ export default class ConfigVar extends Component {
       edit: false,
       newValue: null,
     };
-    this.loadConfigVars();
+    this.getConfigVars();
   }
 
   componentDidMount() {
@@ -87,42 +87,11 @@ export default class ConfigVar extends Component {
     this._isMounted = false;
   }
 
-  getConfigVars() {
-    return Object.keys(this.state.config).map(key => (
-      <TableRow hover className={key} key={key} style={style.tableRow}>
-        <TableCell style={style.configVar}>
-          <div style={style.configVar.key}>{key}</div>
-        </TableCell>
-        <TableCell style={style.configVar}>
-          <div style={style.configVar.value}>{this.state.config[key]}</div>
-        </TableCell>
-        <TableCell style={style.editIcon}>
-          <Tooltip title="Edit" placement="top-start">
-            <IconButton className="edit" onClick={() => this.handleEdit(key)}>
-              <EditIcon nativeColor="black" />
-            </IconButton>
-          </Tooltip>
-        </TableCell>
-        <TableCell style={style.removeIcon}>
-          <Tooltip title="Remove" placement="top-start">
-            <IconButton className="remove" onClick={() => this.handleConfirmation(key)}>
-              <RemoveIcon nativeColor="black" />
-            </IconButton>
-          </Tooltip>
-        </TableCell>
-      </TableRow>
-    ));
-  }
-
-  loadConfigVars() {
-    api.getConfig(this.props.app).then((response) => {
-      if (this._isMounted) {
-        this.setState({
-          config: response.data,
-          loading: false,
-        });
-      }
-    });
+  getConfigVars = async () => {
+    const { data: config } = await api.getConfig(this.props.app);
+    if (this._isMounted) {
+      this.setState({ config, loading: false });
+    }
   }
 
   closeEditDialog = () => {
@@ -145,11 +114,12 @@ export default class ConfigVar extends Component {
     this.setState({ open: false });
   }
 
-  handleRemoveConfig = () => {
+  handleRemoveConfig = async () => {
     this.setState({ loading: true });
-    api.patchConfig(this.props.app, this.state.key, null).then(() => {
+    try {
+      await api.patchConfig(this.props.app, this.state.key, null);
       this.reload('Updated Config Vars');
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -160,7 +130,7 @@ export default class ConfigVar extends Component {
         edit: null,
         newValue: null,
       });
-    });
+    }
   }
 
   handleConfirmation = (key) => {
@@ -192,11 +162,12 @@ export default class ConfigVar extends Component {
     });
   }
 
-  handleEditSubmit = () => {
+  handleEditSubmit = async () => {
     this.setState({ loading: true });
-    api.patchConfig(this.props.app, this.state.key, this.state.newValue).then(() => {
+    try {
+      await api.patchConfig(this.props.app, this.state.key, this.state.newValue);
       this.reload('Updated Config Vars');
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -206,7 +177,7 @@ export default class ConfigVar extends Component {
         newValue: null,
         edit: false,
       });
-    });
+    }
   }
 
   handleNewValueChange = (event) => {
@@ -215,21 +186,47 @@ export default class ConfigVar extends Component {
     });
   }
 
-  reload = (message) => {
+  reload = async (message) => {
     this.setState({ loading: true });
-    api.getConfig(this.props.app).then((response) => {
-      this.setState({
-        config: response.data,
-        loading: false,
-        new: false,
-        message,
-        open: true,
-        confirmOpen: false,
-        newValue: null,
-        edit: false,
-        key: null,
-      });
+    const { data: config } = await api.getConfig(this.props.app);
+    this.setState({
+      config,
+      loading: false,
+      new: false,
+      message,
+      open: true,
+      confirmOpen: false,
+      newValue: null,
+      edit: false,
+      key: null,
     });
+  }
+
+  renderConfigVars() {
+    return Object.keys(this.state.config).sort().map(key => (
+      <TableRow hover className={key} key={key} style={style.tableRow}>
+        <TableCell style={style.configVar}>
+          <div style={style.configVar.key}>{key}</div>
+        </TableCell>
+        <TableCell style={style.configVar}>
+          <div style={style.configVar.value}>{this.state.config[key]}</div>
+        </TableCell>
+        <TableCell style={style.editIcon}>
+          <Tooltip title="Edit" placement="top-start">
+            <IconButton className="edit" onClick={() => this.handleEdit(key)}>
+              <EditIcon nativeColor="black" />
+            </IconButton>
+          </Tooltip>
+        </TableCell>
+        <TableCell style={style.removeIcon}>
+          <Tooltip title="Remove" placement="top-start">
+            <IconButton className="remove" onClick={() => this.handleConfirmation(key)}>
+              <RemoveIcon nativeColor="black" />
+            </IconButton>
+          </Tooltip>
+        </TableCell>
+      </TableRow>
+    ));
   }
 
   render() {
@@ -265,7 +262,7 @@ export default class ConfigVar extends Component {
           <Divider />
           <Table className="config-list">
             <TableBody>
-              {this.getConfigVars()}
+              {this.renderConfigVars()}
             </TableBody>
           </Table>
           <Dialog className="config-error" open={this.state.submitFail}>

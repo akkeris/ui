@@ -78,12 +78,12 @@ export default class Orgs extends Component {
   }
 
   componentDidMount() {
-    api.getOrgs().then((response) => {
-      this.setState({
-        orgs: response.data,
-        loading: false,
-      });
-    });
+    this.getOrgs();
+  }
+
+  getOrgs = async () => {
+    const { data: orgs } = await api.getOrgs();
+    this.setState({ orgs, loading: false });
   }
 
   handleSearch = (searchText) => {

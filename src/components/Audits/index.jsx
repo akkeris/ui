@@ -90,16 +90,29 @@ export default class Audits extends Component {
   }
 
   componentDidMount() {
-    api.getAudits(this.props.app.simple_name, this.props.app.space.name).then((response) => {
-      this.setState({
-        audits: response.data,
-        loading: false,
-      });
-      console.log(response.data);
+    this.getAudits();
+  }
+
+  getAudits = async () => {
+    const { data: audits } = await api.getAudits(this.props.app.simple_name, this.props.app.space.name);
+    this.setState({ audits, loading: false });
+  }
+
+  handleRowSelection = (id) => {
+    this.setState({
+      id,
+      diagOpen: true,
     });
   }
 
-  getAudits() {
+  handleDialogClose = () => {
+    this.setState({
+      diagOpen: false,
+      // id: '',
+    });
+  }
+
+  renderAudits() {
     const { audits } = this.state;
     if (audits.length === 0) {
       return (
@@ -137,7 +150,7 @@ export default class Audits extends Component {
     });
   }
 
-  getAuditInfo() {
+  renderAuditInfo() {
     return (
       this.state.audits.map((audit) => {
         const id = SHA256(JSON.stringify(audit)).toString().substring(0, 7);
@@ -147,20 +160,6 @@ export default class Audits extends Component {
         return null;
       })
     );
-  }
-
-  handleRowSelection = (id) => {
-    this.setState({
-      id,
-      diagOpen: true,
-    });
-  }
-
-  handleDialogClose = () => {
-    this.setState({
-      diagOpen: false,
-      // id: '',
-    });
   }
 
   render() {
@@ -191,7 +190,7 @@ export default class Audits extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.getAudits()}
+              {this.renderAudits()}
             </TableBody>
           </Table>
           <Dialog
@@ -206,7 +205,7 @@ export default class Audits extends Component {
             <DialogContent>
               <Table className="audit-info">
                 <TableBody>
-                  {this.getAuditInfo()}
+                  {this.renderAuditInfo()}
                 </TableBody>
               </Table>
             </DialogContent>

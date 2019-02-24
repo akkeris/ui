@@ -46,32 +46,6 @@ export default class NewPipeline extends Component {
     };
   }
 
-  getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return (
-          <div>
-            <TextField
-              className="pipeline-name"
-              label="Name"
-              type="text"
-              value={this.state.pipeline}
-              onChange={this.handlePipelineChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-            />
-            <p>The name of the pipeline, less than 24 characters, alpha numeric only.</p>
-          </div>
-        );
-      case 1:
-        return (
-          <div style={{ margin: '0 auto', width: '1%' }}><CircularProgress /></div>
-        );
-      default:
-        return 'You\'re a long way from home sonny jim!';
-    }
-  }
-
   handleNext = () => {
     if ((this.state.stepIndex === 0 && this.state.pipeline === '')) {
       this.setState({ errorText: 'field required' });
@@ -105,10 +79,11 @@ export default class NewPipeline extends Component {
     });
   };
 
-  submitPipeline = () => {
-    api.createPipeline(this.state.pipeline).then(() => {
+  submitPipeline = async () => {
+    try {
+      await api.createPipeline(this.state.pipeline);
       this.props.onComplete('Pipeline Added');
-    }).catch((error) => {
+    } catch (error) {
       this.setState({
         submitMessage: error.response.data,
         submitFail: true,
@@ -117,8 +92,34 @@ export default class NewPipeline extends Component {
         errorText: null,
         pipeline: '',
       });
-    });
+    }
   };
+
+  renderStepContent(stepIndex) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <div>
+            <TextField
+              className="pipeline-name"
+              label="Name"
+              type="text"
+              value={this.state.pipeline}
+              onChange={this.handlePipelineChange}
+              error={!!this.state.errorText}
+              helperText={this.state.errorText ? this.state.errorText : ''}
+            />
+            <p>The name of the pipeline, less than 24 characters, alpha numeric only.</p>
+          </div>
+        );
+      case 1:
+        return (
+          <div style={{ margin: '0 auto', width: '1%' }}><CircularProgress /></div>
+        );
+      default:
+        return 'You\'re a long way from home sonny jim!';
+    }
+  }
 
   renderContent() {
     const { finished, stepIndex } = this.state;
@@ -130,7 +131,7 @@ export default class NewPipeline extends Component {
 
     return (
       <div style={contentStyle}>
-        <div>{this.getStepContent(stepIndex)}</div>
+        <div>{this.renderStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
           {stepIndex < 1 && (
             <span>

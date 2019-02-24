@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, FormControl,
-  Select, MenuItem, Dialog, Button, Input,
-  DialogTitle, DialogActions, DialogContent,
+  Step, Stepper, StepLabel, CircularProgress, LinearProgress,
+  Dialog, Button, Typography, DialogTitle, DialogActions, DialogContent,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import Select from '../Select';
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
@@ -49,133 +49,71 @@ const style = {
       marginRight: 12,
     },
   },
+  refresh: {
+    div: {
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      width: '40px',
+      height: '350px',
+      marginTop: '20%',
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
+    },
+  },
+  selectContainer: {
+    maxWidth: '400px',
+  },
 };
+
+const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
 export default class NewAddon extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
       loading: true,
-      finished: false,
       stepIndex: 0,
       submitFail: false,
+      provisioning: false,
+      provisionStatus: 0,
+      provisionMessage: '',
       submitMessage: '',
       services: [],
       service: {},
       serviceid: '',
       plans: [],
       plan: {},
-      planid: '',
+      groupedServices: [],
     };
   }
 
   componentDidMount() {
-    api.getAddonServices().then((response) => {
-      this.setState({
-        services: response.data,
-        service: response.data[0],
-        loading: false,
-      });
-    });
+    this.getServices();
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (this.state.stepIndex !== prevState.stepIndex && this.state.stepIndex === 1) {
-      this.setState({ loading: true }); // eslint-disable-line react/no-did-update-set-state
-      api.getAddonServicePlans(this.state.service.name).then((response) => {
-        this.setState({
-          plans: response.data,
-          plan: response.data[0],
-          planid: response.data[0].id,
-          loading: false,
-        });
-      });
+      this.getPlans();
     }
   }
 
-  getServices() {
-    return this.state.services.map(service => (
-      <MenuItem
-        className={service.human_name}
-        key={service.id}
-        value={service.id}
-      >
-        {service.human_name}
-      </MenuItem>
-    ));
+  getServices = async () => {
+    const { data: services } = await api.getAddonServices();
+    const groupedServices = [{ label: 'Services', options: [] }, { label: 'Credentials', options: [] }];
+    services.forEach((addon) => {
+      const formattedAddon = { value: addon.id, label: addon.human_name };
+      groupedServices[addon.human_name.toLowerCase().includes('credential') ? 1 : 0].options.push(formattedAddon);
+    });
+    this.setState({ services, groupedServices, loading: false });
   }
 
-  getPlans() {
-    return this.state.plans.map(plan => (
-      <MenuItem
-        className={plan.human_name}
-        key={plan.name}
-        value={plan.id}
-      >
-        {plan.name}
-      </MenuItem>
-    ));
-  }
-
-  getStepContent(stepIndex) {
-    switch (stepIndex) {
-      case 0:
-        return (
-          <div>
-            <FormControl className="service-form">
-              <Select
-                autoWidth
-                className="service-menu"
-                value={this.state.service.id}
-                onChange={this.handleServiceChange}
-                input={<Input name="service" id="service-helper" />}
-              >
-                {this.getServices()}
-              </Select>
-            </FormControl>
-            <p>
-              Select the akkeris addon you would like to attach to your app.
-            </p>
-          </div>
-        );
-      case 1:
-        return (
-          <div>
-            <FormControl className="plan-form">
-              <Select
-                autoWidth
-                className="plan-menu"
-                value={this.state.planid}
-                onChange={this.handlePlanChange}
-                input={<Input name="plan" id="plan-helper" />}
-              >
-                {this.getPlans()}
-              </Select>
-            </FormControl>
-            <div className="plan-info" style={{ marginBottom: '15px' }}>
-              {this.state.plan.price && this.state.plan.price.cents !== 0 && (
-                <span className="plan-price">
-                  <b>{this.formatPrice(this.state.plan.price.cents)}/mo</b>
-                </span>
-              )}
-              {this.state.plan.price && this.state.plan.price.cents === 0 && (
-                <span className="plan-price">
-                  <b>{this.formatPrice(0)}/mo</b>
-                </span>
-              )}
-              <br />
-              <span className="plan-description">
-                {this.state.plan.description}
-              </span>
-            </div>
-            <p>
-              Select the plan for your addon (please only use larger plans for prod)
-            </p>
-          </div>
-        );
-      default:
-        return 'You\'re a long way from home sonny jim!';
-    }
+  getPlans = async () => {
+    this.setState({ loading: true });
+    let { data: plans } = await api.getAddonServicePlans(this.state.serviceid);
+    plans = plans.filter(x => x.state !== 'deprecated').map(x => ({ value: x.id, label: x.name, price: x.price, description: x.description }));
+    this.setState({ plans, loading: false });
   }
 
   formatPrice(cents) { // eslint-disable-line class-methods-use-this
@@ -190,15 +128,14 @@ export default class NewAddon extends Component {
   }
 
   handleServiceChange = (event) => {
-    const serviceid = event.target.value;
-    const service = this.state.services.find(a => a.id === serviceid);
-    this.setState({ service, serviceid });
+    const { groupedServices } = this.state;
+    const service = groupedServices[event.label.toLowerCase().includes('credential') ? 1 : 0].options.find(a => a.value === event.value);
+    this.setState({ service, serviceid: event.value });
   }
 
   handlePlanChange = (event) => {
-    const planid = event.target.value;
-    const plan = this.state.plans.find(a => a.id === planid);
-    this.setState({ plan, planid });
+    const plan = this.state.plans.find(a => a.value === event.value);
+    this.setState({ plan });
   }
 
   handleNext = () => {
@@ -206,7 +143,6 @@ export default class NewAddon extends Component {
     if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 1,
         loading: stepIndex >= 1,
       });
     }
@@ -222,61 +158,154 @@ export default class NewAddon extends Component {
     }
   }
 
-  submitAddon = () => {
-    api.createAddon(this.props.app, this.state.plan.id).then(() => {
-      this.props.onComplete('Addon Created');
-    }).catch((error) => {
+  submitAddon = async () => {
+    try {
+      this.setState({ loading: true });
+      let { data: addon } = await api.createAddon(this.props.app, this.state.plan.value);
+
+      for (let i = 0; i < 2000; i++) {
+        if (i % 20 === 0) {
+          ({ data: addon } = await api.getAddon(this.props.app, addon.id)); // eslint-disable-line
+        }
+        if (i === 1999) {
+          throw new Error('It seems this addon is taking too long to complete its task. When the provisioning finishes your application will automatically be restarted with the new addon.');
+        }
+        if (addon.state !== 'provisioning') {
+          this.props.onComplete('Addon Created');
+          this.setState({ provisioning: false, provisionStatus: 0, provisionMessage: '', loading: false });
+          return;
+        }
+        this.setState({ provisioning: true, provisionStatus: Math.atan(0.2 * i) / (Math.PI / 2), provisionMessage: addon.state_description || 'Provisioning...', loading: false });
+
+        await new Promise((res, rej) => setTimeout(res, 500)); // eslint-disable-line
+      }
+    } catch (error) {
+      if (!error.response) {
+        console.error(error);
+      }
       this.setState({
-        submitMessage: error.response.data,
+        submitMessage: error.response ? error.response.data : error.message,
         submitFail: true,
-        finished: false,
         stepIndex: 0,
         loading: false,
         plans: [],
         plan: {},
       });
-    });
+    }
+  }
+
+  renderStep(stepIndex) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <div>
+            <div style={style.selectContainer}>
+              <Select
+                options={this.state.groupedServices}
+                value={this.state.service}
+                onChange={this.handleServiceChange}
+                placeholder="Search for an Addon"
+              />
+            </div>
+            <Typography variant="body1">
+              Select the akkeris addon you would like to attach to your app.
+            </Typography>
+          </div>
+        );
+      case 1:
+        return (
+          <div>
+            <div style={style.selectContainer}>
+              <Select
+                options={this.state.plans}
+                value={this.state.plan ? this.state.plan.id : ''}
+                onChange={this.handlePlanChange}
+                placeholder="Search for a Plan"
+              />
+            </div>
+            {!isEmpty(this.state.plan) && (
+              <div className="plan-info" style={{ marginBottom: '12px' }}>
+                {this.state.plan.price && this.state.plan.price.cents !== 0 && (
+                  <span className="plan-price">
+                    <b>{this.formatPrice(this.state.plan.price.cents)}/mo</b>
+                  </span>
+                )}
+                {this.state.plan.price && this.state.plan.price.cents === 0 && (
+                  <span className="plan-price">
+                    <b>{this.formatPrice(0)}/mo</b>
+                  </span>
+                )}
+                <br />
+                <span className="plan-description">
+                  {this.state.plan.description}
+                </span>
+              </div>
+            )}
+            <Typography variant="body1">
+              Select the plan for your addon (please only use larger plans for prod)
+            </Typography>
+          </div>
+        );
+      default:
+        return 'You\'re a long way from home sonny jim!';
+    }
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
-    if (finished) {
-      this.submitAddon();
-    } else {
-      return (
-        <div style={contentStyle}>
-          <div>{this.getStepContent(stepIndex)}</div>
-          <div style={style.buttons.div}>
-            {stepIndex > 0 && (
-              <Button
-                className="back"
-                disabled={stepIndex === 0}
-                onClick={this.handlePrev}
-              >
-                Back
-              </Button>
-            )}
+    const { stepIndex } = this.state;
+    const contentStyle = { margin: '0 32px' };
+    return (
+      <div style={contentStyle}>
+        <div>{this.renderStep(stepIndex)}</div>
+        <div style={style.buttons.div}>
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+            >
+              Back
+            </Button>
+          )}
+          {stepIndex === 0 && (
             <Button
               variant="contained"
               className="next"
               color="primary"
               onClick={this.handleNext}
+              disabled={this.state.serviceid === ''}
             >
-              {stepIndex === 1 ? 'Finish' : 'Next'}
+              Next
             </Button>
-          </div>
+          )}
+          {stepIndex > 0 && (
+            <Button
+              variant="contained"
+              className="next"
+              color="primary"
+              onClick={this.submitAddon}
+            >
+              Finish
+            </Button>
+          )}
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   }
 
   render() {
-    const { loading, stepIndex, finished } = this.state;
+    const { loading, stepIndex } = this.state;
+    const provisionStyle = { display: 'block', ...style.stepper };
+    const provisioningStyle = { display: 'none', ...style.stepper };
+
+    if (this.state.provisioning) {
+      provisionStyle.display = 'none';
+      provisioningStyle.display = 'block';
+    }
+
     return (
       <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
+        <div style={provisionStyle}>
           <Stepper activeStep={stepIndex}>
             <Step>
               <StepLabel>Select Addon Service</StepLabel>
@@ -285,9 +314,14 @@ export default class NewAddon extends Component {
               <StepLabel>Select Plan</StepLabel>
             </Step>
           </Stepper>
-          {(!loading || finished) && (
+          {(!loading) && (
             <div>
               {this.renderContent()}
+            </div>
+          )}
+          {(loading) && (
+            <div style={style.refresh.div}>
+              <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             </div>
           )}
           <Dialog
@@ -304,6 +338,10 @@ export default class NewAddon extends Component {
               >OK</Button>
             </DialogActions>
           </Dialog>
+        </div>
+        <div style={provisioningStyle}>
+          <label>{this.state.provisionMessage}</label> {/* eslint-disable-line */}
+          <LinearProgress variant="determinate" value={this.state.provisionStatus * 100} />
         </div>
       </MuiThemeProvider>
     );

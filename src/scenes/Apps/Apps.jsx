@@ -128,40 +128,21 @@ export default class Apps extends Component {
   }
 
   componentDidMount() {
-    api.getSpaces().then((response) => {
-      this.setState({
-        spaces: response.data,
-        filteredSpaces: response.data,
-      });
-    });
-    api.getRegions().then((response) => {
-      this.setState({
-        regions: response.data,
-      });
-    });
-    this.getApps();
+    this.getData();
   }
 
-  getApps() {
-    api.getApps().then((response) => {
-      this.setState({
-        apps: response.data,
-        filteredApps: response.data,
-        loading: false,
-      });
+  getData = async () => {
+    const { data: spaces } = await api.getSpaces();
+    const { data: regions } = await api.getRegions();
+    const { data: apps } = await api.getApps();
+    this.setState({
+      spaces,
+      filteredSpaces: spaces,
+      regions,
+      apps,
+      filteredApps: apps,
+      loading: false,
     });
-  }
-
-  getSpaces() {
-    return this.state.filteredSpaces.map(space => (
-      <MenuItem className={space.name} key={space.id} value={space.name}>{space.name}</MenuItem>
-    ));
-  }
-
-  getRegions() {
-    return this.state.regions.map(region => (
-      <MenuItem className={region.name} key={region.id} value={region.name}>{region.name}</MenuItem>
-    ));
   }
 
   handleSearch = (searchText) => {
@@ -188,6 +169,18 @@ export default class Apps extends Component {
       filteredApps: apps,
       filteredSpaces: spaces,
     });
+  }
+
+  renderSpaces() {
+    return this.state.filteredSpaces.map(space => (
+      <MenuItem className={space.name} key={space.id} value={space.name}>{space.name}</MenuItem>
+    ));
+  }
+
+  renderRegions() {
+    return this.state.regions.map(region => (
+      <MenuItem className={region.name} key={region.id} value={region.name}>{region.name}</MenuItem>
+    ));
   }
 
   render() {
@@ -220,7 +213,7 @@ export default class Apps extends Component {
                 }}
               >
                 <MenuItem className="all" value="all">All</MenuItem>
-                {this.getRegions()}
+                {this.renderRegions()}
               </Select>
             </FormControl>
             <FormControl style={style.spaceContainer}>
@@ -235,7 +228,7 @@ export default class Apps extends Component {
                 }}
               >
                 <MenuItem className="all" value="all">All</MenuItem>
-                {this.getSpaces()}
+                {this.renderSpaces()}
               </Select>
             </FormControl>
             <Link to="/apps/new" style={style.link}>

@@ -126,6 +126,10 @@ function getAppWebhooks(app) {
   return axios.get(`/api/apps/${app}/hooks`);
 }
 
+function getAddon(app, addon) {
+  return axios.get(`/api/apps/${app}/addons/${addon}`);
+}
+
 function getAddonServices() {
   return axios.get('/api/addon-services');
 }
@@ -298,6 +302,10 @@ function getUser() {
   return axios.get('/account/user');
 }
 
+function getAccount() {
+  return axios.get('/api/account');
+}
+
 function getLogSession(app) {
   return axios.post(`/api/apps/${app}/log-sessions`, { lines: 10, tail: true });
 }
@@ -442,4 +450,6 @@ export default {
   createWebHook,
   getWebhookResults,
   getAppsAttachedToAddon,
+  getAddon,
+  getAccount,
 };
