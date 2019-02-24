@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core';
 import DoneBox from '@material-ui/icons/Done';
 import OpenInNewBox from '@material-ui/icons/OpenInNew';
+import Ansi from 'ansi-to-react';
 import ConfigVar from '../../components/ConfigVar';
 import api from '../../services/api';
 
@@ -506,7 +507,7 @@ export default class AppSetups extends Component {
                   isBuilding ?
                     (
                       <ListItem >
-                        <pre style={style.logs}><code>{this.state.logs}</code></pre>
+                        <pre style={style.logs}><Ansi>{this.state.logs}</Ansi></pre>
                       </ListItem>
                     ) : null
                 }
