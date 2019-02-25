@@ -43,7 +43,7 @@ app.get('/log-plex/:id', (req, res) => {
   });
   proxyRequest.on('error', (err) => {
     console.log('log proxy oops: ', err);
-    res.end();
+    res.status(504).end();
   });
   proxyRequest.setNoDelay(true);
   proxyRequest.end();

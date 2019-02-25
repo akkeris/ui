@@ -37,6 +37,10 @@ const config = {
           cacheDirectory: true,
         },
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
   externals: {

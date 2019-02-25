@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress, Typography } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { LazyLog, ScrollFollow } from 'react-lazylog';
+import Spinner from 'react-spinkit';
 import Ansi from 'ansi-to-react';
 import api from '../../services/api';
 
@@ -44,6 +45,7 @@ export default class Logs extends Component {
       reading: false,
       logs: 'Logplex ready, waiting for logs..\n',
       url: '',
+      connected: true,
     };
     this.loadLogs('constructor');
   }
@@ -53,11 +55,24 @@ export default class Logs extends Component {
       this.setState({ logs: this.state.logs });
     }
     const { data: logSession } = await api.getLogSession(this.props.app);
-    this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(logSession.logplex_url)}` });
+    this.setState({ reading: true, loading: false, connected: true, url: `/log-plex/${encodeURIComponent(logSession.logplex_url)}` });
+  }
+
+  handleLogError = () => {
+    this.setState({ connected: false });
   }
 
   render() {
-    if (this.state.loading) {
+    const { loading, reading, connected, url } = this.state;
+    const { app } = this.props;
+
+    let status;
+    if (connected) {
+      status = <span style={{ color: 'green', fontSize: '1rem', marginRight: '12px' }}>&#9679;</span>;
+    } else {
+      status = <span style={{ color: 'red', fontSize: '1rem', marginRight: '12px' }}>&#9679;</span>;
+    }
+    if (loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
@@ -65,20 +80,30 @@ export default class Logs extends Component {
           </div>
         </MuiThemeProvider>
       );
-    } else if (this.state.reading) {
+    } else if (reading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
+          <div style={{ padding: '12px', backgroundColor: '#222222', color: '#d6d6d6', display: 'flex', flexDirection: 'row', alignItems: 'center', borderBottom: '1px solid grey' }}>
+            <div style={{ marginRight: '12px', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+              {status}
+              <Typography variant="subtitle1" color="inherit" style={{ marginRight: '12px' }}>{`Logs for ${app}`}</Typography>
+            </div>
+            {connected && (
+              <span style={{ maxHeight: '15px' }}><Spinner name="three-bounce" color="#d6d6d6" /></span>
+            )}
+          </div>
           <ScrollFollow
             startFollowing
             render={({ follow, onScroll }) => (
               <LazyLog
                 stream
-                url={this.state.url}
+                url={url}
                 follow={follow}
                 onScroll={onScroll}
                 height={500}
                 formatPart={data => highlight(data)}
                 extraLines={1}
+                onError={this.handleLogError}
               />
             )}
           />
