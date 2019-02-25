@@ -54,7 +54,7 @@ export default class RecentsList extends Component {
           onClick={() => this.handleRowSelection(recent)}
         >
           <TableCell style={style.tableRow}>
-            <div style={style.tableRowColumn.main}>{recent.item}</div>
+            <div style={style.tableRowColumn.main}>{recent.label}</div>
             <div style={style.tableRowColumn.sub}>{recent.type}</div>
           </TableCell>
         </TableRow>
