@@ -61,7 +61,6 @@ export default class FavoritesList extends Component {
       >
         <TableCell style={style.tableRow}>
           <div style={style.tableRowColumn.main}>{app.name} {app.preview ? FavoritesList.previewAnnotation(app.preview) : ''}</div>
-          <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>
         </TableCell>
         <TableCell style={style.tableRow}>
           {this.props.favorites && (
@@ -86,6 +85,7 @@ export default class FavoritesList extends Component {
 
 
   render() {
+    console.log(this.props.apps)
     const { rowsPerPage, page } = this.state;
     return (
       <MuiThemeProvider theme={muiTheme}>
