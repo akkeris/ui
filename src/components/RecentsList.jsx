@@ -38,7 +38,6 @@ const style = {
 };
 
 export default class RecentsList extends Component {
-
   state = {
     page: 0,
     rowsPerPage: 15,
@@ -61,6 +60,7 @@ export default class RecentsList extends Component {
         </TableRow>
       ));
     }
+
   }
 
   handleRowSelection = (recent) => {

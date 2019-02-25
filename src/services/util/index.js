@@ -84,14 +84,17 @@ function filterCouplings(couplings, filter) {
   return filteredCouplings;
 }
 
-function updateHistory(type, item) {
+function updateHistory(type, item, label) {
   let recentItems;
   try {
     recentItems = JSON.parse(localStorage.getItem('akkeris_history'));
-    recentItems.unshift({ type, item });
+    if (recentItems[0].item === item) { // don't allow immediate duplicates
+      return;
+    }
+    recentItems.unshift({ type, item, label });
     if (recentItems.length > 20) { recentItems.pop(); } // Only keep the most recent 20 items
   } catch (err) {
-    recentItems = [{ type, item }];
+    recentItems = [{ type, item, label }];
   }
   localStorage.setItem('akkeris_history', JSON.stringify(recentItems));
 }
@@ -103,7 +106,7 @@ function getHistory() {
   } catch (err) {
     recentItems = [];
   }
-  return recentItems;
+  return recentItems || [];
 }
 
 function clearHistory() {
