@@ -14,7 +14,7 @@ fixture('Sites Page') // eslint-disable-line no-undef
       .typeText('#password', botPassword)
 
       .click('button.login')
-      .navigateTo(`${baseUrl}/#/sites`);
+      .navigateTo(`${baseUrl}/sites`);
   });
 
 test('Should show list of sites', async (t) => { // eslint-disable-line no-undef

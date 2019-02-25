@@ -89,7 +89,7 @@ export default class SiteOverview extends Component {
   handleRemoveSite = async () => {
     try {
       await api.deleteSite(this.props.site.domain);
-      window.location = '#/sites';
+      window.location = '/sites';
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

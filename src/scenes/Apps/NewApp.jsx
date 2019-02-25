@@ -127,7 +127,7 @@ export default class NewApp extends Component {
   submitApp = async () => {
     try {
       await api.createApp(this.state.app, this.state.org, this.state.space);
-      window.location = '#/apps';
+      window.location = '/apps';
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

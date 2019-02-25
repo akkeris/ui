@@ -5,7 +5,7 @@ const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
 
 fixture('Apps Page') // eslint-disable-line no-undef
-  .page(`${baseUrl}/#/apps`)
+  .page(`${baseUrl}/apps`)
   .beforeEach(async (t) => {
     await t
       .expect(Selector('button.login').innerText).eql('Login')
@@ -99,7 +99,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .contains('The requested application already exists.')
     .click('.ok')
 
-    .navigateTo(`${baseUrl}/#/apps`)
+    .navigateTo(`${baseUrl}/apps`)
     // check if app was created
     .click('.space-dropdown')
     .click('#menu-space .testcafe')
@@ -120,7 +120,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
 
 
 fixture('AppInfo Page') // eslint-disable-line no-undef
-  .page(`${baseUrl}/#/apps`)
+  .page(`${baseUrl}/apps`)
   .beforeEach(async (t) => {
     await t
 
@@ -148,7 +148,7 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
   })
   .afterEach(async (t) => {
     await t
-      .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
       .click('.info-tab')
 
     // delete the app
@@ -452,14 +452,14 @@ test // eslint-disable-line no-undef
       .click('.addon-cancel')
 
     // Check Config Vars
-      .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
       .click('.config-tab')
       .expect(Selector('.config-list .OCT_VAULT_DB_LIDS_HOSTNAME').exists)
       .ok()
 
     // Create and Attach addon
-      .navigateTo(`${baseUrl}/#/apps`)
-      .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
+      .navigateTo(`${baseUrl}/apps`)
+      .navigateTo(`${baseUrl}/apps/testcafe2-testcafe`)
       .click('.addons-tab')
       .click('button.new-addon')
       .typeText(Selector('.select-textfield'), 'Akkeris PostgreSQL')
@@ -489,8 +489,8 @@ test // eslint-disable-line no-undef
       .click('.ok')
 
     // Attach Addon from app 2
-      .navigateTo(`${baseUrl}/#/apps`)
-      .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps`)
+      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
       .click('.addons-tab')
       .click('button.attach-addon')
       .typeText('.app-search input', 'testcafe2-testcafe')
@@ -539,7 +539,7 @@ test // eslint-disable-line no-undef
   })
   .after(async (t) => {
     await t
-      .navigateTo(`${baseUrl}/#/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
       .click('.info-tab')
 
     // delete the app
@@ -550,7 +550,7 @@ test // eslint-disable-line no-undef
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .notOk()
 
-      .navigateTo(`${baseUrl}/#/apps/testcafe2-testcafe`)
+      .navigateTo(`${baseUrl}/apps/testcafe2-testcafe`)
       .click('.info-tab')
 
     // delete the app

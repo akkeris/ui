@@ -72,7 +72,6 @@ app.get('/oauth/callback', (req, res) => {
   });
 });
 
-
 /* eslint-disable no-param-reassign */
 app.use('/account', proxy(`${authEndpoint}/user`, {
   proxyReqOptDecorator(reqOpts, srcReq) {
@@ -98,17 +97,6 @@ app.use('/api', proxy(`${akkerisApi}`, {
 }));
 /* eslint-enable no-param-reassign */
 
-app.use('/app-setups', (req, res) => {
-  // If blueprint is a Base64 encoded string, decode it first.
-  let blueprint = req.query.blueprint;
-  if (/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(blueprint)) {
-    blueprint = Buffer.from(blueprint, 'base64').toString();
-  }
-  blueprint = jsonminify(blueprint);
-
-  res.redirect(`/?blueprint=${encodeURIComponent(blueprint)}#/app-setups`);
-});
-
 app.get('/logout', (req, res) => {
   req.session.token = null;
   res.redirect(`${authEndpoint}/logout`);
@@ -132,11 +120,20 @@ if (process.env.NODE_ENV === 'dev') {
   app.use(middleware);
   app.use(webpackHotMiddleware(compiler));
   app.use(express.static('public'));
+  // Required for <BrowserRouter> - fallback to index.html on 404
+  app.get('/*', (req, res) => {
+    res.sendFile(path.resolve('public', 'index.html'));
+  });
 } else {
   console.log(`${process.env.NODE_ENV} ENVIRONMENT`);
   // Production needs physical files! (built via separate process)
   app.use(express.static('build'));
+  // Required for <BrowserRouter> - fallback to index.html on 404
+  app.get('/*', (req, res) => {
+    res.sendFile(path.resolve('build', 'index.html'));
+  });
 }
+
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) {

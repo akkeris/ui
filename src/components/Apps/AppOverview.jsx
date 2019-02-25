@@ -174,7 +174,7 @@ class AppOverview extends Component {
   handleRemoveApp = async () => {
     try {
       await api.deleteApp(this.props.app.name);
-      window.location = '#/apps';
+      window.location = '/apps';
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

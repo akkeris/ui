@@ -264,7 +264,7 @@ export default class InvoiceInfo extends Component {
                 <span style={style.header.title}>{org}</span>
                 <Button
                   style={{ flexGrow: 0, textAlign: 'right', margin: '0 15px' }}
-                  href={`/#/invoices/${month}/${org}`}
+                  href={`/invoices/${month}/${org}`}
                   target="_blank"
                   color="secondary"
                 ><LightbulbIcon />{' Cost Report >'}</Button>

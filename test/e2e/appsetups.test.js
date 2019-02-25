@@ -59,7 +59,7 @@ fixture('App Setups Page') // eslint-disable-line no-undef
   })
   .afterEach(async (t) => {
     await t
-      .navigateTo(`${baseUrl}/#/apps/akkeristest1-testcafe`)
+      .navigateTo(`${baseUrl}/apps/akkeristest1-testcafe`)
       .expect(Selector('.delete').exists)
       .ok()
       .click('.delete')

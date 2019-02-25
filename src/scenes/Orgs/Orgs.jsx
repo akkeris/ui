@@ -87,7 +87,7 @@ export default class Orgs extends Component {
   }
 
   handleSearch = (searchText) => {
-    window.location = `#/orgs/${searchText}`;
+    window.location = `/orgs/${searchText}`;
   }
 
   render() {

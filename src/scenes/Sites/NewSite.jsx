@@ -129,7 +129,7 @@ export default class NewSite extends Component {
   submitSite = async () => {
     try {
       await api.createSite(this.state.domain, this.state.region, this.state.internal);
-      window.location = '#/sites';
+      window.location = '/sites';
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

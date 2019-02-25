@@ -146,7 +146,7 @@ export default class Apps extends Component {
   }
 
   handleSearch = (searchText) => {
-    window.location = `#/apps/${searchText}/info`;
+    window.location = `/apps/${searchText}/info`;
   }
 
   handleSpaceChange = (event) => {
