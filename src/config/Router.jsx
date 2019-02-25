@@ -149,7 +149,7 @@ const Router = () => (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
         <Nav />
         <Switch style={{ flex: 1 }}>
-          <Route exact path="/" render={() => <Redirect to="/dashboard" />} />
+          <Route exact path="/" render={() => <Redirect to="/apps" />} />
           <Route path="/dashboard" component={DashboardRoutes} />
           <Route path="/app-setups" component={AppSetupsRoutes} />
           <Route path="/apps" component={AppRoutes} />
