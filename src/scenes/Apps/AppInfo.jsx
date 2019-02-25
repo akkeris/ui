@@ -147,7 +147,7 @@ export default class AppInfo extends Component {
         submitFail: true,
       });
     }
-    util.updateHistory('apps', this.props.match.params.app);
+    util.updateHistory('apps', this.props.match.params.app, this.props.match.params.app);
   }
 
   componentDidUpdate(prevProps) {
@@ -176,7 +176,7 @@ export default class AppInfo extends Component {
       </Tooltip>
     );
   }
-  
+
   handleClose = () => {
     this.setState({ submitFail: false });
   }

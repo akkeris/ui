@@ -38,23 +38,22 @@ const style = {
 };
 
 export default class RecentsList extends Component {
-
   state = {
     page: 0,
     rowsPerPage: 15,
   }
 
   getRecents(page, rowsPerPage) {
-    return this.props.recents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(recent => (
+    return this.props.recents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((recent, i) => (
       <TableRow
         className={recent.item}
-        key={recent.item}
+        key={`${recent.item}-${i}`}
         style={style.tableRow}
         hover
         onClick={() => this.handleRowSelection(recent)}
       >
         <TableCell style={style.tableRow}>
-          <div style={style.tableRowColumn.main}>{recent.item}</div>
+          <div style={style.tableRowColumn.main}>{recent.label}</div>
           <div style={style.tableRowColumn.sub}>{recent.type}</div>
         </TableCell>
       </TableRow>
@@ -104,7 +103,7 @@ export default class RecentsList extends Component {
 }
 
 RecentsList.propTypes = {
-  recents: PropTypes.arrayOf(PropTypes.object).isRequired
+  recents: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 RecentsList.defaultProps = {

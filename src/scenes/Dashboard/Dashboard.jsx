@@ -10,6 +10,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import RecentIcon from '@material-ui/icons/AccessTime';
 
 import api from '../../services/api';
+import util from '../../services/util';
 import FavoritesList from '../../components/Apps/FavoritesList';
 import RecentsList from '../../components/RecentsList';
 
@@ -106,7 +107,7 @@ export default class Dashboard extends Component {
   async componentDidMount() {
     try {
       const favoriteResponse = await api.getFavorites();
-      let currentTab = this.props.match.params.tab;
+      let currentTab = this.props.match.params.tab; // eslint-disable-line
       if (!currentTab || !tabs.includes(currentTab)) {
         currentTab = 'favorites';
         history.replaceState(null, '', `${this.state.basePath}/favorites`);
@@ -122,7 +123,7 @@ export default class Dashboard extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.match.params.tab !== this.props.match.params.tab && this.props.history.action === 'POP') {
+    if (prevProps.match.params.tab !== this.props.match.params.tab && this.props.history.action === 'POP') { // eslint-disable-line
       let currentTab = this.props.match.params.tab;
       if (!tabs.includes(currentTab)) {
         currentTab = 'favorites';
@@ -143,7 +144,6 @@ export default class Dashboard extends Component {
 
   render() {
     const { currentTab, loading } = this.state;
-    console.log(localStorage.akkeris_history)
     if (loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -157,7 +157,7 @@ export default class Dashboard extends Component {
         <div style={{ marginBottom: '12px' }}>
           <Card className="card" style={{ overflow: 'visible' }}>
             <Tabs
-              fullWidth
+              variant="fullWidth"
               value={this.state.currentTab}
               onChange={this.changeActiveTab}
               scrollButtons="off"
@@ -183,10 +183,9 @@ export default class Dashboard extends Component {
             )}
             {currentTab === 'recent' && (
               <Paper>
-                <RecentsList className="recents" recents={JSON.parse(localStorage.akkeris_history)} />
+                <RecentsList className="recents" recents={util.getHistory()} />
               </Paper>
             )}
-
           </Card>
         </div>
       </MuiThemeProvider>
