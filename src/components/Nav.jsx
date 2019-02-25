@@ -149,7 +149,7 @@ export default class Nav extends Component {
             </header>
             <List component="nav">
               <ListSubheader>Navigation</ListSubheader>
-              <Link to="/" style={style.link} onClick={this.handleClose}>
+              <Link to="/dashboard" style={style.link} onClick={this.handleClose}>
                 <ListItem button className="linktodashboard">
                   <ListItemIcon><HomeIcon /></ListItemIcon>
                   <ListItemText primary="Dashboard" />
