@@ -11,6 +11,7 @@ import RecentIcon from '@material-ui/icons/AccessTime';
 
 import api from '../../services/api';
 import FavoritesList from '../../components/Apps/FavoritesList';
+import RecentsList from '../../components/RecentsList';
 
 
 const muiTheme = createMuiTheme({
@@ -95,10 +96,9 @@ export default class Dashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      apps: [],
+      favorites: [],
       loading: true,
       currentTab: 'favorites',
-      baseHash: '#/dashboard/',
       basePath: '/dashboard',
     };
   }
@@ -106,15 +106,14 @@ export default class Dashboard extends Component {
   async componentDidMount() {
     try {
       const favoriteResponse = await api.getFavorites();
-      const hashPath = window.location.hash;
-      let currentTab = hashPath.replace(this.state.baseHash, '');
-      if (!tabs.includes(currentTab)) {
+      let currentTab = this.props.match.params.tab;
+      if (!currentTab || !tabs.includes(currentTab)) {
         currentTab = 'favorites';
-        window.location.hash = `${this.state.baseHash}favorites`;
+        history.replaceState(null, '', `${this.state.basePath}/favorites`);
       }
       this.setState({
         currentTab,
-        apps: favoriteResponse.data,
+        favorites: favoriteResponse.data,
         loading: false,
       });
     } catch (err) {
@@ -123,22 +122,13 @@ export default class Dashboard extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
-    if (routeHasChanged && this.props.history.action === 'POP') {
-      if (this.props.location.pathname === `${this.state.basePath}` ||
-          this.props.location.pathname === `${this.state.basePath}/`) {
-        window.history.back();
-        return;
+    if (prevProps.match.params.tab !== this.props.match.params.tab && this.props.history.action === 'POP') {
+      let currentTab = this.props.match.params.tab;
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'favorites';
+        history.replaceState(null, '', `${this.state.basePath}/favorites`);
       }
-      const hashPath = window.location.hash;
-      if (hashPath.includes(this.state.baseHash)) {
-        let currentTab = hashPath.replace(this.state.baseHash, '');
-        if (!tabs.includes(currentTab)) {
-          currentTab = 'favorites';
-          window.location = `${this.state.baseHash}favorites`;
-        }
-        this.setState({ currentTab });
-      }
+      this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
     }
   }
 
@@ -147,12 +137,13 @@ export default class Dashboard extends Component {
       this.setState({
         currentTab: newTab,
       });
-      this.props.history.push(`${newTab}`);
+      history.pushState(null, '', `${this.state.basePath}/${newTab}`);
     }
   }
 
   render() {
     const { currentTab, loading } = this.state;
+    console.log(localStorage.akkeris_history)
     if (loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
@@ -187,13 +178,13 @@ export default class Dashboard extends Component {
             </Tabs>
             {currentTab === 'favorites' && (
               <Paper>
-                <FavoritesList className="apps" apps={this.state.apps} />
+                <FavoritesList className="favorites" favorites={this.state.favorites} />
               </Paper>
             )}
             {currentTab === 'recent' && (
-              <div>
-                Hello
-              </div>
+              <Paper>
+                <RecentsList className="recents" recents={JSON.parse(localStorage.akkeris_history)} />
+              </Paper>
             )}
 
           </Card>
@@ -204,6 +195,5 @@ export default class Dashboard extends Component {
 }
 
 Dashboard.propTypes = {
-  location: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

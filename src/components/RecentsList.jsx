@@ -37,36 +37,32 @@ const style = {
   },
 };
 
-export default class FavoritesList extends Component {
-  static previewAnnotation() {
-    return (
-      <span style={style.preview}>Preview</span>
-    );
-  }
+export default class RecentsList extends Component {
 
   state = {
     page: 0,
     rowsPerPage: 15,
   }
 
-  getApps(page, rowsPerPage) {
-    return this.props.favorites.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
+  getRecents(page, rowsPerPage) {
+    return this.props.recents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(recent => (
       <TableRow
-        className={app.name}
-        key={app.id}
+        className={recent.item}
+        key={recent.item}
         style={style.tableRow}
         hover
-        onClick={() => this.handleRowSelection(app)}
+        onClick={() => this.handleRowSelection(recent)}
       >
         <TableCell style={style.tableRow}>
-          <div style={style.tableRowColumn.main}>{app.name}</div>
+          <div style={style.tableRowColumn.main}>{recent.item}</div>
+          <div style={style.tableRowColumn.sub}>{recent.type}</div>
         </TableCell>
       </TableRow>
     ));
   }
 
-  handleRowSelection = (app) => {
-    window.location = `/apps/${app.name}/info`;
+  handleRowSelection = (recent) => {
+    window.location = `/${recent.type}/${recent.item}/info`;
   }
 
   handleChangePage = (event, page) => {
@@ -83,16 +79,16 @@ export default class FavoritesList extends Component {
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={{ marginBottom: '12px' }}>
-          <Table className="app-list">
+          <Table className="recent-list">
             <TableBody>
-              {this.getApps(page, rowsPerPage)}
+              {this.getRecents(page, rowsPerPage)}
             </TableBody>
             <TableFooter>
               <TableRow>
                 <TablePagination
                   rowsPerPageOptions={[15, 25, 50]}
                   colSpan={3}
-                  count={this.props.favorites.length}
+                  count={this.props.recents.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onChangePage={this.handleChangePage}
@@ -107,10 +103,10 @@ export default class FavoritesList extends Component {
   }
 }
 
-FavoritesList.propTypes = {
-  favorites: PropTypes.arrayOf(PropTypes.object).isRequired,
+RecentsList.propTypes = {
+  recents: PropTypes.arrayOf(PropTypes.object).isRequired
 };
 
-FavoritesList.defaultProps = {
-  favorites: null,
+RecentsList.defaultProps = {
+  recents: null,
 };

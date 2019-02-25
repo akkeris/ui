@@ -86,7 +86,7 @@ export default class SiteInfo extends Component {
 
   componentDidMount() {
     this.getSite();
-    util.updateHistory('site', this.props.match.params.site);
+    util.updateHistory('sites', this.props.match.params.site);
   }
 
   componentDidUpdate(prevProps) {

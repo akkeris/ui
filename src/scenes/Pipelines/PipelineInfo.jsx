@@ -110,7 +110,7 @@ export default class PipelineInfo extends Component {
 
   componentDidMount() {
     this.getPipeline();
-    util.updateHistory('pipeline', this.props.match.params.pipeline);
+    util.updateHistory('pipelines', this.props.match.params.pipeline);
   }
 
   componentDidUpdate(prevProps) {

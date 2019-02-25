@@ -130,6 +130,7 @@ export default class Apps extends Component {
 
   componentDidMount() {
     this.getData();
+  }
 
   getData = async () => {
     const { data: spaces } = await api.getSpaces();

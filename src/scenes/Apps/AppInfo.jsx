@@ -122,7 +122,6 @@ export default class AppInfo extends Component {
     };
   }
 
-
   async componentDidMount() {
     try {
       const appResponse = await api.getApp(this.props.match.params.app);
@@ -148,7 +147,7 @@ export default class AppInfo extends Component {
         submitFail: true,
       });
     }
-    util.updateHistory('app', this.props.match.params.app);
+    util.updateHistory('apps', this.props.match.params.app);
   }
 
   componentDidUpdate(prevProps) {

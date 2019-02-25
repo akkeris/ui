@@ -36,21 +36,9 @@ const Dashboard = Loadable({
   loader: () => import('../scenes/Dashboard/Dashboard'),
   loading: Loading,
 });
-
 const DashboardRoutes = () => (
   <Switch>
-    <Route path="/dashboard" component={Dashboard} />
-  </Switch>
-);
-
-const Dashboard = Loadable({
-  loader: () => import('../scenes/Dashboard/Dashboard'),
-  loading: Loading,
-});
-
-const DashboardRoutes = () => (
-  <Switch>
-    <Route path="/dashboard" component={Dashboard} />
+    <Route path="/dashboard/:tab?" component={Dashboard} />
   </Switch>
 );
 
