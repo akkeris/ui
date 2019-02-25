@@ -163,7 +163,6 @@ export default class AppInfo extends Component {
   }
 
   getFavoriteIcon() {
-    console.log(this.state.isFavorite);
     return (
       <Tooltip title="Favorite" placement="top-end">
         <IconButton
