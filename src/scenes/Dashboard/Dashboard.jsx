@@ -170,7 +170,7 @@ export default class Dashboard extends Component {
                 value="favorites"
               />
               <Tab
-                className="recent-tab"
+                className="recents-tab"
                 icon={<RecentIcon />}
                 label="Recent"
                 value="recent"
@@ -183,7 +183,7 @@ export default class Dashboard extends Component {
             )}
             {currentTab === 'recent' && (
               <Paper>
-                <RecentsList className="recents" recents={JSON.parse(localStorage.akkeris_history)} />
+                <RecentsList className="recents" recents={JSON.parse(localStorage.getItem('akkeris_history'))} />
               </Paper>
             )}
 

@@ -45,20 +45,22 @@ export default class RecentsList extends Component {
   }
 
   getRecents(page, rowsPerPage) {
-    return this.props.recents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(recent => (
-      <TableRow
-        className={recent.item}
-        key={recent.item}
-        style={style.tableRow}
-        hover
-        onClick={() => this.handleRowSelection(recent)}
-      >
-        <TableCell style={style.tableRow}>
-          <div style={style.tableRowColumn.main}>{recent.item}</div>
-          <div style={style.tableRowColumn.sub}>{recent.type}</div>
-        </TableCell>
-      </TableRow>
-    ));
+    if (this.props.recents) {
+      return this.props.recents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(recent => (
+        <TableRow
+          className={recent.item}
+          key={recent.item}
+          style={style.tableRow}
+          hover
+          onClick={() => this.handleRowSelection(recent)}
+        >
+          <TableCell style={style.tableRow}>
+            <div style={style.tableRowColumn.main}>{recent.item}</div>
+            <div style={style.tableRowColumn.sub}>{recent.type}</div>
+          </TableCell>
+        </TableRow>
+      ));
+    }
   }
 
   handleRowSelection = (recent) => {
@@ -79,7 +81,7 @@ export default class RecentsList extends Component {
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={{ marginBottom: '12px' }}>
-          <Table className="recent-list">
+          <Table className="recents-list">
             <TableBody>
               {this.getRecents(page, rowsPerPage)}
             </TableBody>
@@ -88,7 +90,7 @@ export default class RecentsList extends Component {
                 <TablePagination
                   rowsPerPageOptions={[15, 25, 50]}
                   colSpan={3}
-                  count={this.props.recents.length}
+                  count={this.props.recents ? this.props.recents.length : 0}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onChangePage={this.handleChangePage}
@@ -104,7 +106,7 @@ export default class RecentsList extends Component {
 }
 
 RecentsList.propTypes = {
-  recents: PropTypes.arrayOf(PropTypes.object).isRequired
+  recents: PropTypes.arrayOf(PropTypes.object),
 };
 
 RecentsList.defaultProps = {

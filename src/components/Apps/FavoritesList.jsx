@@ -83,7 +83,7 @@ export default class FavoritesList extends Component {
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={{ marginBottom: '12px' }}>
-          <Table className="app-list">
+          <Table className="favorites-list">
             <TableBody>
               {this.getApps(page, rowsPerPage)}
             </TableBody>

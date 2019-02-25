@@ -168,7 +168,7 @@ export default class AppInfo extends Component {
       <Tooltip title="Favorite" placement="top-end">
         <IconButton
           style={style.favoriteButton}
-          className="live-app"
+          className="favorite-app"
           onClick={this.handleFavorite}
         >
           {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
