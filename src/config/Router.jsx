@@ -43,6 +43,17 @@ const DashboardRoutes = () => (
   </Switch>
 );
 
+const Dashboard = Loadable({
+  loader: () => import('../scenes/Dashboard/Dashboard'),
+  loading: Loading,
+});
+
+const DashboardRoutes = () => (
+  <Switch>
+    <Route path="/dashboard" component={Dashboard} />
+  </Switch>
+);
+
 const Pipelines = Loadable({
   loader: () => import('../scenes/Pipelines/Pipelines'),
   loading: Loading,
