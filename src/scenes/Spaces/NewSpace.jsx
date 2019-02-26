@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -145,7 +146,7 @@ export default class NewApp extends Component {
         this.state.compliance,
         this.state.stack,
       );
-      window.location = '/spaces';
+      History.get().push('/spaces');
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

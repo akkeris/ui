@@ -6,6 +6,7 @@ import {
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -106,7 +107,7 @@ export default class NewOrg extends Component {
   submitOrg = async () => {
     try {
       await api.createOrg(this.state.org, this.state.description);
-      window.location = '/orgs';
+      History.get().push('/orgs');
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

@@ -1,10 +1,11 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { Router as BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import Loading from '../components/Loading';
-
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
+
+import History from './History';
 
 const PageNotFound = Loadable({
   loader: () => import('../components/PageNotFound'),
@@ -145,7 +146,7 @@ const SitesRoutes = () => (
 
 const Router = () => (
   <div>
-    <BrowserRouter>
+    <BrowserRouter history={History.get()}>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
         <Nav />
         <Switch style={{ flex: 1 }}>

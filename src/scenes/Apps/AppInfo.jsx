@@ -27,6 +27,7 @@ import Logs from '../../components/Logs';
 import AppOverview from '../../components/Apps/AppOverview';
 import api from '../../services/api';
 import util from '../../services/util';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -191,7 +192,7 @@ export default class AppInfo extends Component {
   }
 
   handleNotFoundClose = () => {
-    window.location = '/apps';
+    History.get().push('/apps');
   }
 
   handleRequestClose = () => {
