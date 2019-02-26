@@ -44,7 +44,8 @@ export default class AccountMenu extends Component {
   };
 
   logout = () => {
-    History.get().push('/logout');
+    // can't use history here because we want it to route to Express
+    window.location = '/logout';
   }
 
   account = () => {
