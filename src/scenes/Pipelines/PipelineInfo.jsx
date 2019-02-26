@@ -111,7 +111,6 @@ export default class PipelineInfo extends Component {
 
   componentDidMount() {
     this.getPipeline();
-    util.updateHistory('pipeline', this.props.match.params.pipeline);
   }
 
   componentDidUpdate(prevProps) {
@@ -136,6 +135,7 @@ export default class PipelineInfo extends Component {
         history.replaceState(null, '', `${this.state.basePath}/review`);
       }
       this.setState({ currentTab, pipeline, loading: false });
+      util.updateHistory('pipelines', pipeline.id, pipeline.name);
     } catch (error) {
       this.setState({
         submitFail: true,

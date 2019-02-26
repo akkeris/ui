@@ -11,11 +11,11 @@ const PageNotFound = Loadable({
   loader: () => import('../components/PageNotFound'),
   loading: Loading,
 });
-
 const Apps = Loadable({
   loader: () => import('../scenes/Apps/Apps'),
   loading: Loading,
 });
+
 const NewApp = Loadable({
   loader: () => import('../scenes/Apps/NewApp'),
   loading: Loading,
@@ -30,6 +30,16 @@ const AppRoutes = () => (
     <Route exact path="/apps" component={Apps} />
     <Route exact path="/apps/new" component={NewApp} />
     <Route path="/apps/:app/:tab?" component={AppInfo} />
+  </Switch>
+);
+
+const Dashboard = Loadable({
+  loader: () => import('../scenes/Dashboard/Dashboard'),
+  loading: Loading,
+});
+const DashboardRoutes = () => (
+  <Switch>
+    <Route path="/dashboard/:tab?" component={Dashboard} />
   </Switch>
 );
 
@@ -141,6 +151,7 @@ const Router = () => (
         <Nav />
         <Switch style={{ flex: 1 }}>
           <Route exact path="/" render={() => <Redirect to="/apps" />} />
+          <Route path="/dashboard" component={DashboardRoutes} />
           <Route path="/app-setups" component={AppSetupsRoutes} />
           <Route path="/apps" component={AppRoutes} />
           <Route path="/orgs" component={OrgRoutes} />
