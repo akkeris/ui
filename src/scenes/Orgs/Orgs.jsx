@@ -10,6 +10,7 @@ import api from '../../services/api';
 import util from '../../services/util';
 import Search from '../../components/Search';
 import OrgList from '../../components/Orgs';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -87,7 +88,7 @@ export default class Orgs extends Component {
   }
 
   handleSearch = (searchText) => {
-    window.location = `/orgs/${searchText}`;
+    History.get().push(`/orgs/${searchText}`);
   }
 
   render() {

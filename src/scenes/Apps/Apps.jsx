@@ -11,6 +11,7 @@ import api from '../../services/api';
 import AppList from '../../components/Apps/AppList';
 import util from '../../services/util';
 import Search from '../../components/Search';
+import History from '../../config/History';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
@@ -146,7 +147,7 @@ export default class Apps extends Component {
   }
 
   handleSearch = (searchText) => {
-    window.location = `/apps/${searchText}/info`;
+    History.get().push(`/apps/${searchText}/info`);
   }
 
   handleSpaceChange = (event) => {

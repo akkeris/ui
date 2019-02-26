@@ -6,6 +6,7 @@ import {
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -127,7 +128,7 @@ export default class NewApp extends Component {
   submitApp = async () => {
     try {
       await api.createApp(this.state.app, this.state.org, this.state.space);
-      window.location = '/apps';
+      History.get().push('/apps');
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

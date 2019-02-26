@@ -64,6 +64,7 @@
     "express": "4.16.4",
     "express-http-proxy": "1.5.0",
     "express-session": "1.15.6",
+    "history": "^4.7.2",
     "jsonminify": "0.4.1",
     "prop-types": "15.6.2",
     "react": "^16.6.3",

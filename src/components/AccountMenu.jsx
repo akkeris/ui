@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Avatar, Menu, MenuItem } from '@material-ui/core';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
+import History from '../config/History';
 
 const style = {
   avatar: {
@@ -43,11 +44,11 @@ export default class AccountMenu extends Component {
   };
 
   logout = () => {
-    window.location = '/logout';
+    History.get().push('/logout');
   }
 
   account = () => {
-    window.location = '/user';
+    History.get().push('/user');
   }
 
   handleRequestClose = () => {

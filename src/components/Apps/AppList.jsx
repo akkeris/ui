@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -50,7 +51,7 @@ export default class AppList extends Component {
   }
 
   handleRowSelection = (app) => {
-    window.location = `/apps/${app.name}/info`;
+    History.get().push(`/apps/${app.name}/info`);
   }
 
   handleChangePage = (event, page) => {
