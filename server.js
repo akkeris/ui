@@ -32,10 +32,6 @@ app.use(session({
 }));
 app.use(bodyParser.json());
 
-
-// When proxyRes is destroyed it triggers the proxyRequest 'close' event which then restarts the stream
-// HandleError triggers HandleClose
-
 app.get('/log-plex/:id', (req, res) => {
   res.append('content-type', 'application/octet-stream');
   let streamRestarts = 0;
