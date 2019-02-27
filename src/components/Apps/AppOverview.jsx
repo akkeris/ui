@@ -12,6 +12,7 @@ import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
+import History from '../../config/History';
 
 function addRestrictedTooltip(title, children) {
   return (
@@ -174,7 +175,7 @@ class AppOverview extends Component {
   handleRemoveApp = async () => {
     try {
       await api.deleteApp(this.props.app.name);
-      window.location = '/apps';
+      History.get().push('/apps');
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

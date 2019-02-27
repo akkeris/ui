@@ -10,6 +10,7 @@ import jsonminify from 'jsonminify';
 import Ansi from 'ansi-to-react';
 import ConfigVar from '../../components/ConfigVar';
 import api from '../../services/api';
+import History from '../../config/History';
 
 /* eslint-disable react/jsx-no-bind */
 
@@ -202,11 +203,11 @@ export default class AppSetups extends Component {
     if (destUrl[destUrl.length - 1] === '/') {
       destUrl = destUrl.substring(0, destUrl.length - 1);
     }
-    window.location = `${destUrl}${this.state.blueprint.success_url}`;
+    History.get().push(`${destUrl}${this.state.blueprint.success_url}`);
   }
 
   handleDone = () => {
-    window.location = `/apps/${this.state.blueprint.app.name}-${this.state.blueprint.app.space}/info`;
+    History.get().push(`/apps/${this.state.blueprint.app.name}-${this.state.blueprint.app.space}/info`);
   }
 
   scrollBuildDown = () => {

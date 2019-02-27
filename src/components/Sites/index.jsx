@@ -4,6 +4,7 @@ import {
   Table, TableBody, TableHead, TableRow, TableCell, TableFooter, TablePagination,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -40,7 +41,7 @@ export default class SitesList extends Component {
   }
 
   handleRowSelection = (id) => {
-    window.location = `/sites/${id}/info`;
+    History.get().push(`/sites/${id}/info`);
   }
 
   handleChangePage = (event, page) => {

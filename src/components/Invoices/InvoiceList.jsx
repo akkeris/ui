@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Table, TableBody, TableRow, TableCell, Card, CardHeader } from '@material-ui/core';
 import { BarChart, Bar, XAxis } from 'recharts';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -127,7 +128,7 @@ export default class InvoiceList extends Component {
   }
 
   handleRowSelection = (id) => {
-    window.location = `/invoices/${id}`;
+    History.get().push(`/invoices/${id}`);
   }
 
   render() {
