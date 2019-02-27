@@ -31,20 +31,63 @@ app.use(session({
   name: 'akkeris',
 }));
 app.use(bodyParser.json());
+
+
+// When proxyRes is destroyed it triggers the proxyRequest 'close' event which then restarts the stream
+// HandleError triggers HandleClose
+
 app.get('/log-plex/:id', (req, res) => {
   res.append('content-type', 'application/octet-stream');
-  const proxyRequest = https.request(req.params.id, (proxyRes) => {
-    proxyRes.on('data', (chunk) => {
-      res.write(chunk);
-    });
-    req.on('close', () => {
-      proxyRes.destroy();
-    });
-  });
-  proxyRequest.on('error', (err) => {
-    console.log('log proxy oops: ', err);
-    res.status(504).end();
-  });
+  let streamRestarts = 0;
+  let proxyRequest;
+
+  // Stop sending logs from logplex to client
+  const handleAbort = () => {
+    proxyRequest.abort();
+    res.end();
+  };
+
+  // Stop sending logs from logplex to client and send 504 error
+  const handleError = () => {
+    proxyRequest.abort(); // Stop receiving logs from logplex
+    res.status(504).end(); // Stop sending to client
+  };
+
+  // Create logplex proxy
+  const setupStream = () => (
+    https.request(req.params.id, (proxyRes) => {
+      proxyRes.on('data', chunk => res.write(chunk)); // Write incoming data to the client
+    })
+  );
+
+  // Restart sending of logs from logplex to client
+  const handleClose = () => {
+    if (proxyRequest.aborted) {
+      return; // Don't restart if we've stopped sending
+    }
+    streamRestarts++;
+    if (streamRestarts > 25) {
+      handleError();
+    } else {
+      proxyRequest.abort();
+      // Restart stream after waiting for 1 second
+      setTimeout(() => {
+        proxyRequest = setupStream(req, res);
+        proxyRequest.on('close', handleClose);
+        proxyRequest.on('error', handleClose);
+        proxyRequest.setNoDelay(true);
+        proxyRequest.end();
+      }, 1000);
+    }
+  };
+
+  proxyRequest = setupStream(req, res);
+  // If client ends the connection, stop sending logs
+  req.on('end', handleAbort);
+  req.on('close', handleAbort);
+  // If logplex ends the connection, restart it
+  proxyRequest.on('close', handleClose);
+  proxyRequest.on('error', handleClose);
   proxyRequest.setNoDelay(true);
   proxyRequest.end();
 });
