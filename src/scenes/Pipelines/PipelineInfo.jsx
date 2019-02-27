@@ -15,6 +15,7 @@ import api from '../../services/api';
 import util from '../../services/util';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { Stage } from '../../components/Pipelines';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -110,7 +111,6 @@ export default class PipelineInfo extends Component {
 
   componentDidMount() {
     this.getPipeline();
-    util.updateHistory('pipeline', this.props.match.params.pipeline);
   }
 
   componentDidUpdate(prevProps) {
@@ -135,6 +135,7 @@ export default class PipelineInfo extends Component {
         history.replaceState(null, '', `${this.state.basePath}/review`);
       }
       this.setState({ currentTab, pipeline, loading: false });
+      util.updateHistory('pipelines', pipeline.id, pipeline.name);
     } catch (error) {
       this.setState({
         submitFail: true,
@@ -146,7 +147,7 @@ export default class PipelineInfo extends Component {
   handleRemovePipeline = async () => {
     try {
       await api.deletePipeline(this.props.match.params.pipeline);
-      window.location = '/pipelines';
+      History.get().push('/pipelines');
     } catch (error) {
       this.handleError(error.response.data);
     }
@@ -159,7 +160,7 @@ export default class PipelineInfo extends Component {
   }
 
   handleNotFoundClose = () => {
-    window.location = '/pipelines';
+    History.get().push('/pipelines');
   }
 
   handleConfirmation = () => {

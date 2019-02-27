@@ -383,6 +383,20 @@ function createRoute(site, app, source, target) {
   });
 }
 
+function getFavorites() {
+  return axios.get('/api/favorites');
+}
+
+function deleteFavorite(favorite) {
+  return axios.delete(`/api/favorites/${favorite}`);
+}
+
+function createFavorite(app) {
+  return axios.post('/api/favorites', {
+    app,
+  });
+}
+
 export default {
   appSetup,
   getAppSetup,
@@ -452,4 +466,7 @@ export default {
   getAppsAttachedToAddon,
   getAddon,
   getAccount,
+  getFavorites,
+  deleteFavorite,
+  createFavorite,
 };

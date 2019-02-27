@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -39,20 +37,34 @@ const style = {
   },
 };
 
-export default class AppList extends Component {
-  static previewAnnotation() {
-    return (
-      <span style={style.preview}>Preview</span>
-    );
-  }
-
+export default class RecentsList extends Component {
   state = {
     page: 0,
     rowsPerPage: 15,
   }
 
-  handleRowSelection = (app) => {
-    History.get().push(`/apps/${app.name}/info`);
+  getRecents(page, rowsPerPage) {
+    if (this.props.recents) {
+      return this.props.recents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(recent => (
+        <TableRow
+          className={recent.item}
+          key={recent.item}
+          style={style.tableRow}
+          hover
+          onClick={() => this.handleRowSelection(recent)}
+        >
+          <TableCell style={style.tableRow}>
+            <div style={style.tableRowColumn.main}>{recent.label}</div>
+            <div style={style.tableRowColumn.sub}>{recent.type}</div>
+          </TableCell>
+        </TableRow>
+      ));
+    }
+
+  }
+
+  handleRowSelection = (recent) => {
+    window.location = `/${recent.type}/${recent.item}/info`;
   }
 
   handleChangePage = (event, page) => {
@@ -63,43 +75,22 @@ export default class AppList extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
-  renderApps(page, rowsPerPage) {
-    return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
-      <TableRow
-        className={app.name}
-        key={app.id}
-        style={style.tableRow}
-        hover
-        onClick={() => this.handleRowSelection(app)}
-      >
-        <TableCell style={style.tableRow}>
-          <div style={style.tableRowColumn.main}>{app.name} {app.preview ? AppList.previewAnnotation(app.preview) : ''}</div>
-          <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>
-        </TableCell>
-        <TableCell style={style.tableRow}>
-          {this.props.favorites && (
-            this.props.favorites.findIndex(x => x.name === app.name) > -1 ? <FavoriteIcon style={{ float: 'right' }} /> : null
-          )}
-        </TableCell>
-      </TableRow>
-    ));
-  }
 
   render() {
     const { rowsPerPage, page } = this.state;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={{ marginBottom: '12px' }}>
-          <Table className="app-list">
+          <Table className="recents-list">
             <TableBody>
-              {this.renderApps(page, rowsPerPage)}
+              {this.getRecents(page, rowsPerPage)}
             </TableBody>
             <TableFooter>
               <TableRow>
                 <TablePagination
                   rowsPerPageOptions={[15, 25, 50]}
                   colSpan={3}
-                  count={this.props.apps.length}
+                  count={this.props.recents ? this.props.recents.length : 0}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onChangePage={this.handleChangePage}
@@ -114,11 +105,10 @@ export default class AppList extends Component {
   }
 }
 
-AppList.propTypes = {
-  apps: PropTypes.arrayOf(PropTypes.object).isRequired,
-  favorites: PropTypes.arrayOf(PropTypes.object),
+RecentsList.propTypes = {
+  recents: PropTypes.arrayOf(PropTypes.object),
 };
 
-AppList.defaultProps = {
-  favorites: null,
+RecentsList.defaultProps = {
+  recents: null,
 };

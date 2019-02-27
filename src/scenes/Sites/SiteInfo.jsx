@@ -12,6 +12,7 @@ import SiteOverView from '../../components/Sites/SiteOverview';
 import RouteList from '../../components/Sites/RouteList';
 import api from '../../services/api';
 import util from '../../services/util';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -86,7 +87,6 @@ export default class SiteInfo extends Component {
 
   componentDidMount() {
     this.getSite();
-    util.updateHistory('site', this.props.match.params.site);
   }
 
   componentDidUpdate(prevProps) {
@@ -111,6 +111,7 @@ export default class SiteInfo extends Component {
         history.replaceState(null, '', `${this.state.basePath}/info`);
       }
       this.setState({ currentTab, site, loading: false });
+      util.updateHistory('sites', site.id, site.domain);
     } catch (error) {
       this.setState({
         submitFail: true,
@@ -134,7 +135,7 @@ export default class SiteInfo extends Component {
   }
 
   handleNotFoundClose = () => {
-    window.location = '/sites';
+    History.get().push('/sites');
   }
 
   reload = (message) => {

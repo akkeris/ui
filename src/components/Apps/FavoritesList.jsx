@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -39,7 +37,7 @@ const style = {
   },
 };
 
-export default class AppList extends Component {
+export default class FavoritesList extends Component {
   static previewAnnotation() {
     return (
       <span style={style.preview}>Preview</span>
@@ -51,8 +49,24 @@ export default class AppList extends Component {
     rowsPerPage: 15,
   }
 
+  getApps(page, rowsPerPage) {
+    return this.props.favorites.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
+      <TableRow
+        className={app.name}
+        key={app.id}
+        style={style.tableRow}
+        hover
+        onClick={() => this.handleRowSelection(app)}
+      >
+        <TableCell style={style.tableRow}>
+          <div style={style.tableRowColumn.main}>{app.name}</div>
+        </TableCell>
+      </TableRow>
+    ));
+  }
+
   handleRowSelection = (app) => {
-    History.get().push(`/apps/${app.name}/info`);
+    window.location = `/apps/${app.name}/info`;
   }
 
   handleChangePage = (event, page) => {
@@ -63,43 +77,22 @@ export default class AppList extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
-  renderApps(page, rowsPerPage) {
-    return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
-      <TableRow
-        className={app.name}
-        key={app.id}
-        style={style.tableRow}
-        hover
-        onClick={() => this.handleRowSelection(app)}
-      >
-        <TableCell style={style.tableRow}>
-          <div style={style.tableRowColumn.main}>{app.name} {app.preview ? AppList.previewAnnotation(app.preview) : ''}</div>
-          <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>
-        </TableCell>
-        <TableCell style={style.tableRow}>
-          {this.props.favorites && (
-            this.props.favorites.findIndex(x => x.name === app.name) > -1 ? <FavoriteIcon style={{ float: 'right' }} /> : null
-          )}
-        </TableCell>
-      </TableRow>
-    ));
-  }
 
   render() {
     const { rowsPerPage, page } = this.state;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={{ marginBottom: '12px' }}>
-          <Table className="app-list">
+          <Table className="favorites-list">
             <TableBody>
-              {this.renderApps(page, rowsPerPage)}
+              {this.getApps(page, rowsPerPage)}
             </TableBody>
             <TableFooter>
               <TableRow>
                 <TablePagination
                   rowsPerPageOptions={[15, 25, 50]}
                   colSpan={3}
-                  count={this.props.apps.length}
+                  count={this.props.favorites.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onChangePage={this.handleChangePage}
@@ -114,11 +107,10 @@ export default class AppList extends Component {
   }
 }
 
-AppList.propTypes = {
-  apps: PropTypes.arrayOf(PropTypes.object).isRequired,
-  favorites: PropTypes.arrayOf(PropTypes.object),
+FavoritesList.propTypes = {
+  favorites: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-AppList.defaultProps = {
+FavoritesList.defaultProps = {
   favorites: null,
 };

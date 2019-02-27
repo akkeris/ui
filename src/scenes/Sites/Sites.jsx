@@ -11,6 +11,7 @@ import api from '../../services/api';
 import SitesList from '../../components/Sites';
 import util from '../../services/util';
 import Search from '../../components/Search';
+import History from '../../config/History';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
@@ -140,7 +141,7 @@ class Sites extends Component {
   }
 
   handleSearch = (searchText) => {
-    window.location = `/sites/${searchText}/info`;
+    History.get().push(`/sites/${searchText}/info`);
   }
 
   handleRegionChange = (event) => {

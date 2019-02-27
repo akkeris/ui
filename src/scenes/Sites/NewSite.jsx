@@ -8,6 +8,7 @@ import {
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -129,7 +130,7 @@ export default class NewSite extends Component {
   submitSite = async () => {
     try {
       await api.createSite(this.state.domain, this.state.region, this.state.internal);
-      window.location = '/sites';
+      History.get().push('/sites');
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,
