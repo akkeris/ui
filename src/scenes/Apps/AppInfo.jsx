@@ -144,7 +144,7 @@ export default class AppInfo extends Component {
       });
     } catch (err) {
       this.setState({
-        submitMessage: err.response.message,
+        submitMessage: err.response.data,
         submitFail: true,
       });
     }
