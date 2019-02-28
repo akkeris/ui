@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress, Typography, IconButton } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { Refresh } from '@material-ui/icons';
 import PropTypes from 'prop-types';
 import { LazyLog, ScrollFollow } from 'react-lazylog';
+import Loading from 'react-lazylog/build/Loading';
 import Ansi from 'ansi-to-react';
 import api from '../../services/api';
 
@@ -12,6 +14,16 @@ const muiTheme = createMuiTheme({
   },
   typography: {
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
+  },
+  overrides: {
+    MuiIconButton: {
+      root: {
+        '&:hover': {
+          backgroundColor: 'rgba(255,255,255,0.15)',
+        },
+        padding: '6px',
+      },
+    },
   },
 });
 
@@ -30,6 +42,37 @@ const style = {
       position: 'relative',
     },
   },
+  logsHeader: {
+    loading: {
+      position: 'inherit',
+      maxHeight: '30px',
+      transform: 'none',
+      top: 'auto',
+      left: 'auto',
+    },
+    rootContainer: {
+      padding: '12px',
+      backgroundColor: '#222222',
+      color: '#d6d6d6',
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderBottom: '1px solid grey',
+    },
+    statusContainer: {
+      marginRight: '12px',
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    statusText: {
+      marginRight: '6px',
+    },
+    statusIcon: {
+      fontSize: '1rem',
+      marginRight: '12px',
+    },
+  },
 };
 
 function highlight(data) {
@@ -42,22 +85,30 @@ export default class Logs extends Component {
     this.state = {
       loading: true,
       reading: false,
-      logs: 'Logplex ready, waiting for logs..\n',
       url: '',
+      connected: true,
+      reload: false,
     };
-    this.loadLogs('constructor');
+    this.loadLogs();
   }
 
-  loadLogs = async (mode) => {
-    if (mode !== 'constructor') {
-      this.setState({ logs: this.state.logs });
-    }
+  loadLogs = async () => {
     const { data: logSession } = await api.getLogSession(this.props.app);
-    this.setState({ reading: true, loading: false, url: `/log-plex/${encodeURIComponent(logSession.logplex_url)}` });
+    this.setState({ reading: true, loading: false, connected: true, url: `/log-plex/${encodeURIComponent(logSession.logplex_url)}` });
+  }
+
+  handleLogDisconnect = () => {
+    this.setState({ connected: false });
+  }
+
+  reset = () => {
+    this.setState({ reload: true }, () => this.setState({ reload: false, connected: true }));
   }
 
   render() {
-    if (this.state.loading) {
+    const { loading, reading, connected, url, reload } = this.state;
+    const { app } = this.props;
+    if (loading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
           <div style={style.refresh.div}>
@@ -65,23 +116,38 @@ export default class Logs extends Component {
           </div>
         </MuiThemeProvider>
       );
-    } else if (this.state.reading) {
+    } else if (reading) {
       return (
         <MuiThemeProvider theme={muiTheme}>
-          <ScrollFollow
-            startFollowing
-            render={({ follow, onScroll }) => (
-              <LazyLog
-                stream
-                url={this.state.url}
-                follow={follow}
-                onScroll={onScroll}
-                height={500}
-                formatPart={data => highlight(data)}
-                extraLines={1}
-              />
+          <div style={style.logsHeader.rootContainer}>
+            <div style={style.logsHeader.statusContainer}>
+              <span style={{ ...style.logsHeader.statusIcon, color: connected ? 'green' : 'red' }}>&#9679;</span>
+              <Typography variant="subtitle1" color="inherit" style={style.logsHeader.statusText}>{`Logs for ${app}`}</Typography>
+            </div>
+            {connected ? (
+              <Loading style={style.logsHeader.loading} />
+            ) : (
+              <IconButton onClick={this.reset}><Refresh nativeColor="white" /></IconButton>
             )}
-          />
+          </div>
+          {!reload && (
+            <ScrollFollow
+              startFollowing
+              render={({ follow, onScroll }) => (
+                <LazyLog
+                  stream
+                  url={url}
+                  follow={follow}
+                  onScroll={onScroll}
+                  height={500}
+                  formatPart={data => highlight(data)}
+                  extraLines={1}
+                  onError={this.handleLogDisconnect}
+                  onLoad={this.handleLogDisconnect}
+                />
+              )}
+            />
+          )}
         </MuiThemeProvider>
       );
     }
