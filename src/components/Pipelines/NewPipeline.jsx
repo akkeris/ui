@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, TextField, CircularProgress,
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-
+import ConfirmationModal from '../ConfirmationModal';
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
@@ -157,7 +156,7 @@ export default class NewPipeline extends Component {
   }
 
   render() {
-    const { stepIndex } = this.state;
+    const { stepIndex, submitFail, submitMessage } = this.state;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
@@ -167,15 +166,13 @@ export default class NewPipeline extends Component {
             </Step>
           </Stepper>
           {this.renderContent()}
-          <Dialog open={this.state.submitFail} className="new-pipeline-error">
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
-            </DialogActions>
-          </Dialog>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="new-pipeline-error"
+          />
         </div>
       </MuiThemeProvider>
     );

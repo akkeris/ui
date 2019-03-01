@@ -115,23 +115,14 @@ export default class NewPipelineCoupling extends Component {
     }
   }
 
-  renderContent() {
-    const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 0 40px 57px' };
+  render() {
+    const { finished, loading, stepIndex } = this.state;
 
     if (finished) {
       this.submitPipelineCoupling();
     }
 
-    return (
-      <div style={contentStyle}>
-        <div>{this.renderStepContent(stepIndex)}</div>
-      </div>
-    );
-  }
-
-  render() {
-    const { loading, stepIndex } = this.state;
+    const contentStyle = { margin: '0 0 40px 57px' };
 
     return (
       <MuiThemeProvider theme={muiTheme}>
@@ -142,7 +133,9 @@ export default class NewPipelineCoupling extends Component {
             </Step>
           </Stepper>
           <Collapse in={!loading}>
-            {this.renderContent()}
+            <div style={contentStyle}>
+              <div>{this.renderStepContent(stepIndex)}</div>
+            </div>
           </Collapse>
         </div>
       </MuiThemeProvider>

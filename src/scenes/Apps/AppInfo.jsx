@@ -53,7 +53,7 @@ const muiTheme = createMuiTheme({
       root: {
         display: 'flex',
         flexFlow: 'row-reverse',
-        padding: '0px 16px 0px 0px !important',
+        padding: '0px 13px 0px 0px !important',
       },
     },
     MuiCard: {
@@ -66,7 +66,7 @@ const muiTheme = createMuiTheme({
     },
     MuiCardHeader: {
       root: {
-        padding: '16px 16px 0px 16px !important',
+        padding: '16px 0px 0px 16px !important',
       },
       title: {
         fontSize: '15px',

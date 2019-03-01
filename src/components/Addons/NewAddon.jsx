@@ -7,6 +7,7 @@ import {
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Select from '../Select';
 import api from '../../services/api';
+import ConfirmationModal from '../ConfirmationModal';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -65,6 +66,15 @@ const style = {
   selectContainer: {
     maxWidth: '400px',
   },
+  body1: {
+    marginTop: '12px',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
 };
 
 const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
@@ -112,7 +122,7 @@ export default class NewAddon extends Component {
   getPlans = async () => {
     this.setState({ loading: true });
     let { data: plans } = await api.getAddonServicePlans(this.state.serviceid);
-    plans = plans.filter(x => x.state !== 'deprecated').map(x => ({ value: x.id, label: x.name, price: x.price, description: x.description }));
+    plans = plans.filter(x => x.state !== 'deprecated').map(x => ({ value: x.id, label: x.name, human_name: x.human_name, price: x.price, description: x.description }));
     this.setState({ plans, loading: false });
   }
 
@@ -143,7 +153,7 @@ export default class NewAddon extends Component {
     if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        loading: stepIndex >= 1,
+        loading: stepIndex >= 2,
       });
     }
   }
@@ -195,14 +205,17 @@ export default class NewAddon extends Component {
   }
 
   renderStep(stepIndex) {
+    const { groupedServices, service, plans, plan } = this.state;
+    let planPrice;
+    if (plan.price) { planPrice = this.formatPrice(plan.price.cents !== 0 ? plan.price.cents : 0); }
     switch (stepIndex) {
       case 0:
         return (
           <div>
             <div style={style.selectContainer}>
               <Select
-                options={this.state.groupedServices}
-                value={this.state.service}
+                options={groupedServices}
+                value={service}
                 onChange={this.handleServiceChange}
                 placeholder="Search for an Addon"
               />
@@ -217,32 +230,40 @@ export default class NewAddon extends Component {
           <div>
             <div style={style.selectContainer}>
               <Select
-                options={this.state.plans}
-                value={this.state.plan ? this.state.plan.id : ''}
+                options={plans}
+                value={plan ? plan.id : ''}
                 onChange={this.handlePlanChange}
                 placeholder="Search for a Plan"
               />
             </div>
-            {!isEmpty(this.state.plan) && (
+            {!isEmpty(plan) && (
               <div className="plan-info" style={{ marginBottom: '12px' }}>
-                {this.state.plan.price && this.state.plan.price.cents !== 0 && (
+                {plan.price && (
                   <span className="plan-price">
-                    <b>{this.formatPrice(this.state.plan.price.cents)}/mo</b>
-                  </span>
-                )}
-                {this.state.plan.price && this.state.plan.price.cents === 0 && (
-                  <span className="plan-price">
-                    <b>{this.formatPrice(0)}/mo</b>
+                    <b>{planPrice}/mo</b>
                   </span>
                 )}
                 <br />
                 <span className="plan-description">
-                  {this.state.plan.description}
+                  {plan.description}
                 </span>
               </div>
             )}
             <Typography variant="body1">
               Select the plan for your addon (please only use larger plans for prod)
+            </Typography>
+          </div>
+        );
+      case 2:
+        return (
+          <div>
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The addon '}
+              <span style={style.bold}>{service.label}</span>
+              {' with plan '}
+              <span style={style.bold}>{plan.human_name} ({planPrice})</span>
+              {' will be created and attached to this app.'}
             </Typography>
           </div>
         );
@@ -252,7 +273,7 @@ export default class NewAddon extends Component {
   }
 
   renderContent() {
-    const { stepIndex } = this.state;
+    const { stepIndex, serviceid, plan } = this.state;
     const contentStyle = { margin: '0 32px' };
     return (
       <div style={contentStyle}>
@@ -267,18 +288,18 @@ export default class NewAddon extends Component {
               Back
             </Button>
           )}
-          {stepIndex === 0 && (
+          {(stepIndex === 0 || stepIndex === 1) && (
             <Button
               variant="contained"
               className="next"
               color="primary"
               onClick={this.handleNext}
-              disabled={this.state.serviceid === ''}
+              disabled={stepIndex === 0 ? (serviceid === '') : (isEmpty(plan))}
             >
               Next
             </Button>
           )}
-          {stepIndex > 0 && (
+          {stepIndex > 1 && (
             <Button
               variant="contained"
               className="next"
@@ -294,54 +315,58 @@ export default class NewAddon extends Component {
   }
 
   render() {
-    const { loading, stepIndex } = this.state;
+    const {
+      loading, stepIndex, provisioning, provisionMessage, provisionStatus,
+      submitFail, submitMessage, service, plan,
+    } = this.state;
     const provisionStyle = { display: 'block', ...style.stepper };
     const provisioningStyle = { display: 'none', ...style.stepper };
 
-    if (this.state.provisioning) {
+    if (provisioning) {
       provisionStyle.display = 'none';
       provisioningStyle.display = 'block';
     }
+
+    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
 
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={provisionStyle}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel>Select Addon Service</StepLabel>
+              <StepLabel optional={stepIndex > 0 && renderCaption(service.label)}>
+                Select Addon Service
+              </StepLabel>
             </Step>
             <Step>
-              <StepLabel>Select Plan</StepLabel>
+              <StepLabel optional={stepIndex > 1 && renderCaption(plan.human_name)}>
+                Select Plan
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
             </Step>
           </Stepper>
-          {(!loading) && (
+          {!loading ? (
             <div>
               {this.renderContent()}
             </div>
-          )}
-          {(loading) && (
+          ) : (
             <div style={style.refresh.div}>
               <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             </div>
           )}
-          <Dialog
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
             className="new-addon-error"
-            open={this.state.submitFail}
-          >
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>{this.state.submitMessage}</DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={this.handleClose}
-              >OK</Button>
-            </DialogActions>
-          </Dialog>
+          />
         </div>
         <div style={provisioningStyle}>
-          <label>{this.state.provisionMessage}</label> {/* eslint-disable-line */}
-          <LinearProgress variant="determinate" value={this.state.provisionStatus * 100} />
+          <label>{provisionMessage}</label> {/* eslint-disable-line */}
+          <LinearProgress variant="determinate" value={provisionStatus * 100} />
         </div>
       </MuiThemeProvider>
     );

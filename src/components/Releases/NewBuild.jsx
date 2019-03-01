@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, Button, TextField, Typography,
-  Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
-  Collapse,
+  Step, Stepper, StepLabel, Button, TextField, Typography, Collapse,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
+import ConfirmationModal from '../ConfirmationModal';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -53,6 +52,15 @@ const style = {
       marginRight: 12,
     },
   },
+  body1: {
+    marginTop: '12px',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
 };
 
 export default class NewBuild extends Component {
@@ -82,8 +90,8 @@ export default class NewBuild extends Component {
     } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 2,
-        loading: stepIndex >= 2,
+        finished: stepIndex >= 3,
+        loading: stepIndex >= 3,
         errorText: null,
       });
     }
@@ -128,6 +136,7 @@ export default class NewBuild extends Component {
   }
 
   renderStepContent(stepIndex) {
+    const { url, errorText, branch, version } = this.state;
     switch (stepIndex) {
       case 0:
         return (
@@ -135,10 +144,10 @@ export default class NewBuild extends Component {
             <TextField
               className="url"
               label="URL"
-              value={this.state.url}
+              value={url}
               onChange={this.handleChange('url')}
-              helperText={this.state.errorText}
-              error={this.state.errorText && this.state.errorText.length > 0}
+              helperText={errorText}
+              error={errorText && errorText.length > 0}
             />
             <p>
               The URI to fetch the image or sources for this build.
@@ -154,7 +163,7 @@ export default class NewBuild extends Component {
             <TextField
               className="branch"
               label="Branch (optional)"
-              value={this.state.branch}
+              value={branch}
               onChange={this.handleChange('branch')}
             />
             <p>
@@ -168,7 +177,7 @@ export default class NewBuild extends Component {
             <TextField
               className="version"
               label="Version (optional)"
-              value={this.state.version}
+              value={version}
               onChange={this.handleChange('version')}
             />
             <p>
@@ -176,8 +185,33 @@ export default class NewBuild extends Component {
             </p>
           </div>
         );
-      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
       case 3:
+        return (
+          <div>
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'A new build will be created from '}
+              <span style={style.bold}>{url}</span>
+              {'. '}
+              {branch !== '' && (
+                <React.Fragment>
+                  {'The branch '}
+                  <span style={style.bold}>{branch}</span>
+                  {' will be displayed in the logs and build info. '}
+                </React.Fragment>
+              )}
+              {version !== '' && (
+                <React.Fragment>
+                  {'The version '}
+                  <span style={style.bold}>{version}</span>
+                  {' will be displayed in the logs and build info.'}
+                </React.Fragment>
+              )}
+            </Typography>
+          </div>
+        );
+      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
+      case 4:
         return '';
       default:
         return 'You\'re a long way from home sonny jim!';
@@ -195,25 +229,29 @@ export default class NewBuild extends Component {
       <div style={contentStyle}>
         <div>{this.renderStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<Button
-            className="back"
-            disabled={stepIndex === 0}
-            onClick={this.handlePrev}
-            style={style.buttons.back}
-          >Back</Button>)}
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >Back</Button>
+          )}
           <Button
             variant="contained"
             className="next"
             color="primary"
             onClick={this.handleNext}
-          >{stepIndex === 6 ? 'Finish' : 'Next'}</Button>
+          >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
   }
 
   render() {
-    const { loading, stepIndex } = this.state;
+    const {
+      loading, stepIndex, submitFail, submitMessage,
+    } = this.state;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
@@ -227,27 +265,20 @@ export default class NewBuild extends Component {
             <Step>
               <StepLabel>Version</StepLabel>
             </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
+            </Step>
           </Stepper>
-          {
-            <Collapse in={!loading}>
-              {this.renderContent()}
-            </Collapse>
-          }
-          <Dialog open={this.state.submitFail}>
-            <DialogTitle>
-              <Typography variant="h6">
-                Error
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                {this.state.submitMessage}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
-            </DialogActions>
-          </Dialog>
+          <Collapse in={!loading}>
+            {this.renderContent()}
+          </Collapse>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="new-build-error"
+          />
         </div>
       </MuiThemeProvider>
     );
