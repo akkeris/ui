@@ -406,7 +406,6 @@ export default class Releases extends Component {
 
   render() {
     const { releases, rowsPerPage, page, isElevated, restrictedSpace } = this.state;
-    console.log(releases);
     const actions = [
       <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
         <RemoveIcon />

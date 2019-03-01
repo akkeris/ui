@@ -203,7 +203,6 @@ class AppOverview extends Component {
   }
 
   render() {
-    console.log(this.props.app);
     const { isElevated, restrictedSpace } = this.state;
     if (this.state.loading) {
       return (
