@@ -22,7 +22,9 @@ import api from '../../services/api';
 import NewBuild from './NewBuild';
 import NewAutoBuild from './NewAutoBuild';
 
-import AutoBuildIcon from '../Icons/GitIcon';
+import AutoBuildIcon from '../Icons/OctoFace';
+import GitIcon from '../Icons/GitIcon';
+import GitCommitIcon from '../Icons/GitCommitIcon';
 
 function addRestrictedTooltip(title, placement, children) {
   return (
@@ -380,6 +382,13 @@ export default class Releases extends Component {
             </div>
           </TableCell>
           <TableCell style={style.tableCell.icon}>
+            {release.source_blob.version &&
+            <Tooltip title="Commit" placement="top-end">
+              <IconButton style={style.iconButton} className="git" href={release.source_blob.version} ><GitCommitIcon /></IconButton>
+            </Tooltip>
+            }
+          </TableCell>
+          <TableCell style={style.tableCell.icon}>
             {!release.release &&
               <Tooltip title="Build Logs" placement="top-end">
                 <IconButton style={style.iconButton} className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
@@ -398,6 +407,7 @@ export default class Releases extends Component {
 
   render() {
     const { releases, rowsPerPage, page, isElevated, restrictedSpace } = this.state;
+    console.log(releases);
     const actions = [
       <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
         <RemoveIcon />
