@@ -22,8 +22,7 @@ import api from '../../services/api';
 import NewBuild from './NewBuild';
 import NewAutoBuild from './NewAutoBuild';
 
-import AutoBuildIcon from '../Icons/OctoFace';
-import GitIcon from '../Icons/GitIcon';
+import AutoBuildIcon from '../Icons/CircuitBoard';
 import GitCommitIcon from '../Icons/GitCommitIcon';
 
 function addRestrictedTooltip(title, placement, children) {
