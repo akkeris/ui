@@ -51,8 +51,7 @@ const muiTheme = createMuiTheme({
 const style = {
   link: {
     color: 'rgba(0, 0, 0, 0.54)',
-    textDecoration: 'none'
-    
+    textDecoration: 'none',
   },
   currentImage: {
     visible: {
