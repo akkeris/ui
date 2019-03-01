@@ -51,6 +51,7 @@ const muiTheme = createMuiTheme({
 const style = {
   link: {
     color: 'rgba(0, 0, 0, 0.54)',
+    textDecoration: 'none',
   },
   currentImage: {
     visible: {
@@ -265,10 +266,21 @@ class AppOverview extends Component {
             </GridListTile>
           </GridList>
           <ListItemText
-            style={this.props.app.image ? style.currentImage.visible : style.currentImage.hidden}
+            style={this.props.app.repo ? style.currentImage.visible : style.currentImage.hidden}
             primary="Current Image"
             secondary={this.props.app.image}
           />
+          {this.props.app.git_url && (
+            <ListItemText
+              style={style.currentImage.visible}
+              primary="Git"
+              secondary={
+                <a style={style.link} href={this.props.app.git_url}>
+                  {this.props.app.git_url}
+                </a>
+              }
+            />
+          )}
           <Table>
             <TableBody>
               <TableRow>

@@ -22,7 +22,8 @@ import api from '../../services/api';
 import NewBuild from './NewBuild';
 import NewAutoBuild from './NewAutoBuild';
 
-import AutoBuildIcon from '../Icons/GitIcon';
+import AutoBuildIcon from '../Icons/CircuitBoard';
+import GitCommitIcon from '../Icons/GitCommitIcon';
 
 function addRestrictedTooltip(title, placement, children) {
   return (
@@ -378,6 +379,13 @@ export default class Releases extends Component {
                 {getDateDiff(new Date(release.created_at))}
               </div>
             </div>
+          </TableCell>
+          <TableCell style={style.tableCell.icon}>
+            {release.source_blob.version &&
+            <Tooltip title="Commit" placement="top-end">
+              <IconButton style={style.iconButton} className="git" href={release.source_blob.version} ><GitCommitIcon /></IconButton>
+            </Tooltip>
+            }
           </TableCell>
           <TableCell style={style.tableCell.icon}>
             {!release.release &&
