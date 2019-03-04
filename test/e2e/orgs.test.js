@@ -45,6 +45,7 @@ test("Shouldn't be able to create duplicate org", async (t) => { // eslint-disab
 
     .typeText('.org-description input', 'testcafe')
     .click('button.next')
+    .click('button.next')
 
     .expect(Selector('.error').innerText)
     .contains('The specified organization already exists.')

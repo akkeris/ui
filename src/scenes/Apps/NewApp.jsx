@@ -123,6 +123,12 @@ export default class NewApp extends Component {
     }
   }
 
+  handleClose = () => {
+    this.setState({
+      submitFail: false,
+    });
+  };
+
   handlePrev = () => {
     const { stepIndex } = this.state;
     if (!this.state.loading) {

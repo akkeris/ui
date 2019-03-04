@@ -27,7 +27,7 @@ test('Should show list of spaces', async (t) => { // eslint-disable-line no-unde
 
 test("Shouldn't be able to create duplicate space", async (t) => { // eslint-disable-line no-undef
   await t
-    // navigate to new app page
+    // navigate to new space page
     .click('.new-space')
 
     // field validation
@@ -50,6 +50,7 @@ test("Shouldn't be able to create duplicate space", async (t) => { // eslint-dis
     .click('button.next')
 
     .click('.checkbox-dev')
+    .click('button.next')
     .click('button.next')
 
     .expect(Selector('.error').innerText)

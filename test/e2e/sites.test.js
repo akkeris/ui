@@ -59,18 +59,19 @@ test('Should be able to create and delete site', async (t) => { // eslint-disabl
     .click('button.next')
 
     .click('button.next')
+    .click('button.next')
 
-    // check if app was created
+    // check if site was created
     .click('.site-list .testcafe')
     .expect(Selector('.card .header').innerText)
     .contains('testcafe')
 
-    // delete the app
+    // delete the site
     .click('button.delete')
     .expect(Selector('.confirm').innerText)
     .contains('Are you sure you want to delete this site?')
 
-    // confirm delete and make sure app no longer exists
+    // confirm delete and make sure site no longer exists
     .click('.confirm .ok')
     .expect(Selector('.site-list .testcafe').exists)
     .notOk();
