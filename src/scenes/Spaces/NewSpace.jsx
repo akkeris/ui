@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Checkbox, Paper,
-  MenuItem, Select, FormControl, InputLabel, FormControlLabel,
-  Dialog, DialogTitle, DialogContent, DialogActions,
+  MenuItem, Select, FormControl, InputLabel, FormControlLabel, Typography,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
 import History from '../../config/History';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -23,7 +23,7 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,
@@ -34,6 +34,7 @@ const style = {
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
+    width: '100%',
   },
   div: {
     width: '100%',
@@ -43,6 +44,15 @@ const style = {
     paddingLeft: '14px',
     display: 'flex',
     flexDirection: 'column',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  stepDescription: {
+    marginTop: '24px',
   },
 };
 
@@ -112,7 +122,7 @@ export default class NewApp extends Component {
     } else {
       const { stepIndex } = this.state;
       if (!this.state.loading) {
-        if (stepIndex + 1 <= 3) {
+        if (stepIndex + 1 <= 4) {
           this.setState({
             stepIndex: stepIndex + 1,
             errorText: null,
@@ -164,6 +174,7 @@ export default class NewApp extends Component {
   };
 
   renderStepContent(stepIndex) {
+    const { space, stack, compliance, errorText, description } = this.state;
     switch (stepIndex) {
       case 0:
         return (
@@ -171,16 +182,20 @@ export default class NewApp extends Component {
             <TextField
               className="space-name"
               label="Space Name"
-              value={this.state.space}
+              value={space}
               onChange={this.handleSpaceChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
+              error={!!errorText}
+              helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Create a space! Enter a name that will define your space.
-              (this is typically an org id with environment ex. perf-dev, perf-qa, perf-prod).
-              This will be used to group apps, and provides some service discovery.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {`
+                Create a space! Enter a name that will define your space.
+                (this is typically an org id with environment ex. perf-dev, perf-qa, perf-prod).
+                This will be used to group apps, and provides some service discovery.
+              `}
+            </Typography>
           </div>
         );
       case 1:
@@ -190,7 +205,7 @@ export default class NewApp extends Component {
               <InputLabel htmlFor="stack-select">Stack</InputLabel>
               <Select
                 className="stack-menu"
-                value={this.state.stack}
+                value={stack}
                 onChange={this.handleStackChange}
                 inputProps={{
                   id: 'stack-select',
@@ -200,14 +215,16 @@ export default class NewApp extends Component {
                 {this.renderStacks()}
               </Select>
             </FormControl>
-            <p>
-            Stacks are unique runtimes in akkeris.
-            One or more of them may exist in any one region.
-            The difference between stacks may be physical location,
-            an upgrade to backend components on one stack vs the
-            other or on prem vs cloud offerings.
-            A space must soley exist in one stack
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {`
+                Stacks are unique runtimes in akkeris.
+                One or more of them may exist in any one region.
+                The difference between stacks may be physical location,
+                an upgrade to backend components on one stack vs the
+                other, or on prem vs cloud offerings.
+                A space must solely exist in one stack. 
+              `}
+            </Typography>
           </div>
         );
       case 2:
@@ -216,12 +233,14 @@ export default class NewApp extends Component {
             <TextField
               className="space-description"
               label="Description"
-              value={this.state.description}
+              value={description}
               onChange={this.handleDescriptionChange}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Give a description of your space.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Give a description of your space.'}
+            </Typography>
           </div>
         );
       case 3:
@@ -231,15 +250,36 @@ export default class NewApp extends Component {
             <div style={style.compliance}>
               {this.renderCompliance()}
             </div>
-            <p>
-              Add these to your space.
-              (ex. socs allows socs credentials to be added to apps in this space
-              and redacts the info from the console.)
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {`
+                Add these to your space.
+                (e.g. socs allows socs credentials to be added to apps in this space
+                and redacts sensitive info from the console.)
+              `}
+            </Typography>
+          </div>
+        );
+      case 4:
+        return (
+          <div>
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The space '}
+              <span style={style.bold}>{space}</span>
+              {' will be created in the stack '}
+              <span style={style.bold}>{stack}</span>
+              {compliance.length > 0 && (
+                <React.Fragment>
+                  {' with the following compliance(s): '}
+                  <span style={style.bold}>{compliance.join(', ')}</span>
+                </React.Fragment>
+              )}
+              {'.'}
+            </Typography>
           </div>
         );
       // need this otherwise "You're a long way ..." shows up when you hit finish
-      case 4:
+      case 5:
         return '';
       default:
         return 'You\'re a long way from home sonny jim!';
@@ -294,24 +334,31 @@ export default class NewApp extends Component {
             className="next"
             color="primary"
             onClick={this.handleNext}
-          >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
+          >{stepIndex === 4 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
   }
 
   render() {
-    const { loading, stepIndex } = this.state;
+    const {
+      loading, stepIndex, submitFail, submitMessage, space, stack,
+    } = this.state;
+    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
               <Step>
-                <StepLabel>Create space name</StepLabel>
+                <StepLabel optional={stepIndex > 0 && renderCaption(space)}>
+                  Create space name
+                </StepLabel>
               </Step>
               <Step>
-                <StepLabel>Select stack</StepLabel>
+                <StepLabel optional={stepIndex > 1 && renderCaption(stack)}>
+                  Select stack
+                </StepLabel>
               </Step>
               <Step>
                 <StepLabel>Describe space</StepLabel>
@@ -319,26 +366,20 @@ export default class NewApp extends Component {
               <Step>
                 <StepLabel>Select tags</StepLabel>
               </Step>
+              <Step>
+                <StepLabel>Confirm</StepLabel>
+              </Step>
             </Stepper>
-            {
-              <Collapse in={!loading}>
-                {this.renderContent()}
-              </Collapse>
-            }
-            <Dialog
+            <Collapse in={!loading}>
+              {this.renderContent()}
+            </Collapse>
+            <ConfirmationModal
+              open={submitFail}
+              onOk={this.handleClose}
+              message={submitMessage}
+              title="Error"
               className="error"
-              open={this.state.submitFail}
-            >
-              <DialogTitle>Error</DialogTitle>
-              <DialogContent>{this.state.submitMessage}</DialogContent>
-              <DialogActions>
-                <Button
-                  className="ok"
-                  color="primary"
-                  onClick={this.handleClose}
-                >OK</Button>
-              </DialogActions>
-            </Dialog>
+            />
           </div>
         </Paper>
       </MuiThemeProvider>

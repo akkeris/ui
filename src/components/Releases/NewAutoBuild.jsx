@@ -5,8 +5,8 @@ import {
   Step, Stepper, StepLabel, Button, TextField, Collapse,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import ConfirmationModal from '../ConfirmationModal';
 import gh from 'parse-github-url';
+import ConfirmationModal from '../ConfirmationModal';
 
 import api from '../../services/api';
 
@@ -34,8 +34,8 @@ const style = {
       marginRight: 12,
     },
   },
-  body1: {
-    marginTop: '12px',
+  stepDescription: {
+    marginTop: '24px',
   },
   h6: {
     marginBottom: '12px',
@@ -158,18 +158,26 @@ export default class NewAutoBuild extends Component {
               onChange={this.handleChange('repo')}
               helperText={errorText}
               error={errorText && errorText.length > 0}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <Typography variant="body1">
-              The repo URL (e.g., https://github.com/foo/bar)
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The repo URL (e.g. https://github.com/foo/bar).'}
             </Typography>
           </div>
         );
       case 1:
         return (
           <div>
-            <TextField label="Master" value={branch} onChange={this.handleChange('branch')} />
-            <Typography variant="body1">
-              The branch on the repo to watch and deploy from
+            <TextField
+              label="Master"
+              value={branch}
+              onChange={this.handleChange('branch')}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
+            />
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The branch on the repo to watch and deploy from.'}
             </Typography>
           </div>
         );
@@ -195,9 +203,11 @@ export default class NewAutoBuild extends Component {
                     onChange={this.handleChange('username')}
                     helperText={errorText}
                     error={errorText && errorText.length > 0}
+                    onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+                    autoFocus
                   />
-                  <Typography variant="body1">
-                      The username to access repo as
+                  <Typography variant="body1" style={style.stepDescription}>
+                    {'The username to access the repo as.'}
                   </Typography>
                   <TextField
                     label="Token"
@@ -205,9 +215,10 @@ export default class NewAutoBuild extends Component {
                     onChange={this.handleChange('token')}
                     helperText={errorText}
                     error={errorText && errorText.length > 0}
+                    onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
                   />
-                  <Typography variant="body1">
-                      The users token
+                  <Typography variant="body1" style={style.stepDescription}>
+                    {'The user\'s token.'}
                   </Typography>
                 </div>
               )}

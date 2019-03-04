@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Typography, CircularProgress,
-  Dialog, DialogContent, DialogTitle, DialogActions, DialogContentText,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import CustomSelect from '../../components/Select';
+import Select from '../../components/Select';
 
 import api from '../../services/api';
 import History from '../../config/History';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
@@ -56,8 +56,8 @@ const style = {
   selectContainer: {
     maxWidth: '300px',
   },
-  body1: {
-    marginTop: '12px',
+  stepDescription: {
+    marginTop: '24px',
   },
   h6: {
     marginBottom: '12px',
@@ -154,23 +154,6 @@ export default class NewApp extends Component {
     }
   }
 
-  renderErrorDialog = () => {
-    const { submitFail, submitMessage } = this.state;
-    return (
-      <Dialog className="new-app-error" open={submitFail}>
-        <DialogTitle>Error</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{submitMessage}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button className="ok" color="primary" onClick={() => this.setState({ submitFail: false })}>
-            Ok
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  }
-
   renderStepContent(stepIndex) {
     switch (stepIndex) {
       case 0:
@@ -183,11 +166,15 @@ export default class NewApp extends Component {
               onChange={this.handleChange('app')}
               error={!!this.state.errorText}
               helperText={this.state.errorText ? this.state.errorText : ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <Typography variant="body1" style={style.body1}>
-              {'Enter a name that will define your new akkeris app '}
-              {'(typically matches the repository name)! '}
-              {'This app will then be built from a source and deployed as a Docker image.'}
+            <Typography variant="body1" style={style.stepDescription}>
+              {`
+                Enter a name that will define your new akkeris app
+                (typically matches the repository name)!
+                This app will then be built from a source and deployed as a Docker image.
+              `}
             </Typography>
           </div>
         );
@@ -195,7 +182,7 @@ export default class NewApp extends Component {
         return (
           <div>
             <div style={style.selectContainer}>
-              <CustomSelect
+              <Select
                 onChange={this.handleSelectChange('org')}
                 value={this.state.org}
                 placeholder="Select an Org"
@@ -204,7 +191,7 @@ export default class NewApp extends Component {
               />
               {this.state.selectErr && <Typography variant="subtitle2" style={style.err}>{this.state.selectErr}</Typography>}
             </div>
-            <Typography variant="body1" style={style.body1}>
+            <Typography variant="body1" style={style.stepDescription}>
               {'Specify the organization this app belongs to. This will link attribution and alerting.'}
             </Typography>
           </div>
@@ -213,7 +200,7 @@ export default class NewApp extends Component {
         return (
           <div>
             <div style={style.selectContainer}>
-              <CustomSelect
+              <Select
                 onChange={this.handleSelectChange('space')}
                 value={this.state.space}
                 placeholder="Select a Space"
@@ -222,10 +209,12 @@ export default class NewApp extends Component {
               />
               {this.state.selectErr && <Typography variant="subtitle2" style={style.err}>{this.state.selectErr}</Typography>}
             </div>
-            <Typography variant="body1" style={style.body1}>
-              {'Specify the space your app will live in. '}
-              {'Spaces contain multiple apps and configurations at a similar stage in a pipeline '}
-              {'(e.g. dev, qa, prod).'}
+            <Typography variant="body1" style={style.stepDescription}>
+              {`
+                Specify the space your app will live in.
+                Spaces contain multiple apps and configurations at a similar stage in a pipeline
+                (e.g. dev, qa, prod).
+              `}
             </Typography>
           </div>
         );
@@ -254,8 +243,9 @@ export default class NewApp extends Component {
   }
 
   render() {
-    const { collapsed, finished, stepIndex, app, org, space } = this.state;
-
+    const {
+      collapsed, finished, stepIndex, app, org, space, submitFail, submitMessage,
+    } = this.state;
     if (finished) { this.submitApp(); }
 
     const renderCaption = text => <Typography variant="caption">{text}</Typography>;
@@ -305,8 +295,13 @@ export default class NewApp extends Component {
                 </div>
               </div>
             </Collapse>
-
-            {this.renderErrorDialog()}
+            <ConfirmationModal
+              open={submitFail}
+              onOk={this.handleClose}
+              message={submitMessage}
+              title="Error"
+              className="new-app-error"
+            />
           </div>
         </Paper>
       </MuiThemeProvider>

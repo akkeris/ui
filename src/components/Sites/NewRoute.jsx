@@ -52,8 +52,8 @@ const style = {
   selectContainer: {
     maxWidth: '400px',
   },
-  body1: {
-    marginTop: '12px',
+  stepDescription: {
+    marginTop: '24px',
   },
   h6: {
     marginBottom: '12px',
@@ -176,8 +176,12 @@ export default class NewRoute extends Component {
               onChange={this.handleSourceChange}
               error={!!errorText}
               helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>Path of route after domain ex. `/` or `/source`.</p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Path of route after domain ex. \'/\' or \'/source\'.'}
+            </Typography>
           </div>
         );
       case 1:
@@ -191,7 +195,9 @@ export default class NewRoute extends Component {
                 placeholder="Search for an app"
               />
             </div>
-            <p>The app to route to.</p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The app to route to.'}
+            </Typography>
           </div>
         );
       case 2:
@@ -205,8 +211,12 @@ export default class NewRoute extends Component {
               onChange={this.handleTargetChange}
               error={!!errorText}
               helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>The path on the app to route to.</p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The path on the app to route to.'}
+            </Typography>
           </div>
         );
       case 3:

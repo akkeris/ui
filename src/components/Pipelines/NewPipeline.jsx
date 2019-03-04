@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, Button, TextField, CircularProgress,
+  Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import ConfirmationModal from '../ConfirmationModal';
@@ -29,6 +29,9 @@ const style = {
     back: {
       marginRight: 12,
     },
+  },
+  stepDescription: {
+    marginTop: '24px',
   },
 };
 
@@ -107,8 +110,12 @@ export default class NewPipeline extends Component {
               onChange={this.handlePipelineChange}
               error={!!this.state.errorText}
               helperText={this.state.errorText ? this.state.errorText : ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>The name of the pipeline, less than 24 characters, alpha numeric only.</p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The name of the pipeline, less than 24 characters, alpha numeric only.'}
+            </Typography>
           </div>
         );
       case 1:

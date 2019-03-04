@@ -58,8 +58,8 @@ const style = {
       marginRight: 12,
     },
   },
-  body1: {
-    marginTop: '12px',
+  stepDescription: {
+    marginTop: '24px',
   },
   h6: {
     marginBottom: '12px',
@@ -232,10 +232,12 @@ export default class NewFormation extends Component {
               onChange={this.handleChange('type')}
               error={errorText.length > 0}
               helperText={errorText}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Enter a name for your new dyno.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Enter a name for your new dyno.'}
+            </Typography>
           </div>
         );
       case 1:
@@ -244,9 +246,9 @@ export default class NewFormation extends Component {
             <Select className="new-dropdown" value={quantity} onChange={this.handleChange('quantity')}>
               {this.renderQuantity()}
             </Select>
-            <p>
-              Select the number of dyno instances to be created.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Select the number of dyno instances to be created.'}
+            </Typography>
           </div>
         );
       case 2:
@@ -272,21 +274,44 @@ export default class NewFormation extends Component {
           const p = port === null ? '' : port;
           return (
             <div>
-              <TextField className="new-port" label="Port" type="numeric" value={p} onChange={this.handleChange('port')} error={errorText.length > 0} helperText={errorText} />
-              <p>
-                Specify the port that your app will run on
-                (If your app listens to $PORT, then leave default)
-              </p>
+              <TextField
+                className="new-port"
+                label="Port"
+                type="numeric"
+                value={p}
+                onChange={this.handleChange('port')}
+                error={errorText.length > 0}
+                helperText={errorText}
+                onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+                autoFocus
+              />
+              <Typography variant="body1" style={style.stepDescription}>
+                {`
+                  Specify the port that your app will run on.
+                  If your app listens to $PORT, then leave default.
+                `}
+              </Typography>
             </div>
           );
         }
         return (
           <div>
-            <TextField className="new-command" label="Command" value={command || ''} onChange={this.handleChange('command')} error={errorText.length > 0} helperText={errorText} />
-            <p>
+            <TextField
+              className="new-command"
+              label="Command"
+              value={command || ''}
+              onChange={this.handleChange('command')}
+              error={errorText.length > 0}
+              helperText={errorText}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
+            />
+            <Typography variant="body1" style={style.stepDescription}>
+              {`
                 The command to run when the build image spins up,
                 this if left off will default to the RUN command in the docker image.
-            </p>
+              `}
+            </Typography>
           </div>
         );
       case 4:

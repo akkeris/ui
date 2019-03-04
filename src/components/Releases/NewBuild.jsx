@@ -52,8 +52,8 @@ const style = {
       marginRight: 12,
     },
   },
-  body1: {
-    marginTop: '12px',
+  stepDescription: {
+    marginTop: '24px',
   },
   h6: {
     marginBottom: '12px',
@@ -148,13 +148,17 @@ export default class NewBuild extends Component {
               onChange={this.handleChange('url')}
               helperText={errorText}
               error={errorText && errorText.length > 0}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              The URI to fetch the image or sources for this build.
-              If an image is provided no build will occur, but the image will be fetched.
-              See Docker Integrations at the top for more information on using build images.
-              Data URI&apos;s are also allowed to push code rather than pull.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {`
+                The URI to fetch the image or sources for this build.
+                If an image is provided no build will occur, but the image will be fetched.
+                See Docker Integrations at the top for more information on using build images.
+                Data URI's are also allowed to push code rather than pull.
+              `}
+            </Typography>
           </div>
         );
       case 1:
@@ -165,10 +169,12 @@ export default class NewBuild extends Component {
               label="Branch (optional)"
               value={branch}
               onChange={this.handleChange('branch')}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Branch of commit that caused the build (shown in logs and build info)
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Branch of commit that caused the build (shown in logs and build info).'}
+            </Typography>
           </div>
         );
       case 2:
@@ -179,10 +185,12 @@ export default class NewBuild extends Component {
               label="Version (optional)"
               value={version}
               onChange={this.handleChange('version')}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              An optional version to specify that will show in the logs
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'An optional version to specify that will show in the logs.'}
+            </Typography>
           </div>
         );
       case 3:

@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, CircularProgress, LinearProgress,
-  Dialog, Button, Typography, DialogTitle, DialogActions, DialogContent,
+  Step, Stepper, StepLabel, CircularProgress, LinearProgress, Button, Typography,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Select from '../Select';
@@ -66,8 +65,8 @@ const style = {
   selectContainer: {
     maxWidth: '400px',
   },
-  body1: {
-    marginTop: '12px',
+  stepDescription: {
+    marginTop: '24px',
   },
   h6: {
     marginBottom: '12px',
@@ -220,8 +219,8 @@ export default class NewAddon extends Component {
                 placeholder="Search for an Addon"
               />
             </div>
-            <Typography variant="body1">
-              Select the akkeris addon you would like to attach to your app.
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Select the akkeris addon you would like to attach to your app.'}
             </Typography>
           </div>
         );
@@ -249,8 +248,8 @@ export default class NewAddon extends Component {
                 </span>
               </div>
             )}
-            <Typography variant="body1">
-              Select the plan for your addon (please only use larger plans for prod)
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Select the plan for your addon (please only use larger plans for prod)'}
             </Typography>
           </div>
         );

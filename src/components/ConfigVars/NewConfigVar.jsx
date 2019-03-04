@@ -33,8 +33,8 @@ const style = {
       marginRight: 12,
     },
   },
-  body1: {
-    marginTop: '12px',
+  stepDescription: {
+    marginTop: '24px',
   },
   h6: {
     marginBottom: '12px',
@@ -133,10 +133,12 @@ export default class NewConfigVar extends Component {
               onChange={this.handleKeyTextChange}
               error={!!errorText}
               helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Config Var Key
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Config Var Key'}
+            </Typography>
           </div>
         );
       case 1:
@@ -151,10 +153,12 @@ export default class NewConfigVar extends Component {
               onChange={this.handleValueChange}
               error={!!errorText}
               helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Config Var Value
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Config Var Value'}
+            </Typography>
           </div>
         );
       case 2:

@@ -54,14 +54,14 @@ const style = {
       marginRight: 12,
     },
   },
-  body1: {
-    marginTop: '12px',
-  },
   h6: {
     marginBottom: '12px',
   },
   bold: {
     fontWeight: 'bold',
+  },
+  stepDescription: {
+    marginTop: '24px',
   },
 };
 
@@ -96,7 +96,8 @@ export default class AttachAddon extends Component {
   getApps = async () => {
     const { app } = this.props;
     const { data: apps } = await api.getApps();
-    apps.splice(apps.findIndex(i => i.name.toLowerCase() === app.toLowerCase()), 1); // Remove the current app from the results
+    // Remove the current app from the results
+    apps.splice(apps.findIndex(i => i.name.toLowerCase() === app.toLowerCase()), 1);
     this.setState({ apps, loading: false });
   }
 
@@ -191,7 +192,7 @@ export default class AttachAddon extends Component {
               errorText={this.state.errorText}
               color="black"
             />
-            <Typography variant="body1" style={style.body1}>
+            <Typography variant="body1" style={style.stepDescription}>
               {'Select the application that has an addon that you want to attach (e.g. test-dev).'}
             </Typography>
           </div>
@@ -202,7 +203,7 @@ export default class AttachAddon extends Component {
             <Select className="addon-menu" value={this.state.addon} onChange={this.handleAddonChange}>
               {this.renderAddons()}
             </Select>
-            <Typography variant="body1" style={style.body1}>
+            <Typography variant="body1" style={style.stepDescription}>
               {'Select the addon you want to attach.'}
             </Typography>
           </div>
@@ -213,7 +214,9 @@ export default class AttachAddon extends Component {
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The addon '}
-              <span style={style.bold}>{this.state.addon.addon_service.name} ({this.state.addon.name})</span>
+              <span style={style.bold}>
+                {this.state.addon.addon_service.name} ({this.state.addon.name})
+              </span>
               {' from the app '}
               <span style={style.bold}>{this.state.app}</span>
               {' will be attached.'}
