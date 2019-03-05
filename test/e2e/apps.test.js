@@ -69,13 +69,31 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
   // create app
     .typeText('.app-name input', 'testcafe')
     .click('button.next')
+
+    // Check step 1 caption
+    .expect(Selector('.step-0-label .step-label-caption').innerText)
+    .contains('testcafe')
+
     .typeText('div.select-textfield', 'testcafe')
     .pressKey('enter')
     .click('button.next')
+
+    // Check step 2 caption
+    .expect(Selector('.step-1-label .step-label-caption').innerText)
+    .contains('testcafe')
+
     .typeText('div.select-textfield', 'testcafe')
     .pressKey('enter')
     .click('button.next')
+
+    // Check step 3 caption, stepper summary
+    .expect(Selector('.step-2-label .step-label-caption').innerText)
+    .contains('testcafe')
+    .expect(Selector('.new-app-summary').innerText)
+    .contains('The app testcafe-testcafe will be created in the testcafe org.')
     .click('button.next')
+
+    // Verify that app exists
     .click('.space-dropdown')
     .click('#menu-space .testcafe')
     .expect(Selector('.app-list .testcafe-testcafe').exists)
@@ -232,12 +250,28 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .contains('web')
     .click('button.next')
 
+    // Check step 1 caption
+    .expect(Selector('.step-0-label .step-label-caption').innerText)
+    .contains('web')
+
     .click('div.new-dropdown')
     .click('.q2')
     .click('button.next')
+
+    // Check step 2 caption
+    .expect(Selector('.step-1-label .step-label-caption').innerText)
+    .contains('2')
     .click('.new-size .constellation')
     .click('button.next')
+
+    // Check step 3 caption
+    .expect(Selector('.step-2-label .step-label-caption').innerText)
+    .contains('constellation')
     .click('button.next')
+
+    // Check stepper summary
+    .expect(Selector('.new-formation-summary').innerText)
+    .contains('[2] web dyno(s) will be created with size constellation, and will use the default port.')
     .click('button.next')
 
     .expect(Selector('.formation-snack').innerText)
@@ -328,6 +362,10 @@ test('Should be able to create view and release builds', async (t) => { // eslin
     .click('button.next')
     .click('button.next') // branch
     .click('button.next') // version
+
+    // Check stepper summary
+    .expect(Selector('.new-build-summary').innerText)
+    .contains('A new build will be created from docker://registry.hub.docker.com/library/httpd:alpine.')
     .click('button.next')
 
     .expect(Selector('.release-snack').innerText)
@@ -408,10 +446,22 @@ test // eslint-disable-line no-undef
       .typeText(Selector('.select-textfield'), 'Lids Db Credentials')
       .pressKey('enter')
       .click('button.next')
+
+      // Check step 1 caption
+      .expect(Selector('.step-0-label .step-label-caption').innerText)
+      .contains('Lids Db Credentials')
+
       .typeText(Selector('.select-textfield'), 'lids-db:prod')
       .pressKey('enter')
       .click('button.next')
+
+      // Check step 2 caption, stepper summary
+      .expect(Selector('.step-1-label .step-label-caption').innerText)
+      .contains('Lids Prod Credentials')
+      .expect(Selector('.new-addon-summary').innerText)
+      .contains('The addon Lids Db Credentials with plan Lids Prod Credentials ($0.00) will be created and attached to this app.')
       .click('button.next')
+
       .expect(Selector('.new-addon-error').innerText)
       .contains('The specified addon may not be attached to this app. It requires these necessary compliances in the space')
       .click('.ok')
@@ -502,9 +552,15 @@ test // eslint-disable-line no-undef
       .click('button.attach-addon')
       .typeText('.app-search input', 'testcafe2-testcafe')
       .pressKey('enter')
+      .expect(Selector('.step-0-label .step-label-caption').exists)
+      .ok()
       .click('.addon-menu')
       .click('.akkeris-postgresql')
       .click('button.next')
+      .expect(Selector('.step-1-label .step-label-caption').exists)
+      .ok()
+      .expect(Selector('.attach-addon-summary').exists)
+      .ok()
       .click('button.next')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Attached')
@@ -774,6 +830,10 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .pressKey('backspace')
     .typeText('.webhook-secret input', 'mysecret')
     .click('button.next')
+
+    // Check stepper summary
+    .expect(Selector('.new-webhook-summary').exists)
+    .ok()
     .click('button.next')
 
     // Test that webhook was created, displayed
@@ -1055,12 +1115,25 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
     .contains('field required')
     .typeText('.config-key input', 'MERP')
     .click('button.next')
+
+    // Check step 1 caption
+    .expect(Selector('.step-0-label .step-label-caption').innerText)
+    .contains('MERP')
     .click('button.next')
+
+    // Field validation
     .expect(Selector('.config-value p').innerText)
     .contains('field required')
     .typeText(Selector('.config-value textarea').withAttribute('style'), 'DERP')
     .click('button.next')
+
+    // Check step 2 caption, stepper summary
+    .expect(Selector('.step-1-label .step-label-caption').innerText)
+    .contains('DERP')
+    .expect(Selector('.new-config-summary').innerText)
+    .contains('The environment variable MERP = DERP will be added to this app.')
     .click('button.next')
+
     .expect(Selector('.config-snack').innerText)
     .contains('Added Config Var')
     .expect(Selector('.config-list .MERP').innerText)

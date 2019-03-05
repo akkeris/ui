@@ -38,6 +38,10 @@ test("Shouldn't be able to create duplicate space", async (t) => { // eslint-dis
     .typeText('.space-name input', 'testcafe')
     .click('button.next')
 
+    // Check step 1 caption
+    .expect(Selector('.step-0-label .step-label-caption').innerText)
+    .contains('testcafe')
+
     // select stack
     .click('.stack-menu')
     .expect(Selector('#menu-stack .maru').innerText)
@@ -45,12 +49,22 @@ test("Shouldn't be able to create duplicate space", async (t) => { // eslint-dis
     .click('#menu-stack .maru')
     .click('button.next')
 
+    // Check step 2 caption
+    .expect(Selector('.step-1-label .step-label-caption').innerText)
+    .contains('maru')
+
     // field validation
     .typeText('.space-description input', 'testcafe')
     .click('button.next')
 
     .click('.checkbox-dev')
     .click('button.next')
+
+    // Check stepper summary
+    .expect(Selector('.new-space-summary').innerText)
+    .contains('The space testcafe will be created in the stack maru with the following compliance(s): dev.')
+    .click('button.next')
+
     .click('button.next')
 
     .expect(Selector('.error').innerText)

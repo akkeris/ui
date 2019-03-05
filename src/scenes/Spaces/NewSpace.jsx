@@ -261,7 +261,7 @@ export default class NewApp extends Component {
         );
       case 4:
         return (
-          <div>
+          <div className="new-space-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The space '}
@@ -344,19 +344,19 @@ export default class NewApp extends Component {
     const {
       loading, stepIndex, submitFail, submitMessage, space, stack,
     } = this.state;
-    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
               <Step>
-                <StepLabel optional={stepIndex > 0 && renderCaption(space)}>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(space)}>
                   Create space name
                 </StepLabel>
               </Step>
               <Step>
-                <StepLabel optional={stepIndex > 1 && renderCaption(stack)}>
+                <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(stack)}>
                   Select stack
                 </StepLabel>
               </Step>

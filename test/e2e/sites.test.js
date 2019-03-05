@@ -54,11 +54,24 @@ test('Should be able to create and delete site', async (t) => { // eslint-disabl
     .typeText('.site-name input', 'testcafe')
     .click('button.next')
 
+    // Check step 1 caption
+    .expect(Selector('.step-0-label .step-label-caption').innerText)
+    .contains('testcafe')
+
     // field validation
     .click('.us-seattle')
     .click('button.next')
 
+    // Check step 2 caption
+    .expect(Selector('.step-1-label .step-label-caption').innerText)
+    .contains('us-seattle')
     .click('button.next')
+
+    // Check step 3 caption and stepper summary
+    .expect(Selector('.step-2-label .step-label-caption').innerText)
+    .contains('external')
+    .expect(Selector('.new-site-summary').innerText)
+    .contains('The external site testcafe will be created in the region us-seattle.')
     .click('button.next')
 
     // check if site was created

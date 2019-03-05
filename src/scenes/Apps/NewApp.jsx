@@ -226,7 +226,7 @@ export default class NewApp extends Component {
         );
       case 3:
         return (
-          <div>
+          <div className="new-app-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The app '}
@@ -254,7 +254,7 @@ export default class NewApp extends Component {
     } = this.state;
     if (finished) { this.submitApp(); }
 
-    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
       <MuiThemeProvider theme={muiTheme}>
@@ -262,17 +262,17 @@ export default class NewApp extends Component {
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
               <Step>
-                <StepLabel optional={stepIndex > 0 && renderCaption(app)}>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
                   Create app name
                 </StepLabel>
               </Step>
               <Step>
-                <StepLabel optional={stepIndex > 1 && renderCaption(org.value)}>
+                <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(org.value)}>
                   Select org
                 </StepLabel>
               </Step>
               <Step>
-                <StepLabel optional={stepIndex > 2 && renderCaption(space.value)}>
+                <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(space.value)}>
                   Select space
                 </StepLabel>
               </Step>

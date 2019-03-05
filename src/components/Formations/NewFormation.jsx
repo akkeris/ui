@@ -316,7 +316,7 @@ export default class NewFormation extends Component {
         );
       case 4:
         return (
-          <div>
+          <div className="new-formation-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'['}
@@ -386,22 +386,22 @@ export default class NewFormation extends Component {
       type, quantity, size,
     } = this.state;
 
-    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel optional={stepIndex > 0 && renderCaption(type)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type)}>
                 Select Type</StepLabel>
             </Step>
             <Step>
-              <StepLabel optional={stepIndex > 1 && renderCaption(quantity)}>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(quantity)}>
                 Select Quantity</StepLabel>
             </Step>
             <Step>
-              <StepLabel optional={stepIndex > 2 && renderCaption(size)}>
+              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(size)}>
                 Select Size</StepLabel>
             </Step>
             <Step>

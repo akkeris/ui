@@ -285,7 +285,7 @@ export default class NewWebhook extends Component {
         );
       case 3:
         return (
-          <div>
+          <div className="new-webhook-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The URL '}

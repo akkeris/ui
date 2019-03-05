@@ -38,6 +38,10 @@ test("Shouldn't be able to create duplicate org", async (t) => { // eslint-disab
     .typeText('.org-name input', 'testcafe')
     .click('button.next')
 
+    // Check step caption
+    .expect(Selector('.step-0-label .step-label-caption').innerText)
+    .contains('testcafe')
+
     // field validation
     .click('button.next')
     .expect(Selector('.org-description').innerText)
@@ -45,6 +49,10 @@ test("Shouldn't be able to create duplicate org", async (t) => { // eslint-disab
 
     .typeText('.org-description input', 'testcafe')
     .click('button.next')
+
+    // Check stepper summary
+    .expect(Selector('.new-org-summary').innerText)
+    .contains('The new org testcafe will be created.')
     .click('button.next')
 
     .expect(Selector('.error').innerText)

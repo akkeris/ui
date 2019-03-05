@@ -321,24 +321,24 @@ export default class NewAutoBuild extends Component {
       loading, stepIndex, submitFail, submitMessage,
       repo, branch, username, userSelection,
     } = this.state;
-    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     const account = userSelection === 'bot' ? 'Service Account' : username;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel optional={stepIndex > 0 && renderCaption(gh(repo).repo)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(gh(repo).repo)}>
                 Input Repo
               </StepLabel>
             </Step>
             <Step>
-              <StepLabel optional={stepIndex > 1 && renderCaption(branch.length === 0 ? 'master' : branch)}>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(branch.length === 0 ? 'master' : branch)}>
                 Input Branch
               </StepLabel>
             </Step>
             <Step>
-              <StepLabel optional={stepIndex > 2 && renderCaption(account)}>
+              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(account)}>
                 Input GitHub User
               </StepLabel>
             </Step>

@@ -210,7 +210,7 @@ export default class AttachAddon extends Component {
         );
       case 2:
         return (
-          <div>
+          <div className="attach-addon-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The addon '}
@@ -267,18 +267,18 @@ export default class AttachAddon extends Component {
 
   render() {
     const { loading, stepIndex, finished, app, addon } = this.state;
-    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel optional={stepIndex > 0 && renderCaption(app)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
                 Select App
               </StepLabel>
             </Step>
             <Step>
-              <StepLabel optional={stepIndex > 1 && renderCaption(addon.addon_service.name)}>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(addon.addon_service.name)}>
                 Select Addon
               </StepLabel>
             </Step>

@@ -220,7 +220,7 @@ export default class NewSite extends Component {
         );
       case 3:
         return (
-          <div>
+          <div className="new-site-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The '}
@@ -283,24 +283,24 @@ export default class NewSite extends Component {
 
   render() {
     const { loading, stepIndex, submitFail, submitMessage, domain, region, internal } = this.state;
-    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
               <Step>
-                <StepLabel optional={stepIndex > 0 && renderCaption(domain)}>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain)}>
                   Create domain
                 </StepLabel>
               </Step>
               <Step>
-                <StepLabel optional={stepIndex > 1 && renderCaption(region)}>
+                <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(region)}>
                   Select Region
                 </StepLabel>
               </Step>
               <Step>
-                <StepLabel optional={stepIndex > 2 && renderCaption(internal ? 'internal' : 'external')}>
+                <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(internal ? 'internal' : 'external')}>
                   Select Availability
                 </StepLabel>
               </Step>

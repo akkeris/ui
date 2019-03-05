@@ -255,7 +255,7 @@ export default class NewAddon extends Component {
         );
       case 2:
         return (
-          <div>
+          <div className="new-addon-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The addon '}
@@ -326,19 +326,19 @@ export default class NewAddon extends Component {
       provisioningStyle.display = 'block';
     }
 
-    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={provisionStyle}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel optional={stepIndex > 0 && renderCaption(service.label)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(service.label)}>
                 Select Addon Service
               </StepLabel>
             </Step>
             <Step>
-              <StepLabel optional={stepIndex > 1 && renderCaption(plan.human_name)}>
+              <StepLabel className="step-1-label"optional={stepIndex > 1 && renderCaption(plan.human_name)}>
                 Select Plan
               </StepLabel>
             </Step>

@@ -181,7 +181,7 @@ export default class NewOrg extends Component {
         );
       case 2:
         return (
-          <div>
+          <div className="new-org-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The new org '}
@@ -231,14 +231,14 @@ export default class NewOrg extends Component {
 
   render() {
     const { loading, stepIndex, submitFail, submitMessage, org } = this.state;
-    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
               <Step>
-                <StepLabel optional={stepIndex > 0 && renderCaption(org)}>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org)}>
                   Create org name
                 </StepLabel>
               </Step>

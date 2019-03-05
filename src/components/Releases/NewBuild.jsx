@@ -195,7 +195,7 @@ export default class NewBuild extends Component {
         );
       case 3:
         return (
-          <div>
+          <div className="new-build-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'A new build will be created from '}

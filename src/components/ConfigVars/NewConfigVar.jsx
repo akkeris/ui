@@ -163,7 +163,7 @@ export default class NewConfigVar extends Component {
         );
       case 2:
         return (
-          <div>
+          <div className="new-config-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The environment variable '}
@@ -189,19 +189,19 @@ export default class NewConfigVar extends Component {
       this.submitConfig();
     }
 
-    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel optional={stepIndex > 0 && renderCaption(key)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(key)}>
                 Key Name
               </StepLabel>
             </Step>
             <Step>
-              <StepLabel optional={stepIndex > 1 && renderCaption(value)}>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(value)}>
                 Key Value
               </StepLabel>
             </Step>
