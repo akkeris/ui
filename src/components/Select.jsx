@@ -136,7 +136,7 @@ const components = {
 
 class Select extends PureComponent {
   render() {
-    const { onChange, value, classes, theme, placeholder, options } = this.props;
+    const { onChange, value, classes, theme, placeholder, options, error } = this.props;
 
     const selectStyles = {
       input: base => ({
@@ -152,6 +152,7 @@ class Select extends PureComponent {
       <div className={classes.root}>
         <NoSsr>
           <SelectComponent
+            textFieldProps={{ error }}
             classes={classes}
             styles={selectStyles}
             options={options}
@@ -181,7 +182,12 @@ Select.propTypes = {
   options: PropTypes.array.isRequired,
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
+  error: PropTypes.bool,
 };
+
+Select.defaultProps = {
+  error: false,
+}
 /* eslint-enable */
 
 export default withStyles(styles, { withTheme: true })(Select);

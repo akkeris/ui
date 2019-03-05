@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, Radio, RadioGroup, Dialog, DialogActions,
-  FormControl, FormLabel, FormControlLabel, MenuItem,
-  Button, TextField, Select, DialogContent, Collapse,
+  Step, Stepper, StepLabel, Radio, RadioGroup,
+  FormControl, FormLabel, FormControlLabel, MenuItem, Typography,
+  Button, TextField, Select, Collapse,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
+import ConfirmationModal from '../ConfirmationModal';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -45,7 +46,7 @@ const style = {
   },
   stepper: {
     width: '100%',
-    maxWidth: 700,
+    maxWidth: 800,
     margin: 'auto',
   },
   buttons: {
@@ -56,6 +57,15 @@ const style = {
     back: {
       marginRight: 12,
     },
+  },
+  stepDescription: {
+    marginTop: '24px',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
   },
 };
 
@@ -73,7 +83,7 @@ export default class NewFormation extends Component {
       sizes: [],
       size: '',
       quantity: 1,
-      type: '',
+      type: 'web',
       port: 9000,
       command: '',
       errorText: '',
@@ -119,12 +129,12 @@ export default class NewFormation extends Component {
     } else if ((stepIndex === 3 && this.state.command === '' && this.state.type === 'worker') || (stepIndex === 3 && this.state.port === null && this.state.type === 'web')) {
       this.setState({ errorText: 'Field required' });
     } else if (!this.state.loading) {
-      if (stepIndex === 3) {
+      if (stepIndex === 4) {
         this.submitFormation();
       }
       this.setState({
         stepIndex: stepIndex + 1,
-        loading: stepIndex >= 3,
+        loading: stepIndex >= 4,
         errorText: '',
       });
     }
@@ -209,52 +219,49 @@ export default class NewFormation extends Component {
   }
 
   renderStepContent(stepIndex) {
+    const { type, quantity, size, port, errorText, command } = this.state;
     switch (stepIndex) {
       case 0:
         return (
           <div>
-            {/* <h3 className="type-header" >Type</h3> */}
-            <div>
-              <TextField
-                className="new-type"
-                label="Type"
-                type="text"
-                value={this.state.type}
-                onChange={this.handleChange('type')}
-                error={this.state.errorText.length > 0}
-                helperText={this.state.errorText}
-              />
-              <p>
-                Enter a name for your new dyno.
-              </p>
-            </div>
+            <TextField
+              className="new-type"
+              label="Type"
+              type="text"
+              value={type}
+              onChange={this.handleChange('type')}
+              error={errorText.length > 0}
+              helperText={errorText}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
+            />
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Enter a name for your new dyno.'}
+            </Typography>
           </div>
         );
       case 1:
         return (
           <div>
-            <Select className="new-dropdown" value={this.state.quantity} onChange={this.handleChange('quantity')}>
+            <Select className="new-dropdown" value={quantity} onChange={this.handleChange('quantity')}>
               {this.renderQuantity()}
             </Select>
-            <p>
-              Select the amount of instances for your app.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Select the number of dyno instances to be created.'}
+            </Typography>
           </div>
         );
       case 2:
         return (
           <div>
             <FormControl component="fieldset">
-              <FormLabel
-                component="h1"
-                style={{ color: 'black' }}
-              >
+              <FormLabel component="h1" style={{ color: 'black' }}>
                 Sizes
               </FormLabel>
               <RadioGroup
                 name="sizeSelect"
                 className="new-size"
-                value={this.state.size}
+                value={size}
                 onChange={this.handleChange('size')}
               >
                 {this.renderSizes()}
@@ -263,29 +270,79 @@ export default class NewFormation extends Component {
           </div>
         );
       case 3:
-        if (this.state.type === 'web') {
-          const port = this.state.port === null ? '' : this.state.port;
+        if (type === 'web') {
+          const p = port === null ? '' : port;
           return (
             <div>
-              <TextField className="new-port" label="Port" type="numeric" value={port} onChange={this.handleChange('port')} error={this.state.errorText.length > 0} helperText={this.state.errorText} />
-              <p>
-                Specify the port that your app will run on
-                (If your app listens to $PORT, then leave default)
-              </p>
+              <TextField
+                className="new-port"
+                label="Port"
+                type="numeric"
+                value={p}
+                onChange={this.handleChange('port')}
+                error={errorText.length > 0}
+                helperText={errorText}
+                onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+                autoFocus
+              />
+              <Typography variant="body1" style={style.stepDescription}>
+                {`
+                  Specify the port that your app will run on.
+                  If your app listens to $PORT, then leave default.
+                `}
+              </Typography>
             </div>
           );
         }
         return (
           <div>
-            <TextField className="new-command" label="Command" value={this.state.command || ''} onChange={this.handleChange('command')} error={this.state.errorText.length > 0} helperText={this.state.errorText} />
-            <p>
+            <TextField
+              className="new-command"
+              label="Command"
+              value={command || ''}
+              onChange={this.handleChange('command')}
+              error={errorText.length > 0}
+              helperText={errorText}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
+            />
+            <Typography variant="body1" style={style.stepDescription}>
+              {`
                 The command to run when the build image spins up,
                 this if left off will default to the RUN command in the docker image.
-            </p>
+              `}
+            </Typography>
+          </div>
+        );
+      case 4:
+        return (
+          <div className="new-formation-summary">
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'['}
+              <span style={style.bold}>{quantity}</span>
+              {'] '}
+              <span style={style.bold}>{type}</span>
+              {' dyno(s) will be created with size  '}
+              <span style={style.bold}>{size}</span>
+              {', and will '}
+              {type === 'web' && port === 9000 && 'use the default port.'}
+              {type === 'web' && port !== 9000 && (
+                <React.Fragment>
+                  {'use port '}<span style={style.bold}>{port}</span>{'.'}
+                </React.Fragment>
+              )}
+              {type !== 'web' && command === '' && 'use the RUN command in the docker image.'}
+              {type !== 'web' && command !== '' && (
+                <React.Fragment>
+                  {'run "'}<span style={style.bold}>{command}</span>{'".'}
+                </React.Fragment>
+              )}
+            </Typography>
           </div>
         );
       // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
-      case 4:
+      case 5:
         return '';
       default:
         return 'You\'re a long way from home sonny jim!';
@@ -316,7 +373,7 @@ export default class NewFormation extends Component {
             color="primary"
             onClick={this.handleNext}
           >
-            {stepIndex === 3 ? 'Finish' : 'Next'}
+            {stepIndex === 4 ? 'Finish' : 'Next'}
           </Button>
         </div>
       </div>
@@ -324,47 +381,48 @@ export default class NewFormation extends Component {
   }
 
   render() {
-    const { loading, stepIndex } = this.state;
+    const {
+      loading, stepIndex, submitFail, submitMessage,
+      type, quantity, size,
+    } = this.state;
+
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
+
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel>Select Type</StepLabel>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type)}>
+                Select Type</StepLabel>
             </Step>
             <Step>
-              <StepLabel>Select Quantity</StepLabel>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(quantity)}>
+                Select Quantity</StepLabel>
             </Step>
             <Step>
-              <StepLabel>Select Size</StepLabel>
+              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(size)}>
+                Select Size</StepLabel>
             </Step>
             <Step>
-              <StepLabel>Describe Port/Command</StepLabel>
+              <StepLabel> {/* optional={stepIndex > 3 && renderCaption(service.label)}> */}
+                Describe Port/Command</StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>
+                Confirm</StepLabel>
             </Step>
           </Stepper>
-          {
-            <Collapse in={!loading}>
-              {this.renderContent()}
-            </Collapse>
-          }
-          <Dialog
+          <Collapse in={!loading}>
+            {this.renderContent()}
+          </Collapse>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
             className="new-error"
-            open={this.state.submitFail}
-          >
-            <DialogContent>
-              {this.state.submitMessage}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                label="Ok"
-                color="primary"
-                onClick={this.handleClose}
-              >
-                Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
+          />
         </div>
       </MuiThemeProvider>
     );

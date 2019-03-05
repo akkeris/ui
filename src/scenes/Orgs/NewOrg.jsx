@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper,
-  Dialog, DialogTitle, DialogContent, DialogActions,
+  Typography,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 import History from '../../config/History';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -26,7 +27,7 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,
@@ -37,10 +38,20 @@ const style = {
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
+    width: '100%',
   },
   div: {
     width: '100%',
     margin: 'auto',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  stepDescription: {
+    marginTop: '24px',
   },
 };
 
@@ -65,12 +76,17 @@ export default class NewOrg extends Component {
     } else {
       const { stepIndex } = this.state;
       if (!this.state.loading) {
-        this.setState({
-          loading: stepIndex >= 1,
-          stepIndex: stepIndex + 1,
-          finished: stepIndex >= 1,
-          errorText: null,
-        });
+        if (stepIndex + 1 <= 2) {
+          this.setState({
+            stepIndex: stepIndex + 1,
+            errorText: null,
+          });
+        } else {
+          this.setState({
+            finished: true,
+            loading: true,
+          });
+        }
       }
     }
   };
@@ -122,6 +138,7 @@ export default class NewOrg extends Component {
   };
 
   renderStepContent(stepIndex) {
+    const { org, errorText, description } = this.state;
     switch (stepIndex) {
       case 0:
         return (
@@ -129,15 +146,19 @@ export default class NewOrg extends Component {
             <TextField
               className="org-name"
               label="Org name"
-              value={this.state.org}
+              value={org}
               onChange={this.handleOrgChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
+              error={!!errorText}
+              helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Create an akkeris org! Enter a name that will define your org.
-              This org will be used for attribution and grouping of apps/spaces.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {`
+                Create an akkeris org! Enter a name that will define your org.
+                This org will be used for attribution and grouping of apps/spaces.
+              `}
+            </Typography>
           </div>
         );
       case 1:
@@ -146,18 +167,31 @@ export default class NewOrg extends Component {
             <TextField
               className="org-description"
               label="Org description"
-              value={this.state.description}
+              value={description}
               onChange={this.handleDescriptionChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
+              error={!!errorText}
+              helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Give a description of your org.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Give a description of your org.'}
+            </Typography>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="new-org-summary">
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The new org '}
+              <span style={style.bold}>{org}</span>
+              {' will be created.'}
+            </Typography>
           </div>
         );
       // need this otherwise "You're a long way ..." shows up when you hit finish
-      case 2:
+      case 3:
         return '';
       default:
         return 'You\'re a long way from home sonny jim!';
@@ -189,46 +223,42 @@ export default class NewOrg extends Component {
             className="next"
             color="primary"
             onClick={this.handleNext}
-          >{stepIndex === 1 ? 'Submit' : 'Next'}</Button>
+          >{stepIndex === 2 ? 'Submit' : 'Next'}</Button>
         </div>
       </div>
     );
   }
 
   render() {
-    const { loading, stepIndex } = this.state;
-
+    const { loading, stepIndex, submitFail, submitMessage, org } = this.state;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
               <Step>
-                <StepLabel>Create org name</StepLabel>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org)}>
+                  Create org name
+                </StepLabel>
               </Step>
               <Step>
-                <StepLabel>Describe org </StepLabel>
+                <StepLabel>Describe org</StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>Confirm</StepLabel>
               </Step>
             </Stepper>
-            {
-              <Collapse in={!loading}>
-                {this.renderContent()}
-              </Collapse>
-            }
-            <Dialog
+            <Collapse in={!loading}>
+              {this.renderContent()}
+            </Collapse>
+            <ConfirmationModal
+              open={submitFail}
+              onOk={this.handleClose}
+              message={submitMessage}
+              title="Error"
               className="error"
-              open={this.state.submitFail}
-            >
-              <DialogTitle>Error</DialogTitle>
-              <DialogContent>{this.state.submitMessage}</DialogContent>
-              <DialogActions>
-                <Button
-                  className="ok"
-                  color="primary"
-                  onClick={this.handleClose}
-                >OK</Button>
-              </DialogActions>
-            </Dialog>
+            />
           </div>
         </Paper>
       </MuiThemeProvider>

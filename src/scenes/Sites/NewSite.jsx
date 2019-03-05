@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Switch,
-  Dialog, DialogContent, DialogTitle, DialogActions, DialogContentText,
+  Typography,
   FormControl, FormControlLabel, RadioGroup, Radio,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 import History from '../../config/History';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -23,7 +24,7 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,
@@ -34,6 +35,7 @@ const style = {
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
+    width: '100%',
   },
   div: {
     width: '100%',
@@ -44,6 +46,15 @@ const style = {
   },
   error: {
     color: 'red',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  stepDescription: {
+    marginTop: '24px',
   },
 };
 
@@ -101,7 +112,7 @@ export default class NewSite extends Component {
     } else {
       const { stepIndex } = this.state;
       if (!this.state.loading) {
-        if (stepIndex + 1 <= 2) {
+        if (stepIndex + 1 <= 3) {
           this.setState({
             stepIndex: stepIndex + 1,
             errorText: null,
@@ -147,6 +158,7 @@ export default class NewSite extends Component {
   };
 
   renderStepContent(stepIndex) {
+    const { domain, errorText, region, internal } = this.state;
     switch (stepIndex) {
       case 0:
         return (
@@ -154,15 +166,17 @@ export default class NewSite extends Component {
             <TextField
               className="site-name"
               label="Domain Name"
-              value={this.state.domain}
+              value={domain}
               onChange={this.handleDomainChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
+              error={!!errorText}
+              helperText={errorText || ''}
               style={{ minWidth: '50%' }}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-                The domain name of a site must only use alphanumerics, hyphens and periods.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The domain name of a site must only use alphanumerics, hyphens and periods.'}
+            </Typography>
           </div>
         );
       case 1:
@@ -174,14 +188,14 @@ export default class NewSite extends Component {
                 aria-label="Select Region"
                 name="region-radio-group"
                 className="region-radio-group"
-                value={this.state.region}
+                value={region}
                 onChange={this.handleRegionChange}
               >
                 {this.renderRegions()}
               </RadioGroup>
             </FormControl>
-            {this.state.errorText !== '' && (
-              <p style={style.error}>{this.state.errorText}</p>
+            {errorText !== '' && (
+              <p style={style.error}>{errorText}</p>
             )}
           </div>
         );
@@ -191,7 +205,7 @@ export default class NewSite extends Component {
             <FormControlLabel
               control={
                 <Switch
-                  checked={this.state.internal}
+                  checked={internal}
                   onChange={this.handleToggleInternal}
                   value="internal"
                   className="toggle"
@@ -199,8 +213,28 @@ export default class NewSite extends Component {
               }
               label="Internal"
             />
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Select whether you want your site to route to internal or external apps.'}
+            </Typography>
           </div>
         );
+      case 3:
+        return (
+          <div className="new-site-summary">
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The '}
+              <span style={style.bold}>{internal ? 'internal' : 'external'}</span>
+              {' site '}
+              <span style={style.bold}>{domain}</span>
+              {' will be created in the region '}
+              <span style={style.bold}>{region}</span>
+              {'.'}
+            </Typography>
+          </div>
+        );
+      case 4:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -241,46 +275,49 @@ export default class NewSite extends Component {
             color="primary"
             variant="contained"
             onClick={this.handleNext}
-          >{stepIndex === 2 ? 'Finish' : 'Next'}</Button>
+          >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
   }
 
   render() {
-    const { loading, stepIndex } = this.state;
+    const { loading, stepIndex, submitFail, submitMessage, domain, region, internal } = this.state;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <Paper style={style.paper}>
           <div style={style.div}>
             <Stepper activeStep={stepIndex}>
               <Step>
-                <StepLabel>Create domain</StepLabel>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain)}>
+                  Create domain
+                </StepLabel>
               </Step>
               <Step>
-                <StepLabel>Select Region</StepLabel>
+                <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(region)}>
+                  Select Region
+                </StepLabel>
               </Step>
               <Step>
-                <StepLabel>Select Internal</StepLabel>
+                <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(internal ? 'internal' : 'external')}>
+                  Select Availability
+                </StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>Confirm</StepLabel>
               </Step>
             </Stepper>
             <Collapse in={!loading}>
               {this.renderContent()}
             </Collapse>
-            <Dialog
+            <ConfirmationModal
+              open={submitFail}
+              onOk={this.handleClose}
+              message={submitMessage}
+              title="Error"
               className="error"
-              open={this.state.submitFail}
-            >
-              <DialogTitle>Error</DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  {this.state.submitMessage}
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button className="ok" color="primary" onClick={this.handleClose}>Ok</Button>
-              </DialogActions>
-            </Dialog>
+            />
           </div>
         </Paper>
       </MuiThemeProvider>

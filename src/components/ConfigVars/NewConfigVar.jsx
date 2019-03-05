@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse,
-  Dialog, DialogTitle, DialogContent, DialogActions,
+  Typography,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import ConfirmationModal from '../ConfirmationModal';
 
 import api from '../../services/api';
 
@@ -31,6 +32,15 @@ const style = {
     back: {
       marginRight: 12,
     },
+  },
+  stepDescription: {
+    marginTop: '24px',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
   },
 };
 
@@ -62,8 +72,8 @@ export default class NewConfigVar extends Component {
     } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 1,
-        loading: stepIndex >= 1,
+        finished: stepIndex >= 2,
+        loading: stepIndex >= 2,
         errorText: null,
       });
     }
@@ -111,6 +121,7 @@ export default class NewConfigVar extends Component {
   }
 
   renderStepContent(stepIndex) {
+    const { key, errorText, value } = this.state;
     switch (stepIndex) {
       case 0:
         return (
@@ -118,14 +129,16 @@ export default class NewConfigVar extends Component {
             <TextField
               className="config-key"
               label="Key"
-              value={this.state.key}
+              value={key}
               onChange={this.handleKeyTextChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
+              error={!!errorText}
+              helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Config Var Key
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Config Var Key'}
+            </Typography>
           </div>
         );
       case 1:
@@ -136,93 +149,94 @@ export default class NewConfigVar extends Component {
               label="Value"
               multiline
               fullWidth
-              value={this.state.value}
+              value={value}
               onChange={this.handleValueChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
+              error={!!errorText}
+              helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Config Var Value
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Config Var Value'}
+            </Typography>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="new-config-summary">
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The environment variable '}
+              <span style={style.bold}>{key}</span>
+              {' = '}
+              <span style={style.bold}>{value}</span>
+              {' will be added to this app.'}
+            </Typography>
           </div>
         );
         // need this otherwise "You're a long way ..." shows up when you hit finish
-      case 2:
+      case 3:
         return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
   }
 
-  renderContent() {
-    const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 16px', overflow: 'hidden' };
+  render() {
+    const { loading, stepIndex, submitFail, submitMessage, finished, key, value } = this.state;
+    const contentStyle = { margin: '0 56px' };
     if (finished) {
       this.submitConfig();
     }
 
-    return (
-      <div style={contentStyle}>
-        <div>{this.renderStepContent(stepIndex)}</div>
-        <div style={style.buttons.div}>
-          {stepIndex > 0 && (
-            <Button
-              className="back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.back}
-            >Back</Button>
-          )}
-          <Button
-            variant="contained"
-            className="next"
-            color="primary"
-            onClick={this.handleNext}
-          >{stepIndex === 1 ? 'Finish' : 'Next'}</Button>
-        </div>
-      </div>
-    );
-  }
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
-  render() {
-    const { loading, stepIndex } = this.state;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel>Describe Var</StepLabel>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(key)}>
+                Key Name
+              </StepLabel>
             </Step>
             <Step>
-              <StepLabel>Input Value</StepLabel>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(value)}>
+                Key Value
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
             </Step>
           </Stepper>
-          {
-            <Collapse in={!loading}>
-              {this.renderContent()}
-            </Collapse>
-          }
-          <Dialog
+          <Collapse in={!loading}>
+            <div style={contentStyle}>
+              <div>{this.renderStepContent(stepIndex)}</div>
+              <div style={style.buttons.div}>
+                {stepIndex > 0 && (
+                  <Button
+                    className="back"
+                    disabled={stepIndex === 0}
+                    onClick={this.handlePrev}
+                    style={style.buttons.back}
+                  >Back</Button>
+                )}
+                <Button
+                  variant="contained"
+                  className="next"
+                  color="primary"
+                  onClick={this.handleNext}
+                >{stepIndex === 2 ? 'Finish' : 'Next'}</Button>
+              </div>
+            </div>
+          </Collapse>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
             className="new-config-error"
-            open={this.state.submitFail}
-          >
-            <DialogTitle>
-              Error
-            </DialogTitle>
-            <DialogContent>
-              {this.state.submitMessage}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                label="Ok"
-                color="primary"
-                onClick={this.handleClose}
-              >
-                Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
+          />
         </div>
       </MuiThemeProvider>
     );

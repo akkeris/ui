@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, Checkbox, Grid, TextField, IconButton, Typography,
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, FormControlLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, FormControlLabel,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import HelpIcon from '@material-ui/icons/Help';
 import api from '../../services/api';
 import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
+import ConfirmationModal from '../ConfirmationModal';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -73,9 +74,18 @@ const style = {
     height: '18px',
     width: '18px',
   },
+  stepDescription: {
+    marginTop: '24px',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
 };
 
-const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'released', 'crashed'];
+const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'preview-released', 'released', 'crashed'];
 
 export default class NewWebhook extends Component {
   constructor(props, context) {
@@ -148,7 +158,7 @@ export default class NewWebhook extends Component {
     } else {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 2,
+        finished: stepIndex >= 3,
         errorText: '',
       });
     }
@@ -191,6 +201,7 @@ export default class NewWebhook extends Component {
   }
 
   renderStepContent(stepIndex) {
+    const { url, events, errorText, secret, checkedAll } = this.state;
     switch (stepIndex) {
       case 0:
         return (
@@ -199,14 +210,16 @@ export default class NewWebhook extends Component {
               className="webhook-url"
               label="URL"
               type="text"
-              value={this.state.url}
+              value={url}
               onChange={this.handleChange('url')}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-              error={!!this.state.errorText}
+              helperText={errorText || ''}
+              error={!!errorText}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Enter a URL for the new webhook (defaults to http).
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Enter a URL for the new webhook (defaults to http).'}
+            </Typography>
           </div>
         );
       case 1:
@@ -235,7 +248,7 @@ export default class NewWebhook extends Component {
                         value="Check All"
                         key="Check All"
                         className="checkbox-check-all"
-                        checked={this.state.checkedAll}
+                        checked={checkedAll}
                         onChange={this.handleCheckAll}
                       />
                     }
@@ -244,9 +257,9 @@ export default class NewWebhook extends Component {
                 </Grid>
               </Grid>
             </div>
-            {this.state.errorText && (
+            {errorText && (
               <div style={style.eventsError} className="events-errorText">
-                {this.state.errorText}
+                {errorText}
               </div>
             )}
           </div>
@@ -258,18 +271,32 @@ export default class NewWebhook extends Component {
               className="webhook-secret"
               label="Secret"
               type="password"
-              value={this.state.secret}
+              value={secret}
               onChange={this.handleChange('secret')}
-              helperText={this.state.errorText ? this.state.errorText : ''}
-              errorText={this.state.errorText}
+              helperText={errorText || ''}
+              errorText={errorText}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>
-              Define a secret for calculation of SHA (optional).
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Define a secret for calculation of SHA (optional).'}
+            </Typography>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="new-webhook-summary">
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The URL '}
+              <span style={style.bold}>{url}</span>
+              {' will receive the following hooks: '}
+              <span style={style.bold}>{events.join(', ')}</span>
+            </Typography>
           </div>
         );
         // Have to have this otherwise it displays "Error- Captain Hook not found" on submit
-      case 3:
+      case 4:
         return '';
       default:
         return 'Error- Captain Hook not found';
@@ -293,10 +320,6 @@ export default class NewWebhook extends Component {
         />
       </Grid>
     ));
-  }
-
-  renderEvents() {
-    return this.state.events.map((event, idx) => <span key={event} style={style.tableRow.column.event}>{event}{idx === this.state.events.length - 1 ? '' : ','} </span>);
   }
 
   renderEventsInfoDialog() {
@@ -344,7 +367,7 @@ export default class NewWebhook extends Component {
               className="next"
               color="primary"
               onClick={this.handleNext}
-            >{stepIndex === 2 ? 'Finish' : 'Next'}</Button>
+            >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
           </div>
         </div>
       );
@@ -353,7 +376,7 @@ export default class NewWebhook extends Component {
   }
 
   render() {
-    const { stepIndex } = this.state;
+    const { stepIndex, submitFail, submitMessage } = this.state;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
@@ -367,25 +390,20 @@ export default class NewWebhook extends Component {
             <Step>
               <StepLabel>Choose Secret</StepLabel>
             </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
+            </Step>
           </Stepper>
           <div>
             {this.renderContent()}
           </div>
-          <Dialog open={this.state.submitFail} className="new-webhook-error">
-            <DialogTitle>
-              <Typography variant="h6">
-                Error
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                {this.state.submitMessage}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
-            </DialogActions>
-          </Dialog>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="new-webhook-error"
+          />
         </div>
       </MuiThemeProvider>
     );

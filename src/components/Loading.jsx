@@ -38,7 +38,7 @@ function Loading() {
         <div className="loading" style={style.refresh.div}>
           <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
         </div>
-      </MuiThemeProvider>);
+      </MuiThemeProvider>
     </div>
   );
 }

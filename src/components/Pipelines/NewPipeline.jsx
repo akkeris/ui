@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, Button, TextField, CircularProgress,
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-
+import ConfirmationModal from '../ConfirmationModal';
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
@@ -30,6 +29,9 @@ const style = {
     back: {
       marginRight: 12,
     },
+  },
+  stepDescription: {
+    marginTop: '24px',
   },
 };
 
@@ -108,8 +110,12 @@ export default class NewPipeline extends Component {
               onChange={this.handlePipelineChange}
               error={!!this.state.errorText}
               helperText={this.state.errorText ? this.state.errorText : ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>The name of the pipeline, less than 24 characters, alpha numeric only.</p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The name of the pipeline, less than 24 characters, alpha numeric only.'}
+            </Typography>
           </div>
         );
       case 1:
@@ -157,7 +163,7 @@ export default class NewPipeline extends Component {
   }
 
   render() {
-    const { stepIndex } = this.state;
+    const { stepIndex, submitFail, submitMessage } = this.state;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
@@ -167,15 +173,13 @@ export default class NewPipeline extends Component {
             </Step>
           </Stepper>
           {this.renderContent()}
-          <Dialog open={this.state.submitFail} className="new-pipeline-error">
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
-            </DialogActions>
-          </Dialog>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="new-pipeline-error"
+          />
         </div>
       </MuiThemeProvider>
     );

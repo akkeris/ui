@@ -13,7 +13,6 @@ fixture('Dashboard Page') // eslint-disable-line no-undef
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
       .click('button.login');
-
   });
 
 test('Should show tabs', async (t) => { // eslint-disable-line no-undef
@@ -43,11 +42,12 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
       // create app
       .typeText('.app-name input', 'testcafe')
       .click('button.next')
-      .click('div.dropdown')
-      .click('li.testcafe')
+      .typeText('div.select-textfield', 'testcafe')
+      .pressKey('enter')
       .click('button.next')
-      .click('div.dropdown')
-      .click('li.testcafe')
+      .typeText('div.select-textfield', 'testcafe')
+      .pressKey('enter')
+      .click('button.next')
       .click('button.next')
       .click('.space-dropdown')
       .click('#menu-space .testcafe')
@@ -76,7 +76,7 @@ test('Should allow favorite of app and addition or removal to dashboard', async 
 
     .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
     .click('button.favorite-app')
-    
+
     .navigateTo(`${baseUrl}/dashboard`)
     .expect(Selector('.favorites-list tbody').childElementCount)
     .gt(0)
@@ -86,7 +86,7 @@ test('Should allow favorite of app and addition or removal to dashboard', async 
 
     .click('.favorites-list .testcafe-testcafe')
     .click('button.favorite-app')
-    
+
     .navigateTo(`${baseUrl}/dashboard`)
     .expect(Selector('.favorites-list tbody').childElementCount)
     .eql(0);
@@ -109,11 +109,12 @@ fixture('Recents Tab') // eslint-disable-line no-undef
       // create app
       .typeText('.app-name input', 'testcafe')
       .click('button.next')
-      .click('div.dropdown')
-      .click('li.testcafe')
+      .typeText('div.select-textfield', 'testcafe')
+      .pressKey('enter')
       .click('button.next')
-      .click('div.dropdown')
-      .click('li.testcafe')
+      .typeText('div.select-textfield', 'testcafe')
+      .pressKey('enter')
+      .click('button.next')
       .click('button.next')
       .click('.space-dropdown')
       .click('#menu-space .testcafe')
@@ -150,7 +151,7 @@ test('Should allow view of recent activity and quick access to those items', asy
     .click('.config-tab')
     .click('.metrics-tab')
     .click('.logs-tab')
-    
+
     .navigateTo(`${baseUrl}/dashboard`)
     .click('.recents-tab')
     .expect(Selector('.recents-list tbody').childElementCount)

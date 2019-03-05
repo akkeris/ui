@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, TextField, Collapse, Select, MenuItem, Button,
-  Dialog, DialogTitle, DialogActions, DialogContent,
+  Step, Stepper, StepLabel, TextField, Collapse, Button, Typography,
 } from '@material-ui/core';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-
+import ConfirmationModal from '../ConfirmationModal';
+import Select from '../Select';
 import api from '../../services/api';
 
 const muiTheme = createMuiTheme({
@@ -49,6 +49,18 @@ const style = {
       marginRight: 12,
     },
   },
+  selectContainer: {
+    maxWidth: '400px',
+  },
+  stepDescription: {
+    marginTop: '24px',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
 };
 
 export default class NewRoute extends Component {
@@ -74,6 +86,7 @@ export default class NewRoute extends Component {
 
   getApps = async () => {
     const { data: apps } = await api.getApps();
+    apps.forEach((i) => { i.value = i.id; i.label = i.name; }); // eslint-disable-line
     this.setState({ apps, app: apps[0], loading: false });
   }
 
@@ -90,8 +103,8 @@ export default class NewRoute extends Component {
     } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 2,
-        loading: stepIndex >= 2,
+        finished: stepIndex >= 3,
+        loading: stepIndex >= 3,
         errorText: null,
       });
     }
@@ -122,10 +135,7 @@ export default class NewRoute extends Component {
 
   handleAppChange = (event) => {
     const { apps } = this.state;
-    const id = event.target.value;
-    this.setState({
-      app: apps.find(i => i.id === id),
-    });
+    this.setState({ app: apps.find(a => a.value === event.value) });
   }
 
   submitRoute = async () => {
@@ -152,13 +162,8 @@ export default class NewRoute extends Component {
     }
   }
 
-  renderApps() {
-    return this.state.apps.map(app => (
-      <MenuItem className={app.id} key={app.id} value={app.id}>{app.name}</MenuItem>
-    ));
-  }
-
   renderStepContent(stepIndex) {
+    const { apps, app, source, errorText, target } = this.state;
     switch (stepIndex) {
       case 0:
         return (
@@ -167,21 +172,32 @@ export default class NewRoute extends Component {
               className="source-path"
               label="Source Path"
               type="text"
-              value={this.state.source}
+              value={source}
               onChange={this.handleSourceChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
+              error={!!errorText}
+              helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>Path of route after domain ex. `/` or `/source`.</p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Path of route after domain ex. \'/\' or \'/source\'.'}
+            </Typography>
           </div>
         );
       case 1:
         return (
           <div>
-            <Select className="new-dropdown" value={this.state.app.id} onChange={this.handleAppChange}>
-              {this.renderApps()}
-            </Select>
-            <p>The app to route to.</p>
+            <div style={style.selectContainer}>
+              <Select
+                options={apps}
+                value={app}
+                onChange={this.handleAppChange}
+                placeholder="Search for an app"
+              />
+            </div>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The app to route to.'}
+            </Typography>
           </div>
         );
       case 2:
@@ -191,14 +207,35 @@ export default class NewRoute extends Component {
               className="target-path"
               label="Target Path"
               type="text"
-              value={this.state.target}
+              value={target}
               onChange={this.handleTargetChange}
-              error={!!this.state.errorText}
-              helperText={this.state.errorText ? this.state.errorText : ''}
+              error={!!errorText}
+              helperText={errorText || ''}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <p>The path on the app to route to.</p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The path on the app to route to.'}
+            </Typography>
           </div>
         );
+      case 3:
+        return (
+          <div>
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The source path '}
+              <span style={style.bold}>{source}</span>
+              {' will be routed to the destination path '}
+              <span style={style.bold}>{target}</span>
+              {' on the app '}
+              <span style={style.bold}>{app.label}</span>
+              {'.'}
+            </Typography>
+          </div>
+        );
+      case 4:
+        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -206,11 +243,10 @@ export default class NewRoute extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 32px' };
     if (finished) {
       this.submitRoute();
     }
-
     return (
       <div style={contentStyle}>
         <div>{this.renderStepContent(stepIndex)}</div>
@@ -231,7 +267,7 @@ export default class NewRoute extends Component {
             color="primary"
             onClick={this.handleNext}
           >
-            {stepIndex === 2 ? 'Finish' : 'Next'}
+            {stepIndex === 3 ? 'Finish' : 'Next'}
           </Button>
         </div>
       </div>
@@ -239,40 +275,45 @@ export default class NewRoute extends Component {
   }
 
   render() {
-    const { loading, stepIndex } = this.state;
+    const {
+      loading, stepIndex, submitFail, submitMessage, source, app, target,
+    } = this.state;
+
+    const renderCaption = text => <Typography variant="caption">{text}</Typography>;
+
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel>Input Source</StepLabel>
+              <StepLabel optional={stepIndex > 0 && renderCaption(source)}>
+                Input Source
+              </StepLabel>
             </Step>
             <Step>
-              <StepLabel>Select App</StepLabel>
+              <StepLabel optional={stepIndex > 1 && renderCaption(app.name)}>
+                Select App
+              </StepLabel>
             </Step>
             <Step>
-              <StepLabel>Input Target</StepLabel>
+              <StepLabel optional={stepIndex > 2 && renderCaption(target)}>
+                Input Target
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
             </Step>
           </Stepper>
-          {
-            <Collapse in={!loading}>
-              {this.renderContent()}
-            </Collapse>
-          }
-          <Dialog
-            className="new-addon-error"
-            open={this.state.submitFail}
-          >
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>{this.state.submitMessage}</DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={this.handleClose}
-              >OK</Button>
-            </DialogActions>
-          </Dialog>
+          <Collapse in={!loading}>
+            {this.renderContent()}
+          </Collapse>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="new-route-error"
+          />
         </div>
       </MuiThemeProvider>
     );

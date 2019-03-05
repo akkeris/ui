@@ -61,6 +61,7 @@ const style = {
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '12px',
+    overflow: 'visible',
   },
   rightIcon: {
     float: 'right',
