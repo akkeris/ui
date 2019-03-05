@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
+import History from '../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -60,11 +61,10 @@ export default class RecentsList extends Component {
         </TableRow>
       ));
     }
-
   }
 
   handleRowSelection = (recent) => {
-    window.location = `/${recent.type}/${recent.item}/info`;
+    History.get().push(`/${recent.type}/${recent.item}/info`);
   }
 
   handleChangePage = (event, page) => {
