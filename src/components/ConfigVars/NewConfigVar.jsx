@@ -104,7 +104,7 @@ export default class NewConfigVar extends Component {
 
   submitConfig = async () => {
     try {
-      await api.patchConfig(this.props.app, this.state.key, this.state.value);
+      await api.patchConfig(this.props.app, this.state.key.trim(), this.state.value.trim());
       this.props.onComplete('Added Config Var');
     } catch (error) {
       this.setState({
