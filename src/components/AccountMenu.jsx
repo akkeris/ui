@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Avatar, Menu, MenuItem } from '@material-ui/core';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
+import History from '../config/History';
 
 const style = {
   avatar: {
@@ -43,11 +44,12 @@ export default class AccountMenu extends Component {
   };
 
   logout = () => {
+    // can't use history here because we want it to route to Express
     window.location = '/logout';
   }
 
   account = () => {
-    window.location = '/user';
+    History.get().push('/user');
   }
 
   handleRequestClose = () => {

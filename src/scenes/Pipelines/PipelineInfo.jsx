@@ -15,6 +15,7 @@ import api from '../../services/api';
 import util from '../../services/util';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { Stage } from '../../components/Pipelines';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -104,51 +105,37 @@ export default class PipelineInfo extends Component {
       message: '',
       pipeline: null,
       currentTab: 'review',
-      baseHash: `#/pipelines/${this.props.match.params.pipeline}/`,
       basePath: `/pipelines/${this.props.match.params.pipeline}`,
     };
   }
 
   componentDidMount() {
     this.getPipeline();
-    util.updateHistory('pipeline', this.props.match.params.pipeline);
   }
 
   componentDidUpdate(prevProps) {
-    // If we changed locations AND it was a 'pop' history event (back or forward button)
-    const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
-    if (routeHasChanged && this.props.history.action === 'POP') {
-      // If hitting back took us to the base path without a tab, hit back again
-      // TODO: what if we hit forward to the base path?
-      //    detect forward click and do window.history.forward()
-      if (this.props.location.pathname === `${this.state.basePath}` ||
-          this.props.location.pathname === `${this.state.basePath}/`) {
-        window.history.back();
-        return;
+    // If we changed tabs through the back or forward button, update currentTab
+    if (prevProps.match.params.tab !== this.props.match.params.tab && this.props.history.action === 'POP') {
+      let currentTab = this.props.match.params.tab;
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'review';
+        history.replaceState(null, '', `${this.state.basePath}/review`);
       }
-      const hashPath = window.location.hash;
-      if (hashPath.includes(this.state.baseHash)) {
-        let currentTab = hashPath.replace(this.state.baseHash, '');
-        if (!tabs.includes(currentTab)) {
-          currentTab = 'review';
-          window.location = `${this.state.baseHash}review`;
-        }
-        // Since we check conditions before setState we avoid infinite loops
-        this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
-      }
+      this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
     }
   }
 
   getPipeline = async () => {
     try {
       const { data: pipeline } = await api.getPipeline(this.props.match.params.pipeline);
-      const hashPath = window.location.hash;
-      let currentTab = hashPath.replace(this.state.baseHash, '');
-      if (!tabs.includes(currentTab)) {
+      // If current tab not provided or invalid, rewrite it to be /review
+      let currentTab = this.props.match.params.tab;
+      if (!currentTab || !tabs.includes(currentTab)) {
         currentTab = 'review';
-        window.location.hash = `${this.state.baseHash}review`;
+        history.replaceState(null, '', `${this.state.basePath}/review`);
       }
       this.setState({ currentTab, pipeline, loading: false });
+      util.updateHistory('pipelines', pipeline.id, pipeline.name);
     } catch (error) {
       this.setState({
         submitFail: true,
@@ -160,7 +147,7 @@ export default class PipelineInfo extends Component {
   handleRemovePipeline = async () => {
     try {
       await api.deletePipeline(this.props.match.params.pipeline);
-      window.location = '#/pipelines';
+      History.get().push('/pipelines');
     } catch (error) {
       this.handleError(error.response.data);
     }
@@ -173,7 +160,7 @@ export default class PipelineInfo extends Component {
   }
 
   handleNotFoundClose = () => {
-    window.location = '/#/pipelines';
+    History.get().push('/pipelines');
   }
 
   handleConfirmation = () => {
@@ -211,7 +198,7 @@ export default class PipelineInfo extends Component {
       this.setState({
         currentTab: newTab,
       });
-      this.props.history.push(`${newTab}`);
+      history.pushState(null, '', `${this.state.basePath}/${newTab}`);
     }
   }
 
@@ -376,5 +363,4 @@ export default class PipelineInfo extends Component {
 PipelineInfo.propTypes = {
   match: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  location: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

@@ -9,6 +9,7 @@ import RemoveIcon from '@material-ui/icons/Clear';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -89,7 +90,7 @@ export default class SiteOverview extends Component {
   handleRemoveSite = async () => {
     try {
       await api.deleteSite(this.props.site.domain);
-      window.location = '#/sites';
+      History.get().push('/sites');
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

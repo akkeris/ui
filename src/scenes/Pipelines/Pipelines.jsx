@@ -11,6 +11,7 @@ import { NewPipeline } from '../../components/Pipelines';
 import api from '../../services/api';
 import util from '../../services/util';
 import Search from '../../components/Search';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -113,11 +114,11 @@ class Pipelines extends Component {
   }
 
   handleRowSelection = (id) => {
-    window.location = `#/pipelines/${id}/review`;
+    History.get().push(`/pipelines/${id}/review`);
   }
 
   handleSearch = (searchText) => {
-    window.location = `#/pipelines/${searchText}/review`;
+    History.get().push(`/pipelines/${searchText}/review`);
   }
 
   handleNewPipeline = () => {

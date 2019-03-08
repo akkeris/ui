@@ -12,6 +12,7 @@ import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
+import History from '../../config/History';
 
 function addRestrictedTooltip(title, children) {
   return (
@@ -50,6 +51,7 @@ const muiTheme = createMuiTheme({
 const style = {
   link: {
     color: 'rgba(0, 0, 0, 0.54)',
+    textDecoration: 'none',
   },
   currentImage: {
     visible: {
@@ -174,7 +176,7 @@ class AppOverview extends Component {
   handleRemoveApp = async () => {
     try {
       await api.deleteApp(this.props.app.name);
-      window.location = '#/apps';
+      History.get().push('/apps');
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,
@@ -264,10 +266,21 @@ class AppOverview extends Component {
             </GridListTile>
           </GridList>
           <ListItemText
-            style={this.props.app.image ? style.currentImage.visible : style.currentImage.hidden}
+            style={this.props.app.repo ? style.currentImage.visible : style.currentImage.hidden}
             primary="Current Image"
             secondary={this.props.app.image}
           />
+          {this.props.app.git_url && (
+            <ListItemText
+              style={style.currentImage.visible}
+              primary="Git"
+              secondary={
+                <a style={style.link} href={this.props.app.git_url}>
+                  {this.props.app.git_url}
+                </a>
+              }
+            />
+          )}
           <Table>
             <TableBody>
               <TableRow>

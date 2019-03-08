@@ -11,6 +11,7 @@ import api from '../../services/api';
 import AppList from '../../components/Apps/AppList';
 import util from '../../services/util';
 import Search from '../../components/Search';
+import History from '../../config/History';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
@@ -119,6 +120,7 @@ export default class Apps extends Component {
       space: '',
       region: '',
       apps: [],
+      favorites: [],
       filteredApps: [],
       filteredSpaces: [],
       spaces: [],
@@ -135,18 +137,20 @@ export default class Apps extends Component {
     const { data: spaces } = await api.getSpaces();
     const { data: regions } = await api.getRegions();
     const { data: apps } = await api.getApps();
+    const { data: favorites } = await api.getFavorites();
     this.setState({
       spaces,
       filteredSpaces: spaces,
       regions,
       apps,
       filteredApps: apps,
+      favorites,
       loading: false,
     });
   }
 
   handleSearch = (searchText) => {
-    window.location = `#/apps/${searchText}/info`;
+    History.get().push(`/apps/${searchText}/info`);
   }
 
   handleSpaceChange = (event) => {
@@ -236,7 +240,7 @@ export default class Apps extends Component {
             </Link>
           </Toolbar>
           <Paper style={style.paper}>
-            <AppList className="apps" apps={this.state.filteredApps} />
+            <AppList className="apps" apps={this.state.filteredApps} favorites={this.state.favorites} />
           </Paper>
         </div>
       </MuiThemeProvider>

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, Collapse,
+  Step, Stepper, StepLabel, Collapse, Typography,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
@@ -32,6 +32,9 @@ const style = {
     back: {
       marginRight: 12,
     },
+  },
+  stepDescription: {
+    marginTop: '24px',
   },
 };
 
@@ -103,9 +106,9 @@ export default class NewPipelineCoupling extends Component {
               color="black"
               errorText={this.state.errorText}
             />
-            <p>
-              The application name or id to add to the pipeline. Ex. my-test-app-dev
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The application name or id to add to the pipeline (e.g. my-test-app-dev).'}
+            </Typography>
           </div>
         );
       case 1:
@@ -115,23 +118,14 @@ export default class NewPipelineCoupling extends Component {
     }
   }
 
-  renderContent() {
-    const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 0 40px 57px' };
+  render() {
+    const { finished, loading, stepIndex } = this.state;
 
     if (finished) {
       this.submitPipelineCoupling();
     }
 
-    return (
-      <div style={contentStyle}>
-        <div>{this.renderStepContent(stepIndex)}</div>
-      </div>
-    );
-  }
-
-  render() {
-    const { loading, stepIndex } = this.state;
+    const contentStyle = { margin: '0 0 40px 57px' };
 
     return (
       <MuiThemeProvider theme={muiTheme}>
@@ -142,7 +136,9 @@ export default class NewPipelineCoupling extends Component {
             </Step>
           </Stepper>
           <Collapse in={!loading}>
-            {this.renderContent()}
+            <div style={contentStyle}>
+              <div>{this.renderStepContent(stepIndex)}</div>
+            </div>
           </Collapse>
         </div>
       </MuiThemeProvider>

@@ -31,20 +31,59 @@ app.use(session({
   name: 'akkeris',
 }));
 app.use(bodyParser.json());
+
 app.get('/log-plex/:id', (req, res) => {
   res.append('content-type', 'application/octet-stream');
-  const proxyRequest = https.request(req.params.id, (proxyRes) => {
-    proxyRes.on('data', (chunk) => {
-      res.write(chunk);
-    });
-    req.on('close', () => {
-      proxyRes.destroy();
-    });
-  });
-  proxyRequest.on('error', (err) => {
-    console.log('log proxy oops: ', err);
+  let streamRestarts = 0;
+  let proxyRequest;
+
+  // Stop sending logs from logplex to client
+  const handleAbort = () => {
+    proxyRequest.abort();
     res.end();
-  });
+  };
+
+  // Stop sending logs from logplex to client and send 504 error
+  const handleError = () => {
+    proxyRequest.abort(); // Stop receiving logs from logplex
+    res.status(504).end(); // Stop sending to client
+  };
+
+  // Create logplex proxy
+  const setupStream = () => (
+    https.request(req.params.id, (proxyRes) => {
+      proxyRes.on('data', chunk => res.write(chunk)); // Write incoming data to the client
+    })
+  );
+
+  // Restart sending of logs from logplex to client
+  const handleClose = () => {
+    if (proxyRequest.aborted) {
+      return; // Don't restart if we've stopped sending
+    }
+    streamRestarts++;
+    if (streamRestarts > 25) {
+      handleError();
+    } else {
+      proxyRequest.abort();
+      // Restart stream after waiting for 1 second
+      setTimeout(() => {
+        proxyRequest = setupStream(req, res);
+        proxyRequest.on('close', handleClose);
+        proxyRequest.on('error', handleClose);
+        proxyRequest.setNoDelay(true);
+        proxyRequest.end();
+      }, 1000);
+    }
+  };
+
+  proxyRequest = setupStream(req, res);
+  // If client ends the connection, stop sending logs
+  req.on('end', handleAbort);
+  req.on('close', handleAbort);
+  // If logplex ends the connection, restart it
+  proxyRequest.on('close', handleClose);
+  proxyRequest.on('error', handleClose);
   proxyRequest.setNoDelay(true);
   proxyRequest.end();
 });
@@ -72,7 +111,6 @@ app.get('/oauth/callback', (req, res) => {
   });
 });
 
-
 /* eslint-disable no-param-reassign */
 app.use('/account', proxy(`${authEndpoint}/user`, {
   proxyReqOptDecorator(reqOpts, srcReq) {
@@ -98,17 +136,6 @@ app.use('/api', proxy(`${akkerisApi}`, {
 }));
 /* eslint-enable no-param-reassign */
 
-app.use('/app-setups', (req, res) => {
-  // If blueprint is a Base64 encoded string, decode it first.
-  let blueprint = req.query.blueprint;
-  if (/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(blueprint)) {
-    blueprint = Buffer.from(blueprint, 'base64').toString();
-  }
-  blueprint = jsonminify(blueprint);
-
-  res.redirect(`/?blueprint=${encodeURIComponent(blueprint)}#/app-setups`);
-});
-
 app.get('/logout', (req, res) => {
   req.session.token = null;
   res.redirect(`${authEndpoint}/logout`);
@@ -132,11 +159,20 @@ if (process.env.NODE_ENV === 'dev') {
   app.use(middleware);
   app.use(webpackHotMiddleware(compiler));
   app.use(express.static('public'));
+  // Required for <BrowserRouter> - fallback to index.html on 404
+  app.get('/*', (req, res) => {
+    res.sendFile(path.resolve('public', 'index.html'));
+  });
 } else {
   console.log(`${process.env.NODE_ENV} ENVIRONMENT`);
   // Production needs physical files! (built via separate process)
   app.use(express.static('build'));
+  // Required for <BrowserRouter> - fallback to index.html on 404
+  app.get('/*', (req, res) => {
+    res.sendFile(path.resolve('build', 'index.html'));
+  });
 }
+
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) {

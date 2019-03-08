@@ -22,7 +22,7 @@ import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
 
-const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'released', 'crashed'];
+const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'preview-released', 'released', 'crashed'];
 
 const muiTheme = createMuiTheme({
   palette: {

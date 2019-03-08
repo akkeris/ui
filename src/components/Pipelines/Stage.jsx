@@ -13,6 +13,7 @@ import api from '../../services/api';
 import util from '../../services/util';
 import ConfirmationModal from '../ConfirmationModal';
 import { NewPipelineCoupling } from '../../components/Pipelines';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -198,7 +199,7 @@ export default class Stage extends Component {
   }
 
   handleGoToApp = (app) => {
-    window.location = `#/apps/${app}/info`;
+    History.get().push(`/apps/${app}/info`);
   }
 
   handleNewCouplingCancel = () => {
@@ -240,7 +241,7 @@ export default class Stage extends Component {
       return (
         <TableRow hover className={coupling.app.name} key={coupling.id} style={style.tableRow}>
           <TableCell>
-            <div style={style.tableCell.title}><a style={style.link} href={`#/apps/${coupling.app.name}/info`}>{coupling.app.name}</a></div>
+            <div style={style.tableCell.title}><a style={style.link} href={`/apps/${coupling.app.name}/info`}>{coupling.app.name}</a></div>
             <div style={style.tableCell.sub}>id: {coupling.id}</div>
             {coupling.release.updated_at && (
               <div>

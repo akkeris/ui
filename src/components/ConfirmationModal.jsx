@@ -33,7 +33,7 @@ export default class ConfirmationModal extends Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.open && !this.props.open) {
-      this.setState({ loading: false });
+      this.setState({ loading: false }); // eslint-disable-line react/no-did-update-set-state
     }
   }
 
@@ -67,6 +67,7 @@ export default class ConfirmationModal extends Component {
               color="primary"
               onClick={this.onOk}
               disabled={loading}
+              autoFocus={this.props.onCancel === null}
             >
               Ok
             </Button>

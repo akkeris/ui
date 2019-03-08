@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-  Step, Stepper, StepLabel, Button, TextField, Collapse,
   FormGroup, FormControlLabel, Switch, Typography, FormControl, Radio, RadioGroup, FormLabel,
+  Step, Stepper, StepLabel, Button, TextField, Collapse,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import gh from 'parse-github-url';
+import ConfirmationModal from '../ConfirmationModal';
 
 import api from '../../services/api';
 
@@ -21,17 +22,26 @@ const muiTheme = createMuiTheme({
 const style = {
   stepper: {
     width: '100%',
-    maxWidth: 700,
+    maxWidth: 800,
     margin: 'auto',
   },
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,
     },
+  },
+  stepDescription: {
+    marginTop: '24px',
+  },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
   },
 };
 
@@ -66,8 +76,8 @@ export default class NewAutoBuild extends Component {
     } else if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 3,
-        loading: stepIndex >= 3,
+        finished: stepIndex >= 4,
+        loading: stepIndex >= 4,
         errorText: null,
       });
     }
@@ -134,6 +144,9 @@ export default class NewAutoBuild extends Component {
   }
 
   renderStepContent(stepIndex) {
+    const {
+      errorText, repo, branch, userSelection, username, token, autoDeploy, statusCheck,
+    } = this.state;
     switch (stepIndex) {
       case 0:
         return (
@@ -141,22 +154,30 @@ export default class NewAutoBuild extends Component {
             <TextField
               className="Repo"
               label="Repo"
-              value={this.state.repo}
+              value={repo}
               onChange={this.handleChange('repo')}
-              helperText={this.state.errorText}
-              error={this.state.errorText && this.state.errorText.length > 0}
+              helperText={errorText}
+              error={errorText && errorText.length > 0}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
             />
-            <Typography variant="body">
-              The repo URL (e.g., https://github.com/foo/bar)
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The repo URL (e.g. https://github.com/foo/bar).'}
             </Typography>
           </div>
         );
       case 1:
         return (
           <div>
-            <TextField label="Master" value={this.state.branch} onChange={this.handleChange('branch')} />
-            <Typography variant="body">
-              The branch on the repo to watch and deploy from
+            <TextField
+              label="Master"
+              value={branch}
+              onChange={this.handleChange('branch')}
+              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+              autoFocus
+            />
+            <Typography variant="body1" style={style.stepDescription}>
+              {'The branch on the repo to watch and deploy from.'}
             </Typography>
           </div>
         );
@@ -168,36 +189,39 @@ export default class NewAutoBuild extends Component {
               <RadioGroup
                 name="User Selection"
                 className="UserRadio"
-                value={this.state.userSelection}
+                value={userSelection}
                 onChange={this.handleChange('userSelection')}
               >
                 <FormControlLabel value="bot" control={<Radio />} label="Service Account" />
                 <FormControlLabel value="user" control={<Radio />} label="User Account" />
-                {this.state.userSelection === 'user' && (
-                  <div>
-                    <TextField
-                      label="User"
-                      value={this.state.username}
-                      onChange={this.handleChange('username')}
-                      helperText={this.state.errorText}
-                      error={this.state.errorText && this.state.errorText.length > 0}
-                    />
-                    <Typography variant="body">
-                      The username to access repo as
-                    </Typography>
-                    <TextField
-                      label="Token"
-                      value={this.state.token}
-                      onChange={this.handleChange('token')}
-                      helperText={this.state.errorText}
-                      error={this.state.errorText && this.state.errorText.length > 0}
-                    />
-                    <Typography variant="body">
-                      The users token
-                    </Typography>
-                  </div>
-                )}
               </RadioGroup>
+              {userSelection === 'user' && (
+                <div>
+                  <TextField
+                    label="User"
+                    value={username}
+                    onChange={this.handleChange('username')}
+                    helperText={errorText}
+                    error={errorText && errorText.length > 0}
+                    onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+                    autoFocus
+                  />
+                  <Typography variant="body1" style={style.stepDescription}>
+                    {'The username to access the repo as.'}
+                  </Typography>
+                  <TextField
+                    label="Token"
+                    value={token}
+                    onChange={this.handleChange('token')}
+                    helperText={errorText}
+                    error={errorText && errorText.length > 0}
+                    onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+                  />
+                  <Typography variant="body1" style={style.stepDescription}>
+                    {'The user\'s token.'}
+                  </Typography>
+                </div>
+              )}
             </FormControl>
           </div>
         );
@@ -208,7 +232,7 @@ export default class NewAutoBuild extends Component {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={this.state.autoDeploy}
+                    checked={autoDeploy}
                     onChange={this.handleAutoDeploy}
                     color="primary"
                   />
@@ -218,7 +242,7 @@ export default class NewAutoBuild extends Component {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={this.state.statusCheck}
+                    checked={statusCheck}
                     onChange={this.handleStatusCheck}
                     color="primary"
                   />
@@ -228,8 +252,34 @@ export default class NewAutoBuild extends Component {
             </FormGroup>
           </div>
         );
-      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
       case 4:
+        return (
+          <div>
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The '}
+              {userSelection === 'bot' ? (
+                <span style={style.bold}>service account</span>
+              ) : (
+                <React.Fragment>
+                  {'user '}
+                  <span style={style.bold}>{username}</span>
+                </React.Fragment>
+              )}
+              {' will be used to access the '}
+              <span style={style.bold}>{gh(repo).repo}</span>
+              {' repo, and the '}
+              <span style={style.bold}>{branch.length === 0 ? 'master' : branch}</span>
+              {' branch will be monitored for this app. Auto Deploy '}
+              <span style={style.bold}>{autoDeploy ? 'will' : 'will not'}</span>
+              {' be enabled. Status Checks '}
+              <span style={style.bold}>{statusCheck ? 'will' : 'will not'}</span>
+              {' be enabled.'}
+            </Typography>
+          </div>
+        );
+      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
+      case 5:
         return '';
       default:
         return 'You\'re a long way from home sonny jim!';
@@ -247,62 +297,70 @@ export default class NewAutoBuild extends Component {
       <div style={contentStyle}>
         <div>{this.renderStepContent(stepIndex)}</div>
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (<Button
-            className="back"
-            disabled={stepIndex === 0}
-            onClick={this.handlePrev}
-            style={style.buttons.back}
-          >Back</Button>)}
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >Back</Button>
+          )}
           <Button
             variant="contained"
             className="next"
             color="primary"
             onClick={this.handleNext}
-          >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
+          >{stepIndex === 4 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
   }
 
   render() {
-    const { loading, stepIndex } = this.state;
+    const {
+      loading, stepIndex, submitFail, submitMessage,
+      repo, branch, username, userSelection,
+    } = this.state;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
+    const account = userSelection === 'bot' ? 'Service Account' : username;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel>Input Repo</StepLabel>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(gh(repo).repo)}>
+                Input Repo
+              </StepLabel>
             </Step>
             <Step>
-              <StepLabel>Input Branch</StepLabel>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(branch.length === 0 ? 'master' : branch)}>
+                Input Branch
+              </StepLabel>
             </Step>
             <Step>
-              <StepLabel>Input GitHub User</StepLabel>
+              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(account)}>
+                Input GitHub User
+              </StepLabel>
             </Step>
             <Step>
-              <StepLabel>Options</StepLabel>
+              <StepLabel>
+                Options
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
             </Step>
           </Stepper>
-          {
-            <Collapse in={!loading}>
-              {this.renderContent()}
-            </Collapse>
-          }
-          <Dialog open={this.state.submitFail}>
-            <DialogTitle>
-              <Typography variant="h6">
-                Error
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                {this.state.submitMessage}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button label="Ok" color="primary" onClick={this.handleClose}>Ok</Button>
-            </DialogActions>
-          </Dialog>
+          <Collapse in={!loading}>
+            {this.renderContent()}
+          </Collapse>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="new-auto-build-error"
+          />
         </div>
       </MuiThemeProvider>
     );

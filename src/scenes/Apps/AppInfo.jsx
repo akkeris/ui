@@ -7,6 +7,8 @@ import {
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
 import CPUIcon from '@material-ui/icons/Memory';
+import FavoriteIcon from '@material-ui/icons/FavoriteBorder';
+import IsFavoriteIcon from '@material-ui/icons/Favorite';
 import MetricIcon from '@material-ui/icons/TrackChanges';
 import AddonIcon from '@material-ui/icons/ShoppingBasket';
 import LogIcon from '@material-ui/icons/Visibility';
@@ -25,6 +27,7 @@ import Logs from '../../components/Logs';
 import AppOverview from '../../components/Apps/AppOverview';
 import api from '../../services/api';
 import util from '../../services/util';
+import History from '../../config/History';
 
 const muiTheme = createMuiTheme({
   palette: {
@@ -50,7 +53,7 @@ const muiTheme = createMuiTheme({
       root: {
         display: 'flex',
         flexFlow: 'row-reverse',
-        padding: '0px 16px 0px 0px !important',
+        padding: '0px 13px 0px 0px !important',
       },
     },
     MuiCard: {
@@ -63,7 +66,7 @@ const muiTheme = createMuiTheme({
     },
     MuiCardHeader: {
       root: {
-        padding: '16px 16px 0px 16px !important',
+        padding: '16px 0px 0px 16px !important',
       },
       title: {
         fontSize: '15px',
@@ -80,6 +83,10 @@ const muiTheme = createMuiTheme({
 const style = {
   iconButton: {
     color: 'black',
+  },
+  favoriteButton: {
+    color: 'black',
+    marginRight: '21px',
   },
   refresh: {
     div: {
@@ -103,6 +110,7 @@ export default class AppInfo extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isFavorite: false,
       app: {},
       accountInfo: {},
       loading: true,
@@ -111,58 +119,80 @@ export default class AppInfo extends Component {
       open: false,
       message: '',
       currentTab: 'info',
-      baseHash: `#/apps/${this.props.match.params.app}/`,
       basePath: `/apps/${this.props.match.params.app}`,
     };
   }
 
-
   async componentDidMount() {
     try {
       const appResponse = await api.getApp(this.props.match.params.app);
+      const favoriteResponse = await api.getFavorites();
       const accountResponse = await api.getAccount();
-      const hashPath = window.location.hash;
-      let currentTab = hashPath.replace(this.state.baseHash, '');
-      if (!tabs.includes(currentTab)) {
+
+      // If current tab not provided or invalid, rewrite it to be /info
+      let currentTab = this.props.match.params.tab;
+      if (!currentTab || !tabs.includes(currentTab)) {
         currentTab = 'info';
-        window.location.hash = `${this.state.baseHash}info`;
+        history.replaceState(null, '', `${this.state.basePath}/info`);
       }
-      this.setState({ currentTab, app: appResponse.data, accountInfo: accountResponse.data, loading: false });
+      this.setState({
+        currentTab,
+        app: appResponse.data,
+        accountInfo: accountResponse.data,
+        isFavorite: favoriteResponse.data.findIndex(x => x.name === appResponse.data.name) > -1,
+        loading: false,
+      });
     } catch (err) {
-      this.setState({ submitMessage: err.response.data, submitFail: true });
+      this.setState({
+        submitMessage: err.response.data,
+        submitFail: true,
+      });
     }
-    util.updateHistory('app', this.props.match.params.app);
+    util.updateHistory('apps', this.props.match.params.app, this.props.match.params.app);
   }
 
   componentDidUpdate(prevProps) {
-    // If we changed locations AND it was a 'pop' history event (back or forward button)
-    const routeHasChanged = prevProps.location.pathname !== this.props.location.pathname;
-    if (routeHasChanged && this.props.history.action === 'POP') {
-      // If hitting back took us to the base path without a tab, hit back again
-      if (this.props.location.pathname === `${this.state.basePath}` ||
-          this.props.location.pathname === `${this.state.basePath}/`) {
-        window.history.back();
-        return;
+    // If we changed tabs through the back or forward button, update currentTab
+    if (prevProps.match.params.tab !== this.props.match.params.tab && this.props.history.action === 'POP') {
+      let currentTab = this.props.match.params.tab;
+      if (!tabs.includes(currentTab)) {
+        currentTab = 'info';
+        history.replaceState(null, '', `${this.state.basePath}/info`);
       }
-      const hashPath = window.location.hash;
-      if (hashPath.includes(this.state.baseHash)) {
-        let currentTab = hashPath.replace(this.state.baseHash, '');
-        if (!tabs.includes(currentTab)) {
-          currentTab = 'info';
-          window.location = `${this.state.baseHash}info`;
-        }
-        // Since we check conditions before setState we avoid infinite loops
-        this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
-      }
+      this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
     }
+  }
+
+  getFavoriteIcon() {
+    return (
+      <Tooltip title="Favorite" placement="top-end">
+        <IconButton
+          style={style.favoriteButton}
+          className="favorite-app"
+          onClick={this.handleFavorite}
+        >
+          {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
+        </IconButton>
+      </Tooltip>
+    );
   }
 
   handleClose = () => {
     this.setState({ submitFail: false });
   }
 
+  handleFavorite = () => {
+    if (this.state.isFavorite) {
+      api.deleteFavorite(this.state.app.name);
+      this.setState({ isFavorite: false });
+    } else {
+      api.createFavorite(this.state.app.name);
+      this.setState({ isFavorite: true });
+    }
+  }
+
   handleNotFoundClose = () => {
-    window.location = '/#/apps';
+    History.get().push('/apps');
   }
 
   handleRequestClose = () => {
@@ -181,7 +211,7 @@ export default class AppInfo extends Component {
       this.setState({
         currentTab: newTab,
       });
-      this.props.history.push(`${newTab}`);
+      history.pushState(null, '', `${this.state.basePath}/${newTab}`);
     }
   }
 
@@ -236,6 +266,9 @@ export default class AppInfo extends Component {
               className="header"
               title={this.state.app.name}
               subheader={this.state.app.organization.name}
+              action={
+                this.getFavoriteIcon()
+              }
             />
             <CardContent>
               <Tooltip title="Live App" placement="top-end">
@@ -404,6 +437,5 @@ export default class AppInfo extends Component {
 
 AppInfo.propTypes = {
   match: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  location: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

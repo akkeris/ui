@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   Button, Step, Stepper, StepLabel, Select, MenuItem,
-  Dialog, DialogActions, DialogContent,
+  Dialog, DialogActions, DialogContent, Typography,
 } from '@material-ui/core';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
@@ -54,6 +54,15 @@ const style = {
       marginRight: 12,
     },
   },
+  h6: {
+    marginBottom: '12px',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  stepDescription: {
+    marginTop: '24px',
+  },
 };
 
 export default class AttachAddon extends Component {
@@ -85,8 +94,11 @@ export default class AttachAddon extends Component {
   }
 
   getApps = async () => {
-    const response = await api.getApps();
-    this.setState({ apps: response.data, loading: false });
+    const { app } = this.props;
+    const { data: apps } = await api.getApps();
+    // Remove the current app from the results
+    apps.splice(apps.findIndex(i => i.name.toLowerCase() === app.toLowerCase()), 1);
+    this.setState({ apps, loading: false });
   }
 
   getAddons = async (prevState) => {
@@ -121,8 +133,8 @@ export default class AttachAddon extends Component {
     if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 1,
-        loading: stepIndex >= 1,
+        finished: stepIndex >= 2,
+        loading: stepIndex >= 2,
       });
     }
   }
@@ -180,9 +192,9 @@ export default class AttachAddon extends Component {
               errorText={this.state.errorText}
               color="black"
             />
-            <p>
-              The application name that has an addon you want to attach. Ex. my-test-app-dev
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Select the application that has an addon that you want to attach (e.g. test-dev).'}
+            </Typography>
           </div>
         );
       case 1:
@@ -191,9 +203,24 @@ export default class AttachAddon extends Component {
             <Select className="addon-menu" value={this.state.addon} onChange={this.handleAddonChange}>
               {this.renderAddons()}
             </Select>
-            <p>
-              Select the addon you want to attach.
-            </p>
+            <Typography variant="body1" style={style.stepDescription}>
+              {'Select the addon you want to attach.'}
+            </Typography>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="attach-addon-summary">
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The addon '}
+              <span style={style.bold}>
+                {this.state.addon.addon_service.name} ({this.state.addon.name})
+              </span>
+              {' from the app '}
+              <span style={style.bold}>{this.state.app}</span>
+              {' will be attached.'}
+            </Typography>
           </div>
         );
       default:
@@ -228,7 +255,7 @@ export default class AttachAddon extends Component {
                 color="primary"
                 onClick={this.handleNext}
               >
-                {stepIndex === 1 ? 'Finish' : 'Next'}
+                {stepIndex === 2 ? 'Finish' : 'Next'}
               </Button>
             )}
           </div>
@@ -239,16 +266,24 @@ export default class AttachAddon extends Component {
   }
 
   render() {
-    const { loading, stepIndex, finished } = this.state;
+    const { loading, stepIndex, finished, app, addon } = this.state;
+    const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>
-              <StepLabel>Select App</StepLabel>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
+                Select App
+              </StepLabel>
             </Step>
             <Step>
-              <StepLabel>Select Addon</StepLabel>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(addon.addon_service.name)}>
+                Select Addon
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
             </Step>
           </Stepper>
           {(!loading || finished) && (
@@ -268,23 +303,6 @@ export default class AttachAddon extends Component {
                 className="ok"
                 color="primary"
                 onClick={this.handleClose}
-              >
-                Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Dialog
-            className="load-app-error"
-            open={this.state.loadingError}
-          >
-            <DialogContent>
-              {this.state.loadingErrorMessage}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={() => this.setState({ loadingError: false, loadingErrorMessage: '' })}
               >
                 Ok
               </Button>
