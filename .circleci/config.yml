@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    working_directory: /app
+    docker:
+      - image: golang:1.11-alpine
+      - image: circleci/postgres:9.6.2-alpine
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build application docker image
+          command: |
+            docker build -t ui .
+      - deploy:
+          name: Push application Docker image
+          command: |
+            if [ "${CIRCLE_BRANCH}" != "release" ]; then
+              if [ "${CIRCLE_PROJECT_USERNAME}" == "akkeris" ]; then 
+                docker login -u $DOCKER_LOGIN -p $DOCKER_PASS
+                docker tag ui "docker.io/akkeris/ui:${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}"
+                docker push "docker.io/akkeris/ui:${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}"
+                if [ "${CIRCLE_BRANCH}" == "master" ]; then
+                  docker tag ui "docker.io/akkeris/ui:release-${CIRCLE_BUILD_NUM}"
+                  docker tag ui "docker.io/akkeris/ui:latest"
+                  docker push "docker.io/akkeris/ui:latest"
+                  docker push "docker.io/akkeris/ui:release-${CIRCLE_BUILD_NUM}"
+                fi
+              fi
+            fi
