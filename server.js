@@ -99,22 +99,22 @@ app.use((req, res, next) => {
 });
 
 app.get('/oauth/callback', (req, res) => {
-  let reqopts = {"url": `${authEndpoint}/access_token`, "headers":{"user-agent":"akkerisui", "accept":"application/json"}};
-  reqopts.formData = {
+  const reqopts = { url: `${authEndpoint}/access_token`, headers: { 'user-agent': 'akkerisui', accept: 'application/json' } };
+  reqopts.form = {
     client_id: clientID,
     client_secret: clientSecret,
     code: req.query.code,
     grant_type: 'authorization_code',
   };
   request.post(reqopts, (err, response, body) => {
-    if(err) {
-      console.error('Error retrieving access token from auth code:')
-      console.error(err)
-      return res.send('Uh oh, an error occured.  Please try again later.')
+    if (err) {
+      console.error('Error retrieving access token from auth code:');
+      console.error(err);
+      return res.send('Uh oh, an error occured.  Please try again later.');
     } else if (response.statusCode < 200 || response.statusCode > 299) {
-      console.error('Error retrieving access token from auth code, invalid response:')
-      console.error(response.statusCode, response.headers)
-      return res.send('Uh oh, an error occured.  Please try again later.')
+      console.error('Error retrieving access token from auth code, invalid response:');
+      console.error(response.statusCode, response.headers);
+      return res.send('Uh oh, an error occured.  Please try again later.');
     }
     req.session.token = JSON.parse(body).access_token;
     res.redirect(req.session.redirect || '/');
@@ -122,7 +122,7 @@ app.get('/oauth/callback', (req, res) => {
 });
 
 /* eslint-disable no-param-reassign */
-app.use(['/account','/api/account'], proxy(authUserEndpoint, {
+app.use(['/account', '/api/account'], proxy(authUserEndpoint, {
   proxyReqOptDecorator(reqOpts, srcReq) {
     reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`;
     reqOpts.headers['Content-Type'] = 'application/json';
