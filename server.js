@@ -90,25 +90,11 @@ app.get('/log-plex/:id', (req, res) => {
 });
 
 app.use((req, res, next) => {
-  // No idea why this happens..
-  try {
-    console.log('headers:', JSON.stringify(req.headers, null, 2))
-    console.log('path:', req.path)
-    if (req.path[0] === '/' && req.path[1] === '/') {
-      console.log('duplicate forward slash found.')
-    }
-    if (process.env.OAUTH2_DEBUG) {
-      console.log('middleware oauth2 check [req.session]', req.session)
-      console.log(`middleware oauth2 check [req.path] "${JSON.stringify(req.path)}"`)
-    }
-    if (req.session.token || req.path === '/oauth/callback') {
-      next();
-    } else {
-      req.session.redirect = req.originalUrl;
-      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
-    }
-  } catch (err) {
-    console.error('unexpected error:', err)
+  if (req.session.token || req.path === '/oauth/callback') {
+    next();
+  } else {
+    req.session.redirect = req.originalUrl;
+    res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
   }
 });
 
@@ -121,27 +107,17 @@ app.get('/oauth/callback', (req, res) => {
     grant_type: 'authorization_code',
   };
   request.post(reqopts, (err, response, body) => {
-    try {
-      if(err) {
-        console.error('Error retrieving access token from auth code:')
-        console.error(err)
-        return res.send('Uh oh, an error occured.  Please try again later.')
-      } else if (response.statusCode < 200 || response.statusCode > 299) {
-        console.error('Error retrieving access token from auth code, invalid response:')
-        console.error(response.statusCode, response.headers)
-        return res.send('Uh oh, an error occured.  Please try again later.')
-      }
-      if (process.env.OAUTH2_DEBUG) {
-        console.log('oauth2 debug [response]', response)
-        console.log('oauth2 debug [body]', body)
-      }
-      req.session.token = JSON.parse(body).access_token;
-      res.redirect(req.session.redirect || '/');
-    } catch (e) {
-      console.error('Error processing access token from auth code, hard error:')
-      console.error(e);
-      res.send('Uh oh, an error occurued.');
+    if(err) {
+      console.error('Error retrieving access token from auth code:')
+      console.error(err)
+      return res.send('Uh oh, an error occured.  Please try again later.')
+    } else if (response.statusCode < 200 || response.statusCode > 299) {
+      console.error('Error retrieving access token from auth code, invalid response:')
+      console.error(response.statusCode, response.headers)
+      return res.send('Uh oh, an error occured.  Please try again later.')
     }
+    req.session.token = JSON.parse(body).access_token;
+    res.redirect(req.session.redirect || '/');
   });
 });
 
