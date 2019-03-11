@@ -91,18 +91,23 @@ app.get('/log-plex/:id', (req, res) => {
 
 app.use((req, res, next) => {
   // No idea why this happens..
-  if (req.path[0] === '/' && req.path[1] === '/') {
-    req.path = req.path.substring(1);
-  }
-  if (process.env.OAUTH2_DEBUG) {
-    console.log('middleware oauth2 check [req.session]', req.session)
-    console.log(`middleware oauth2 check [req.path] "${req.path}"`)
-  }
-  if (req.session.token || req.path === '/oauth/callback') {
-    next();
-  } else {
-    req.session.redirect = req.originalUrl;
-    res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
+  try {
+    if (req.path[0] === '/' && req.path[1] === '/') {
+      console.log('duplicate forward slash found.')
+      req.path = req.path.substring(1);
+    }
+    if (process.env.OAUTH2_DEBUG) {
+      console.log('middleware oauth2 check [req.session]', req.session)
+      console.log(`middleware oauth2 check [req.path] "${JSON.stringify(req.path)}"`)
+    }
+    if (req.session.token || req.path === '/oauth/callback') {
+      next();
+    } else {
+      req.session.redirect = req.originalUrl;
+      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
+    }
+  } catch (err) {
+    console.error('unexpected error:', err)
   }
 });
 
