@@ -90,6 +90,10 @@ app.get('/log-plex/:id', (req, res) => {
 });
 
 app.use((req, res, next) => {
+  // No idea why this happens..
+  if (req.path[0] === '/' && req.path[1] === '/') {
+    req.path = req.path.substring(1);
+  }
   if (process.env.OAUTH2_DEBUG) {
     console.log('middleware oauth2 check [req.session]', req.session)
     console.log('middleware oauth2 check [req.path]', req.path)
