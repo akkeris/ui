@@ -92,6 +92,8 @@ app.get('/log-plex/:id', (req, res) => {
 app.use((req, res, next) => {
   // No idea why this happens..
   try {
+    console.log('headers:', JSON.stringify(req.headers, null, 2))
+    console.log('path:', req.path)
     if (req.path[0] === '/' && req.path[1] === '/') {
       console.log('duplicate forward slash found.')
     }
@@ -192,7 +194,7 @@ if (process.env.NODE_ENV === 'dev') {
   app.use(webpackHotMiddleware(compiler));
   app.use(express.static('public'));
   // Required for <BrowserRouter> - fallback to index.html on 404
-  app.get('*', (req, res) => {
+  app.get('/*', (req, res) => {
     res.sendFile(path.resolve('public', 'index.html'));
   });
 } else {
@@ -200,7 +202,7 @@ if (process.env.NODE_ENV === 'dev') {
   // Production needs physical files! (built via separate process)
   app.use(express.static('build'));
   // Required for <BrowserRouter> - fallback to index.html on 404
-  app.get('*', (req, res) => {
+  app.get('/*', (req, res) => {
     res.sendFile(path.resolve('build', 'index.html'));
   });
 }
