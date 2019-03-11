@@ -83,7 +83,7 @@ function examinSavings(metrics, formations, addons, sizes) {
   });
 
   // postgresql
-  addons.filter(addon => addon.addon_service.name === 'alamo-postgresql').forEach((addon) => {
+  addons.filter(addon => addon.addon_service.name === 'akkeris-postgresql').forEach((addon) => {
     const currentPlanIndex = postgresqlPlans.findIndex(x => x.name === addon.plan.name);
     const lowerPlanIndex = currentPlanIndex - 1;
     let found = false;
