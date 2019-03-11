@@ -17,6 +17,7 @@ const clientSecret = process.env.CLIENT_SECRET;
 const clientURI = process.env.CLIENT_URI || 'http://localhost:3000';
 const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
+const authUserEndpoint = process.env.OAUTH_USER_ENDPOINT || `${authEndpoint}/user`;
 const https = require('https');
 
 const app = express();
@@ -98,21 +99,30 @@ app.use((req, res, next) => {
 });
 
 app.get('/oauth/callback', (req, res) => {
-  request.post(`${authEndpoint}/access_token`, {
-    form: {
-      client_id: clientID,
-      client_secret: clientSecret,
-      code: req.query.code,
-      grant_type: 'authorization_code',
-    },
-  }, (err, response, body) => {
+  let reqopts = {"url": `${authEndpoint}/access_token`, "headers":{"user-agent":"akkerisui", "accept":"application/json"}};
+  reqopts.formData = {
+    client_id: clientID,
+    client_secret: clientSecret,
+    code: req.query.code,
+    grant_type: 'authorization_code',
+  };
+  request.post(reqopts, (err, response, body) => {
+    if(err) {
+      console.error('Error retrieving access token from auth code:')
+      console.error(err)
+      return res.send('Uh oh, an error occured.  Please try again later.')
+    } else if (response.statusCode < 200 || response.statusCode > 299) {
+      console.error('Error retrieving access token from auth code, invalid response:')
+      console.error(response.statusCode, response.headers)
+      return res.send('Uh oh, an error occured.  Please try again later.')
+    }
     req.session.token = JSON.parse(body).access_token;
     res.redirect(req.session.redirect || '/');
   });
 });
 
 /* eslint-disable no-param-reassign */
-app.use('/account', proxy(`${authEndpoint}/user`, {
+app.use(['/account','/api/account'], proxy(authUserEndpoint, {
   proxyReqOptDecorator(reqOpts, srcReq) {
     reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`;
     reqOpts.headers['Content-Type'] = 'application/json';
@@ -142,7 +152,7 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/user', (req, res) => {
-  res.redirect(`${authEndpoint}/user`);
+  res.redirect(process.env.OAUTH_USER_VIEW || `${authEndpoint}/user`);
 });
 
 if (process.env.NODE_ENV === 'dev') {
