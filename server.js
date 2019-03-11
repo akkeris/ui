@@ -94,7 +94,6 @@ app.use((req, res, next) => {
   try {
     if (req.path[0] === '/' && req.path[1] === '/') {
       console.log('duplicate forward slash found.')
-      req.path = req.path.substring(1);
     }
     if (process.env.OAUTH2_DEBUG) {
       console.log('middleware oauth2 check [req.session]', req.session)
@@ -193,7 +192,7 @@ if (process.env.NODE_ENV === 'dev') {
   app.use(webpackHotMiddleware(compiler));
   app.use(express.static('public'));
   // Required for <BrowserRouter> - fallback to index.html on 404
-  app.get('/*', (req, res) => {
+  app.get('*', (req, res) => {
     res.sendFile(path.resolve('public', 'index.html'));
   });
 } else {
@@ -201,7 +200,7 @@ if (process.env.NODE_ENV === 'dev') {
   // Production needs physical files! (built via separate process)
   app.use(express.static('build'));
   // Required for <BrowserRouter> - fallback to index.html on 404
-  app.get('/*', (req, res) => {
+  app.get('*', (req, res) => {
     res.sendFile(path.resolve('build', 'index.html'));
   });
 }
