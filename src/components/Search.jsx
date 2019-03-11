@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import deepmerge from 'deepmerge';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import { TextField, MenuItem, Paper, withStyles } from '@material-ui/core';
 import parse from 'autosuggest-highlight/parse';
 import Autosuggest from 'react-autosuggest';
@@ -46,10 +47,7 @@ class Search extends Component {
 
     const { color } = this.props;
 
-    this.muiTheme = createMuiTheme({
-      palette: {
-        primary: { main: '#0097a7' },
-      },
+    this.theme = parentTheme => deepmerge(parentTheme, {
       overrides: {
         MuiInput: {
           input: {
@@ -187,7 +185,7 @@ class Search extends Component {
           inputProps={{
             catchReturn: this.catchReturn,
             errorText,
-            muiTheme: this.muiTheme,
+            muiTheme: this.theme,
             placeholder,
             label: errorText || undefined,
             value: this.state.single,

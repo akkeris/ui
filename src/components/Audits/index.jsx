@@ -1,22 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import SHA256 from 'crypto-js/sha256';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
   CircularProgress, Table, TableHead, TableBody, TableRow, TableCell, Button, Typography,
   Dialog, DialogContent, DialogActions, DialogTitle,
 } from '@material-ui/core';
 
 import api from '../../services/api';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   tableRow: {
@@ -165,60 +155,57 @@ export default class Audits extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <Table className="audit-list" >
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <span>Change</span>
-                </TableCell>
-                <TableCell>
-                  <span>User</span>
-                </TableCell>
-                <TableCell >
-                  <span>Time</span>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.renderAudits()}
-            </TableBody>
-          </Table>
-          <Dialog
-            className="audit-dialog"
-            open={this.state.diagOpen}
-            // Clear id on exited to avoid race between
-            // closing dialog and clearing displayed audit info
-            onExited={() => { this.setState({ id: '' }); }}
-            maxWidth="lg"
-          >
-            <DialogTitle>Audit Info</DialogTitle>
-            <DialogContent>
-              <Table className="audit-info">
-                <TableBody>
-                  {this.renderAuditInfo()}
-                </TableBody>
-              </Table>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={this.handleDialogClose}
-              >Ok</Button>
-            </DialogActions>
-          </Dialog>
-        </div>
-      </MuiThemeProvider>
+      <div>
+        <Table className="audit-list" >
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <span>Change</span>
+              </TableCell>
+              <TableCell>
+                <span>User</span>
+              </TableCell>
+              <TableCell >
+                <span>Time</span>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.renderAudits()}
+          </TableBody>
+        </Table>
+        <Dialog
+          className="audit-dialog"
+          open={this.state.diagOpen}
+          // Clear id on exited to avoid race between
+          // closing dialog and clearing displayed audit info
+          onExited={() => { this.setState({ id: '' }); }}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>Audit Info</DialogTitle>
+          <DialogContent>
+            <Table className="audit-info">
+              <TableBody>
+                {this.renderAuditInfo()}
+              </TableBody>
+            </Table>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              className="ok"
+              color="primary"
+              onClick={this.handleDialogClose}
+            >Ok</Button>
+          </DialogActions>
+        </Dialog>
+      </div>
     );
   }
 }

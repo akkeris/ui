@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import deepmerge from 'deepmerge';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import {
   Toolbar, IconButton, Select, MenuItem,
   CircularProgress, Paper, FormControl, InputLabel,
 } from '@material-ui/core';
-import { Link } from 'react-router-dom';
 import AddIcon from '@material-ui/icons/Add';
 
 import api from '../../services/api';
@@ -15,16 +15,12 @@ import History from '../../config/History';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiIconButton: {
-      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
+      root: {
+        color: 'white', padding: '6px', marginBottom: '-6px',
+      },
     },
     MuiToolbar: {
       root: {
@@ -190,14 +186,14 @@ export default class Apps extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProvider theme={theme}>
           <div className="loading" style={style.refresh.div}>
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div>
           <Toolbar style={style.toolbar} disableGutters>
             <Search
@@ -235,9 +231,9 @@ export default class Apps extends Component {
                 {this.renderSpaces()}
               </Select>
             </FormControl>
-            <Link to="/apps/new" style={style.link}>
-              <IconButton className="new-app"><AddIcon /></IconButton>
-            </Link>
+            <IconButton style={{ marginLeft: 'auto' }} onClick={() => History.get().push('/apps/new')} className="new-app">
+              <AddIcon />
+            </IconButton>
           </Toolbar>
           <Paper style={style.paper}>
             <AppList className="apps" apps={this.state.filteredApps} favorites={this.state.favorites} />

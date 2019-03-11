@@ -1,31 +1,19 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import PropTypes from 'prop-types';
 import {
   Button, Step, Stepper, StepLabel, Select, MenuItem,
   Dialog, DialogActions, DialogContent, Typography,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
 import ConfirmationModal from '../ConfirmationModal';
 import Search from '../Search';
 import api from '../../services/api';
 import util from '../../services/util';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#0097a7',
-    },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
     MuiButton: {
       root: {
         marginRight: '15px',
@@ -269,7 +257,7 @@ export default class AttachAddon extends Component {
     const { loading, stepIndex, finished, app, addon } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>

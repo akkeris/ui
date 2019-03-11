@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import PropTypes from 'prop-types';
 import {
   IconButton, CircularProgress, Tooltip,
@@ -7,7 +8,7 @@ import {
   Table, TableBody, TableRow, TableCell,
   ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import ActiveIcon from '@material-ui/icons/Notifications';
 import InactiveIcon from '@material-ui/icons/NotificationsPaused';
 import HistoryIcon from '@material-ui/icons/History';
@@ -24,13 +25,7 @@ import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line i
 
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'preview-released', 'released', 'crashed'];
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiExpansionPanelSummary: {
       root: {
@@ -736,7 +731,7 @@ export default class Webhook extends Component {
 
   render() {
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <ExpansionPanel style={style.expansionPanel} className={`webhook-item-${this.props.rowindex}`}>
           <ExpansionPanelSummary
             expandIcon={<ExpandMoreIcon />}

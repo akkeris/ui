@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Typography, CircularProgress,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import Select from '../../components/Select';
 
 import api from '../../services/api';
@@ -10,15 +9,6 @@ import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 
 const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   buttons: {
@@ -257,60 +247,59 @@ export default class NewApp extends Component {
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <Paper style={style.paper}>
-          <div style={style.div}>
-            <Stepper activeStep={stepIndex}>
-              <Step>
-                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
+      <Paper style={style.paper}>
+        <div style={style.div}>
+          <Stepper activeStep={stepIndex}>
+            <Step>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
                   Create app name
-                </StepLabel>
-              </Step>
-              <Step>
-                <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(org.value)}>
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(org.value)}>
                   Select org
-                </StepLabel>
-              </Step>
-              <Step>
-                <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(space.value)}>
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(space.value)}>
                   Select space
-                </StepLabel>
-              </Step>
-              <Step>
-                <StepLabel>Confirm</StepLabel>
-              </Step>
-            </Stepper>
-            <Collapse in={!collapsed}>
-              <div style={style.contentStyle}>
-                <div>{this.renderStepContent(stepIndex)}</div>
-                <div style={style.buttons.div}>
-                  {stepIndex > 0 && (
-                    <Button
-                      className="back-button"
-                      disabled={stepIndex === 0}
-                      onClick={this.handlePrev}
-                      style={style.buttons.back}
-                    >Back</Button>
-                  )}
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
+            </Step>
+          </Stepper>
+          <Collapse in={!collapsed}>
+            <div style={style.contentStyle}>
+              <div>{this.renderStepContent(stepIndex)}</div>
+              <div style={style.buttons.div}>
+                {stepIndex > 0 && (
                   <Button
-                    className="next"
-                    color="primary"
-                    variant="contained"
-                    onClick={this.handleNext}
-                  >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
-                </div>
+                    className="back-button"
+                    disabled={stepIndex === 0}
+                    onClick={this.handlePrev}
+                    style={style.buttons.back}
+                  >Back</Button>
+                )}
+                <Button
+                  className="next"
+                  color="primary"
+                  variant="contained"
+                  onClick={this.handleNext}
+                >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
               </div>
-            </Collapse>
-            <ConfirmationModal
-              open={submitFail}
-              onOk={this.handleClose}
-              message={submitMessage}
-              title="Error"
-              className="new-app-error"
-            />
-          </div>
-        </Paper>
-      </MuiThemeProvider>
+            </div>
+          </Collapse>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="new-app-error"
+          />
+        </div>
+      </Paper>
+
     );
   }
 }

@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import PropTypes from 'prop-types';
 import {
   Select, MenuItem, IconButton, TextField, Typography, FormControl, InputLabel,
   ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Tooltip,
   Table, TableHead, TableBody, TableRow, TableCell, Input,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import RemoveIcon from '@material-ui/icons/Clear';
 import RestartIcon from '@material-ui/icons/Replay';
@@ -18,12 +19,8 @@ import { pink, teal, amber, red } from '@material-ui/core/colors';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
     h6: {
       fontSize: 15,
       fontWeight: 500,
@@ -276,7 +273,7 @@ export default class DynoType extends Component {
     const healthcheck = this.state.healthcheck === null ? '' : this.state.healthcheck;
     const date = new Date(this.props.formation.updated_at);
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <TableRow
           className={this.props.formation.type}
           key={this.props.formation.id}

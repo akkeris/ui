@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
-  CircularProgress, Switch, List, ListItem, ListItemText, Button, Dialog,
-  GridList, GridListTile, Table, TableBody, TableRow, TableCell,
-  DialogActions, DialogContent, DialogContentText,
-  FormGroup, FormControlLabel, Tooltip,
+  CircularProgress, Switch, List, ListItem, ListItemText, Button,
+  GridList, GridListTile, FormGroup, FormControlLabel, Tooltip,
 } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Clear';
 
@@ -22,32 +19,6 @@ function addRestrictedTooltip(title, children) {
   );
 }
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiDialog: {
-      paper: {
-        width: '40%',
-      },
-    },
-    MuiTableCell: {
-      root: {
-        borderBottom: 'none',
-      },
-    },
-    MuiFormGroup: {
-      root: {
-        alignContent: 'center',
-      },
-    },
-  },
-});
-
 const style = {
   link: {
     color: 'rgba(0, 0, 0, 0.54)',
@@ -55,10 +26,10 @@ const style = {
   },
   currentImage: {
     visible: {
-      padding: '0 24px 10px 24px',
+      padding: '0 24px 20px',
     },
     hidden: {
-      padding: '0 24px 18px 24px',
+      padding: '0 24px 20px 24px',
     },
   },
   refresh: {
@@ -80,6 +51,13 @@ const style = {
   },
   gridList: {
     overflowY: 'auto',
+    margin: '0px 24px',
+  },
+  gridListTile: {
+    padding: '0px',
+  },
+  listItem: {
+    padding: '12px 0px',
   },
   tableCell: {
     main: {
@@ -89,6 +67,7 @@ const style = {
       paddingLeft: '24px',
       marginLeft: '0px',
       paddingRight: '16px',
+      borderBottom: 'none',
     },
     sub: {
       fontSize: '14px',
@@ -206,11 +185,9 @@ class AppOverview extends Component {
     const { isElevated, restrictedSpace } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
 
@@ -234,109 +211,98 @@ class AppOverview extends Component {
     }
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <GridList style={style.gridList} cellHeight={'auto'}>
-            <GridListTile>
-              <List>
-                <ListItem>
-                  <ListItemText primary="Organization" secondary={this.props.app.organization.name} />
-                </ListItem>
-                <ListItem>
-                  <ListItemText primary="ID" secondary={`${this.props.app.id}`} />
-                </ListItem>
-              </List>
-            </GridListTile>
-            <GridListTile>
-              <List>
-                <ListItem>
-                  <ListItemText
-                    primary="URL"
-                    secondary={
-                      <a style={style.link} href={this.props.app.web_url}>
-                        {this.props.app.web_url}
-                      </a>
-                    }
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText primary="Discovery" secondary={`${this.props.app.simple_name.toUpperCase()}_SERVICE_HOST, ${this.props.app.simple_name.toUpperCase()}_SERVICE_PORT`} />
-                </ListItem>
-              </List>
-            </GridListTile>
-          </GridList>
+      <div>
+        <GridList style={style.gridList} cellHeight={'auto'}>
+          <GridListTile style={{ padding: '0px' }}>
+            <List>
+              <ListItem style={style.listItem}>
+                <ListItemText primary="Organization" secondary={this.props.app.organization.name} />
+              </ListItem>
+              <ListItem style={style.listItem}>
+                <ListItemText primary="ID" secondary={`${this.props.app.id}`} />
+              </ListItem>
+            </List>
+          </GridListTile>
+          <GridListTile style={{ padding: '0px' }}>
+            <List>
+              <ListItem style={style.listItem}>
+                <ListItemText
+                  primary="URL"
+                  secondary={
+                    <a style={style.link} href={this.props.app.web_url}>
+                      {this.props.app.web_url}
+                    </a>
+                  }
+                />
+              </ListItem>
+              <ListItem style={style.listItem}>
+                <ListItemText primary="Discovery" secondary={`${this.props.app.simple_name.toUpperCase()}_SERVICE_HOST, ${this.props.app.simple_name.toUpperCase()}_SERVICE_PORT`} />
+              </ListItem>
+            </List>
+          </GridListTile>
+        </GridList>
+        <ListItemText
+          style={this.props.app.repo ? style.currentImage.visible : style.currentImage.hidden}
+          primary="Current Image"
+          secondary={this.props.app.image}
+        />
+        {this.props.app.git_url && (
           <ListItemText
-            style={this.props.app.repo ? style.currentImage.visible : style.currentImage.hidden}
-            primary="Current Image"
-            secondary={this.props.app.image}
+            style={style.currentImage.visible}
+            primary="Git"
+            secondary={
+              <a style={style.link} href={this.props.app.git_url}>
+                {this.props.app.git_url}
+              </a>
+            }
           />
-          {this.props.app.git_url && (
-            <ListItemText
-              style={style.currentImage.visible}
-              primary="Git"
-              secondary={
-                <a style={style.link} href={this.props.app.git_url}>
-                  {this.props.app.git_url}
-                </a>
+        )}
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0px 24px' }}>
+          <div>
+            <div style={style.tableCell.main}>
+              {'Last Release and Most Recent Changes'}
+            </div>
+            <div style={style.tableCell.sub}>
+              {Date(this.props.app.released_at).toLocaleString()}
+            </div>
+          </div>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  className="toggle"
+                  checked={this.state.isMaintenance}
+                  onChange={this.handleMaintenanceConfirmation}
+                />
               }
+              label="Maintenance"
+              labelPlacement="start"
             />
-          )}
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell style={style.tableCell.header}>
-                  <div style={style.tableCell.main}>{'Last Release and Most Recent Changes'}</div>
-                  <div style={style.tableCell.sub}>
-                    {Date(this.props.app.released_at).toLocaleString()}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          className="toggle"
-                          checked={this.state.isMaintenance}
-                          onChange={this.handleMaintenanceConfirmation}
-                        />
-                      }
-                      label="Maintenance"
-                      labelPlacement="start"
-                    />
-                  </FormGroup>
-                </TableCell>
-                <TableCell >
-                  <div style={style.tableCell.end}>{deleteButton}</div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <Audits app={this.props.app} />
-          <ConfirmationModal className="delete-confirm" open={this.state.open} onOk={this.handleRemoveApp} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this app?" />
-          <ConfirmationModal
-            className="maintenance-confirm"
-            open={this.state.mOpen}
-            onOk={this.handleMaintenanceToggle}
-            onCancel={this.handleCancelMaintenanceConfirmation}
-            message={!this.state.isMaintenance ? (
-              'Are you sure you want to take this app out of maintenance?'
-            ) : (
-              'Are you sure you want to put this app in maintenance?'
-            )}
-            title="Confirm Maintenance"
-          />
-          <Dialog className="error" open={this.state.loading || this.state.submitFail}>
-            <DialogContent>
-              <DialogContentText>
-                {this.state.submitMessage}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button className="ok" color="primary" onClick={this.handleClose}>Ok</Button>
-            </DialogActions>
-          </Dialog>
+          </FormGroup>
+          <div>{deleteButton}</div>
         </div>
-      </MuiThemeProvider>
+        <Audits app={this.props.app} />
+        <ConfirmationModal className="delete-confirm" open={this.state.open} onOk={this.handleRemoveApp} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this app?" />
+        <ConfirmationModal
+          className="maintenance-confirm"
+          open={this.state.mOpen}
+          onOk={this.handleMaintenanceToggle}
+          onCancel={this.handleCancelMaintenanceConfirmation}
+          message={!this.state.isMaintenance ? (
+            'Are you sure you want to take this app out of maintenance?'
+          ) : (
+            'Are you sure you want to put this app in maintenance?'
+          )}
+          title="Confirm Maintenance"
+        />
+        <ConfirmationModal
+          className="error"
+          open={this.state.loading || this.state.submitFail}
+          onOk={this.handleClose}
+          message={this.state.submitMessage}
+          title="Error"
+        />
+      </div>
     );
   }
 }

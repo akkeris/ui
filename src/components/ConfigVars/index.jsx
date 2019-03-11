@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
   CircularProgress, Table, TableBody, TableRow, TableCell, IconButton, Tooltip,
   Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
@@ -14,15 +13,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import api from '../../services/api';
 import NewConfigVar from './NewConfigVar';
 import ConfirmationModal from '../ConfirmationModal';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   tableRow: {
@@ -232,65 +222,61 @@ export default class ConfigVar extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          {!this.state.new && (
-            <Paper elevation={0}>
-              <Tooltip title="New Config" placement="bottom-start">
-                <IconButton className="new-config" onClick={this.handleNewConfig}><AddIcon nativeColor="black" /></IconButton>
-              </Tooltip>
-            </Paper>
-          )}
-          {this.state.new && (
-            <div>
-              <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon nativeColor="black" /></IconButton>
-              <NewConfigVar
-                app={this.props.app}
-                onComplete={this.reload}
-                config={this.state.config}
-              />
-            </div>
-          )}
-          <Divider />
-          <Table className="config-list">
-            <TableBody>
-              {this.renderConfigVars()}
-            </TableBody>
-          </Table>
-          <Dialog className="config-error" open={this.state.submitFail}>
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                {this.state.submitMessage}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button className="ok" color="primary" onClick={this.handleDialogClose}>Ok</Button>
-            </DialogActions>
-          </Dialog>
-          <ConfirmationModal
-            className="remove-config"
-            open={this.state.confirmOpen}
-            onOk={this.handleRemoveConfig}
-            onCancel={this.handleCancelConfirmation}
-            message="Are you sure you want to delete this config var?"
-          />
-          <Snackbar
-            className="config-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
-          />
-        </div>
+      <div>
+        {!this.state.new && (
+          <Paper elevation={0}>
+            <Tooltip title="New Config" placement="bottom-start">
+              <IconButton className="new-config" onClick={this.handleNewConfig}><AddIcon nativeColor="black" /></IconButton>
+            </Tooltip>
+          </Paper>
+        )}
+        {this.state.new && (
+          <div>
+            <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon nativeColor="black" /></IconButton>
+            <NewConfigVar
+              app={this.props.app}
+              onComplete={this.reload}
+              config={this.state.config}
+            />
+          </div>
+        )}
+        <Divider />
+        <Table className="config-list">
+          <TableBody>
+            {this.renderConfigVars()}
+          </TableBody>
+        </Table>
+        <Dialog className="config-error" open={this.state.submitFail}>
+          <DialogTitle>Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {this.state.submitMessage}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button className="ok" color="primary" onClick={this.handleDialogClose}>Ok</Button>
+          </DialogActions>
+        </Dialog>
+        <ConfirmationModal
+          className="remove-config"
+          open={this.state.confirmOpen}
+          onOk={this.handleRemoveConfig}
+          onCancel={this.handleCancelConfirmation}
+          message="Are you sure you want to delete this config var?"
+        />
+        <Snackbar
+          className="config-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
         <Dialog
           className="config-edit"
           open={this.state.edit}
@@ -313,7 +299,7 @@ export default class ConfigVar extends Component {
             <Button className="submit" color="primary" onClick={this.handleEditSubmit}>Submit</Button>
           </DialogActions>
         </Dialog>
-      </MuiThemeProvider>
+      </div>
     );
   }
 }

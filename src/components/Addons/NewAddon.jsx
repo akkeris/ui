@@ -1,26 +1,16 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, CircularProgress, LinearProgress, Button, Typography,
 } from '@material-ui/core';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import Select from '../Select';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
     MuiButton: {
       root: {
         marginRight: '15px',
@@ -329,7 +319,7 @@ export default class NewAddon extends Component {
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div style={provisionStyle}>
           <Stepper activeStep={stepIndex}>
             <Step>

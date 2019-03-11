@@ -1,21 +1,16 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import {
   Toolbar, Table, TableBody, TableHead, TableRow, TableCell, IconButton, CircularProgress, Paper,
   TableFooter, TablePagination,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import AddIcon from '@material-ui/icons/Add';
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import api from '../../services/api';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiToolbar: {
       root: {
@@ -134,14 +129,14 @@ export default class Spaces extends Component {
     const { spaces, page, rowsPerPage } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProvider theme={theme}>
           <div style={style.refresh.div}>
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div>
           <Toolbar style={style.toolbar} disableGutters>
             <Link to="/spaces/new" style={style.link}>

@@ -1,17 +1,12 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import {
   Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress,
 } from '@material-ui/core';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiPaper: {
       root: {
@@ -45,7 +40,7 @@ export default class ConfirmationModal extends Component {
   render() {
     const { loading } = this.state;
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <Dialog
           className={this.props.className}
           open={this.props.open}

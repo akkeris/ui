@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import {
   Toolbar, IconButton, CircularProgress, Paper,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import AddIcon from '@material-ui/icons/Add';
 
@@ -12,13 +13,7 @@ import Search from '../../components/Search';
 import OrgList from '../../components/Orgs';
 import History from '../../config/History';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiToolbar: {
       root: {
@@ -94,7 +89,7 @@ export default class Orgs extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProvider theme={theme}>
           <div style={style.refresh.div}>
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
@@ -102,7 +97,7 @@ export default class Orgs extends Component {
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div>
           <Toolbar style={style.toolbar}>
             <Search

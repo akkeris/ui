@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { grey, teal } from '@material-ui/core/colors';
 import {
   Paper, Snackbar, CircularProgress, Table, TableBody, TableRow, TableCell,
@@ -32,27 +31,6 @@ function addRestrictedTooltip(title, placement, children) {
     </Tooltip>
   );
 }
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiDialog: {
-      paper: {
-        width: '80%',
-        maxWidth: 'none',
-      },
-      paperWidthSm: {
-        width: '80%',
-        maxWidth: 'none',
-      },
-    },
-  },
-});
 
 const releaseLimit = 20;
 
@@ -447,110 +425,111 @@ export default class Releases extends Component {
 
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>);
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
+      );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          {this.state.release && (
-            <Dialog
-              className="logs"
-              open={this.state.logsOpen}
-              onClose={() => { this.handleClose(); }}
-            >
-              <DialogTitle>{this.state.title}</DialogTitle>
-              <DialogContent style={{ padding: '0px', margin: '0px' }}>
-                <Logs
-                  build={this.state.release.slug.id}
-                  app={this.props.app.name}
-                  open={this.state.logsOpen}
+      <div>
+        {this.state.release && (
+          <Dialog
+            className="logs"
+            open={this.state.logsOpen}
+            onClose={() => { this.handleClose(); }}
+            maxWidth="xl"
+            fullWidth
+          >
+            <DialogTitle>{this.state.title}</DialogTitle>
+            <DialogContent style={{ padding: '0px', margin: '0px' }}>
+              <Logs
+                build={this.state.release.slug.id}
+                app={this.props.app.name}
+                open={this.state.logsOpen}
+              />
+            </DialogContent>
+            <DialogActions>{actions}</DialogActions>
+          </Dialog>
+        )}
+        {this.state.revert && (
+          <Dialog
+            className="revert"
+            open={this.state.revertOpen}
+            onClose={() => { this.handleRevertClose(); }}
+            maxWidth="md"
+            fullWidth
+          >
+            <DialogTitle>{this.state.title}</DialogTitle>
+            <DialogContent>
+              <div>
+                {getDateDiff(new Date(this.state.revert.created_at))} - {[
+                  this.state.revert.description,
+                  this.state.revert.source_blob.author,
+                  this.state.revert.source_blob.commit ? `#${this.state.revert.source_blob.commit.substring(0, 7)}` : '',
+                  this.state.revert.source_blob.message ? this.state.revert.source_blob.message.replace(/\s+/g, ' ') : '',
+                ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' ')).join(' ')}
+              </div>
+            </DialogContent>
+            <DialogActions>{actionsRevert}</DialogActions>
+          </Dialog>
+        )}
+        {(!this.state.new && !this.state.newAuto) && (
+          <Paper elevation={0}>
+            <Tooltip title="Attach to Repo" placement="bottom-end">
+              <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
+            </Tooltip>
+            {newReleaseButton}
+          </Paper>
+        )}
+        {this.state.new && (
+          <div>
+            <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
+            <NewBuild
+              app={this.props.app.name}
+              org={this.props.org}
+              onComplete={
+                (message) => { this.reload(message); }
+              }
+            />
+          </div>
+        )}
+        {this.state.newAuto && (
+          <div>
+            <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
+            <NewAutoBuild
+              app={this.props.app.name}
+              onComplete={(message) => { this.reload(message); }}
+            />
+          </div>
+        )}
+        <Table className="release-list" style={{ overflow: 'visible' }}>
+          <TableBody>
+            {this.renderReleases(page, rowsPerPage)}
+          </TableBody>
+          {releases.length !== 0 && (
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[15, 25, 50]}
+                  colSpan={3}
+                  count={releases.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onChangePage={this.handleChangePage}
+                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
                 />
-              </DialogContent>
-              <DialogActions>{actions}</DialogActions>
-            </Dialog>
+              </TableRow>
+            </TableFooter>
           )}
-          {this.state.revert && (
-            <Dialog
-              className="revert"
-              open={this.state.revertOpen}
-              onClose={() => { this.handleRevertClose(); }}
-            >
-              <DialogTitle>{this.state.title}</DialogTitle>
-              <DialogContent>
-                <div>
-                  {getDateDiff(new Date(this.state.revert.created_at))} - {[
-                    this.state.revert.description,
-                    this.state.revert.source_blob.author,
-                    this.state.revert.source_blob.commit ? `#${this.state.revert.source_blob.commit.substring(0, 7)}` : '',
-                    this.state.revert.source_blob.message ? this.state.revert.source_blob.message.replace(/\s+/g, ' ') : '',
-                  ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' ')).join(' ')}
-                </div>
-              </DialogContent>
-              <DialogActions>{actionsRevert}</DialogActions>
-            </Dialog>
-          )}
-          {(!this.state.new && !this.state.newAuto) && (
-            <Paper elevation={0}>
-              <Tooltip title="Attach to Repo" placement="bottom-end">
-                <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
-              </Tooltip>
-              {newReleaseButton}
-            </Paper>
-          )}
-          {this.state.new && (
-            <div>
-              <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
-              <NewBuild
-                app={this.props.app.name}
-                org={this.props.org}
-                onComplete={
-                  (message) => { this.reload(message); }
-                }
-              />
-            </div>
-          )}
-          {this.state.newAuto && (
-            <div>
-              <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
-              <NewAutoBuild
-                app={this.props.app.name}
-                onComplete={(message) => { this.reload(message); }}
-              />
-            </div>
-          )}
-          <Table className="release-list" style={{ overflow: 'visible' }}>
-            <TableBody>
-              {this.renderReleases(page, rowsPerPage)}
-            </TableBody>
-            {releases.length !== 0 && (
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[15, 25, 50]}
-                    colSpan={3}
-                    count={releases.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                  />
-                </TableRow>
-              </TableFooter>
-            )}
-          </Table>
-          <Snackbar
-            className="release-snack"
-            open={this.state.snackOpen}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={() => { this.handleSnackClose(); }}
-          />
-        </div>
-      </MuiThemeProvider>
+        </Table>
+        <Snackbar
+          className="release-snack"
+          open={this.state.snackOpen}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={() => { this.handleSnackClose(); }}
+        />
+      </div>
     );
   }
 }

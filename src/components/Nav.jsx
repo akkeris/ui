@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import { Link } from 'react-router-dom';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
   AppBar, Drawer, Divider, List, ListItem, ListSubheader, ListItemIcon, ListItemText,
   Toolbar, IconButton,
 } from '@material-ui/core';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import HomeIcon from '@material-ui/icons/Home';
 import AppIcon from '@material-ui/icons/DeveloperBoard';
 import SpacesIcon from '@material-ui/icons/Toys';
@@ -19,18 +20,16 @@ import MenuIcon from '@material-ui/icons/Menu';
 import AccountMenu from './AccountMenu';
 import api from '../services/api';
 
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: 'ProximaNova',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
-    MuiIconButton: {
+    MuiListItemText: {
+      primary: {
+        fontFamily: 'ProximaNova',
+      },
+    },
+    MuiListSubheader: {
       root: {
-        margin: '0px 18px 0px 0px',
+        fontFamily: 'ProximaNova',
       },
     },
   },
@@ -60,6 +59,9 @@ const style = {
     app: {
       fontWeight: 400,
     },
+  },
+  drawerButton: {
+    margin: '0px 18px 0px 0px',
   },
 };
 
@@ -112,7 +114,7 @@ export default class Nav extends Component {
     );
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div>
           <AppBar
             className="appbar"
@@ -120,7 +122,7 @@ export default class Nav extends Component {
             position="static"
           >
             <Toolbar>
-              <IconButton onClick={this.handleToggle}>
+              <IconButton onClick={this.handleToggle} style={style.drawerButton}>
                 <MenuIcon nativeColor="white" />
               </IconButton>
               {title}
@@ -140,7 +142,7 @@ export default class Nav extends Component {
                 style={style.nav}
               >
                 <Toolbar>
-                  <IconButton onClick={this.handleToggle}>
+                  <IconButton onClick={this.handleToggle} style={style.drawerButton}>
                     <MenuIcon nativeColor="white" />
                   </IconButton>
                   {title}

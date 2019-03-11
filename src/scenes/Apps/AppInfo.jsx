@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import deepmerge from 'deepmerge';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, CardContent,
   Tooltip, Button, IconButton, Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
@@ -29,13 +30,7 @@ import api from '../../services/api';
 import util from '../../services/util';
 import History from '../../config/History';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiTabs: {
       root: {
@@ -233,7 +228,7 @@ export default class AppInfo extends Component {
         } catch (e) { notFoundMessage = submitMessage; }
       }
       return (
-        <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProvider theme={theme}>
           <div style={style.refresh.div}>
             { !submitFail && <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" /> }
             <Dialog
@@ -259,7 +254,7 @@ export default class AppInfo extends Component {
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div style={{ marginBottom: '12px' }}>
           <Card className="card" style={{ overflow: 'visible' }}>
             <CardHeader

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import PropTypes from 'prop-types';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import {
   CircularProgress, IconButton, Button, Paper, Divider, FormControlLabel,
   Table, TableBody, TableRow, TableCell, Tooltip, Checkbox,
@@ -15,13 +16,7 @@ import ConfirmationModal from '../ConfirmationModal';
 import { NewPipelineCoupling } from '../../components/Pipelines';
 import History from '../../config/History';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiCheckbox: {
       root: {
@@ -73,7 +68,6 @@ const style = {
   },
   link: {
     textDecoration: 'none',
-    color: muiTheme.palette.primary1Color,
   },
 };
 
@@ -224,19 +218,22 @@ export default class Stage extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProvider theme={theme}>
           <div style={style.refresh.div}>
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>
       );
     }
+
     const couplingList = this.state.stageCouplings.map((coupling) => {
       const releaseDate = new Date(coupling.release.updated_at);
       const buildDate = new Date(coupling.release.build.updated_at);
       const commitSha = coupling.release.build.commit.sha ? `Commit: ${coupling.release.build.commit.sha.substring(0, 8)}...` : `Build: ${coupling.release.build.id}`;
       const commitMessage = coupling.release.build.commit.message ? `, ${coupling.release.build.commit.message.substring(0, 60)}` : null;
       const commitAuthor = coupling.release.build.commit.author ? `, ${coupling.release.build.commit.author.substring(0, 20)}` : null;
+
+      console.log(this.context);
 
       return (
         <TableRow hover className={coupling.app.name} key={coupling.id} style={style.tableRow}>
@@ -286,7 +283,7 @@ export default class Stage extends Component {
     });
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div>
           <Table className={`${this.props.stage}-coupling-list`}>
             <TableBody>

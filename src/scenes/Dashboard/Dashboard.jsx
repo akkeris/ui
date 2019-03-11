@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import deepmerge from 'deepmerge';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
 import {
-  Tab, Tabs, CircularProgress, Card, CardHeader, Paper,
+  Tab, Tabs, CircularProgress, Card, Paper,
 } from '@material-ui/core';
 
 import FavoriteIcon from '@material-ui/icons/Favorite';
@@ -15,13 +16,7 @@ import FavoritesList from '../../components/Apps/FavoritesList';
 import RecentsList from '../../components/RecentsList';
 
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiTabs: {
       root: {
@@ -146,14 +141,14 @@ export default class Dashboard extends Component {
     const { currentTab, loading } = this.state;
     if (loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProvider theme={theme}>
           <div className="loading" style={style.refresh.div}>
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div style={{ marginBottom: '12px' }}>
           <Card className="card" style={{ overflow: 'visible' }}>
             <Tabs

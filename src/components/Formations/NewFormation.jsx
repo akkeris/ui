@@ -1,27 +1,17 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Radio, RadioGroup,
   FormControl, FormLabel, FormControlLabel, MenuItem, Typography,
   Button, TextField, Select, Collapse,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
     MuiButton: {
       root: {
         marginRight: '15px',
@@ -389,7 +379,7 @@ export default class NewFormation extends Component {
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div style={style.stepper}>
           <Stepper activeStep={stepIndex}>
             <Step>

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import {
   Button, IconButton, Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
 } from '@material-ui/core';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
 import LaptopIcon from '@material-ui/icons/Computer';
@@ -17,13 +18,7 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 import { Stage } from '../../components/Pipelines';
 import History from '../../config/History';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiTabs: {
       root: {
@@ -249,7 +244,7 @@ export default class PipelineInfo extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProvider theme={theme}>
           <div style={style.refresh.div}>
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
             <Dialog
@@ -273,7 +268,7 @@ export default class PipelineInfo extends Component {
         </MuiThemeProvider>);
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div>
           <Card className="card" style={style.card}>
             <CardHeader
