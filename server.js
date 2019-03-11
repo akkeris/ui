@@ -96,7 +96,7 @@ app.use((req, res, next) => {
   }
   if (process.env.OAUTH2_DEBUG) {
     console.log('middleware oauth2 check [req.session]', req.session)
-    console.log('middleware oauth2 check [req.path]', req.path)
+    console.log(`middleware oauth2 check [req.path] "${req.path}"`)
   }
   if (req.session.token || req.path === '/oauth/callback') {
     next();
