@@ -94,7 +94,7 @@ app.use((req, res, next) => {
     next();
   } else {
     req.session.redirect = req.originalUrl;
-    res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
+    res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback&scope=${encodeURIComponent("read:user,read:org")}`)}`);
   }
 });
 
