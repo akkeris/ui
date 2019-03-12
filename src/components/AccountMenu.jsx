@@ -49,7 +49,8 @@ export default class AccountMenu extends Component {
   }
 
   account = () => {
-    History.get().push('/user');
+    // can't use history here because we want it to route to Express
+    window.location = '/user';
   }
 
   handleRequestClose = () => {

@@ -94,49 +94,36 @@ app.use((req, res, next) => {
     next();
   } else {
     req.session.redirect = req.originalUrl;
-    res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
+    if(process.env.OAUTH_SCOPES) {
+      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}&scope=${encodeURIComponent(process.env.OAUTH_SCOPES)}`);
+    } else {
+      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);      
+    }
   }
 });
 
 app.get('/oauth/callback', (req, res) => {
-  let reqopts = {"url": `${authEndpoint}/access_token`, "headers":{"user-agent":"akkerisui", "accept":"application/json"}};
-  reqopts.formData = {
+  const reqopts = { url: `${authEndpoint}/access_token`, headers: { 'user-agent': 'akkerisui', accept: 'application/json' } };
+  reqopts.form = {
     client_id: clientID,
     client_secret: clientSecret,
     code: req.query.code,
     grant_type: 'authorization_code',
   };
   request.post(reqopts, (err, response, body) => {
-    if(err) {
-      console.error('Error retrieving access token from auth code:')
-      console.error(err)
-      return res.send('Uh oh, an error occured.  Please try again later.')
+    if (err) {
+      console.error('Error retrieving access token from auth code:');
+      console.error(err);
+      return res.send('Uh oh, an error occured.  Please try again later.');
     } else if (response.statusCode < 200 || response.statusCode > 299) {
-      console.error('Error retrieving access token from auth code, invalid response:')
-      console.error(response.statusCode, response.headers)
-      return res.send('Uh oh, an error occured.  Please try again later.')
+      console.error('Error retrieving access token from auth code, invalid response:');
+      console.error(response.statusCode, response.headers);
+      return res.send('Uh oh, an error occured.  Please try again later.');
     }
     req.session.token = JSON.parse(body).access_token;
     res.redirect(req.session.redirect || '/');
   });
 });
-
-/* eslint-disable no-param-reassign */
-app.use(['/account','/api/account'], proxy(authUserEndpoint, {
-  proxyReqOptDecorator(reqOpts, srcReq) {
-    reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`;
-    reqOpts.headers['Content-Type'] = 'application/json';
-    reqOpts.headers['content-type'] = 'application/json';
-    reqOpts.headers.Accept = 'application/json';
-    reqOpts.headers.Cookie = null;
-    return reqOpts;
-  },
-  userResDecorator(proxyRes, proxyResData, userReq, userRes) {
-    userRes.set('Set-Cookie', '');
-    userRes.set('set-cookie', '');
-    return proxyResData;
-  },
-}));
 
 app.use('/api', proxy(`${akkerisApi}`, {
   proxyReqOptDecorator(reqOpts, srcReq) {

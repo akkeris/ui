@@ -299,7 +299,7 @@ function deletePipeline(pipeline) {
 }
 
 function getUser() {
-  return axios.get('/account/user');
+  return axios.get('/api/account');
 }
 
 function getAccount() {
