@@ -121,23 +121,6 @@ app.get('/oauth/callback', (req, res) => {
   });
 });
 
-/* eslint-disable no-param-reassign */
-app.use(['/account', '/api/account'], proxy(authUserEndpoint, {
-  proxyReqOptDecorator(reqOpts, srcReq) {
-    reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`;
-    reqOpts.headers['Content-Type'] = 'application/json';
-    reqOpts.headers['content-type'] = 'application/json';
-    reqOpts.headers.Accept = 'application/json';
-    reqOpts.headers.Cookie = null;
-    return reqOpts;
-  },
-  userResDecorator(proxyRes, proxyResData, userReq, userRes) {
-    userRes.set('Set-Cookie', '');
-    userRes.set('set-cookie', '');
-    return proxyResData;
-  },
-}));
-
 app.use('/api', proxy(`${akkerisApi}`, {
   proxyReqOptDecorator(reqOpts, srcReq) {
     reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`;
