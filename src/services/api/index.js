@@ -323,7 +323,7 @@ function getLogPlex(url, cb) {
 
 function getInvoices(past12) {
   return new Promise((resolve, reject) => {
-    axios.get('/api/invoices').then((response) => {
+    axios.get('/api/account/invoices').then((response) => {
       if (past12) {
         response.data = response.data.slice(-12);
       }
@@ -335,7 +335,7 @@ function getInvoices(past12) {
 }
 
 function getInvoice(invoice) {
-  return axios.get(`/api/invoices/${invoice}`);
+  return axios.get(`/api/account/invoices/${invoice}`);
 }
 
 function getSites() {
