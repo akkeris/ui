@@ -17,7 +17,7 @@ const clientURI = process.env.CLIENT_URI || 'http://localhost:3000';
 const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
 const https = require('https');
-const authPath = process.env.OAUTH_URI;
+const authPath = process.env.OAUTH_URI || '';
 
 const app = express();
 
