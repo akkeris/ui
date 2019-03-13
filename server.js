@@ -134,7 +134,7 @@ app.use('/api', proxy(`${akkerisApi}`, {
 
 app.get('/logout', (req, res) => {
   req.session.token = null;
-  res.redirect(`${authBase}/logout`);
+  res.redirect(`${authEndpoint}/logout`);
 });
 
 app.get('/user', (req, res) => {
