@@ -9,7 +9,6 @@ const webpack = require('webpack');
 const webpackMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 const config = require('./webpack-dev-server.config.js');
-const jsonminify = require('jsonminify');
 
 const port = process.env.PORT || 3000;
 const clientID = process.env.CLIENT_ID;
@@ -17,8 +16,8 @@ const clientSecret = process.env.CLIENT_SECRET;
 const clientURI = process.env.CLIENT_URI || 'http://localhost:3000';
 const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
-const authUserEndpoint = process.env.OAUTH_USER_ENDPOINT || `${authEndpoint}/user`;
 const https = require('https');
+const authPath = process.env.OAUTH_URI;
 
 const app = express();
 
@@ -95,15 +94,15 @@ app.use((req, res, next) => {
   } else {
     req.session.redirect = req.originalUrl;
     if(process.env.OAUTH_SCOPES) {
-      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}&scope=${encodeURIComponent(process.env.OAUTH_SCOPES)}`);
+      res.redirect(`${authEndpoint}${authPath}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}&scope=${encodeURIComponent(process.env.OAUTH_SCOPES)}`);
     } else {
-      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);      
+      res.redirect(`${authEndpoint}${authPath}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);      
     }
   }
 });
 
 app.get('/oauth/callback', (req, res) => {
-  const reqopts = { url: `${authEndpoint}/access_token`, headers: { 'user-agent': 'akkerisui', accept: 'application/json' } };
+  const reqopts = { url: `${authEndpoint}${authPath}/access_token`, headers: { 'user-agent': 'akkerisui', accept: 'application/json' } };
   reqopts.form = {
     client_id: clientID,
     client_secret: clientSecret,
@@ -135,11 +134,11 @@ app.use('/api', proxy(`${akkerisApi}`, {
 
 app.get('/logout', (req, res) => {
   req.session.token = null;
-  res.redirect(`${authEndpoint}/logout`);
+  res.redirect(`${authBase}/logout`);
 });
 
 app.get('/user', (req, res) => {
-  res.redirect(process.env.OAUTH_USER_VIEW || `${authEndpoint}/user`);
+  res.redirect(process.env.OAUTH_USER_VIEW || `${authEndpoint}${authPath}/user`);
 });
 
 if (process.env.NODE_ENV === 'dev') {
