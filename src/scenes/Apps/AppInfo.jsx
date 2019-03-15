@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import deepmerge from 'deepmerge';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import {
-  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, CardContent,
-  Tooltip, Button, IconButton, Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
+  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, Tooltip, IconButton,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
@@ -14,7 +13,7 @@ import MetricIcon from '@material-ui/icons/TrackChanges';
 import AddonIcon from '@material-ui/icons/ShoppingBasket';
 import LogIcon from '@material-ui/icons/Visibility';
 import ConfigIcon from '@material-ui/icons/Tune';
-import AppIcon from '@material-ui/icons/ExitToApp';
+import AppIcon from '@material-ui/icons/Launch';
 import ReleaseIcon from '@material-ui/icons/Cloud';
 import GitIcon from '../../components/Icons/GitIcon';
 import WebhookIcon from '../../components/Icons/WebhookIcon';
@@ -29,6 +28,7 @@ import AppOverview from '../../components/Apps/AppOverview';
 import api from '../../services/api';
 import util from '../../services/util';
 import History from '../../config/History';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
@@ -60,8 +60,9 @@ const theme = parentTheme => deepmerge(parentTheme, {
       },
     },
     MuiCardHeader: {
-      root: {
-        padding: '16px 0px 0px 16px !important',
+      action: {
+        flex: 0.22,
+        margin: '0 !important',
       },
       title: {
         fontSize: '15px',
@@ -78,10 +79,6 @@ const theme = parentTheme => deepmerge(parentTheme, {
 const style = {
   iconButton: {
     color: 'black',
-  },
-  favoriteButton: {
-    color: 'black',
-    marginRight: '21px',
   },
   refresh: {
     div: {
@@ -158,20 +155,6 @@ export default class AppInfo extends Component {
     }
   }
 
-  getFavoriteIcon() {
-    return (
-      <Tooltip title="Favorite" placement="top-end">
-        <IconButton
-          style={style.favoriteButton}
-          className="favorite-app"
-          onClick={this.handleFavorite}
-        >
-          {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
-        </IconButton>
-      </Tooltip>
-    );
-  }
-
   handleClose = () => {
     this.setState({ submitFail: false });
   }
@@ -210,6 +193,42 @@ export default class AppInfo extends Component {
     }
   }
 
+  renderHeaderActions() {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        {this.state.app.git_url && (
+          <Tooltip title="Github Repo" placement="top-end">
+            <IconButton
+              style={style.iconButton}
+              className="github"
+              onClick={() => window.open(this.state.app.git_url, '_blank')}
+            >
+              <GitIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+        <Tooltip title="Live App" placement="top-end">
+          <IconButton
+            style={style.iconButton}
+            className="live-app"
+            onClick={() => window.open(this.state.app.web_url, '_blank')}
+          >
+            <AppIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Favorite" placement="top-end">
+          <IconButton
+            style={style.iconButton}
+            className="favorite-app"
+            onClick={this.handleFavorite}
+          >
+            {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
+          </IconButton>
+        </Tooltip>
+      </div>
+    );
+  }
+
   render() {
     const { currentTab, loading, submitMessage, submitFail } = this.state;
     if (loading) {
@@ -231,25 +250,13 @@ export default class AppInfo extends Component {
         <MuiThemeProvider theme={theme}>
           <div style={style.refresh.div}>
             { !submitFail && <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" /> }
-            <Dialog
-              className="not-found-error"
+            <ConfirmationModal
               open={submitFail}
-            >
-              <DialogTitle>Error</DialogTitle>
-              <DialogContent>
-                <DialogContentText>{notFoundMessage}</DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button
-                  onClick={this.handleNotFoundClose}
-                  color="primary"
-                  autoFocus
-                  onKeyDown={e => ['Escape', 'Esc'].includes(e.key) && this.handleNotFoundClose()}
-                >
-                  Ok
-                </Button>
-              </DialogActions>
-            </Dialog>
+              onOk={this.handleNotFoundClose}
+              message={notFoundMessage}
+              title="Error"
+              className="not-found-error"
+            />
           </div>
         </MuiThemeProvider>);
     }
@@ -262,31 +269,9 @@ export default class AppInfo extends Component {
               title={this.state.app.name}
               subheader={this.state.app.organization.name}
               action={
-                this.getFavoriteIcon()
+                this.renderHeaderActions()
               }
             />
-            <CardContent>
-              <Tooltip title="Live App" placement="top-end">
-                <IconButton
-                  style={style.iconButton}
-                  className="live-app"
-                  href={this.state.app.web_url}
-                >
-                  <AppIcon />
-                </IconButton>
-              </Tooltip>
-              {this.state.app.git_url && (
-                <Tooltip title="Github Repo" placement="top-end">
-                  <IconButton
-                    style={style.iconButton}
-                    className="github"
-                    href={this.state.app.git_url}
-                  >
-                    <GitIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </CardContent>
             <Tabs
               fullWidth
               value={this.state.currentTab}
@@ -359,7 +344,7 @@ export default class AppInfo extends Component {
             )}
             {currentTab === 'dynos' && (
               <Formations
-                app={this.state.app.name}
+                app={this.state.app}
               />
             )}
             {currentTab === 'releases' && (
@@ -400,23 +385,13 @@ export default class AppInfo extends Component {
               />
             )}
           </Card>
-          <Dialog
-            className="app-error"
+          <ConfirmationModal
             open={this.state.submitFail}
-          >
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                color="primary"
-                onClick={this.handleClose}
-              >
-              Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
+            onOk={this.handleClose}
+            message={this.state.submitMessage}
+            title="Error"
+            className="app-error"
+          />
           <Snackbar
             className="app-snack"
             open={this.state.open}
