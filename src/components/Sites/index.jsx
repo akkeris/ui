@@ -3,17 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Table, TableBody, TableHead, TableRow, TableCell, TableFooter, TablePagination,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import History from '../../config/History';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   tableRow: {
@@ -85,37 +75,35 @@ export default class SitesList extends Component {
     const { sites } = this.props;
     const { page, rowsPerPage } = this.state;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <Table className="site-list">
-            <TableHead>
+      <div>
+        <Table className="site-list">
+          <TableHead>
+            <TableRow>
+              <TableCell>Site</TableCell>
+              <TableCell>Updated</TableCell>
+              <TableCell>Region</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.renderSites(page, rowsPerPage)}
+          </TableBody>
+          {sites.length !== 0 && (
+            <TableFooter>
               <TableRow>
-                <TableCell>Site</TableCell>
-                <TableCell>Updated</TableCell>
-                <TableCell>Region</TableCell>
+                <TablePagination
+                  rowsPerPageOptions={[15, 25, 50]}
+                  colSpan={3}
+                  count={sites.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onChangePage={this.handleChangePage}
+                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.renderSites(page, rowsPerPage)}
-            </TableBody>
-            {sites.length !== 0 && (
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[15, 25, 50]}
-                    colSpan={3}
-                    count={sites.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                  />
-                </TableRow>
-              </TableFooter>
-            )}
-          </Table>
-        </div>
-      </MuiThemeProvider>
+            </TableFooter>
+          )}
+        </Table>
+      </div>
     );
   }
 }

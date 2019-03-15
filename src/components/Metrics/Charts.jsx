@@ -1,19 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import { createMuiTheme } from '@material-ui/core/styles';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  // tabs: {
-  //   backgroundColor: '#3c4146',
-  // },
-});
+import { withTheme } from '@material-ui/core/styles';
 
 function hourformat(date) {
   const d = new Date(date);
@@ -47,28 +35,28 @@ const Charts = (props) => {
   let m = null;
 
   if (props.legend.y != null) {
-    y = <Area name={props.legend.y} unit={props.unit} type="step" dataKey="y" stroke={muiTheme.palette.primary1Color} fill="url(#colorPv)" fillOpacity={1} />;
+    y = <Area name={props.legend.y} unit={props.unit} type="step" dataKey="y" stroke={props.theme.palette.primary1Color} fill="url(#colorPv)" fillOpacity={1} />;
   }
   if (props.legend.z != null) {
-    z = <Area name={props.legend.z} unit={props.unit} type="step" dataKey="z" stroke={muiTheme.palette.primary2Color} fill="url(#colorRv)" fillOpacity={1} />;
+    z = <Area name={props.legend.z} unit={props.unit} type="step" dataKey="z" stroke={props.theme.palette.primary2Color} fill="url(#colorRv)" fillOpacity={1} />;
   }
   if (props.legend.u != null) {
-    u = <Area name={props.legend.u} unit={props.unit} type="step" dataKey="u" stroke={muiTheme.palette.primary3Color} fill="url(#colorUv)" fillOpacity={1} />;
+    u = <Area name={props.legend.u} unit={props.unit} type="step" dataKey="u" stroke={props.theme.palette.primary3Color} fill="url(#colorUv)" fillOpacity={1} />;
   }
   if (props.legend.v) {
-    v = <Area name={props.legend.v} unit={props.unit} type="step" dataKey="v" stroke={muiTheme.palette.accent1Color} fill="url(#colorRv)" fillOpacity={1} />;
+    v = <Area name={props.legend.v} unit={props.unit} type="step" dataKey="v" stroke={props.theme.palette.accent1Color} fill="url(#colorRv)" fillOpacity={1} />;
   }
   if (props.legend.o) {
-    o = <Area name={props.legend.o} unit={props.unit} type="step" dataKey="o" stroke={muiTheme.palette.primary1Color} fill="url(#colorPv)" fillOpacity={1} />;
+    o = <Area name={props.legend.o} unit={props.unit} type="step" dataKey="o" stroke={props.theme.palette.primary1Color} fill="url(#colorPv)" fillOpacity={1} />;
   }
   if (props.legend.w) {
-    w = <Area name={props.legend.w} unit={props.unit} type="step" dataKey="w" stroke={muiTheme.palette.primary2Color} fill="url(#colorUv)" fillOpacity={1} />;
+    w = <Area name={props.legend.w} unit={props.unit} type="step" dataKey="w" stroke={props.theme.palette.primary2Color} fill="url(#colorUv)" fillOpacity={1} />;
   }
   if (props.legend.n) {
-    n = <Area name={props.legend.n} unit={props.unit} type="step" dataKey="n" stroke={muiTheme.palette.primary3Color} fill="url(#colorPv)" fillOpacity={1} />;
+    n = <Area name={props.legend.n} unit={props.unit} type="step" dataKey="n" stroke={props.theme.palette.primary3Color} fill="url(#colorPv)" fillOpacity={1} />;
   }
   if (props.legend.m) {
-    m = <Area name={props.legend.m} unit={props.unit} type="step" dataKey="m" stroke={muiTheme.palette.accent1Color} fill="url(#colorRv)" fillOpacity={1} />;
+    m = <Area name={props.legend.m} unit={props.unit} type="step" dataKey="m" stroke={props.theme.palette.accent1Color} fill="url(#colorRv)" fillOpacity={1} />;
   }
 
   return (
@@ -83,13 +71,13 @@ const Charts = (props) => {
       >
         <defs>
           <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muiTheme.palette.secondary.main} stopOpacity={0.25} />
+            <stop offset="0%" stopColor={props.theme.palette.secondary.main} stopOpacity={0.25} />
           </linearGradient>
           <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muiTheme.palette.primary.main} stopOpacity={0.25} />
+            <stop offset="0%" stopColor={props.theme.palette.primary.main} stopOpacity={0.25} />
           </linearGradient>
           <linearGradient id="colorRv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={muiTheme.palette.primary.dark} stopOpacity={0.25} />
+            <stop offset="0%" stopColor={props.theme.palette.primary.dark} stopOpacity={0.25} />
           </linearGradient>
         </defs>
         <XAxis
@@ -116,7 +104,7 @@ const Charts = (props) => {
           name={props.legend.x}
           type="step"
           dataKey="x"
-          stroke={muiTheme.palette.secondary.main}
+          stroke={props.theme.palette.secondary.main}
           fill="url(#colorUv)"
           fillOpacity={1}
         />
@@ -137,6 +125,7 @@ Charts.propTypes = {
   legend: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
   unit: PropTypes.string.isRequired,
+  theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
-export default Charts;
+export default withTheme()(Charts);

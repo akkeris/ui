@@ -131,6 +131,16 @@ app.use('/api', proxy(`${akkerisApi}`, {
     return reqOpts;
   },
 }));
+
+app.get('/healthcheck', (req, res) => {
+  const url = decodeURIComponent(req.query.uri);
+  if (url) {
+    request({ url }).on('error', e => res.end(e)).pipe(res);
+  } else {
+    res.sendStatus(400);
+  }
+});
+
 /* eslint-enable no-param-reassign */
 
 app.get('/logout', (req, res) => {

@@ -3,36 +3,9 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, TextField, Collapse, Button, Typography,
 } from '@material-ui/core';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import ConfirmationModal from '../ConfirmationModal';
-import Select from '../Select';
+import Search from '../Search';
 import api from '../../services/api';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
-    MuiButton: {
-      root: {
-        marginRight: '15px',
-      },
-    },
-    MuiFormControl: {
-      root: {
-        marginBottom: '15px',
-      },
-    },
-  },
-});
 
 const style = {
   stepper: {
@@ -43,10 +16,10 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
-      marginRight: 12,
+      marginRight: 15,
     },
   },
   selectContainer: {
@@ -188,7 +161,7 @@ export default class NewRoute extends Component {
         return (
           <div>
             <div style={style.selectContainer}>
-              <Select
+              <Search
                 options={apps}
                 value={app}
                 onChange={this.handleAppChange}
@@ -282,40 +255,38 @@ export default class NewRoute extends Component {
     const renderCaption = text => <Typography variant="caption">{text}</Typography>;
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel optional={stepIndex > 0 && renderCaption(source)}>
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel optional={stepIndex > 0 && renderCaption(source)}>
                 Input Source
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel optional={stepIndex > 1 && renderCaption(app.name)}>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel optional={stepIndex > 1 && renderCaption(app.name)}>
                 Select App
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel optional={stepIndex > 2 && renderCaption(target)}>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel optional={stepIndex > 2 && renderCaption(target)}>
                 Input Target
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            {this.renderContent()}
-          </Collapse>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="new-route-error"
-          />
-        </div>
-      </MuiThemeProvider>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Confirm</StepLabel>
+          </Step>
+        </Stepper>
+        <Collapse in={!loading}>
+          {this.renderContent()}
+        </Collapse>
+        <ConfirmationModal
+          open={submitFail}
+          onOk={this.handleClose}
+          message={submitMessage}
+          title="Error"
+          className="new-route-error"
+        />
+      </div>
     );
   }
 }

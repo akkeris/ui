@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
-  CircularProgress, MenuItem, Snackbar, IconButton, Button, Paper,
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  CircularProgress, Snackbar, IconButton, Paper,
   Table, TableBody, TableHead, TableRow, TableCell, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -12,25 +10,7 @@ import api from '../../services/api';
 import util from '../../services/util';
 import NewFormation from './NewFormation';
 import DynoType from './DynoType';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  overrides: {
-    MuiTable: {
-      root: {
-        tableLayout: 'fixed',
-      },
-    },
-    MuiPaper: {
-      root: {
-        boxShadow: 'none !important',
-      },
-    },
-  },
-});
+import ConfirmationModal from '../ConfirmationModal';
 
 const style = {
   iconButton: {
@@ -82,9 +62,9 @@ export default class Formations extends Component {
 
   getFormations = async () => {
     const [r1, r2, r3] = await Promise.all([
-      api.getFormations(this.props.app),
+      api.getFormations(this.props.app.name),
       api.getFormationSizes(),
-      api.getDynos(this.props.app),
+      api.getDynos(this.props.app.name),
     ]);
     const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
     const dynos = r3.data;
@@ -104,6 +84,7 @@ export default class Formations extends Component {
         loading: false,
       });
     }
+    console.log('sizes: ', JSON.stringify(sizes));
   }
 
   handleError = (message) => {
@@ -142,8 +123,8 @@ export default class Formations extends Component {
   reload = async (message) => {
     this.setState({ loading: true });
     const [r1, r2] = await Promise.all([
-      api.getFormations(this.props.app),
-      api.getDynos(this.props.app),
+      api.getFormations(this.props.app.name),
+      api.getDynos(this.props.app.name),
     ]);
     const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
     const dynos = r2.data;
@@ -159,15 +140,6 @@ export default class Formations extends Component {
     }
   }
 
-  renderSizes() {
-    return this.state.sizes.map(size =>
-      (<MenuItem
-        className={size.name}
-        key={size.name}
-        value={size.name}
-      >{size.resources.limits.memory}</MenuItem>));
-  }
-
   renderFormations() {
     return this.state.formations.map(formation => (
       <DynoType
@@ -176,7 +148,8 @@ export default class Formations extends Component {
         onComplete={this.reload}
         onAlert={this.info}
         key={formation.id}
-        sizeList={this.renderSizes()}
+        sizes={this.state.sizes}
+        // sizeList={this.renderSizes()}
         onError={this.handleError}
         app={this.props.app}
       />
@@ -186,73 +159,55 @@ export default class Formations extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          {!this.state.new && (
-            <Paper elevation={0}>
-              <Tooltip title="New Formation" placement="bottom-end">
-                <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
-              </Tooltip>
-
-            </Paper>
-          )}
-          {this.state.new && (
-            <div>
-              <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
-              <NewFormation app={this.props.app} onComplete={this.reload} />
-            </div>
-          )}
-          <Table className="formation-list" >
-            <TableHead>
-              <TableRow>
-                <TableCell>Formation</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.renderFormations()}
-            </TableBody>
-          </Table>
-          <Dialog
-            className="error"
-            open={this.state.submitFail}
-          >
-            <DialogTitle>
-              Error
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                color="primary"
-                className="ok"
-                onClick={this.handleDialogClose}
-              >
-                Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Snackbar
-            className="formation-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
-          />
-        </div>
-      </MuiThemeProvider>
+      <div>
+        {!this.state.new && (
+          <Paper elevation={0}>
+            <Tooltip title="New Formation" placement="bottom-end">
+              <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
+            </Tooltip>
+          </Paper>
+        )}
+        {this.state.new && (
+          <div>
+            <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
+            <NewFormation app={this.props.app.name} onComplete={this.reload} />
+          </div>
+        )}
+        <Table className="formation-list">
+          <TableHead>
+            <TableRow>
+              <TableCell>Formation</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.renderFormations()}
+          </TableBody>
+        </Table>
+        <ConfirmationModal
+          className="error"
+          open={this.state.submitFail}
+          onOk={this.handleDialogClose}
+          message={this.state.submitMessage}
+          title="Error"
+        />
+        <Snackbar
+          className="formation-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }
 
 Formations.propTypes = {
-  app: PropTypes.string.isRequired,
+  app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

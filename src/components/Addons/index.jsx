@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import {
   Button, IconButton, Snackbar, Typography, CircularProgress, Dialog,
   Tooltip, Table, TableHead, TableBody, TableRow, TableCell,
-  DialogTitle, DialogContent, DialogContentText, DialogActions,
+  DialogTitle, DialogContent, DialogActions,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { withTheme } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import AttachIcon from '@material-ui/icons/CallMerge';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -30,27 +30,6 @@ function addRestrictedTooltip(title, placement, children) {
     </Tooltip>
   );
 }
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiPaper: {
-      root: {
-        boxShadow: '0 !important',
-      },
-    },
-    MuiDialog: {
-      paper: {
-        width: '40%',
-      },
-    },
-  },
-});
 
 const style = {
   iconButton: {
@@ -93,7 +72,7 @@ const style = {
   },
 };
 
-export default class Addons extends Component {
+class Addons extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -192,7 +171,7 @@ export default class Addons extends Component {
         </TableCell>
         <TableCell>
           {attachment.owner && (
-            <div className="attachment-owner" style={{ color: muiTheme.palette.secondary.main }}>Owner</div>
+            <div className="attachment-owner" style={{ color: this.props.theme.palette.secondary.main }}>Owner</div>
           )}
         </TableCell>
       </TableRow>
@@ -427,160 +406,153 @@ export default class Addons extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={{ overflow: 'visible' }}>
-          {(!this.state.new && !this.state.attach) && (
-            <div>
-              <Tooltip title="New Addon" placement="bottom-end">
-                <IconButton
-                  className="new-addon"
-                  onClick={this.handleNewAddon}
-                  style={style.iconButton}
-                >
-                  <AddIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Attach Addon" placement="bottom-end">
-                <IconButton
-                  className="attach-addon"
-                  onClick={this.handleAttachAddon}
-                  style={style.iconButton}
-                >
-                  <AttachIcon />
-                </IconButton>
-              </Tooltip>
-            </div>
-          )}
-          {this.state.new && (
-            <div>
-              <IconButton style={style.iconButton} className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
-              <NewAddon app={this.props.app.name} onComplete={this.reload} />
-            </div>
-          )}
-          {this.state.attach && (
-            <div>
-              <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
-              <AttachAddon app={this.props.app.name} onComplete={this.reload} />
-            </div>
-          )}
-          <Table className="addon-list">
+      <div style={{ overflow: 'visible' }}>
+        {(!this.state.new && !this.state.attach) && (
+          <div>
+            <Tooltip title="New Addon" placement="bottom-end">
+              <IconButton
+                className="new-addon"
+                onClick={this.handleNewAddon}
+                style={style.iconButton}
+              >
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Attach Addon" placement="bottom-end">
+              <IconButton
+                className="attach-addon"
+                onClick={this.handleAttachAddon}
+                style={style.iconButton}
+              >
+                <AttachIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
+        )}
+        {this.state.new && (
+          <div>
+            <IconButton style={style.iconButton} className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
+            <NewAddon app={this.props.app.name} onComplete={this.reload} />
+          </div>
+        )}
+        {this.state.attach && (
+          <div>
+            <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
+            <AttachAddon app={this.props.app.name} onComplete={this.reload} />
+          </div>
+        )}
+        <Table className="addon-list">
+          <TableHead>
+            <TableRow>
+              <TableCell>Addon</TableCell>
+              <TableCell>Plan</TableCell>
+              <TableCell style={style.tableRowColumn.icon}>Remove</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.state.addons.length > 0 ? this.renderAddons() : (
+              <TableRow><TableCell /><TableCell>No Results</TableCell><TableCell /></TableRow>
+            )}
+          </TableBody>
+        </Table>
+        {this.state.addonAttachments.length > 0 && (
+          <Table className="addon-attachment-list">
             <TableHead>
               <TableRow>
-                <TableCell>Addon</TableCell>
+                <TableCell>Attachment</TableCell>
                 <TableCell>Plan</TableCell>
+                <TableCell>Source</TableCell>
                 <TableCell style={style.tableRowColumn.icon}>Remove</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.state.addons.length > 0 ? this.renderAddons() : (
-                <TableRow><TableCell /><TableCell>No Results</TableCell><TableCell /></TableRow>
-              )}
+              {this.renderAddonAttachments()}
             </TableBody>
           </Table>
-          {this.state.addonAttachments.length > 0 && (
-            <Table className="addon-attachment-list">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Attachment</TableCell>
-                  <TableCell>Plan</TableCell>
-                  <TableCell>Source</TableCell>
-                  <TableCell style={style.tableRowColumn.icon}>Remove</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {this.renderAddonAttachments()}
-              </TableBody>
-            </Table>
-          )}
-          <Dialog
-            className="attached-apps-dialog"
-            onClose={this.handleAddonDialogClose}
-            open={this.state.addonDialogOpen}
-          >
-            <DialogTitle>
-              {this.renderDialogTitle()}
-            </DialogTitle>
-            <DialogContent>
-              {!isEmpty(this.state.currentAddon) && (
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell colSpan="2">App</TableCell>
-                      <TableCell>Ownership</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {this.state.currentAddon.attached_to &&
+        )}
+        <Dialog
+          className="attached-apps-dialog"
+          onClose={this.handleAddonDialogClose}
+          open={this.state.addonDialogOpen}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {this.renderDialogTitle()}
+          </DialogTitle>
+          <DialogContent>
+            {!isEmpty(this.state.currentAddon) && (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell colSpan="2">App</TableCell>
+                    <TableCell>Ownership</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {this.state.currentAddon.attached_to &&
                       this.state.currentAddon.attached_to.map((attachment, index) =>
                         this.formatAttachment(attachment, index),
                       )}
-                  </TableBody>
-                </Table>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={this.handleAddonDialogClose}
-              >
+                </TableBody>
+              </Table>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              className="ok"
+              color="primary"
+              onClick={this.handleAddonDialogClose}
+            >
                 Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <ConfirmationModal
-            className="remove-addon-confirm"
-            open={this.state.confirmAddonOpen}
-            onOk={this.handleRemoveAddon}
-            onCancel={this.handleCancelAddonConfirmation}
-            message="Are you sure you want to delete this addon?"
-          />
-          <ConfirmationModal
-            className="remove-attachment-confirm"
-            open={this.state.confirmAttachmentOpen}
-            onOk={this.handleRemoveAddonAttachment}
-            onCancel={this.handleCancelAddonAttachmentConfirmation}
-            message="Are you sure you want to delete this attachment?"
-          />
-          <Dialog
-            className="addon-error"
-            open={this.state.submitFail}
-          >
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={this.handleDialogClose}
-              >
-                Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Snackbar
-            className="addon-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
-          />
-        </div>
-      </MuiThemeProvider>
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <ConfirmationModal
+          className="remove-addon-confirm"
+          open={this.state.confirmAddonOpen}
+          onOk={this.handleRemoveAddon}
+          onCancel={this.handleCancelAddonConfirmation}
+          message="Are you sure you want to delete this addon?"
+        />
+        <ConfirmationModal
+          className="remove-attachment-confirm"
+          open={this.state.confirmAttachmentOpen}
+          onOk={this.handleRemoveAddonAttachment}
+          onCancel={this.handleCancelAddonAttachmentConfirmation}
+          message="Are you sure you want to delete this attachment?"
+        />
+        <ConfirmationModal
+          className="addon-error"
+          open={this.state.submitFail}
+          onOk={this.handleDialogClose}
+          message={this.state.submitMessage}
+          title="Error"
+        />
+        <Snackbar
+          className="addon-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }
 
+/* eslint-disable react/forbid-prop-types */
 Addons.propTypes = {
-  app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  accountInfo: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  app: PropTypes.object.isRequired,
+  accountInfo: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
 };
+/* eslint-enable react/forbid-prop-types */
+
+export default withTheme()(Addons);

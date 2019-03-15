@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
   CircularProgress, IconButton, Button, Paper, Divider, FormControlLabel,
   Table, TableBody, TableRow, TableCell, Tooltip, Checkbox,
@@ -14,22 +13,6 @@ import util from '../../services/util';
 import ConfirmationModal from '../ConfirmationModal';
 import { NewPipelineCoupling } from '../../components/Pipelines';
 import History from '../../config/History';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiCheckbox: {
-      root: {
-        padding: '2px 12px',
-      },
-    },
-  },
-});
 
 const style = {
   tableRow: {
@@ -73,7 +56,6 @@ const style = {
   },
   link: {
     textDecoration: 'none',
-    color: muiTheme.palette.primary1Color,
   },
 };
 
@@ -224,13 +206,12 @@ export default class Stage extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
+
     const couplingList = this.state.stageCouplings.map((coupling) => {
       const releaseDate = new Date(coupling.release.updated_at);
       const buildDate = new Date(coupling.release.build.updated_at);
@@ -286,65 +267,63 @@ export default class Stage extends Component {
     });
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <Table className={`${this.props.stage}-coupling-list`}>
-            <TableBody>
-              {couplingList}
-            </TableBody>
-          </Table>
-          <Divider />
-          {!this.state.new && (
-            <Paper elevation={0}>
-              <Tooltip title="New Coupling" placement="left">
-                <IconButton className={`${this.props.stage}-new-coupling`} onClick={this.handleNewCoupling}>
-                  <AddIcon />
-                </IconButton>
-              </Tooltip>
-            </Paper>
-          )}
-          {this.state.new && (
-            <div>
-              <IconButton className={`${this.props.stage}-cancel`} onClick={this.handleNewCouplingCancel}><RemoveIcon /></IconButton>
-              <NewPipelineCoupling
-                onError={this.handleError}
-                pipeline={this.props.pipeline.name}
-                onComplete={this.reload}
-                stage={this.props.stage}
-              />
-            </div>
-          )}
-          <ConfirmationModal
-            className={`${this.props.stage}-promote-confirm`}
-            open={this.state.promoteOpen}
-            onOk={this.handlePromote}
-            onCancel={this.handlePromoteCancelConfirmation}
-            message="Are you sure you want to promote?"
-            title="Promote"
-            loading={this.state.loading}
-            actions={
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    className="force-check"
-                    checked={!this.state.safePromote}
-                    onChange={this.handleSafePromoteCheck}
-                    style={{ maxWidth: '120', textAlign: 'left', marginLeft: '12' }}
-                    iconStyle={{ textAlign: 'left' }}
-                  />}
-                label="Force"
-              />
-            }
-          />
-          <ConfirmationModal
-            className={`${this.props.stage}-remove-confirm`}
-            open={this.state.open}
-            onOk={this.handleRemoveCoupling}
-            onCancel={this.handleCancelConfirmation}
-            message="Are you sure you want to delete this coupling?"
-          />
-        </div>
-      </MuiThemeProvider>
+      <div>
+        <Table className={`${this.props.stage}-coupling-list`}>
+          <TableBody>
+            {couplingList}
+          </TableBody>
+        </Table>
+        <Divider />
+        {!this.state.new && (
+          <Paper elevation={0}>
+            <Tooltip title="New Coupling" placement="left">
+              <IconButton className={`${this.props.stage}-new-coupling`} onClick={this.handleNewCoupling}>
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+          </Paper>
+        )}
+        {this.state.new && (
+          <div>
+            <IconButton className={`${this.props.stage}-cancel`} onClick={this.handleNewCouplingCancel}><RemoveIcon /></IconButton>
+            <NewPipelineCoupling
+              onError={this.handleError}
+              pipeline={this.props.pipeline.name}
+              onComplete={this.reload}
+              stage={this.props.stage}
+            />
+          </div>
+        )}
+        <ConfirmationModal
+          className={`${this.props.stage}-promote-confirm`}
+          open={this.state.promoteOpen}
+          onOk={this.handlePromote}
+          onCancel={this.handlePromoteCancelConfirmation}
+          message="Are you sure you want to promote?"
+          title="Promote"
+          loading={this.state.loading}
+          actions={
+            <FormControlLabel
+              control={
+                <Checkbox
+                  className="force-check"
+                  checked={!this.state.safePromote}
+                  onChange={this.handleSafePromoteCheck}
+                  style={{ maxWidth: '120', textAlign: 'left', marginLeft: '12' }}
+                  iconStyle={{ textAlign: 'left' }}
+                />}
+              label="Force"
+            />
+          }
+        />
+        <ConfirmationModal
+          className={`${this.props.stage}-remove-confirm`}
+          open={this.state.open}
+          onOk={this.handleRemoveCoupling}
+          onCancel={this.handleCancelConfirmation}
+          message="Are you sure you want to delete this coupling?"
+        />
+      </div>
     );
   }
 }

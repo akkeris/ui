@@ -4,19 +4,9 @@ import {
   Step, Stepper, StepLabel, Button, TextField, Collapse,
   Typography,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import ConfirmationModal from '../ConfirmationModal';
 
 import api from '../../services/api';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   stepper: {
@@ -184,7 +174,7 @@ export default class NewConfigVar extends Component {
 
   render() {
     const { loading, stepIndex, submitFail, submitMessage, finished, key, value } = this.state;
-    const contentStyle = { margin: '0 56px' };
+    const contentStyle = { margin: '0 32px' };
     if (finished) {
       this.submitConfig();
     }
@@ -192,53 +182,51 @@ export default class NewConfigVar extends Component {
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(key)}>
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(key)}>
                 Key Name
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(value)}>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(value)}>
                 Key Value
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            <div style={contentStyle}>
-              <div>{this.renderStepContent(stepIndex)}</div>
-              <div style={style.buttons.div}>
-                {stepIndex > 0 && (
-                  <Button
-                    className="back"
-                    disabled={stepIndex === 0}
-                    onClick={this.handlePrev}
-                    style={style.buttons.back}
-                  >Back</Button>
-                )}
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Confirm</StepLabel>
+          </Step>
+        </Stepper>
+        <Collapse in={!loading}>
+          <div style={contentStyle}>
+            <div>{this.renderStepContent(stepIndex)}</div>
+            <div style={style.buttons.div}>
+              {stepIndex > 0 && (
                 <Button
-                  variant="contained"
-                  className="next"
-                  color="primary"
-                  onClick={this.handleNext}
-                >{stepIndex === 2 ? 'Finish' : 'Next'}</Button>
-              </div>
+                  className="back"
+                  disabled={stepIndex === 0}
+                  onClick={this.handlePrev}
+                  style={style.buttons.back}
+                >Back</Button>
+              )}
+              <Button
+                variant="contained"
+                className="next"
+                color="primary"
+                onClick={this.handleNext}
+              >{stepIndex === 2 ? 'Finish' : 'Next'}</Button>
             </div>
-          </Collapse>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="new-config-error"
-          />
-        </div>
-      </MuiThemeProvider>
+          </div>
+        </Collapse>
+        <ConfirmationModal
+          open={submitFail}
+          onOk={this.handleClose}
+          message={submitMessage}
+          title="Error"
+          className="new-config-error"
+        />
+      </div>
     );
   }
 }

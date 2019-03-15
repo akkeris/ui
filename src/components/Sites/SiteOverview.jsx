@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
   Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
   List, ListItem, ListItemText, Button, CircularProgress,
@@ -10,15 +9,6 @@ import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import History from '../../config/History';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   refresh: {
@@ -102,61 +92,57 @@ export default class SiteOverview extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <List>
-            <ListItem >
-              <ListItemText primary="Domain" secondary={this.props.site.domain} />
-            </ListItem>
-            <ListItem >
-              <ListItemText primary="ID" secondary={this.props.site.id} />
-            </ListItem>
-            <ListItem >
-              <ListItemText primary="Region" secondary={this.props.site.region.name} />
-            </ListItem>
-            <ListItem >
-              <ListItemText primary="Compliance" secondary={this.props.site.compliance.toString()} />
-            </ListItem>
-            <ListItem >
-              <ListItemText primary="Updated At" secondary={Date(this.props.site.updated_at).toLocaleString()} />
-              <Button
-                variant="contained"
-                className="delete"
-                style={style.button}
-                onClick={this.handleConfirmation}
-                color="secondary"
-              >
-                <RemoveIcon nativeColor="white" style={style.removeIcon} />
-                <span style={style.deleteButtonLabel}>Delete Site</span>
-              </Button>
-            </ListItem>
-          </List>
-          <ConfirmationModal open={this.state.open} onOk={this.handleRemoveSite} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this site?" />
-          <Dialog
-            className="error"
-            open={this.state.submitFail}
-          >
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                color="primary"
-                onClick={this.handleClose}
-              >Ok</Button>
-            </DialogActions>
-          </Dialog>
-        </div>
-      </MuiThemeProvider>
+      <div>
+        <List>
+          <ListItem >
+            <ListItemText primary="Domain" secondary={this.props.site.domain} />
+          </ListItem>
+          <ListItem >
+            <ListItemText primary="ID" secondary={this.props.site.id} />
+          </ListItem>
+          <ListItem >
+            <ListItemText primary="Region" secondary={this.props.site.region.name} />
+          </ListItem>
+          <ListItem >
+            <ListItemText primary="Compliance" secondary={this.props.site.compliance.toString()} />
+          </ListItem>
+          <ListItem >
+            <ListItemText primary="Updated At" secondary={Date(this.props.site.updated_at).toLocaleString()} />
+            <Button
+              variant="contained"
+              className="delete"
+              style={style.button}
+              onClick={this.handleConfirmation}
+              color="secondary"
+            >
+              <RemoveIcon nativeColor="white" style={style.removeIcon} />
+              <span style={style.deleteButtonLabel}>Delete Site</span>
+            </Button>
+          </ListItem>
+        </List>
+        <ConfirmationModal open={this.state.open} onOk={this.handleRemoveSite} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this site?" />
+        <Dialog
+          className="error"
+          open={this.state.submitFail}
+        >
+          <DialogTitle>Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{this.state.submitMessage}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              color="primary"
+              onClick={this.handleClose}
+            >Ok</Button>
+          </DialogActions>
+        </Dialog>
+      </div>
     );
   }
 }

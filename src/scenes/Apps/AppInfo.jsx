@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import {
-  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, CardContent,
-  Tooltip, Button, IconButton, Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
+  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, Tooltip, IconButton,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
@@ -13,7 +11,7 @@ import MetricIcon from '@material-ui/icons/TrackChanges';
 import AddonIcon from '@material-ui/icons/ShoppingBasket';
 import LogIcon from '@material-ui/icons/Visibility';
 import ConfigIcon from '@material-ui/icons/Tune';
-import AppIcon from '@material-ui/icons/ExitToApp';
+import AppIcon from '@material-ui/icons/Launch';
 import ReleaseIcon from '@material-ui/icons/Cloud';
 import GitIcon from '../../components/Icons/GitIcon';
 import WebhookIcon from '../../components/Icons/WebhookIcon';
@@ -28,65 +26,11 @@ import AppOverview from '../../components/Apps/AppOverview';
 import api from '../../services/api';
 import util from '../../services/util';
 import History from '../../config/History';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiTabs: {
-      root: {
-        backgroundColor: '#3c4146',
-        color: 'white',
-        maxWidth: '1024px',
-      },
-    },
-    MuiTab: {
-      root: {
-        minWidth: '120px !important',
-      },
-    },
-    MuiCardContent: {
-      root: {
-        display: 'flex',
-        flexFlow: 'row-reverse',
-        padding: '0px 13px 0px 0px !important',
-      },
-    },
-    MuiCard: {
-      root: {
-        maxWidth: '1024px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        marginTop: '12px',
-      },
-    },
-    MuiCardHeader: {
-      root: {
-        padding: '16px 0px 0px 16px !important',
-      },
-      title: {
-        fontSize: '15px',
-        fontWeight: '500',
-      },
-      subheader: {
-        fontSize: '14px',
-        fontWeight: '500',
-      },
-    },
-  },
-});
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 const style = {
   iconButton: {
     color: 'black',
-  },
-  favoriteButton: {
-    color: 'black',
-    marginRight: '21px',
   },
   refresh: {
     div: {
@@ -163,20 +107,6 @@ export default class AppInfo extends Component {
     }
   }
 
-  getFavoriteIcon() {
-    return (
-      <Tooltip title="Favorite" placement="top-end">
-        <IconButton
-          style={style.favoriteButton}
-          className="favorite-app"
-          onClick={this.handleFavorite}
-        >
-          {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
-        </IconButton>
-      </Tooltip>
-    );
-  }
-
   handleClose = () => {
     this.setState({ submitFail: false });
   }
@@ -215,6 +145,42 @@ export default class AppInfo extends Component {
     }
   }
 
+  renderHeaderActions() {
+    return (
+      <div style={{ display: 'flex', justifyContent: this.state.app.git_url ? 'space-between' : 'space-evenly' }}>
+        {this.state.app.git_url && (
+          <Tooltip title="Github Repo" placement="top-end">
+            <IconButton
+              style={style.iconButton}
+              className="github"
+              onClick={() => window.open(this.state.app.git_url, '_blank')}
+            >
+              <GitIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+        <Tooltip title="Live App" placement="top-end">
+          <IconButton
+            style={style.iconButton}
+            className="live-app"
+            onClick={() => window.open(this.state.app.web_url, '_blank')}
+          >
+            <AppIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Favorite" placement="top-end">
+          <IconButton
+            style={style.iconButton}
+            className="favorite-app"
+            onClick={this.handleFavorite}
+          >
+            {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
+          </IconButton>
+        </Tooltip>
+      </div>
+    );
+  }
+
   render() {
     const { currentTab, loading, submitMessage, submitFail } = this.state;
     if (loading) {
@@ -233,204 +199,157 @@ export default class AppInfo extends Component {
         } catch (e) { notFoundMessage = submitMessage; }
       }
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            { !submitFail && <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" /> }
-            <Dialog
-              className="not-found-error"
-              open={submitFail}
-            >
-              <DialogTitle>Error</DialogTitle>
-              <DialogContent>
-                <DialogContentText>{notFoundMessage}</DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button
-                  onClick={this.handleNotFoundClose}
-                  color="primary"
-                  autoFocus
-                  onKeyDown={e => ['Escape', 'Esc'].includes(e.key) && this.handleNotFoundClose()}
-                >
-                  Ok
-                </Button>
-              </DialogActions>
-            </Dialog>
-          </div>
-        </MuiThemeProvider>);
-    }
-    return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={{ marginBottom: '12px' }}>
-          <Card className="card" style={{ overflow: 'visible' }}>
-            <CardHeader
-              className="header"
-              title={this.state.app.name}
-              subheader={this.state.app.organization.name}
-              action={
-                this.getFavoriteIcon()
-              }
-            />
-            <CardContent>
-              <Tooltip title="Live App" placement="top-end">
-                <IconButton
-                  style={style.iconButton}
-                  className="live-app"
-                  href={this.state.app.web_url}
-                >
-                  <AppIcon />
-                </IconButton>
-              </Tooltip>
-              {this.state.app.git_url && (
-                <Tooltip title="Github Repo" placement="top-end">
-                  <IconButton
-                    style={style.iconButton}
-                    className="github"
-                    href={this.state.app.git_url}
-                  >
-                    <GitIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </CardContent>
-            <Tabs
-              fullWidth
-              value={this.state.currentTab}
-              onChange={this.changeActiveTab}
-              scrollButtons="off"
-            >
-              <Tab
-                disableRipple
-                className="info-tab"
-                icon={<InfoIcon />}
-                label="Info"
-                value="info"
-              />
-              <Tab
-                disableRipple
-                className="dynos-tab"
-                icon={<CPUIcon />}
-                label="Dynos"
-                value="dynos"
-              />
-              <Tab
-                disableRipple
-                className="releases-tab"
-                icon={<ReleaseIcon />}
-                label="Activity"
-                value="releases"
-              />
-              <Tab
-                disableRipple
-                className="addons-tab"
-                icon={<AddonIcon />}
-                label="Addons"
-                value="addons"
-              />
-              <Tab
-                disableRipple
-                className="webhooks-tab"
-                icon={<WebhookIcon />}
-                label="Webhooks"
-                value="webhooks"
-              />
-              <Tab
-                disableRipple
-                className="config-tab"
-                icon={<ConfigIcon />}
-                label="Config"
-                value="config"
-              />
-              <Tab
-                disableRipple
-                className="metrics-tab"
-                icon={<MetricIcon />}
-                label="Metrics"
-                value="metrics"
-              />
-              <Tab
-                disableRipple
-                className="logs-tab"
-                icon={<LogIcon />}
-                label="Logs"
-                value="logs"
-              />
-            </Tabs>
-            {currentTab === 'info' && (
-              <AppOverview
-                app={this.state.app}
-                onComplete={this.reload}
-                accountInfo={this.state.accountInfo}
-              />
-            )}
-            {currentTab === 'dynos' && (
-              <Formations
-                app={this.state.app.name}
-              />
-            )}
-            {currentTab === 'releases' && (
-              <Releases
-                app={this.state.app}
-                org={this.state.app.organization.name}
-                accountInfo={this.state.accountInfo}
-              />
-            )}
-            {currentTab === 'addons' && (
-              <Addons
-                app={this.state.app}
-                accountInfo={this.state.accountInfo}
-              />
-            )}
-            {currentTab === 'webhooks' && (
-              <Webhooks
-                app={this.state.app.name}
-              />
-            )}
-            {currentTab === 'config' && (
-              <Config
-                app={this.state.app.name}
-              />
-            )}
-            {currentTab === 'metrics' && (
-              <Metrics
-                app={this.state.app.name}
-                appName={this.state.app.simple_name}
-                space={this.state.app.space.name}
-              />
-            )}
-            {currentTab === 'logs' && (
-              <Logs
-                app={this.state.app.name}
-                appName={this.state.app.simple_name}
-                space={this.state.app.space.name}
-              />
-            )}
-          </Card>
-          <Dialog
-            className="app-error"
-            open={this.state.submitFail}
-          >
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                color="primary"
-                onClick={this.handleClose}
-              >
-              Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Snackbar
-            className="app-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
+        <div style={style.refresh.div}>
+          { !submitFail && <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" /> }
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleNotFoundClose}
+            message={notFoundMessage}
+            title="Error"
+            className="not-found-error"
           />
         </div>
-      </MuiThemeProvider>
+      );
+    }
+    return (
+      <div style={{ marginBottom: '12px' }}>
+        <Card className="card" style={{ overflow: 'visible' }}>
+          <CardHeader
+            className="header"
+            title={this.state.app.name}
+            subheader={this.state.app.organization.name}
+            action={
+              this.renderHeaderActions()
+            }
+          />
+          <Tabs
+            fullWidth
+            value={this.state.currentTab}
+            onChange={this.changeActiveTab}
+            scrollButtons="off"
+          >
+            <Tab
+              disableRipple
+              className="info-tab"
+              icon={<InfoIcon />}
+              label="Info"
+              value="info"
+            />
+            <Tab
+              disableRipple
+              className="dynos-tab"
+              icon={<CPUIcon />}
+              label="Dynos"
+              value="dynos"
+            />
+            <Tab
+              disableRipple
+              className="releases-tab"
+              icon={<ReleaseIcon />}
+              label="Activity"
+              value="releases"
+            />
+            <Tab
+              disableRipple
+              className="addons-tab"
+              icon={<AddonIcon />}
+              label="Addons"
+              value="addons"
+            />
+            <Tab
+              disableRipple
+              className="webhooks-tab"
+              icon={<WebhookIcon />}
+              label="Webhooks"
+              value="webhooks"
+            />
+            <Tab
+              disableRipple
+              className="config-tab"
+              icon={<ConfigIcon />}
+              label="Config"
+              value="config"
+            />
+            <Tab
+              disableRipple
+              className="metrics-tab"
+              icon={<MetricIcon />}
+              label="Metrics"
+              value="metrics"
+            />
+            <Tab
+              disableRipple
+              className="logs-tab"
+              icon={<LogIcon />}
+              label="Logs"
+              value="logs"
+            />
+          </Tabs>
+          {currentTab === 'info' && (
+            <AppOverview
+              app={this.state.app}
+              onComplete={this.reload}
+              accountInfo={this.state.accountInfo}
+            />
+          )}
+          {currentTab === 'dynos' && (
+            <Formations
+              app={this.state.app}
+            />
+          )}
+          {currentTab === 'releases' && (
+            <Releases
+              app={this.state.app}
+              org={this.state.app.organization.name}
+              accountInfo={this.state.accountInfo}
+            />
+          )}
+          {currentTab === 'addons' && (
+            <Addons
+              app={this.state.app}
+              accountInfo={this.state.accountInfo}
+            />
+          )}
+          {currentTab === 'webhooks' && (
+            <Webhooks
+              app={this.state.app.name}
+            />
+          )}
+          {currentTab === 'config' && (
+            <Config
+              app={this.state.app.name}
+            />
+          )}
+          {currentTab === 'metrics' && (
+            <Metrics
+              app={this.state.app.name}
+              appName={this.state.app.simple_name}
+              space={this.state.app.space.name}
+            />
+          )}
+          {currentTab === 'logs' && (
+            <Logs
+              app={this.state.app.name}
+              appName={this.state.app.simple_name}
+              space={this.state.app.space.name}
+            />
+          )}
+        </Card>
+        <ConfirmationModal
+          open={this.state.submitFail}
+          onOk={this.handleClose}
+          message={this.state.submitMessage}
+          title="Error"
+          className="app-error"
+        />
+        <Snackbar
+          className="app-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }

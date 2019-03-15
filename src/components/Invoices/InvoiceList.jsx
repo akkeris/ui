@@ -1,18 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Table, TableBody, TableRow, TableCell, Card, CardHeader } from '@material-ui/core';
+import { withTheme } from '@material-ui/core/styles';
 import { BarChart, Bar, XAxis } from 'recharts';
 import History from '../../config/History';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   tableRow: {
@@ -87,7 +78,7 @@ function getNamedShortMonth(date) {
   }
 }
 
-export default class InvoiceList extends Component {
+class InvoiceList extends Component {
   getInvoiceHistory() {
     // only show the last 20 entries.
     const data = this.props.invoices.map((invoice) => {
@@ -132,35 +123,37 @@ export default class InvoiceList extends Component {
   }
 
   render() {
+    const { theme } = this.props;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <Card>
-            <CardHeader title="Billing Information" subheader={`Current Usage: ${formatMoney(this.getInvoiceTotal())}`} />
-          </Card>
-          <BarChart
-            style={{ marginLeft: 'auto', marginRight: 'auto' }}
-            margin={{
-              top: 15, bottom: 15, left: 15, right: 15,
-            }}
-            width={600}
-            height={200}
-            data={this.getInvoiceHistory()}
-          >
-            <XAxis axisLine={false} dataKey="time" tickLine={false} />
-            <Bar type="monotone" dataKey="x" fill={muiTheme.palette.primary.main} />
-          </BarChart>
-          <Table>
-            <TableBody>
-              {this.getInvoices()}
-            </TableBody>
-          </Table>
-        </div>
-      </MuiThemeProvider>
+      <div>
+        <Card>
+          <CardHeader title="Billing Information" subheader={`Current Usage: ${formatMoney(this.getInvoiceTotal())}`} />
+        </Card>
+        <BarChart
+          style={{ marginLeft: 'auto', marginRight: 'auto' }}
+          margin={{
+            top: 15, bottom: 15, left: 15, right: 15,
+          }}
+          width={600}
+          height={200}
+          data={this.getInvoiceHistory()}
+        >
+          <XAxis axisLine={false} dataKey="time" tickLine={false} />
+          <Bar type="monotone" dataKey="x" fill={theme.palette.primary.main} />
+        </BarChart>
+        <Table>
+          <TableBody>
+            {this.getInvoices()}
+          </TableBody>
+        </Table>
+      </div>
     );
   }
 }
 
 InvoiceList.propTypes = {
   invoices: PropTypes.arrayOf(PropTypes.object).isRequired,
+  theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
+
+export default withTheme()(InvoiceList);

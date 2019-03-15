@@ -1,11 +1,13 @@
 import React from 'react';
 import { Router as BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import Loadable from 'react-loadable';
 import Loading from '../components/Loading';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
 
 import History from './History';
+import globalTheme from './GlobalTheme';
 
 const PageNotFound = Loadable({
   loader: () => import('../components/PageNotFound'),
@@ -145,9 +147,9 @@ const SitesRoutes = () => (
 );
 
 const Router = () => (
-  <div>
-    <BrowserRouter history={History.get()}>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
+  <BrowserRouter history={History.get()}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
+      <MuiThemeProvider theme={globalTheme}>
         <Nav />
         <Switch style={{ flex: 1 }}>
           <Route exact path="/" render={() => <Redirect to="/apps" />} />
@@ -163,9 +165,9 @@ const Router = () => (
         </Switch>
         <canvas id="canv" style={{ position: 'fixed', top: '0', left: '0', zIndex: '-1' }} />
         <Footer />
-      </div>
-    </BrowserRouter>
-  </div>
+      </MuiThemeProvider>
+    </div>
+  </BrowserRouter>
 );
 
 export default Router;

@@ -50,11 +50,13 @@ body {
   font-size: 13px;
   line-height: 20px;
   margin: 0;
-  /*background:linear-gradient(to right, #dc8e20 0%,#e72a7e 100%);  orange to pink */
-  /*background:linear-gradient(128deg, #2E9BFF 0%, #1FE6DF 100%);  blue to light blue */
-  /*background:linear-gradient(128deg, #ff4036 0%, #ffb511 100%);  orange to yellow */
-  /*background:linear-gradient(128deg, #8aba37 0%, #ddd427 100%);  green to yellow */
-  background:linear-gradient(to right, rgb(174,58,152) 0%, rgb(206,57,98) 100%); /* blue to pink *//*linear-gradient(128deg, #E11F5C 0%, #B62AA1 100%)*/
+  /* background:linear-gradient(to right, #dc8e20 0%,#e72a7e 100%);  orange to pink */
+  /* background:linear-gradient(to right, rgb(46, 123, 255) 0%, rgb(92, 25, 186) 75%); blue to purple */
+  /* background:linear-gradient(128deg, #2E9BFF 0%, #1FE6DF 100%);  blue to light blue */
+  /* background:linear-gradient(128deg, #ff4036 0%, #ffb511 100%);  orange to yellow */
+  /* background:linear-gradient(128deg, #8aba37 0%, #ddd427 100%);  green to yellow */
+  background:linear-gradient(to right, rgb(174,58,152) 0%, rgb(206,57,98) 100%); /* blue to pink */
+  /*linear-gradient(128deg, #E11F5C 0%, #B62AA1 100%)*/
 }
 
 .recommendations {

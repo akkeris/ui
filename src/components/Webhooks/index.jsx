@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
-  CircularProgress, Button, IconButton, Paper, Snackbar, Typography,
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  CircularProgress, IconButton, Paper, Snackbar,
   Table, TableHead, TableBody, TableRow, TableCell, Tooltip, Grid,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -12,15 +10,7 @@ import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import NewWebhook from './NewWebhook';
 import Webhook from './Webhook';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
+import ConfirmationModal from '../ConfirmationModal';
 
 const style = {
   headerLeftPadding: {
@@ -135,77 +125,62 @@ export default class Webhooks extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          {!this.state.new ? (
-            <Paper elevation={0}>
-              <Tooltip placement="bottom-end" title="New Webhook">
-                <IconButton
-                  className="new-webhook"
-                  onClick={this.handleNewWebhook}
-                >
-                  <AddIcon />
-                </IconButton>
-              </Tooltip>
-            </Paper>
-          ) : (
-            <div>
-              <IconButton className="webhook-cancel" onClick={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
-              { <NewWebhook app={this.props.app} onComplete={this.reload} /> }
-            </div>
+      <div>
+        {!this.state.new ? (
+          <Paper elevation={0}>
+            <Tooltip placement="bottom-end" title="New Webhook">
+              <IconButton
+                className="new-webhook"
+                onClick={this.handleNewWebhook}
+              >
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+          </Paper>
+        ) : (
+          <div>
+            <IconButton className="webhook-cancel" onClick={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
+            { <NewWebhook app={this.props.app} onComplete={this.reload} /> }
+          </div>
+        )}
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell style={{ padding: 0, paddingBottom: '10px' }}>
+                <Grid container>
+                  <Grid item xs={6} style={style.headerLeftPadding}>Webhook</Grid>
+                  <Grid item xs={6}>Events</Grid>
+                </Grid>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          {this.state.webhooks && this.state.webhooks.length > 0 && (
+            <TableBody className="webhook-list">
+              {this.renderWebhooks()}
+            </TableBody>
           )}
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell style={{ padding: 0, paddingBottom: '10px' }}>
-                  <Grid container>
-                    <Grid item xs={6} style={style.headerLeftPadding}>Webhook</Grid>
-                    <Grid item xs={6}>Events</Grid>
-                  </Grid>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            {this.state.webhooks && this.state.webhooks.length > 0 && (
-              <TableBody className="webhook-list">
-                {this.renderWebhooks()}
-              </TableBody>
-            )}
-          </Table>
-          <Dialog
-            open={this.state.submitFail}
-            className="webhook-error"
-          >
-            <DialogTitle>
-              <Typography variant="h6">
-                Error
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                {this.state.submitMessage}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button label="Ok" color="primary" onClick={this.handleDialogClose}>Ok</Button>
-            </DialogActions>
-          </Dialog>
-          <Snackbar
-            className="webhook-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
-          />
-        </div>
-      </MuiThemeProvider>
+        </Table>
+        <ConfirmationModal
+          open={this.state.submitFail}
+          onOk={this.handleDialogClose}
+          message={this.state.submitMessage}
+          title="Error"
+          className="webhook-error"
+        />
+        <Snackbar
+          className="webhook-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }

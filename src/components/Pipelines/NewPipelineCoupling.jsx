@@ -3,20 +3,10 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Collapse, Typography,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
-import Search from '../../components/Search';
+import AutoSuggest from '../AutoSuggest';
 import util from '../../services/util';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   stepper: {
@@ -27,7 +17,7 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,
@@ -98,7 +88,7 @@ export default class NewPipelineCoupling extends Component {
       case 0:
         return (
           <div>
-            <Search
+            <AutoSuggest
               className={`${this.props.stage}-app-search`}
               label="App"
               data={util.filterName(this.state.apps)}
@@ -125,23 +115,21 @@ export default class NewPipelineCoupling extends Component {
       this.submitPipelineCoupling();
     }
 
-    const contentStyle = { margin: '0 0 40px 57px' };
+    const contentStyle = { margin: '0 0 48px 32px' };
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel>Select App</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            <div style={contentStyle}>
-              <div>{this.renderStepContent(stepIndex)}</div>
-            </div>
-          </Collapse>
-        </div>
-      </MuiThemeProvider>
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel>Select App</StepLabel>
+          </Step>
+        </Stepper>
+        <Collapse in={!loading}>
+          <div style={contentStyle}>
+            <div>{this.renderStepContent(stepIndex)}</div>
+          </div>
+        </Collapse>
+      </div>
     );
   }
 }

@@ -397,6 +397,10 @@ function createFavorite(app) {
   });
 }
 
+function getHealthcheck(uri) {
+  return axios.get(`/healthcheck?uri=${encodeURIComponent(uri)}`);
+}
+
 export default {
   appSetup,
   getAppSetup,
@@ -469,4 +473,5 @@ export default {
   getFavorites,
   deleteFavorite,
   createFavorite,
+  getHealthcheck,
 };

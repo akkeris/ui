@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
   Paper, CircularProgress, LinearProgress, TextField, Select, MenuItem, Button, Divider,
   List, ListItem, ListItemIcon, ListItemText, FormControl, InputLabel,
@@ -13,15 +12,6 @@ import api from '../../services/api';
 import History from '../../config/History';
 
 /* eslint-disable react/jsx-no-bind */
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   refresh: {
@@ -273,16 +263,14 @@ export default class AppSetups extends Component {
   }
 
   renderErrorMessage = msg => (
-    <MuiThemeProvider theme={muiTheme}>
-      <div>
-        <Paper style={style.paper}>
-          <div className="internal">
-            <div className="status" style={style.header}>Uh oh...</div>
-            <span>{msg}</span>
-          </div>
-        </Paper>
-      </div>
-    </MuiThemeProvider>
+    <div>
+      <Paper style={style.paper}>
+        <div className="internal">
+          <div className="status" style={style.header}>Uh oh...</div>
+          <span>{msg}</span>
+        </div>
+      </Paper>
+    </div>
   )
 
   renderSpaces() {
@@ -312,11 +300,9 @@ export default class AppSetups extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div className="apps" style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div className="apps" style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     } else if (this.state.panel === 'form' && this.state.loading === false) {
       const configVars = [];
@@ -365,62 +351,60 @@ export default class AppSetups extends Component {
         }
 
         return (
-          <MuiThemeProvider theme={muiTheme}>
-            <div>
-              <Paper style={style.paper}>
-                <div className="internal">
-                  {headers}
-                  <TextField
-                    className="application_name"
-                    label="Application Name"
-                    style={style.textfield}
-                    error={!!this.state.app_name_error}
-                    helperText={this.state.app_name_error ? this.state.app_name_error : undefined}
-                    onChange={this.handleNameChange}
-                  />
-                  <FormControl style={style.fullWidth}>
-                    <InputLabel htmlFor="space-field">Space</InputLabel>
-                    <Select
-                      className="space-field"
-                      value={this.state.blueprint.app.space}
-                      onChange={this.handleSpaceChange}
-                      inputProps={{
-                        name: 'space',
-                        id: 'space-field',
-                      }}
-                    >
-                      {this.renderSpaces()}
-                    </Select>
-                  </FormControl>
-                  <br />
-                  <FormControl style={style.fullWidth}>
-                    <InputLabel htmlFor="org-field">Organization</InputLabel>
-                    <Select
-                      className="org-field"
-                      value={this.state.blueprint.app.organization}
-                      onChange={this.handleOrgChange}
-                      inputProps={{
-                        name: 'org',
-                        id: 'org-field',
-                      }}
-                    >
-                      {this.renderOrgs()}
-                    </Select>
-                  </FormControl>
-                  <br />
-                  {configVars}
-                  <Button
-                    variant="contained"
-                    className="create"
-                    disabled={this.state.create_disabled}
-                    color="primary"
-                    fullWidth
-                    onClick={this.handleOnClick}
-                  >Create</Button>
-                </div>
-              </Paper>
-            </div>
-          </MuiThemeProvider>
+          <div>
+            <Paper style={style.paper}>
+              <div className="internal">
+                {headers}
+                <TextField
+                  className="application_name"
+                  label="Application Name"
+                  style={style.textfield}
+                  error={!!this.state.app_name_error}
+                  helperText={this.state.app_name_error ? this.state.app_name_error : undefined}
+                  onChange={this.handleNameChange}
+                />
+                <FormControl style={style.fullWidth}>
+                  <InputLabel htmlFor="space-field">Space</InputLabel>
+                  <Select
+                    className="space-field"
+                    value={this.state.blueprint.app.space}
+                    onChange={this.handleSpaceChange}
+                    inputProps={{
+                      name: 'space',
+                      id: 'space-field',
+                    }}
+                  >
+                    {this.renderSpaces()}
+                  </Select>
+                </FormControl>
+                <br />
+                <FormControl style={style.fullWidth}>
+                  <InputLabel htmlFor="org-field">Organization</InputLabel>
+                  <Select
+                    className="org-field"
+                    value={this.state.blueprint.app.organization}
+                    onChange={this.handleOrgChange}
+                    inputProps={{
+                      name: 'org',
+                      id: 'org-field',
+                    }}
+                  >
+                    {this.renderOrgs()}
+                  </Select>
+                </FormControl>
+                <br />
+                {configVars}
+                <Button
+                  variant="contained"
+                  className="create"
+                  disabled={this.state.create_disabled}
+                  color="primary"
+                  fullWidth
+                  onClick={this.handleOnClick}
+                >Create</Button>
+              </div>
+            </Paper>
+          </div>
         );
       } catch (error) {
         return (this.renderErrorMessage('Blueprint Parsing Error - Check your JSON syntax!'));
@@ -456,69 +440,67 @@ export default class AppSetups extends Component {
       const isBuilding = this.state.progress === 100;
 
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div>
-            <Paper style={style.paper}>
-              <List style={{ padding: '5em' }}>
-                <ListItem className="config-environment" >
-                  <ListItemText primary="Configuring environment" />
-                  {(!isConfiguring) ? <ListItemIcon><DoneBox /></ListItemIcon> : null}
-                </ListItem>
-                {
-                  isConfiguring ?
-                    (
-                      <ListItem>
-                        <div style={style.linearProgressContainer}>
-                          <LinearProgress variant="determinate" value={this.state.progress} />
-                        </div>
-                      </ListItem>
-                    ) : null
-                }
-                <Divider variant="inset" style={style.divider} />
-                <ListItem >
-                  <ListItemText primary="Building app" />
-                  {(isBuilding && (this.state.panel === 'ready' || this.state.panel === 'done')) ? (
-                    <ListItemIcon><DoneBox /></ListItemIcon>
-                  ) : null}
-                </ListItem>
-                {
-                  isBuilding ?
-                    (
-                      <ListItem >
-                        <pre style={style.logs}><Ansi>{this.state.logs}</Ansi></pre>
-                      </ListItem>
-                    ) : null
-                }
-                <Divider variant="inset" style={style.divider} />
-                <ListItem>
-                  <ListItemText primary="Provisioning" />
-                  {(this.state.panel === 'ready' || this.state.panel === 'done') ? <ListItemIcon><DoneBox /></ListItemIcon> : null}
-                </ListItem>
-                <Divider variant="inset" style={style.divider} />
-                <ListItem>
-                  <ListItemText primary="Deploying" />
-                  {(this.state.panel === 'ready' || this.state.panel === 'done') ? <ListItemIcon><DoneBox /></ListItemIcon> : null}
-                </ListItem>
-                <Divider variant="inset" style={style.divider} />
-                {
-                  (this.state.panel === 'ready' || this.state.panel === 'done') ?
-                    ([<Divider variant="inset" key="done1" style={style.divider} />,
-                      <ListItem key="done2">
-                        <ListItemText
-                          style={{
-                            textAlign: 'center', paddingTop: '2em', fontWeight: '500', color: '#666',
-                          }}
-                          primary="Your app was successfully deployed."
-                        />
-                      </ListItem>,
-                      <ListItem key="done3" style={{ alignItems: 'inherit', justifyContent: 'center' }}>
-                        {buttons}
-                      </ListItem>]
-                    ) : null }
-              </List>
-            </Paper>
-          </div>
-        </MuiThemeProvider>
+        <div>
+          <Paper style={style.paper}>
+            <List style={{ padding: '5em' }}>
+              <ListItem className="config-environment" >
+                <ListItemText primary="Configuring environment" />
+                {(!isConfiguring) ? <ListItemIcon><DoneBox /></ListItemIcon> : null}
+              </ListItem>
+              {
+                isConfiguring ?
+                  (
+                    <ListItem>
+                      <div style={style.linearProgressContainer}>
+                        <LinearProgress variant="determinate" value={this.state.progress} />
+                      </div>
+                    </ListItem>
+                  ) : null
+              }
+              <Divider variant="inset" style={style.divider} />
+              <ListItem >
+                <ListItemText primary="Building app" />
+                {(isBuilding && (this.state.panel === 'ready' || this.state.panel === 'done')) ? (
+                  <ListItemIcon><DoneBox /></ListItemIcon>
+                ) : null}
+              </ListItem>
+              {
+                isBuilding ?
+                  (
+                    <ListItem >
+                      <pre style={style.logs}><Ansi>{this.state.logs}</Ansi></pre>
+                    </ListItem>
+                  ) : null
+              }
+              <Divider variant="inset" style={style.divider} />
+              <ListItem>
+                <ListItemText primary="Provisioning" />
+                {(this.state.panel === 'ready' || this.state.panel === 'done') ? <ListItemIcon><DoneBox /></ListItemIcon> : null}
+              </ListItem>
+              <Divider variant="inset" style={style.divider} />
+              <ListItem>
+                <ListItemText primary="Deploying" />
+                {(this.state.panel === 'ready' || this.state.panel === 'done') ? <ListItemIcon><DoneBox /></ListItemIcon> : null}
+              </ListItem>
+              <Divider variant="inset" style={style.divider} />
+              {
+                (this.state.panel === 'ready' || this.state.panel === 'done') ?
+                  ([<Divider variant="inset" key="done1" style={style.divider} />,
+                    <ListItem key="done2">
+                      <ListItemText
+                        style={{
+                          textAlign: 'center', paddingTop: '2em', fontWeight: '500', color: '#666',
+                        }}
+                        primary="Your app was successfully deployed."
+                      />
+                    </ListItem>,
+                    <ListItem key="done3" style={{ alignItems: 'inherit', justifyContent: 'center' }}>
+                      {buttons}
+                    </ListItem>]
+                  ) : null }
+            </List>
+          </Paper>
+        </div>
       );
     } else if (this.state.panel === 'error' && this.state.loading === false) {
       return this.renderErrorMessage(this.state.error);

@@ -1,43 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Button, Step, Stepper, StepLabel, Select, MenuItem,
-  Dialog, DialogActions, DialogContent, Typography,
+  Button, Step, Stepper, StepLabel, Select, MenuItem, Typography,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-
 import ConfirmationModal from '../ConfirmationModal';
-import Search from '../Search';
+import AutoSuggest from '../AutoSuggest';
 import api from '../../services/api';
 import util from '../../services/util';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#0097a7',
-    },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
-    MuiButton: {
-      root: {
-        marginRight: '15px',
-      },
-    },
-    MuiFormControl: {
-      root: {
-        marginBottom: '15px',
-      },
-    },
-  },
-});
 
 const style = {
   stepper: {
@@ -184,7 +153,7 @@ export default class AttachAddon extends Component {
       case 0:
         return (
           <div>
-            <Search
+            <AutoSuggest
               className={'app-search'}
               label="App"
               data={util.filterName(this.state.apps)}
@@ -243,7 +212,7 @@ export default class AttachAddon extends Component {
                 className="back"
                 disabled={stepIndex === 0}
                 onClick={this.handlePrev}
-                style={style.buttons.Back}
+                style={style.buttons.back}
               >
                 Back
               </Button>
@@ -269,53 +238,41 @@ export default class AttachAddon extends Component {
     const { loading, stepIndex, finished, app, addon } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
                 Select App
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(addon.addon_service.name)}>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(addon.addon_service.name)}>
                 Select Addon
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          {(!loading || finished) && (
-            <div>
-              {this.renderContent()}
-            </div>
-          )}
-          <Dialog
-            className="attach-addon-error"
-            open={this.state.submitFail}
-          >
-            <DialogContent>
-              {this.state.submitMessage}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={this.handleClose}
-              >
-                Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <ConfirmationModal
-            open={this.state.loadingError}
-            onOk={() => this.setState({ loadingError: false, loadingErrorMessage: '' })}
-            message={this.state.loadingErrorMessage}
-            title="Error"
-          />
-        </div>
-      </MuiThemeProvider>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Confirm</StepLabel>
+          </Step>
+        </Stepper>
+        {(!loading || finished) && (
+          <div>
+            {this.renderContent()}
+          </div>
+        )}
+        <ConfirmationModal
+          open={this.state.submitFail}
+          onOk={this.handleClose}
+          message={this.state.submitMessage}
+          title="Error"
+          className="attach-addon-error"
+        />
+        <ConfirmationModal
+          open={this.state.loadingError}
+          onOk={() => this.setState({ loadingError: false, loadingErrorMessage: '' })}
+          message={this.state.loadingErrorMessage}
+          title="Error"
+        />
+      </div>
     );
   }
 }
