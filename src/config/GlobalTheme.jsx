@@ -59,6 +59,47 @@ const GlobalTheme = () => createMuiTheme({
         maxHeight: '48px !important',
       },
     },
+    MuiTabs: {
+      root: {
+        backgroundColor: '#424242', // '#3c4146'
+        color: 'white',
+        maxWidth: '1024px',
+      },
+    },
+    MuiTab: {
+      root: {
+        minWidth: '120px !important',
+      },
+    },
+    MuiCardContent: {
+      root: {
+        display: 'flex',
+        flexFlow: 'row-reverse',
+        padding: '0px 13px 0px 0px !important',
+      },
+    },
+    MuiCard: {
+      root: {
+        maxWidth: '1024px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        marginTop: '12px',
+      },
+    },
+    MuiCardHeader: {
+      action: {
+        flex: 0.22,
+        margin: '0 !important',
+      },
+      title: {
+        fontSize: '15px',
+        fontWeight: '500',
+      },
+      subheader: {
+        fontSize: '14px',
+        fontWeight: '500',
+      },
+    },
   },
 });
 

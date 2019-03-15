@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, Button,
   Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
@@ -14,23 +12,6 @@ import RouteList from '../../components/Sites/RouteList';
 import api from '../../services/api';
 import util from '../../services/util';
 import History from '../../config/History';
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiTabs: {
-      root: {
-        backgroundColor: '#3c4146',
-        color: 'white',
-        maxWidth: '1024px',
-      },
-    },
-    MuiTab: {
-      root: {
-        minWidth: '120px !important',
-      },
-    },
-  },
-});
 
 const style = {
   refresh: {
@@ -154,82 +135,79 @@ export default class SiteInfo extends Component {
     const { currentTab } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={theme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-            <Dialog
-              className="not-found-error"
-              open={this.state.submitFail}
-            >
-              <DialogTitle>Error</DialogTitle>
-              <DialogContent>{this.state.submitMessage}</DialogContent>
-              <DialogActions>
-                <Button
-                  className="ok"
-                  color="primary"
-                  onClick={this.handleNotFoundClose}
-                >Ok</Button>
-              </DialogActions>
-            </Dialog>
-          </div>
-        </MuiThemeProvider>);
-    }
-    return (
-      <MuiThemeProvider theme={theme}>
-        <div>
-          <Card className="card" style={style.card}>
-            <CardHeader
-              className="header"
-              title={this.state.site.domain}
-              subheader={this.state.site.region.name}
-            />
-            <Tabs
-              fullWidth
-              value={this.state.currentTab}
-              onChange={this.changeActiveTab}
-              scrollButtons="off"
-            >
-              <Tab
-                className="info-tab"
-                icon={<InfoIcon />}
-                label="Info"
-                value="info"
-              />
-              <Tab
-                className="routes-tab"
-                icon={<MapIcon />}
-                label="Routes"
-                value="routes"
-              />
-            </Tabs>
-            {currentTab === 'info' && <SiteOverView site={this.state.site} />}
-            {currentTab === 'routes' && <RouteList site={this.state.site.domain} onError={this.handleError} />}
-          </Card>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           <Dialog
-            className="error"
+            className="not-found-error"
             open={this.state.submitFail}
           >
             <DialogTitle>Error</DialogTitle>
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
+            <DialogContent>{this.state.submitMessage}</DialogContent>
             <DialogActions>
               <Button
+                className="ok"
                 color="primary"
-                onClick={this.handleClose}
-              >
-              Ok
-              </Button>
+                onClick={this.handleNotFoundClose}
+              >Ok</Button>
             </DialogActions>
           </Dialog>
-          <Snackbar
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
-          />
         </div>
-      </MuiThemeProvider>
+      );
+    }
+    return (
+      <div>
+        <Card className="card" style={style.card}>
+          <CardHeader
+            className="header"
+            title={this.state.site.domain}
+            subheader={this.state.site.region.name}
+          />
+          <Tabs
+            fullWidth
+            value={this.state.currentTab}
+            onChange={this.changeActiveTab}
+            scrollButtons="off"
+          >
+            <Tab
+              className="info-tab"
+              icon={<InfoIcon />}
+              label="Info"
+              value="info"
+            />
+            <Tab
+              className="routes-tab"
+              icon={<MapIcon />}
+              label="Routes"
+              value="routes"
+            />
+          </Tabs>
+          {currentTab === 'info' && <SiteOverView site={this.state.site} />}
+          {currentTab === 'routes' && <RouteList site={this.state.site.domain} onError={this.handleError} />}
+        </Card>
+        <Dialog
+          className="error"
+          open={this.state.submitFail}
+        >
+          <DialogTitle>Error</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{this.state.submitMessage}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              color="primary"
+              onClick={this.handleClose}
+            >
+              Ok
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Snackbar
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }

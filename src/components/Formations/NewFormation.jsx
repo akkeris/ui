@@ -1,34 +1,12 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Radio, RadioGroup,
   FormControl, FormLabel, FormControlLabel, MenuItem, Typography,
   Button, TextField, Select, Collapse,
 } from '@material-ui/core';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiButton: {
-      root: {
-        marginRight: '15px',
-      },
-    },
-    MuiSwitchBase: {
-      root: {
-        padding: '8px',
-      },
-    },
-    MuiFormControlLabel: {
-      root: {
-        marginLeft: '-8px',
-      },
-    },
-  },
-});
 
 const style = {
   radio: {
@@ -45,7 +23,7 @@ const style = {
       marginBottom: 12,
     },
     back: {
-      marginRight: 12,
+      marginRight: 15,
     },
   },
   stepDescription: {
@@ -379,42 +357,41 @@ export default class NewFormation extends Component {
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
-      <MuiThemeProvider theme={theme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type)}>
-                Select Type</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(quantity)}>
-                Select Quantity</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(size)}>
-                Select Size</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel> {/* optional={stepIndex > 3 && renderCaption(service.label)}> */}
-                Describe Port/Command</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>
-                Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            {this.renderContent()}
-          </Collapse>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="new-error"
-          />
-        </div>
-      </MuiThemeProvider>
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type)}>
+              Select Type
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(quantity)}>
+              Select Quantity
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(size)}>
+              Select Size
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Describe Port/Command</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Confirm</StepLabel>
+          </Step>
+        </Stepper>
+        <Collapse in={!loading}>
+          {this.renderContent()}
+        </Collapse>
+        <ConfirmationModal
+          open={submitFail}
+          onOk={this.handleClose}
+          message={submitMessage}
+          title="Error"
+          className="new-error"
+        />
+      </div>
     );
   }
 }

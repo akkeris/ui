@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, Tooltip, IconButton,
 } from '@material-ui/core';
@@ -29,52 +27,6 @@ import api from '../../services/api';
 import util from '../../services/util';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiTabs: {
-      root: {
-        backgroundColor: '#3c4146',
-        color: 'white',
-        maxWidth: '1024px',
-      },
-    },
-    MuiTab: {
-      root: {
-        minWidth: '120px !important',
-      },
-    },
-    MuiCardContent: {
-      root: {
-        display: 'flex',
-        flexFlow: 'row-reverse',
-        padding: '0px 13px 0px 0px !important',
-      },
-    },
-    MuiCard: {
-      root: {
-        maxWidth: '1024px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        marginTop: '12px',
-      },
-    },
-    MuiCardHeader: {
-      action: {
-        flex: 0.22,
-        margin: '0 !important',
-      },
-      title: {
-        fontSize: '15px',
-        fontWeight: '500',
-      },
-      subheader: {
-        fontSize: '14px',
-        fontWeight: '500',
-      },
-    },
-  },
-});
 
 const style = {
   iconButton: {
@@ -247,160 +199,157 @@ export default class AppInfo extends Component {
         } catch (e) { notFoundMessage = submitMessage; }
       }
       return (
-        <MuiThemeProvider theme={theme}>
-          <div style={style.refresh.div}>
-            { !submitFail && <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" /> }
-            <ConfirmationModal
-              open={submitFail}
-              onOk={this.handleNotFoundClose}
-              message={notFoundMessage}
-              title="Error"
-              className="not-found-error"
-            />
-          </div>
-        </MuiThemeProvider>);
-    }
-    return (
-      <MuiThemeProvider theme={theme}>
-        <div style={{ marginBottom: '12px' }}>
-          <Card className="card" style={{ overflow: 'visible' }}>
-            <CardHeader
-              className="header"
-              title={this.state.app.name}
-              subheader={this.state.app.organization.name}
-              action={
-                this.renderHeaderActions()
-              }
-            />
-            <Tabs
-              fullWidth
-              value={this.state.currentTab}
-              onChange={this.changeActiveTab}
-              scrollButtons="off"
-            >
-              <Tab
-                disableRipple
-                className="info-tab"
-                icon={<InfoIcon />}
-                label="Info"
-                value="info"
-              />
-              <Tab
-                disableRipple
-                className="dynos-tab"
-                icon={<CPUIcon />}
-                label="Dynos"
-                value="dynos"
-              />
-              <Tab
-                disableRipple
-                className="releases-tab"
-                icon={<ReleaseIcon />}
-                label="Activity"
-                value="releases"
-              />
-              <Tab
-                disableRipple
-                className="addons-tab"
-                icon={<AddonIcon />}
-                label="Addons"
-                value="addons"
-              />
-              <Tab
-                disableRipple
-                className="webhooks-tab"
-                icon={<WebhookIcon />}
-                label="Webhooks"
-                value="webhooks"
-              />
-              <Tab
-                disableRipple
-                className="config-tab"
-                icon={<ConfigIcon />}
-                label="Config"
-                value="config"
-              />
-              <Tab
-                disableRipple
-                className="metrics-tab"
-                icon={<MetricIcon />}
-                label="Metrics"
-                value="metrics"
-              />
-              <Tab
-                disableRipple
-                className="logs-tab"
-                icon={<LogIcon />}
-                label="Logs"
-                value="logs"
-              />
-            </Tabs>
-            {currentTab === 'info' && (
-              <AppOverview
-                app={this.state.app}
-                onComplete={this.reload}
-                accountInfo={this.state.accountInfo}
-              />
-            )}
-            {currentTab === 'dynos' && (
-              <Formations
-                app={this.state.app}
-              />
-            )}
-            {currentTab === 'releases' && (
-              <Releases
-                app={this.state.app}
-                org={this.state.app.organization.name}
-                accountInfo={this.state.accountInfo}
-              />
-            )}
-            {currentTab === 'addons' && (
-              <Addons
-                app={this.state.app}
-                accountInfo={this.state.accountInfo}
-              />
-            )}
-            {currentTab === 'webhooks' && (
-              <Webhooks
-                app={this.state.app.name}
-              />
-            )}
-            {currentTab === 'config' && (
-              <Config
-                app={this.state.app.name}
-              />
-            )}
-            {currentTab === 'metrics' && (
-              <Metrics
-                app={this.state.app.name}
-                appName={this.state.app.simple_name}
-                space={this.state.app.space.name}
-              />
-            )}
-            {currentTab === 'logs' && (
-              <Logs
-                app={this.state.app.name}
-                appName={this.state.app.simple_name}
-                space={this.state.app.space.name}
-              />
-            )}
-          </Card>
+        <div style={style.refresh.div}>
+          { !submitFail && <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" /> }
           <ConfirmationModal
-            open={this.state.submitFail}
-            onOk={this.handleClose}
-            message={this.state.submitMessage}
+            open={submitFail}
+            onOk={this.handleNotFoundClose}
+            message={notFoundMessage}
             title="Error"
-            className="app-error"
-          />
-          <Snackbar
-            className="app-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
+            className="not-found-error"
           />
         </div>
-      </MuiThemeProvider>
+      );
+    }
+    return (
+      <div style={{ marginBottom: '12px' }}>
+        <Card className="card" style={{ overflow: 'visible' }}>
+          <CardHeader
+            className="header"
+            title={this.state.app.name}
+            subheader={this.state.app.organization.name}
+            action={
+              this.renderHeaderActions()
+            }
+          />
+          <Tabs
+            fullWidth
+            value={this.state.currentTab}
+            onChange={this.changeActiveTab}
+            scrollButtons="off"
+          >
+            <Tab
+              disableRipple
+              className="info-tab"
+              icon={<InfoIcon />}
+              label="Info"
+              value="info"
+            />
+            <Tab
+              disableRipple
+              className="dynos-tab"
+              icon={<CPUIcon />}
+              label="Dynos"
+              value="dynos"
+            />
+            <Tab
+              disableRipple
+              className="releases-tab"
+              icon={<ReleaseIcon />}
+              label="Activity"
+              value="releases"
+            />
+            <Tab
+              disableRipple
+              className="addons-tab"
+              icon={<AddonIcon />}
+              label="Addons"
+              value="addons"
+            />
+            <Tab
+              disableRipple
+              className="webhooks-tab"
+              icon={<WebhookIcon />}
+              label="Webhooks"
+              value="webhooks"
+            />
+            <Tab
+              disableRipple
+              className="config-tab"
+              icon={<ConfigIcon />}
+              label="Config"
+              value="config"
+            />
+            <Tab
+              disableRipple
+              className="metrics-tab"
+              icon={<MetricIcon />}
+              label="Metrics"
+              value="metrics"
+            />
+            <Tab
+              disableRipple
+              className="logs-tab"
+              icon={<LogIcon />}
+              label="Logs"
+              value="logs"
+            />
+          </Tabs>
+          {currentTab === 'info' && (
+            <AppOverview
+              app={this.state.app}
+              onComplete={this.reload}
+              accountInfo={this.state.accountInfo}
+            />
+          )}
+          {currentTab === 'dynos' && (
+            <Formations
+              app={this.state.app}
+            />
+          )}
+          {currentTab === 'releases' && (
+            <Releases
+              app={this.state.app}
+              org={this.state.app.organization.name}
+              accountInfo={this.state.accountInfo}
+            />
+          )}
+          {currentTab === 'addons' && (
+            <Addons
+              app={this.state.app}
+              accountInfo={this.state.accountInfo}
+            />
+          )}
+          {currentTab === 'webhooks' && (
+            <Webhooks
+              app={this.state.app.name}
+            />
+          )}
+          {currentTab === 'config' && (
+            <Config
+              app={this.state.app.name}
+            />
+          )}
+          {currentTab === 'metrics' && (
+            <Metrics
+              app={this.state.app.name}
+              appName={this.state.app.simple_name}
+              space={this.state.app.space.name}
+            />
+          )}
+          {currentTab === 'logs' && (
+            <Logs
+              app={this.state.app.name}
+              appName={this.state.app.simple_name}
+              space={this.state.app.space.name}
+            />
+          )}
+        </Card>
+        <ConfirmationModal
+          open={this.state.submitFail}
+          onOk={this.handleClose}
+          message={this.state.submitMessage}
+          title="Error"
+          className="app-error"
+        />
+        <Snackbar
+          className="app-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }

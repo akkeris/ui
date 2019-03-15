@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  CircularProgress, MenuItem, Snackbar, IconButton, Paper,
+  CircularProgress, Snackbar, IconButton, Paper,
   Table, TableBody, TableHead, TableRow, TableCell, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
