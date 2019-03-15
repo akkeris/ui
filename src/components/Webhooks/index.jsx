@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  CircularProgress, Button, IconButton, Paper, Snackbar, Typography,
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  CircularProgress, IconButton, Paper, Snackbar,
   Table, TableHead, TableBody, TableRow, TableCell, Tooltip, Grid,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -11,6 +10,7 @@ import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import NewWebhook from './NewWebhook';
 import Webhook from './Webhook';
+import ConfirmationModal from '../ConfirmationModal';
 
 const style = {
   headerLeftPadding: {
@@ -166,24 +166,13 @@ export default class Webhooks extends Component {
             </TableBody>
           )}
         </Table>
-        <Dialog
+        <ConfirmationModal
           open={this.state.submitFail}
+          onOk={this.handleDialogClose}
+          message={this.state.submitMessage}
+          title="Error"
           className="webhook-error"
-        >
-          <DialogTitle>
-            <Typography variant="h6">
-                Error
-            </Typography>
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              {this.state.submitMessage}
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button label="Ok" color="primary" onClick={this.handleDialogClose}>Ok</Button>
-          </DialogActions>
-        </Dialog>
+        />
         <Snackbar
           className="webhook-snack"
           open={this.state.open}

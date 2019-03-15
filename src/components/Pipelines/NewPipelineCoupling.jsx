@@ -5,7 +5,7 @@ import {
 } from '@material-ui/core';
 
 import api from '../../services/api';
-import Search from '../../components/Search';
+import AutoSuggest from '../AutoSuggest';
 import util from '../../services/util';
 
 const style = {
@@ -88,7 +88,7 @@ export default class NewPipelineCoupling extends Component {
       case 0:
         return (
           <div>
-            <Search
+            <AutoSuggest
               className={`${this.props.stage}-app-search`}
               label="App"
               data={util.filterName(this.state.apps)}

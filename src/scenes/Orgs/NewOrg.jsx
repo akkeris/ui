@@ -11,8 +11,8 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 const style = {
   stepper: {
     width: '100%',
-    maxWidth: 700,
     margin: 'auto',
+    maxWidth: 900,
   },
   buttons: {
     div: {
@@ -190,7 +190,7 @@ export default class NewOrg extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 94px', overflow: 'hidden' };
 
     if (finished) {
       this.submitOrg();
@@ -225,7 +225,7 @@ export default class NewOrg extends Component {
     return (
       <Paper style={style.paper}>
         <div style={style.div}>
-          <Stepper activeStep={stepIndex}>
+          <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
               <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org)}>
                   Create org name

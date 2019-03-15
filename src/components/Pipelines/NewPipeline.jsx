@@ -10,6 +10,7 @@ const style = {
   stepper: {
     width: '100%',
     margin: 'auto',
+    maxWidth: 700,
   },
   buttons: {
     div: {

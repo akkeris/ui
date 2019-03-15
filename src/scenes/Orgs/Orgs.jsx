@@ -1,31 +1,15 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
 import {
   Toolbar, IconButton, CircularProgress, Paper,
 } from '@material-ui/core';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import AddIcon from '@material-ui/icons/Add';
 
 import api from '../../services/api';
 import util from '../../services/util';
-import Search from '../../components/Search';
+import AutoSuggest from '../../components/AutoSuggest';
 import OrgList from '../../components/Orgs';
 import History from '../../config/History';
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiToolbar: {
-      root: {
-        minHeight: '48px !important',
-        maxHeight: '48px !important',
-      },
-    },
-    MuiIconButton: {
-      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
-    },
-  },
-});
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
@@ -50,6 +34,7 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
+    padding: '12px 0px',
   },
   link: {
     textDecoration: 'none',
@@ -89,31 +74,27 @@ export default class Orgs extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={theme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={theme}>
-        <div>
-          <Toolbar style={style.toolbar}>
-            <Search
-              className="search"
-              data={util.filterName(this.state.orgs)}
-              handleSearch={this.handleSearch}
-            />
-            <Link to="/orgs/new" style={style.link}>
-              <IconButton className="new-org" ><AddIcon /></IconButton>
-            </Link>
-          </Toolbar>
-          <Paper style={style.paper}>
-            <OrgList className="orgs" orgs={this.state.orgs} />
-          </Paper>
-        </div>
-      </MuiThemeProvider>
+      <div>
+        <Toolbar style={style.toolbar}>
+          <AutoSuggest
+            className="search"
+            data={util.filterName(this.state.orgs)}
+            handleSearch={this.handleSearch}
+          />
+          <Link to="/orgs/new" style={style.link}>
+            <IconButton className="new-org" style={{ padding: '6px', marginBottom: '-6px' }} ><AddIcon style={{ color: 'white' }} /></IconButton>
+          </Link>
+        </Toolbar>
+        <Paper style={style.paper}>
+          <OrgList className="orgs" orgs={this.state.orgs} />
+        </Paper>
+      </div>
     );
   }
 }

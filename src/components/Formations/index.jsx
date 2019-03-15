@@ -62,9 +62,9 @@ export default class Formations extends Component {
 
   getFormations = async () => {
     const [r1, r2, r3] = await Promise.all([
-      api.getFormations(this.props.app),
+      api.getFormations(this.props.app.name),
       api.getFormationSizes(),
-      api.getDynos(this.props.app),
+      api.getDynos(this.props.app.name),
     ]);
     const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
     const dynos = r3.data;
@@ -84,6 +84,7 @@ export default class Formations extends Component {
         loading: false,
       });
     }
+    console.log('sizes: ', JSON.stringify(sizes));
   }
 
   handleError = (message) => {
@@ -122,8 +123,8 @@ export default class Formations extends Component {
   reload = async (message) => {
     this.setState({ loading: true });
     const [r1, r2] = await Promise.all([
-      api.getFormations(this.props.app),
-      api.getDynos(this.props.app),
+      api.getFormations(this.props.app.name),
+      api.getDynos(this.props.app.name),
     ]);
     const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
     const dynos = r2.data;
@@ -139,15 +140,6 @@ export default class Formations extends Component {
     }
   }
 
-  renderSizes() {
-    return this.state.sizes.map(size =>
-      (<MenuItem
-        className={size.name}
-        key={size.name}
-        value={size.name}
-      >{size.resources.limits.memory}</MenuItem>));
-  }
-
   renderFormations() {
     return this.state.formations.map(formation => (
       <DynoType
@@ -156,7 +148,8 @@ export default class Formations extends Component {
         onComplete={this.reload}
         onAlert={this.info}
         key={formation.id}
-        sizeList={this.renderSizes()}
+        sizes={this.state.sizes}
+        // sizeList={this.renderSizes()}
         onError={this.handleError}
         app={this.props.app}
       />
@@ -178,13 +171,12 @@ export default class Formations extends Component {
             <Tooltip title="New Formation" placement="bottom-end">
               <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
             </Tooltip>
-
           </Paper>
         )}
         {this.state.new && (
           <div>
             <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
-            <NewFormation app={this.props.app} onComplete={this.reload} />
+            <NewFormation app={this.props.app.name} onComplete={this.reload} />
           </div>
         )}
         <Table className="formation-list">
@@ -217,5 +209,5 @@ export default class Formations extends Component {
 }
 
 Formations.propTypes = {
-  app: PropTypes.string.isRequired,
+  app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };

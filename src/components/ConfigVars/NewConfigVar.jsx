@@ -174,7 +174,7 @@ export default class NewConfigVar extends Component {
 
   render() {
     const { loading, stepIndex, submitFail, submitMessage, finished, key, value } = this.state;
-    const contentStyle = { margin: '0 56px' };
+    const contentStyle = { margin: '0 32px' };
     if (finished) {
       this.submitConfig();
     }

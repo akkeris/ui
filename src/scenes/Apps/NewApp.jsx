@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Typography, CircularProgress,
 } from '@material-ui/core';
-import Select from '../../components/Select';
+import Search from '../../components/Search';
 
 import api from '../../services/api';
 import History from '../../config/History';
@@ -11,6 +11,11 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
 const style = {
+  stepper: {
+    width: '100%',
+    margin: 'auto',
+    maxWidth: 900,
+  },
   buttons: {
     div: {
       marginTop: 24,
@@ -35,7 +40,7 @@ const style = {
     minWidth: 180,
   },
   contentStyle: {
-    margin: '0 58px',
+    margin: '0 94px',
   },
   bold: {
     fontWeight: 'bold',
@@ -178,7 +183,7 @@ export default class NewApp extends Component {
         return (
           <div>
             <div style={style.selectContainer}>
-              <Select
+              <Search
                 onChange={this.handleSelectChange('org')}
                 value={this.state.org}
                 placeholder="Select an Org"
@@ -196,7 +201,7 @@ export default class NewApp extends Component {
         return (
           <div>
             <div style={style.selectContainer}>
-              <Select
+              <Search
                 onChange={this.handleSelectChange('space')}
                 value={this.state.space}
                 placeholder="Select a Space"
@@ -249,7 +254,7 @@ export default class NewApp extends Component {
     return (
       <Paper style={style.paper}>
         <div style={style.div}>
-          <Stepper activeStep={stepIndex}>
+          <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
               <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
                   Create app name

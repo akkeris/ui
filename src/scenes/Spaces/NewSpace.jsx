@@ -10,6 +10,11 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 const tags = ['internal', 'socs', 'prod', 'dev', 'qa'];
 
 const style = {
+  stepper: {
+    width: '100%',
+    margin: 'auto',
+    maxWidth: 900,
+  },
   buttons: {
     div: {
       marginTop: 24,
@@ -303,7 +308,7 @@ export default class NewApp extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 94px', overflow: 'hidden' };
     if (finished) {
       this.submitSpace();
     }
@@ -338,7 +343,7 @@ export default class NewApp extends Component {
     return (
       <Paper style={style.paper}>
         <div style={style.div}>
-          <Stepper activeStep={stepIndex}>
+          <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
               <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(space)}>
                   Create space name

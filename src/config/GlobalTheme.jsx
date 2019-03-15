@@ -53,6 +53,12 @@ const GlobalTheme = () => createMuiTheme({
         padding: '24px 0px',
       },
     },
+    MuiToolbar: { // Used in the main Scenes for their toolbar above the table (apps, orgs, etc)
+      root: {
+        minHeight: '48px !important',
+        maxHeight: '48px !important',
+      },
+    },
   },
 });
 

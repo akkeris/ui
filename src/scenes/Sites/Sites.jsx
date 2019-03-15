@@ -1,66 +1,18 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
 import {
-  Toolbar, IconButton, CircularProgress, Paper, Select, MenuItem,
-  FormControl, InputLabel,
+  Toolbar, IconButton, CircularProgress, Paper, MenuItem,
 } from '@material-ui/core';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import { Link } from 'react-router-dom';
 
 import api from '../../services/api';
 import SitesList from '../../components/Sites';
 import util from '../../services/util';
-import Search from '../../components/Search';
+import AutoSuggest from '../../components/AutoSuggest';
 import History from '../../config/History';
+import CustomSelect from '../../components/CustomSelect';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiIconButton: {
-      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
-    },
-    MuiToolbar: {
-      root: {
-        minHeight: '48px !important',
-        maxHeight: '48px !important',
-      },
-    },
-    MuiInputLabel: {
-      root: { color: 'white !important' },
-      shrink: { color: 'white !important' },
-      animated: { color: 'white !important' },
-    },
-    MuiSelect: {
-      root: { color: 'white' },
-      icon: { color: 'white' },
-      select: { color: 'white !important' },
-    },
-    MuiInput: {
-      input: {
-        '&::placeholder': {
-          color: 'white',
-        },
-        color: 'white',
-      },
-      underline: {
-        // Border color when input is not selected
-        '&:before': {
-          borderBottom: '1px solid rgb(200, 200, 200)',
-        },
-        // Border color when input is selected
-        '&:after': {
-          borderBottom: '2px solid white',
-        },
-        // Border color on hover
-        '&:hover:not([class^=".MuiInput-disabled-"]):not([class^=".MuiInput-focused-"]):not([class^=".MuiInput-error-"]):before': {
-          borderBottom: '1px solid rgb(200, 200, 200)',
-        },
-      },
-    },
-  },
-});
 
 const style = {
   filter: {
@@ -86,7 +38,7 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '16px 0',
+    padding: '12px 0',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -157,45 +109,39 @@ class Sites extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={theme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>);
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
+      );
     }
     return (
-      <MuiThemeProvider theme={theme}>
-        <div>
-          <Toolbar style={style.toolbar} disableGutters>
-            <Search
-              className="search"
-              data={util.filterDomain(this.state.filteredSites)}
-              handleSearch={this.handleSearch}
-            />
-            <FormControl style={style.regionContainer}>
-              <InputLabel htmlFor="region-select">Filter by Region</InputLabel>
-              <Select
-                className="region-dropdown"
-                value={this.state.region}
-                onChange={this.handleRegionChange}
-                inputProps={{
-                  name: 'region',
-                  id: 'region-select',
-                }}
-              >
-                <MenuItem className="all" value="all">All</MenuItem>
-                {this.renderRegions()}
-              </Select>
-            </FormControl>
-            <Link to="/sites/new" style={style.link}>
-              <IconButton className="new-site"><AddIcon /></IconButton>
-            </Link>
-          </Toolbar>
-          <Paper style={style.paper}>
-            <SitesList sites={this.state.filteredSites} />
-          </Paper>
-        </div>
-      </MuiThemeProvider>
+      <div>
+        <Toolbar style={style.toolbar} disableGutters>
+          <AutoSuggest
+            className="search"
+            data={util.filterDomain(this.state.filteredSites)}
+            handleSearch={this.handleSearch}
+          />
+          <CustomSelect
+            name="region"
+            value={this.state.region}
+            onChange={this.handleRegionChange}
+            label="Filter by Region"
+            style={style.regionContainer}
+          >
+            <MenuItem className="all" value="all">All</MenuItem>
+            {this.renderRegions()}
+          </CustomSelect>
+          <Link to="/sites/new" style={style.link}>
+            <IconButton className="new-site" style={{ padding: '6px', marginBottom: '-6px' }}>
+              <AddIcon style={{ color: 'white' }} />
+            </IconButton>
+          </Link>
+        </Toolbar>
+        <Paper style={style.paper}>
+          <SitesList sites={this.state.filteredSites} />
+        </Paper>
+      </div>
     );
   }
 }

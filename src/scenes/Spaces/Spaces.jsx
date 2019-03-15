@@ -1,28 +1,12 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
 import {
   Toolbar, Table, TableBody, TableHead, TableRow, TableCell, IconButton, CircularProgress, Paper,
   TableFooter, TablePagination,
 } from '@material-ui/core';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import AddIcon from '@material-ui/icons/Add';
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import api from '../../services/api';
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiToolbar: {
-      root: {
-        minHeight: '48px !important',
-        maxHeight: '48px !important',
-      },
-    },
-    MuiIconButton: {
-      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
-    },
-  },
-});
 
 const style = {
   refresh: {
@@ -129,52 +113,51 @@ export default class Spaces extends Component {
     const { spaces, page, rowsPerPage } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={theme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>);
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
+      );
     }
     return (
-      <MuiThemeProvider theme={theme}>
-        <div>
-          <Toolbar style={style.toolbar} disableGutters>
-            <Link to="/spaces/new" style={style.link}>
-              <IconButton className="new-space"><AddIcon /></IconButton>
-            </Link>
-          </Toolbar>
-          <Paper style={style.paper}>
-            <Table className="space-list" >
-              <TableHead>
+      <div>
+        <Toolbar style={style.toolbar} disableGutters>
+          <Link to="/spaces/new" style={style.link}>
+            <IconButton className="new-space" style={{ padding: '6px', marginBottom: '-6px' }} >
+              <AddIcon style={{ color: 'white' }} />
+            </IconButton>
+          </Link>
+        </Toolbar>
+        <Paper style={style.paper}>
+          <Table className="space-list" >
+            <TableHead>
+              <TableRow>
+                <TableCell>Space</TableCell>
+                <TableCell style={style.tableCell.icon}>Apps</TableCell>
+                <TableCell>Compliance</TableCell>
+                <TableCell>Stack</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {this.renderSpaces(page, rowsPerPage)}
+            </TableBody>
+            {spaces.length !== 0 && (
+              <TableFooter>
                 <TableRow>
-                  <TableCell>Space</TableCell>
-                  <TableCell style={style.tableCell.icon}>Apps</TableCell>
-                  <TableCell>Compliance</TableCell>
-                  <TableCell>Stack</TableCell>
+                  <TablePagination
+                    rowsPerPageOptions={[15, 25, 50]}
+                    colSpan={4}
+                    count={spaces.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {this.renderSpaces(page, rowsPerPage)}
-              </TableBody>
-              {spaces.length !== 0 && (
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      rowsPerPageOptions={[15, 25, 50]}
-                      colSpan={4}
-                      count={spaces.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onChangePage={this.handleChangePage}
-                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                    />
-                  </TableRow>
-                </TableFooter>
-              )}
-            </Table>
-          </Paper>
-        </div>
-      </MuiThemeProvider>
+              </TableFooter>
+            )}
+          </Table>
+        </Paper>
+      </div>
     );
   }
 }

@@ -1,67 +1,16 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import {
-  Toolbar, IconButton, Select, MenuItem,
-  CircularProgress, Paper, FormControl, InputLabel,
+  Toolbar, IconButton, MenuItem, CircularProgress, Paper,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-
 import api from '../../services/api';
 import AppList from '../../components/Apps/AppList';
 import util from '../../services/util';
-import Search from '../../components/Search';
+import AutoSuggest from '../../components/AutoSuggest';
 import History from '../../config/History';
+import CustomSelect from '../../components/CustomSelect';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiIconButton: {
-      root: {
-        color: 'white', padding: '6px', marginBottom: '-6px',
-      },
-    },
-    MuiToolbar: {
-      root: {
-        minHeight: '48px !important',
-        maxHeight: '48px !important',
-      },
-    },
-    MuiInputLabel: {
-      root: { color: 'white !important' },
-      shrink: { color: 'white !important' },
-      animated: { color: 'white !important' },
-    },
-    MuiSelect: {
-      root: { color: 'white' },
-      icon: { color: 'white' },
-      select: { color: 'white !important' },
-    },
-    MuiInput: {
-      input: {
-        '&::placeholder': {
-          color: 'white',
-        },
-        color: 'white',
-      },
-      underline: {
-        // Border color when input is not selected
-        '&:before': {
-          borderBottom: '1px solid rgb(200, 200, 200)',
-        },
-        // Border color when input is selected
-        '&:after': {
-          borderBottom: '2px solid white',
-        },
-        // Border color on hover
-        '&:hover:not([class^=".MuiInput-disabled-"]):not([class^=".MuiInput-focused-"]):not([class^=".MuiInput-error-"]):before': {
-          borderBottom: '1px solid rgb(200, 200, 200)',
-        },
-      },
-    },
-  },
-});
 
 const style = {
   refresh: {
@@ -186,60 +135,47 @@ export default class Apps extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={theme}>
-          <div className="loading" style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>);
+        <div className="loading" style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
+      );
     }
     return (
-      <MuiThemeProvider theme={theme}>
-        <div>
-          <Toolbar style={style.toolbar} disableGutters>
-            <Search
-              data={util.filterName(this.state.filteredApps)}
-              handleSearch={this.handleSearch}
-              className="search"
-            />
-            <FormControl style={style.regionContainer}>
-              <InputLabel htmlFor="region-select">Filter by Region</InputLabel>
-              <Select
-                className="region-dropdown"
-                value={this.state.region}
-                onChange={this.handleRegionChange}
-                inputProps={{
-                  name: 'region',
-                  id: 'region-select',
-                }}
-              >
-                <MenuItem className="all" value="all">All</MenuItem>
-                {this.renderRegions()}
-              </Select>
-            </FormControl>
-            <FormControl style={style.spaceContainer}>
-              <InputLabel htmlFor="space-select">Filter by Space</InputLabel>
-              <Select
-                className="space-dropdown"
-                value={this.state.space}
-                onChange={this.handleSpaceChange}
-                inputProps={{
-                  name: 'space',
-                  id: 'space-select',
-                }}
-              >
-                <MenuItem className="all" value="all">All</MenuItem>
-                {this.renderSpaces()}
-              </Select>
-            </FormControl>
-            <IconButton style={{ marginLeft: 'auto' }} onClick={() => History.get().push('/apps/new')} className="new-app">
-              <AddIcon />
-            </IconButton>
-          </Toolbar>
-          <Paper style={style.paper}>
-            <AppList className="apps" apps={this.state.filteredApps} favorites={this.state.favorites} />
-          </Paper>
-        </div>
-      </MuiThemeProvider>
+      <div>
+        <Toolbar style={style.toolbar} disableGutters>
+          <AutoSuggest
+            data={util.filterName(this.state.filteredApps)}
+            handleSearch={this.handleSearch}
+            className="search"
+          />
+          <CustomSelect
+            name="region"
+            value={this.state.region}
+            onChange={this.handleRegionChange}
+            label="Filter by Region"
+            style={style.regionContainer}
+          >
+            <MenuItem className="all" value="all">All</MenuItem>
+            {this.renderRegions()}
+          </CustomSelect>
+          <CustomSelect
+            name="space"
+            value={this.state.space}
+            onChange={this.handleSpaceChange}
+            label="Filter by Space"
+            style={style.spaceContainer}
+          >
+            <MenuItem className="all" value="all">All</MenuItem>
+            {this.renderSpaces()}
+          </CustomSelect>
+          <IconButton style={{ marginLeft: 'auto', padding: '6px', marginBottom: '-6px' }} onClick={() => History.get().push('/apps/new')} className="new-app">
+            <AddIcon style={{ color: 'white' }} />
+          </IconButton>
+        </Toolbar>
+        <Paper style={style.paper}>
+          <AppList className="apps" apps={this.state.filteredApps} favorites={this.state.favorites} />
+        </Paper>
+      </div>
     );
   }
 }

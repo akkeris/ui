@@ -6,7 +6,7 @@ import {
 } from '@material-ui/core';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import ConfirmationModal from '../ConfirmationModal';
-import Select from '../Select';
+import Search from '../Search';
 import api from '../../services/api';
 
 const theme = parentTheme => deepmerge(parentTheme, {
@@ -178,7 +178,7 @@ export default class NewRoute extends Component {
         return (
           <div>
             <div style={style.selectContainer}>
-              <Select
+              <Search
                 options={apps}
                 value={app}
                 onChange={this.handleAppChange}

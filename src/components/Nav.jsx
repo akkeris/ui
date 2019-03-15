@@ -32,6 +32,12 @@ const theme = parentTheme => deepmerge(parentTheme, {
         fontFamily: 'ProximaNova',
       },
     },
+    MuiToolbar: { // Use default values for AppBar height
+      root: {
+        minHeight: undefined,
+        maxHeight: undefined,
+      },
+    },
   },
 });
 

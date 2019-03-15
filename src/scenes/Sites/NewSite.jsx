@@ -11,6 +11,11 @@ import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 
 const style = {
+  stepper: {
+    width: '100%',
+    margin: 'auto',
+    maxWidth: 900,
+  },
   buttons: {
     div: {
       marginTop: 24,
@@ -244,7 +249,7 @@ export default class NewSite extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 94px', overflow: 'hidden' };
     if (finished) {
       this.submitSite();
     }
@@ -277,7 +282,7 @@ export default class NewSite extends Component {
     return (
       <Paper style={style.paper}>
         <div style={style.div}>
-          <Stepper activeStep={stepIndex}>
+          <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
               <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain)}>
                   Create domain

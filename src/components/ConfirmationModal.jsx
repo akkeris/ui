@@ -1,21 +1,8 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
 import {
   Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress,
 } from '@material-ui/core';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiPaper: {
-      root: {
-        width: '75%',
-        maxWidth: '768px',
-      },
-    },
-  },
-});
 
 /* eslint-disable react/prefer-stateless-function */
 export default class ConfirmationModal extends Component {
@@ -40,45 +27,46 @@ export default class ConfirmationModal extends Component {
   render() {
     const { loading } = this.state;
     return (
-      <MuiThemeProvider theme={theme}>
-        <Dialog
-          className={this.props.className}
-          open={this.props.open}
-        >
-          <DialogTitle>{this.props.title}</DialogTitle>
-          <DialogContent>
-            {!loading ? (
-              <DialogContentText>{this.props.message}</DialogContentText>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CircularProgress />
-              </div>
-            )}
-          </DialogContent>
-          <DialogActions>
-            {this.props.actions}
-            <Button
-              className="ok"
-              color="primary"
-              onClick={this.onOk}
-              disabled={loading}
-              autoFocus={this.props.onCancel === null}
-            >
+      <Dialog
+        className={this.props.className}
+        open={this.props.open}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>{this.props.title}</DialogTitle>
+        <DialogContent>
+          {!loading ? (
+            <DialogContentText>{this.props.message}</DialogContentText>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CircularProgress />
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          {this.props.actions}
+          <Button
+            className="ok"
+            color="primary"
+            onClick={this.onOk}
+            disabled={loading}
+            autoFocus={this.props.onCancel === null}
+            onKeyDown={e => ['Escape', 'Esc'].includes(e.key) && this.props.onCancel === null && this.onOk()}
+          >
               Ok
-            </Button>
-            {this.props.onCancel !== null && (
-              <Button
-                className="cancel"
-                color="secondary"
-                onClick={this.props.onCancel}
-                disabled={loading}
-              >
+          </Button>
+          {this.props.onCancel !== null && (
+            <Button
+              className="cancel"
+              color="secondary"
+              onClick={this.props.onCancel}
+              disabled={loading}
+            >
                 Cancel
-              </Button>
-            )}
-          </DialogActions>
-        </Dialog>
-      </MuiThemeProvider>
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     );
   }
 }

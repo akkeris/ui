@@ -27,7 +27,7 @@ const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change'
 
 const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
-    MuiExpansionPanelSummary: {
+    MuiExpansionPanelSummary: { // Makes webhook url/id, events line up with column headers
       root: {
         padding: 0,
       },
@@ -36,23 +36,6 @@ const theme = parentTheme => deepmerge(parentTheme, {
         '& > :last-child': {
           paddingRight: 0,
         },
-      },
-    },
-    MuiDialog: {
-      paper: {
-        width: '55%',
-        maxWidth: 'none',
-        border: '0',
-      },
-    },
-    MuiCheckbox: {
-      root: {
-        padding: '2px 12px',
-      },
-    },
-    MuiTableCell: {
-      root: {
-        borderBottom: 'none',
       },
     },
   },
@@ -82,63 +65,22 @@ function objectToTable(prefix, input) {
 }
 
 const style = {
-  infoIcon: {
-    height: '18px', width: '18px',
-  },
-  infoButton: {
-    padding: 0,
-  },
   expansionPanel: {
     boxShadow: 'none',
   },
-  eventsHeader: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '70px',
-  },
   urlTextField: {
     maxWidth: '250px',
+    width: '100%',
   },
   secretTextField: {
-    marginLeft: '20px',
-    maxWidth: '200px',
-  },
-  checkAllContainer: {
-    inactive: {
-      borderTop: '1px solid rgba(0, 0, 0, 0.3)',
-      marginTop: '5px',
-      paddingTop: '5px',
-    },
-    active: {
-      borderTop: '1px solid black',
-      marginTop: '5px',
-      paddingTop: '5px',
-    },
-  },
-  eventsError: {
-    color: 'red',
-    paddingTop: '20px',
-  },
-  eventsTwoColumns: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexWrap: 'wrap',
-    width: '200%',
-  },
-  gridContainer: {
-    width: '350px',
+    maxWidth: '225px',
+    width: '100%',
   },
   statusIcon: {
     height: '18px',
     width: '18px',
     position: 'relative',
     padding: '0 10px 0 10px',
-  },
-  eventsLabel: {
-    color: 'rgba(0, 0, 0, 0.3)',
-    fontSize: '12px',
   },
   noPadding: {
     padding: 0,
@@ -158,9 +100,6 @@ const style = {
   titleContainer: {
     display: 'flex',
     alignItems: 'center',
-  },
-  toggle: {
-    width: '35%',
   },
   historyDialogTable: {
     paddingLeft: '10px',
@@ -190,24 +129,11 @@ const style = {
     fontSize: '11px',
     textTransform: 'uppercase',
   },
-  eventsRow: {
-    display: 'block',
-    overflow: 'visible',
-  },
-  iconButtonCell: {
-    width: '58px',
-    paddingRight: '10px',
-    overflow: 'visible',
-  },
   eventSpan: {
     padding: '0px 2px 0px 2px',
   },
   tableRowHeight: {
     height: '58px',
-  },
-  eventsCell: {
-    overflow: 'visible',
-    borderBottom: 'none',
   },
   titleGrid: {
     paddingRight: '0 !important',
@@ -219,6 +145,57 @@ const style = {
       paddingRight: '32px',
       display: 'flex',
       alignItems: 'center',
+    },
+  },
+  webhookDetail: {
+    container: {
+      display: 'flex', flexDirection: 'column', width: '100%', padding: '6px 24px',
+    },
+    rowContainer: {
+      display: 'flex', flexDirection: 'row',
+    },
+    eventsContainer: {
+      display: 'flex', flexDirection: 'column',
+    },
+    textContainer: {
+      display: 'flex', flex: 4, flexDirection: 'row', justifyContent: 'space-between',
+    },
+    toggleContainer: {
+      display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center',
+    },
+    actionContainer: {
+      display: 'flex', flex: 2, alignItems: 'center', justifyContent: 'space-evenly',
+    },
+    action: {
+      width: '50px',
+    },
+    events: {
+      header: {
+        display: 'flex', marginTop: '12px',
+      },
+      label: {
+        color: 'rgba(0, 0, 0, 0.3)', fontSize: '12px', marginRight: '12px',
+      },
+      infoIcon: {
+        height: '18px', width: '18px',
+      },
+      grid: {
+        width: '500px', marginLeft: '2px',
+      },
+      checkbox: {
+        padding: '6px', marginRight: '6px',
+      },
+      error: {
+        color: 'red', paddingTop: '20px',
+      },
+      checkAll: {
+        active: {
+          borderTop: '1px solid black', marginTop: '5px', paddingTop: '5px',
+        },
+        inactive: {
+          borderTop: '1px solid rgba(0, 0, 0, 0.3)', marginTop: '5px', paddingTop: '5px',
+        },
+      },
     },
   },
 };
@@ -404,7 +381,7 @@ export default class Webhook extends Component {
 
   renderEventCheckboxes() { // eslint-disable-line class-methods-use-this
     return defaultEvents.map(event => (
-      <Grid item xs={6} key={event}>
+      <Grid item xs={4} key={event}>
         <FormControlLabel
           label={event}
           control={
@@ -415,6 +392,7 @@ export default class Webhook extends Component {
               checked={this.state.events.includes(event)}
               onChange={this.handleCheck}
               disabled={!this.state.edit}
+              style={style.webhookDetail.events.checkbox}
             />}
         />
       </Grid>
@@ -443,6 +421,8 @@ export default class Webhook extends Component {
       <Dialog
         className="events-info-dialog"
         open={this.state.eventsDialogOpen}
+        maxWidth="sm"
+        fullWidth
       >
         <DialogTitle>Description of Events</DialogTitle>
         <DialogContent>
@@ -496,20 +476,18 @@ export default class Webhook extends Component {
         className="events-info-button"
         onClick={this.openEventsInfoDialog}
         color={this.state.edit ? 'secondary' : undefined}
-        style={this.state.edit ? style.infoButton : {
-          ...style.infoButton, color: 'rgba(0,0,0,0.3)',
-        }}
+        style={this.state.edit ? undefined : { color: 'rgba(0,0,0,0.3)' }}
         disabled={!this.state.edit}
       >
-        <HelpIcon style={style.infoIcon} />
+        <HelpIcon style={style.webhookDetail.events.infoIcon} />
       </IconButton>
     );
 
     return (
-      <Table>
-        <TableBody>
-          <TableRow>
-            <TableCell style={{ display: 'flex', flexDirection: 'row', paddingRight: '10px' }}>
+      <React.Fragment>
+        <div style={style.webhookDetail.container}>
+          <div style={style.webhookDetail.rowContainer}>
+            <div style={style.webhookDetail.textContainer}>
               <TextField
                 style={style.urlTextField}
                 className="edit-url"
@@ -534,8 +512,8 @@ export default class Webhook extends Component {
                 helperText={this.state.secretErrorText ? this.state.secretErrorText : ''}
                 disabled={!this.state.edit}
               />
-            </TableCell>
-            <TableCell>
+            </div>
+            <div style={style.webhookDetail.toggleContainer}>
               <FormControlLabel
                 control={
                   <Switch
@@ -549,115 +527,109 @@ export default class Webhook extends Component {
                 labelPlacement="start"
                 label="Active"
               />
-            </TableCell>
-            <TableCell style={style.iconButtonCell}>
-              {this.state.edit ? (
-                <Tooltip placement="top-start" title="Save">
-                  <IconButton className="webhook-save" onClick={this.handleSave}>
-                    <SaveIcon />
-                  </IconButton>
-                </Tooltip>
-              ) : (
-                <Tooltip placement="top-start" title="Edit">
-                  <IconButton
-                    className="webhook-edit"
-                    onClick={() => this.setState({ edit: true })}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </TableCell>
-            <TableCell style={style.iconButtonCell}>
-              {!this.state.edit && (
-                <Tooltip placement="top-start" title="History">
-                  <IconButton
-                    className="webhook-history"
-                    onClick={this.handleHistoryIcon}
-                  >
-                    <HistoryIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </TableCell>
-            <TableCell style={style.iconButtonCell}>
-              {!this.state.edit ? (
-                <Tooltip placement="top-start" title="Remove">
-                  <IconButton
-                    className="webhook-remove"
-                    onClick={() => this.handleConfirmation(this.props.webhook)}
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                </Tooltip>
-              ) : (
-                <Tooltip title="Back" placement="top-start">
-                  <IconButton
-                    className="webhook-back"
-                    onClick={this.handleReset}
-                  >
-                    <BackIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-              <ConfirmationModal
-                className="delete-webhook"
-                open={this.state.open}
-                onOk={this.handleRemoveWebhook}
-                onCancel={this.handleCancelConfirmation}
-                message="Are you sure you want to delete this webhook?"
-              />
-            </TableCell>
-          </TableRow>
-          <TableRow style={style.eventsRow}>
-            <TableCell style={style.eventsCell} colSpan={3}>
-              <div>
-                <div style={style.eventsHeader}>
-                  <p style={style.eventsLabel}>Events</p>
-                  {this.state.edit ? (
-                    <Tooltip placement="right" title="Click for Descriptions">
-                      {eventsHelperButton()}
-                    </Tooltip>
-                  ) : eventsHelperButton()}
-                </div>
-                {this.renderEventsInfoDialog()}
-                <div style={style.eventsTwoColumns} className="events">
-                  <Grid container spacing={8} style={style.gridContainer}>
-                    {this.renderEventCheckboxes(this.props.webhook)}
-                    <Grid
-                      item
-                      xs={12}
-                      style={
-                        this.state.edit ?
-                          style.checkAllContainer.active : style.checkAllContainer.inactive
-                      }
+            </div>
+            <div style={style.webhookDetail.actionContainer}>
+              <div style={style.webhookDetail.action}>
+                {this.state.edit ? (
+                  <Tooltip placement="top-start" title="Save">
+                    <IconButton className="webhook-save" onClick={this.handleSave}>
+                      <SaveIcon />
+                    </IconButton>
+                  </Tooltip>
+                ) : (
+                  <Tooltip placement="top-start" title="Edit">
+                    <IconButton
+                      className="webhook-edit"
+                      onClick={() => this.setState({ edit: true })}
                     >
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            value="Check All"
-                            key="Check All"
-                            className="checkbox-check-all"
-                            checked={this.state.checkedAll}
-                            onChange={this.handleCheckAll}
-                            disabled={!this.state.edit}
-                          />
-                        }
-                        label="Check All"
-                      />
-                    </Grid>
-                  </Grid>
-                </div>
-                {this.state.eventErrorText && (
-                  <div style={style.eventsError} className="events-errorText">
-                    {this.state.eventErrorText}
-                  </div>
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
                 )}
               </div>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+              <div style={style.webhookDetail.action}>
+                {!this.state.edit && (
+                  <Tooltip placement="top-start" title="History">
+                    <IconButton
+                      className="webhook-history"
+                      onClick={this.handleHistoryIcon}
+                    >
+                      <HistoryIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </div>
+              <div style={style.webhookDetail.action}>
+                {!this.state.edit ? (
+                  <Tooltip placement="top-start" title="Remove">
+                    <IconButton
+                      className="webhook-remove"
+                      onClick={() => this.handleConfirmation(this.props.webhook)}
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+                  </Tooltip>
+                ) : (
+                  <Tooltip title="Back" placement="top-start">
+                    <IconButton
+                      className="webhook-back"
+                      onClick={this.handleReset}
+                    >
+                      <BackIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </div>
+            </div>
+          </div>
+          <div style={style.webhookDetail.eventsContainer}>
+            <div style={style.webhookDetail.events.header}>
+              <p style={style.webhookDetail.events.label}>Events</p>
+              {this.state.edit ? (
+                <Tooltip placement="right" title="Click for Descriptions">
+                  {eventsHelperButton()}
+                </Tooltip>
+              ) : eventsHelperButton()}
+            </div>
+            <Grid container spacing={8} style={style.webhookDetail.events.grid} className="events">
+              {this.renderEventCheckboxes(this.props.webhook)}
+              <Grid
+                item
+                xs={12}
+                style={style.webhookDetail.events.checkAll[this.state.edit ? 'active' : 'inactive']}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      value="Check All"
+                      key="Check All"
+                      className="checkbox-check-all"
+                      checked={this.state.checkedAll}
+                      onChange={this.handleCheckAll}
+                      disabled={!this.state.edit}
+                      style={style.webhookDetail.events.checkbox}
+                    />
+                  }
+                  label="Check All"
+                />
+              </Grid>
+            </Grid>
+          </div>
+          {this.state.eventErrorText && (
+            <div style={style.webhookDetail.events.error} className="events-errorText">
+              {this.state.eventErrorText}
+            </div>
+          )}
+        </div>
+        {this.renderEventsInfoDialog()}
+        <ConfirmationModal
+          className="delete-webhook"
+          open={this.state.open}
+          onOk={this.handleRemoveWebhook}
+          onCancel={this.handleCancelConfirmation}
+          message="Are you sure you want to delete this webhook?"
+        />
+      </React.Fragment>
     );
   }
 
@@ -668,6 +640,7 @@ export default class Webhook extends Component {
         open={this.state.historyOpen}
         onClose={this.handleHistoryDialogOk}
         maxWidth="md"
+        fullWidth
       >
         <DialogTitle>
           {this.renderDialogTitle()}
@@ -743,7 +716,7 @@ export default class Webhook extends Component {
             {this.renderWebhookInfo()}
           </ExpansionPanelDetails>
         </ExpansionPanel>
-        {this.state.historyOpen && this.renderHistoryDialog()}
+        {this.renderHistoryDialog()}
       </MuiThemeProvider>
     );
   }

@@ -1,32 +1,16 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
 import {
   Toolbar, IconButton, CircularProgress, Paper, Table, TableBody, TableRow, TableCell,
   Snackbar, Divider, Collapse, TableFooter, TablePagination,
 } from '@material-ui/core';
-import { MuiThemeProvider } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
 
 import { NewPipeline } from '../../components/Pipelines';
 import api from '../../services/api';
 import util from '../../services/util';
-import Search from '../../components/Search';
+import AutoSuggest from '../../components/AutoSuggest';
 import History from '../../config/History';
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiToolbar: {
-      root: {
-        minHeight: '48px !important',
-        maxHeight: '48px !important',
-      },
-    },
-    MuiIconButton: {
-      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
-    },
-  },
-});
 
 const style = {
   refresh: {
@@ -49,6 +33,7 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
+    padding: '12px 0px',
   },
   paper: {
     maxWidth: '1024px',
@@ -78,7 +63,8 @@ const style = {
   },
   icon: {
     marginLeft: 'auto',
-    color: 'white',
+    padding: '6px',
+    marginBottom: '-6px',
   },
   cancelIcon: {
     margin: '5px',
@@ -146,7 +132,7 @@ class Pipelines extends Component {
 
   renderPipelines() {
     const { page, rowsPerPage, pipelines } = this.state;
-    return pipelines.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((pipeline) => {
+    return pipelines.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((pipeline) => { // eslint-disable-line
       const date = new Date(pipeline.updated_at);
       return (
         <TableRow
@@ -172,72 +158,68 @@ class Pipelines extends Component {
     const { page, rowsPerPage, pipelines } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={theme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>);
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
+      );
     }
     return (
-      <MuiThemeProvider theme={theme}>
-        <div>
-          <Toolbar style={style.toolbar}>
-            <Search
-              className="search"
-              data={util.filterName(this.state.pipelines)}
-              handleSearch={this.handleSearch}
-            />
-            {!this.state.new && (
-              <IconButton
-                className="new-pipeline"
-                style={style.icon}
-                onClick={this.handleNewPipeline}
-              >
-                <AddIcon />
-              </IconButton>
-            )}
-          </Toolbar>
-          <Paper style={style.paper}>
-            <Collapse in={this.state.new}>
-              <div>
-                <IconButton className="cancel" onClick={this.handleNewPipelineCancel} style={style.cancelIcon}>
-                  <RemoveIcon nativeColor="black" />
-                </IconButton>
-                <NewPipeline onComplete={this.reload} />
-                <Divider style={{ marginTop: '15px' }} />
-              </div>
-            </Collapse>
-
-            <Table className="pipeline-list">
-              <TableBody >
-                {this.renderPipelines()}
-              </TableBody>
-              {pipelines.length !== 0 && (
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      rowsPerPageOptions={[15, 25, 50]}
-                      colSpan={4}
-                      count={pipelines.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onChangePage={this.handleChangePage}
-                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                    />
-                  </TableRow>
-                </TableFooter>
-              )}
-            </Table>
-          </Paper>
-          <Snackbar
-            className="pipelines-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
+      <div>
+        <Toolbar style={style.toolbar}>
+          <AutoSuggest
+            className="search"
+            data={util.filterName(this.state.pipelines)}
+            handleSearch={this.handleSearch}
           />
-        </div>
-      </MuiThemeProvider>
+          {!this.state.new && (
+            <IconButton
+              className="new-pipeline"
+              style={style.icon}
+              onClick={this.handleNewPipeline}
+            >
+              <AddIcon style={{ color: 'white' }} />
+            </IconButton>
+          )}
+        </Toolbar>
+        <Paper style={style.paper}>
+          <Collapse in={this.state.new}>
+            <div>
+              <IconButton className="cancel" onClick={this.handleNewPipelineCancel} style={style.cancelIcon}>
+                <RemoveIcon nativeColor="black" />
+              </IconButton>
+              <NewPipeline onComplete={this.reload} />
+              <Divider style={{ marginTop: '15px' }} />
+            </div>
+          </Collapse>
+          <Table className="pipeline-list">
+            <TableBody >
+              {this.renderPipelines()}
+            </TableBody>
+            {pipelines.length !== 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[15, 25, 50]}
+                    colSpan={4}
+                    count={pipelines.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
+          </Table>
+        </Paper>
+        <Snackbar
+          className="pipelines-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }

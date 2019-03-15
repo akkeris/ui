@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import deepmerge from 'deepmerge';
-import { MuiThemeProvider, withTheme } from '@material-ui/core/styles';
+import { withTheme } from '@material-ui/core/styles';
 import {
   List, ListItem, ListItemText, CircularProgress, Button, Paper, ListSubheader, Divider,
   Collapse,
@@ -13,29 +12,6 @@ import { ResponsiveContainer, Line, LineChart, XAxis, YAxis } from 'recharts';
 import api from '../../services/api';
 
 /* eslint-disable react/no-array-index-key */
-
-const theme = parentTheme => deepmerge(parentTheme, {
-  overrides: {
-    MuiTabs: {
-      root: {
-        backgroundColor: '#3c4146',
-        color: 'white',
-        maxWidth: '1024px',
-      },
-    },
-    MuiTab: {
-      root: {
-        minWidth: '120px !important',
-      },
-    },
-    MuiButton: {
-      root: {
-        margin: '0',
-        padding: '0px 8px',
-      },
-    },
-  },
-});
 
 function formatMoney(amount) {
   return `$${amount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,')}`;
@@ -137,9 +113,6 @@ class InvoiceInfo extends Component {
         position: 'relative',
         color: 'white',
       },
-    },
-    tabs: {
-      backgroundColor: '#3c4146',
     },
     paper: {
       maxWidth: '1024px',
@@ -283,7 +256,7 @@ class InvoiceInfo extends Component {
     return (groupByApp(items, org).map((item, index) => (
       <div key={`${org + index}container`}>
         <ListItem button onClick={() => this.handleClick(index, org)}>
-          <ListItemText primary={item} secondary={`Total: ${formatMoney(sumByApp(items, item))}`} />
+          <ListItemText primary={item} secondary={`Total: ${formatMoney(sumByApp(items, item))}`} style={{ padding: '0px 8px' }} />
           {(open && currentItem === index && currentOrg === org) ?
             <ExpandLessIcon /> : <ExpandMoreIcon />
           }
@@ -292,7 +265,7 @@ class InvoiceInfo extends Component {
           in={open && currentItem === index && currentOrg === org}
           unmountOnExit
         >
-          <List disablePadding style={{ paddingBottom: '10px' }}>
+          <List disablePadding style={{ padding: '0px 16px 10px' }} >
             {this.renderItems(month, items, item)}
           </List>
         </Collapse>
@@ -306,20 +279,17 @@ class InvoiceInfo extends Component {
     const { data } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={theme}>
-          <div style={this.style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={this.style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>);
+        <div style={this.style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={this.style.refresh.indicator} status="loading" />
+        </div>
+      );
     }
     return (
-      <MuiThemeProvider theme={theme}>
-        <div className="invoices">
-          <Paper style={this.style.paper}>
-            {this.renderOrgs(match.params.invoice, data.items)}
-          </Paper>
-        </div>
-      </MuiThemeProvider>
+      <div className="invoices">
+        <Paper style={this.style.paper}>
+          {this.renderOrgs(match.params.invoice, data.items)}
+        </Paper>
+      </div>
     );
   }
 }
