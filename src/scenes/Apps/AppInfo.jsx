@@ -147,7 +147,7 @@ export default class AppInfo extends Component {
 
   renderHeaderActions() {
     return (
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', justifyContent: this.state.app.git_url ? 'space-between' : 'space-evenly' }}>
         {this.state.app.git_url && (
           <Tooltip title="Github Repo" placement="top-end">
             <IconButton

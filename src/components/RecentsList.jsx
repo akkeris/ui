@@ -35,29 +35,20 @@ export default class RecentsList extends Component {
   }
 
   getRecents(page, rowsPerPage) {
-    if (this.props.recents && this.props.recents.length > 0) {
-      return this.props.recents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(recent => (
-        <TableRow
-          className={recent.item}
-          key={recent.item}
-          style={style.tableRow}
-          hover
-          onClick={() => this.handleRowSelection(recent)}
-        >
-          <TableCell style={style.tableRow}>
-            <div style={style.tableRowColumn.main}>{recent.label}</div>
-            <div style={style.tableRowColumn.sub}>{recent.type}</div>
-          </TableCell>
-        </TableRow>
-      ));
-    }
-    return (
-      <TableRow style={style.tableRow} >
+    return this.props.recents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(recent => (
+      <TableRow
+        className={recent.item}
+        key={recent.item}
+        style={style.tableRow}
+        hover
+        onClick={() => this.handleRowSelection(recent)}
+      >
         <TableCell style={style.tableRow}>
-          <Typography>No Recently Viewed Items</Typography>
+          <div style={style.tableRowColumn.main}>{recent.label}</div>
+          <div style={style.tableRowColumn.sub}>{recent.type}</div>
         </TableCell>
       </TableRow>
-    );
+    ));
   }
 
   handleRowSelection = (recent) => {
