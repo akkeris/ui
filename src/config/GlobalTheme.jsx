@@ -59,9 +59,10 @@ const GlobalTheme = () => createMuiTheme({
         maxHeight: '48px !important',
       },
     },
+    /* Used for Info pages - i.e. AppInfo, PipelineInfo, and so on */
     MuiTabs: {
       root: {
-        backgroundColor: '#424242', // '#3c4146'
+        backgroundColor: '#424242', // old value is '#3c4146'
         color: 'white',
         maxWidth: '1024px',
       },
@@ -69,13 +70,6 @@ const GlobalTheme = () => createMuiTheme({
     MuiTab: {
       root: {
         minWidth: '120px !important',
-      },
-    },
-    MuiCardContent: {
-      root: {
-        display: 'flex',
-        flexFlow: 'row-reverse',
-        padding: '0px 13px 0px 0px !important',
       },
     },
     MuiCard: {

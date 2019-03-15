@@ -15,12 +15,10 @@ import ConfirmationModal from '../ConfirmationModal';
 const style = {
   refresh: {
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '15%',
-      marginBottom: '5%',
+      padding: '10% 0',
+      margin: '0 auto',
     },
     indicator: {
       display: 'inline-block',
@@ -170,7 +168,6 @@ export default class RouteList extends Component {
       );
     }
     return (
-
       <div>
         {!this.state.new && (
           <Paper elevation={0}>

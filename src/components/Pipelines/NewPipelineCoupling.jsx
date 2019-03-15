@@ -17,7 +17,7 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,
@@ -115,7 +115,7 @@ export default class NewPipelineCoupling extends Component {
       this.submitPipelineCoupling();
     }
 
-    const contentStyle = { margin: '0 0 40px 57px' };
+    const contentStyle = { margin: '0 0 48px 32px' };
 
     return (
       <div style={style.stepper}>

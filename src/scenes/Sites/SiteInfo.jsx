@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import {
-  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, Button,
-  Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
+  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
 } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
 import MapIcon from '@material-ui/icons/Map';
@@ -12,6 +11,7 @@ import RouteList from '../../components/Sites/RouteList';
 import api from '../../services/api';
 import util from '../../services/util';
 import History from '../../config/History';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 const style = {
   refresh: {
@@ -28,9 +28,6 @@ const style = {
       position: 'relative',
       color: 'white',
     },
-  },
-  tabs: {
-    backgroundColor: '#3c4146',
   },
   card: {
     maxWidth: '1024px',
@@ -137,20 +134,13 @@ export default class SiteInfo extends Component {
       return (
         <div style={style.refresh.div}>
           <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          <Dialog
-            className="not-found-error"
+          <ConfirmationModal
             open={this.state.submitFail}
-          >
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>{this.state.submitMessage}</DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={this.handleNotFoundClose}
-              >Ok</Button>
-            </DialogActions>
-          </Dialog>
+            onOk={this.handleNotFoundClose}
+            message={this.state.submitMessage}
+            title="Error"
+            className="not-found-error"
+          />
         </div>
       );
     }
@@ -184,23 +174,13 @@ export default class SiteInfo extends Component {
           {currentTab === 'info' && <SiteOverView site={this.state.site} />}
           {currentTab === 'routes' && <RouteList site={this.state.site.domain} onError={this.handleError} />}
         </Card>
-        <Dialog
-          className="error"
+        <ConfirmationModal
           open={this.state.submitFail}
-        >
-          <DialogTitle>Error</DialogTitle>
-          <DialogContent>
-            <DialogContentText>{this.state.submitMessage}</DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              color="primary"
-              onClick={this.handleClose}
-            >
-              Ok
-            </Button>
-          </DialogActions>
-        </Dialog>
+          onOk={this.handleClose}
+          message={this.state.submitMessage}
+          title="Error"
+          className="error"
+        />
         <Snackbar
           open={this.state.open}
           message={this.state.message}
