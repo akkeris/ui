@@ -133,7 +133,7 @@ export default class Webhooks extends Component {
     return (
       <div>
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px' }}>
-          <Typography style={{ flex: 1, paddingLeft: '30px' }} variant="overline">Services</Typography>
+          <Typography style={{ flex: 1, paddingLeft: '30px' }} variant="overline">Webhooks</Typography>
           <div style={{ width: '50px' }}>
             {this.state.new ? (
               <IconButton className="webhook-cancel" onClick={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
