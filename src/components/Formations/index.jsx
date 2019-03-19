@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  CircularProgress, Snackbar, IconButton, Paper,
-  Table, TableBody, TableHead, TableRow, TableCell, Tooltip,
+  CircularProgress, Snackbar, IconButton, TableCell, Tooltip, Typography, Collapse,
+  Table, TableBody, TableHead, TableRow,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -84,7 +84,6 @@ export default class Formations extends Component {
         loading: false,
       });
     }
-    console.log('sizes: ', JSON.stringify(sizes));
   }
 
   handleError = (message) => {
@@ -149,7 +148,6 @@ export default class Formations extends Component {
         onAlert={this.info}
         key={formation.id}
         sizes={this.state.sizes}
-        // sizeList={this.renderSizes()}
         onError={this.handleError}
         app={this.props.app}
       />
@@ -166,23 +164,26 @@ export default class Formations extends Component {
     }
     return (
       <div>
-        {!this.state.new && (
-          <Paper elevation={0}>
-            <Tooltip title="New Formation" placement="bottom-end">
-              <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
-            </Tooltip>
-          </Paper>
-        )}
-        {this.state.new && (
-          <div>
-            <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
-            <NewFormation app={this.props.app.name} onComplete={this.reload} />
-          </div>
-        )}
         <Table className="formation-list">
           <TableHead>
             <TableRow>
-              <TableCell>Formation</TableCell>
+              <TableCell>
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="overline">Formations</Typography>
+                  <div style={{ paddingRight: '8px' }}>
+                    {!this.state.new ? (
+                      <Tooltip title="New Formation" placement="bottom-end">
+                        <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
+                      </Tooltip>
+                    ) : (
+                      <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
+                    )}
+                  </div>
+                </div>
+                <Collapse in={this.state.new}>
+                  <NewFormation app={this.props.app} onComplete={this.reload} />
+                </Collapse>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

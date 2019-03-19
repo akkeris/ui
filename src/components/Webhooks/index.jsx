@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  CircularProgress, IconButton, Paper, Snackbar,
+  CircularProgress, IconButton, Snackbar, Typography, Collapse, Divider,
   Table, TableHead, TableBody, TableRow, TableCell, Tooltip, Grid,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -132,27 +132,31 @@ export default class Webhooks extends Component {
     }
     return (
       <div>
-        {!this.state.new ? (
-          <Paper elevation={0}>
-            <Tooltip placement="bottom-end" title="New Webhook">
-              <IconButton
-                className="new-webhook"
-                onClick={this.handleNewWebhook}
-              >
-                <AddIcon />
-              </IconButton>
-            </Tooltip>
-          </Paper>
-        ) : (
-          <div>
-            <IconButton className="webhook-cancel" onClick={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
-            { <NewWebhook app={this.props.app} onComplete={this.reload} /> }
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px' }}>
+          <Typography style={{ flex: 1, paddingLeft: '30px' }} variant="overline">Services</Typography>
+          <div style={{ width: '50px' }}>
+            {this.state.new ? (
+              <IconButton className="webhook-cancel" onClick={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
+            ) : (
+              <Tooltip placement="bottom-end" title="New Webhook">
+                <IconButton
+                  className="new-webhook"
+                  onClick={this.handleNewWebhook}
+                >
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
+            )}
           </div>
-        )}
+        </div>
+        <Collapse in={this.state.new}>
+          <NewWebhook app={this.props.app} onComplete={this.reload} />
+        </Collapse>
+        <Divider />
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{ padding: 0, paddingBottom: '10px' }}>
+              <TableCell style={{ padding: 0 }}>
                 <Grid container>
                   <Grid item xs={6} style={style.headerLeftPadding}>Webhook</Grid>
                   <Grid item xs={6}>Events</Grid>

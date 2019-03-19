@@ -16,7 +16,7 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,
@@ -27,8 +27,9 @@ const style = {
       marginLeft: 'auto',
       marginRight: 'auto',
       width: '40px',
-      height: '350px',
-      marginTop: '20%',
+      height: '50px',
+      paddingTop: '36px',
+      paddingBottom: '36px',
     },
     indicator: {
       display: 'inline-block',

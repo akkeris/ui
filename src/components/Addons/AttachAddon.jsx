@@ -199,7 +199,7 @@ export default class AttachAddon extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px' };
+    const contentStyle = { margin: '0px 32px 48px 32px' };
     if (finished) {
       this.submitAddonAttachment();
     } else {

@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { grey, teal } from '@material-ui/core/colors';
 import {
-  Paper, Snackbar, CircularProgress, Table, TableBody, TableRow, TableCell,
+  Snackbar, CircularProgress, Table, TableBody, TableRow, TableCell,
   IconButton, Dialog, Button, DialogActions, DialogContent, DialogTitle,
-  Tooltip, TablePagination, TableFooter,
+  Tooltip, TablePagination, TableFooter, Divider, Typography, Collapse,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -337,18 +337,18 @@ export default class Releases extends Component {
         color: releaseColor,
       }, style.status);
       return (
-        <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current, height: '84px' }}>
-          <TableCell style={{ width: '28px', paddingLeft: '24px', paddingRight: '0px' }}>
-            <div style={{ position: 'relative', height: '100%' }}>
-              {!release.release ? (<BuildIcon style={style.mainIcon} />) : (<ReleaseIcon style={{
-                position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
-              }}
-              />)}
-              <StatusIcon style={statusIconStyle} />
+        <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current }}>
+          <TableCell style={{ display: 'flex', padding: '12px 24px', height: '64px', alignItems: 'center' }}>
+            <div style={{ width: '25px', paddingRight: '24px' }}>
+              <div style={{ position: 'relative', height: '100%' }}>
+                {!release.release ? (<BuildIcon style={style.mainIcon} />) : (<ReleaseIcon style={{
+                  position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
+                }}
+                />)}
+                <StatusIcon style={statusIconStyle} />
+              </div>
             </div>
-          </TableCell>
-          <TableCell>
-            <div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `}
               {info1.join(' ')}
               <br />
@@ -357,25 +357,27 @@ export default class Releases extends Component {
                 {getDateDiff(new Date(release.created_at))}
               </div>
             </div>
-          </TableCell>
-          <TableCell style={style.tableCell.icon}>
-            {release.source_blob.version &&
-            <Tooltip title="Commit" placement="top-end">
-              <IconButton style={style.iconButton} className="git" href={release.source_blob.version} ><GitCommitIcon /></IconButton>
-            </Tooltip>
-            }
-          </TableCell>
-          <TableCell style={style.tableCell.icon}>
-            {!release.release &&
-              <Tooltip title="Build Logs" placement="top-end">
-                <IconButton style={style.iconButton} className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
-              </Tooltip>
-            }
-            {!release.current && release.release &&
-              <Tooltip title="Rollback" placement="top-end">
-                <IconButton style={style.iconButton} className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
-              </Tooltip>
-            }
+            <div style={{ width: '112px', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ width: '50px' }}>
+                {release.source_blob.version &&
+                  <Tooltip title="Commit" placement="top-end">
+                    <IconButton style={style.iconButton} className="git" href={release.source_blob.version} ><GitCommitIcon /></IconButton>
+                  </Tooltip>
+                }
+              </div>
+              <div style={{ width: '50px' }}>
+                {!release.release &&
+                  <Tooltip title="Build Logs" placement="top-end">
+                    <IconButton style={style.iconButton} className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
+                  </Tooltip>
+                }
+                {!release.current && release.release &&
+                  <Tooltip title="Rollback" placement="top-end">
+                    <IconButton style={style.iconButton} className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
+                  </Tooltip>
+                }
+              </div>
+            </div>
           </TableCell>
         </TableRow>
       );
@@ -473,35 +475,43 @@ export default class Releases extends Component {
             <DialogActions>{actionsRevert}</DialogActions>
           </Dialog>
         )}
-        {(!this.state.new && !this.state.newAuto) && (
-          <Paper elevation={0}>
-            <Tooltip title="Attach to Repo" placement="bottom-end">
-              <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
-            </Tooltip>
-            {newReleaseButton}
-          </Paper>
-        )}
-        {this.state.new && (
-          <div>
-            <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px' }}>
+          <Typography style={{ flex: 1 }} variant="overline">Releases</Typography>
+          <div style={{ width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ width: '50px' }}>
+              {(!this.state.new && !this.state.newAuto) && (
+                <Tooltip title="Attach to Repo" placement="bottom-end">
+                  <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
+                </Tooltip>
+              )}
+            </div>
+            <div style={{ width: '50px' }}>
+              {(!this.state.new && !this.state.newAuto) && newReleaseButton}
+              {this.state.new && (
+                <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
+              )}
+              {this.state.newAuto && (
+                <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
+              )}
+            </div>
+          </div>
+        </div>
+        <Collapse in={this.state.new || this.state.newAuto}>
+          {this.state.new && (
             <NewBuild
               app={this.props.app.name}
               org={this.props.org}
-              onComplete={
-                (message) => { this.reload(message); }
-              }
+              onComplete={message => this.reload(message)}
             />
-          </div>
-        )}
-        {this.state.newAuto && (
-          <div>
-            <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
+          )}
+          {this.state.newAuto && (
             <NewAutoBuild
               app={this.props.app.name}
-              onComplete={(message) => { this.reload(message); }}
+              onComplete={message => this.reload(message)}
             />
-          </div>
-        )}
+          )}
+        </Collapse>
+        <Divider />
         <Table className="release-list" style={{ overflow: 'visible' }}>
           <TableBody>
             {this.renderReleases(page, rowsPerPage)}
