@@ -14,6 +14,15 @@ import api from '../../services/api';
 import NewConfigVar from './NewConfigVar';
 import ConfirmationModal from '../ConfirmationModal';
 
+// fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
+function isEmpty(obj) {
+  let empty = true;
+  Object.keys(obj).forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) { empty = false; }
+  });
+  return empty;
+}
+
 const style = {
   tableRow: {
     height: '58px',
@@ -250,7 +259,7 @@ export default class ConfigVar extends Component {
 
     return (
       <div>
-        <Collapse in={this.state.attach || this.state.new}>
+        <Collapse in={this.state.new}>
           <div style={style.collapse.container}>
             <div style={style.collapse.header.container}>
               <Typography style={style.collapse.header.title} variant="overline">New Config</Typography>
@@ -267,6 +276,11 @@ export default class ConfigVar extends Component {
         </Collapse>
         <Divider />
         <Table className="config-list">
+          <colgroup>
+            <col style={{ width: '40%' }} />
+            <col style={{ width: '45%' }} />
+            <col style={{ width: '15%' }} />
+          </colgroup>
           <TableHead>
             <TableRow>
               <TableCell><Typography variant="overline">Key</Typography></TableCell>
@@ -283,7 +297,10 @@ export default class ConfigVar extends Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            {this.renderConfigVars()}
+            {console.log(this.state.config)}
+            {isEmpty(this.state.config) ? (
+              <TableRow><TableCell>No Config Vars</TableCell></TableRow>
+            ) : this.renderConfigVars()}
           </TableBody>
         </Table>
         <ConfirmationModal

@@ -191,7 +191,9 @@ export default class Formations extends Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            {this.renderFormations()}
+            {(!this.state.formations || this.state.formations.length === 0) ? (
+              <TableRow><TableCell>No Dynos</TableCell></TableRow>
+            ) : this.renderFormations()}
           </TableBody>
         </Table>
         <ConfirmationModal

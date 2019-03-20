@@ -557,7 +557,9 @@ export default class Releases extends Component {
         <Divider />
         <Table className="release-list" style={{ overflow: 'visible' }}>
           <TableBody>
-            {this.renderReleases(page, rowsPerPage)}
+            {(!this.state.releases || this.state.releases.length === 0) ? (
+              <TableRow><TableCell>No Releases</TableCell></TableRow>
+            ) : this.renderReleases(page, rowsPerPage)}
           </TableBody>
           {releases.length !== 0 && (
             <TableFooter>

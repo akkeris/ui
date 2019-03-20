@@ -13,6 +13,7 @@ import NewAddon from './NewAddon';
 import AttachAddon from './AttachAddon';
 import ConfirmationModal from '../ConfirmationModal';
 import AttachmentIcon from '../Icons/AttachmentIcon';
+import DeleteAttachmentIcon from '../Icons/DeleteAttachmentIcon';
 
 // fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
 function isEmpty(obj) {
@@ -370,7 +371,7 @@ class Addons extends Component {
           className="attachment-remove"
           onClick={() => this.handleAddonAttachmentConfirmation(attachment)}
         >
-          <RemoveIcon color={((restrictedSpace && !isElevated) || attachment.state === 'provisioning') ? 'disabled' : 'inherit'} />
+          <DeleteAttachmentIcon color={((restrictedSpace && !isElevated) || attachment.state === 'provisioning') ? 'disabled' : 'inherit'} />
         </IconButton>
       );
 
@@ -463,7 +464,7 @@ class Addons extends Component {
             <TableRow>
               <TableCell><Typography variant="overline">Addon</Typography></TableCell>
               <TableCell><Typography variant="overline">Plan</Typography></TableCell>
-              <TableCell>{this.state.addonAttachments.length !== 0 && <Typography variant="overline">Attachment Source</Typography>}</TableCell>
+              <TableCell>{this.state.addonAttachments.length !== 0 && <Typography variant="overline">Attached From</Typography>}</TableCell>
               <TableCell>
                 <div style={style.headerActions.container}>
                   <div style={style.headerActions.button}>
@@ -554,7 +555,7 @@ class Addons extends Component {
           open={this.state.confirmAttachmentOpen}
           onOk={this.handleRemoveAddonAttachment}
           onCancel={this.handleCancelAddonAttachmentConfirmation}
-          message="Are you sure you want to delete this attachment?"
+          message="Are you sure you want to remove this attachment from this app?"
         />
         <ConfirmationModal
           className="addon-error"

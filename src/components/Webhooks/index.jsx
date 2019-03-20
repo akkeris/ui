@@ -185,11 +185,13 @@ export default class Webhooks extends Component {
               </TableCell>
             </TableRow>
           </TableHead>
-          {this.state.webhooks && this.state.webhooks.length > 0 && (
-            <TableBody className="webhook-list">
-              {this.renderWebhooks()}
-            </TableBody>
-          )}
+          <TableBody className="webhook-list">
+            {(this.state.webhooks && this.state.webhooks.length) > 0 ? (
+              this.renderWebhooks()
+            ) : (
+              <TableRow><TableCell><span style={{ paddingLeft: '12px' }}>No Webhooks</span></TableCell></TableRow>
+            )}
+          </TableBody>
         </Table>
         <ConfirmationModal
           open={this.state.submitFail}
