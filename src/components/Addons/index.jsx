@@ -3,11 +3,10 @@ import PropTypes from 'prop-types';
 import {
   Button, IconButton, Snackbar, Typography, CircularProgress, Dialog,
   Tooltip, Table, TableHead, TableBody, TableRow, TableCell,
-  DialogTitle, DialogContent, DialogActions, Divider, Collapse,
+  DialogTitle, DialogContent, DialogActions, Collapse,
 } from '@material-ui/core';
 import { withTheme } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
-import AttachIcon from '@material-ui/icons/CallMerge';
 import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import NewAddon from './NewAddon';
@@ -43,7 +42,7 @@ const style = {
     height: '58px',
   },
   tableRowPointer: {
-    height: '58px',
+    height: '72px',
     cursor: 'pointer',
   },
   tableRowColumn: {
@@ -69,6 +68,27 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+    },
+  },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  headerActions: {
+    container: {
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    },
+    button: {
+      width: '50px',
     },
   },
 };
@@ -321,12 +341,9 @@ class Addons extends Component {
           <TableCell
             onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
           >
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
-              {this.state.addonAttachments.length > 0 && <div style={{ width: '36px' }} />}
-              <div>
-                <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
-                <div style={style.tableRowColumn.sub}>{addon.id} {addon.state === 'provisioning' ? '- provisioning' : ''}</div>
-              </div>
+            <div>
+              <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
+              <div style={style.tableRowColumn.sub}>{addon.id} {addon.state === 'provisioning' ? '- provisioning' : ''}</div>
             </div>
           </TableCell>
           <TableCell
@@ -336,7 +353,7 @@ class Addons extends Component {
             <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
           </TableCell>
           <TableCell>
-            {deleteButton}
+            <div style={{ paddingRight: '2px', textAlign: 'right' }}>{deleteButton}</div>
           </TableCell>
         </TableRow>
       );
@@ -373,12 +390,9 @@ class Addons extends Component {
           <TableCell
             onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
           >
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginRight: '12px' }}><AttachmentIcon /></div>
-              <div>
-                <div style={style.tableRowColumn.title}>{attachment.name}</div>
-                <div style={style.tableRowColumn.sub}>{attachment.id} {attachment.state === 'provisioning' ? '- provisioning' : ''}</div>
-              </div>
+            <div>
+              <div style={style.tableRowColumn.title}>{attachment.name}</div>
+              <div style={style.tableRowColumn.sub}>{attachment.id} {attachment.state === 'provisioning' ? '- provisioning' : ''}</div>
             </div>
           </TableCell>
           <TableCell
@@ -392,7 +406,7 @@ class Addons extends Component {
             <div style={style.tableRowColumn.title}>{attachment.addon.app.name}</div>
           </TableCell>
           <TableCell>
-            {deleteButton}
+            <div style={{ textAlign: 'right' }}>{deleteButton}</div>
           </TableCell>
         </TableRow>
       );
@@ -425,44 +439,19 @@ class Addons extends Component {
     }
     return (
       <div style={{ overflow: 'visible' }}>
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px' }}>
-          <Typography style={{ flex: 1 }} variant="overline">Services</Typography>
-          <div style={{ width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '4px' }}>
-            <div style={{ width: '50px' }}>
-              {!this.state.new && !this.state.attach && (
-                <Tooltip title="New Addon" placement="bottom-end">
-                  <IconButton
-                    className="new-addon"
-                    onClick={this.handleNewAddon}
-                    style={style.iconButton}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </div>
-            <div style={{ width: '50px' }}>
-              {!this.state.attach && !this.state.new && (
-                <Tooltip title="Attach Addon" placement="bottom-end">
-                  <IconButton
-                    className="attach-addon"
-                    onClick={this.handleAttachAddon}
-                    style={style.iconButton}
-                  >
-                    <AttachIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
+        <Collapse in={this.state.attach || this.state.new}>
+          <div style={style.collapse.container}>
+            <div style={style.collapse.header.container}>
+              <Typography style={style.collapse.header.title} variant="overline">{this.state.attach && 'Attach Addon'}{this.state.new && 'New Addon'}</Typography>
               {this.state.new && <IconButton style={style.iconButton} className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton> }
               {this.state.attach && <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton> }
             </div>
+            <div>
+              {this.state.new && <NewAddon app={this.props.app.name} onComplete={this.reload} /> }
+              {this.state.attach && <AttachAddon app={this.props.app.name} onComplete={this.reload} /> }
+            </div>
           </div>
-        </div>
-        <Collapse in={this.state.attach || this.state.new}>
-          {this.state.new && <NewAddon app={this.props.app.name} onComplete={this.reload} /> }
-          {this.state.attach && <AttachAddon app={this.props.app.name} onComplete={this.reload} /> }
         </Collapse>
-        <Divider />
         <Table>
           <colgroup>
             <col style={{ width: '35%' }} />
@@ -472,10 +461,39 @@ class Addons extends Component {
           </colgroup>
           <TableHead>
             <TableRow>
-              <TableCell style={{ paddingLeft: this.state.addonAttachments.length > 0 ? '60px' : undefined }}>Addon</TableCell>
-              <TableCell>Plan</TableCell>
-              <TableCell>Source</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell><Typography variant="overline">Addon</Typography></TableCell>
+              <TableCell><Typography variant="overline">Plan</Typography></TableCell>
+              <TableCell>{this.state.addonAttachments.length !== 0 && <Typography variant="overline">Attachment Source</Typography>}</TableCell>
+              <TableCell>
+                <div style={style.headerActions.container}>
+                  <div style={style.headerActions.button}>
+                    {!this.state.attach && !this.state.new && (
+                      <Tooltip title="Attach Addon" placement="bottom-end">
+                        <IconButton
+                          className="attach-addon"
+                          onClick={this.handleAttachAddon}
+                          style={style.iconButton}
+                        >
+                          <AttachmentIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </div>
+                  <div style={style.headerActions.button}>
+                    {!this.state.new && !this.state.attach && (
+                      <Tooltip title="New Addon" placement="bottom-end">
+                        <IconButton
+                          className="new-addon"
+                          onClick={this.handleNewAddon}
+                          style={style.iconButton}
+                        >
+                          <AddIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

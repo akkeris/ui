@@ -164,25 +164,29 @@ export default class Formations extends Component {
     }
     return (
       <div>
+        <Collapse in={this.state.new}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '6px 26px 0px' }}>
+              <Typography style={{ flex: 1 }} variant="overline">New Formation</Typography>
+              <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
+            </div>
+            <NewFormation app={this.props.app} onComplete={this.reload} />
+          </div>
+        </Collapse>
         <Table className="formation-list">
           <TableHead>
             <TableRow>
               <TableCell>
                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Typography variant="overline">Formations</Typography>
+                  <Typography variant="overline">Formation</Typography>
                   <div style={{ paddingRight: '8px' }}>
-                    {!this.state.new ? (
+                    {!this.state.new && (
                       <Tooltip title="New Formation" placement="bottom-end">
                         <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
                       </Tooltip>
-                    ) : (
-                      <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
                     )}
                   </div>
                 </div>
-                <Collapse in={this.state.new}>
-                  <NewFormation app={this.props.app} onComplete={this.reload} />
-                </Collapse>
               </TableCell>
             </TableRow>
           </TableHead>

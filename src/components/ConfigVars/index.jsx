@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, Table, TableBody, TableRow, TableCell, IconButton, Tooltip,
-  Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
-  Snackbar, Divider, Paper, Button, TextField, Collapse, Typography, TableHead,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Snackbar, Divider, Button, TextField, Collapse, Typography, TableHead,
 } from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
@@ -47,6 +47,26 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+    },
+  },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  header: {
+    actions: {
+      container: {
+        display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+      },
     },
   },
 };
@@ -202,7 +222,7 @@ export default class ConfigVar extends Component {
           <div style={style.configVar.value}>{this.state.config[key]}</div>
         </TableCell>
         <TableCell>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0px 2px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Tooltip title="Edit" placement="top-start">
               <IconButton className="edit" onClick={() => this.handleEdit(key)}>
                 <EditIcon nativeColor="black" />
@@ -227,29 +247,41 @@ export default class ConfigVar extends Component {
         </div>
       );
     }
+
     return (
       <div>
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px' }}>
-          <Typography style={{ flex: 1 }} variant="overline">Config</Typography>
-          <div style={{ width: '50px' }}>
-            {this.state.new ? (
+        <Collapse in={this.state.attach || this.state.new}>
+          <div style={style.collapse.container}>
+            <div style={style.collapse.header.container}>
+              <Typography style={style.collapse.header.title} variant="overline">New Config</Typography>
               <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon nativeColor="black" /></IconButton>
-            ) : (
-              <Tooltip title="New Config" placement="bottom-start">
-                <IconButton className="new-config" onClick={this.handleNewConfig}><AddIcon nativeColor="black" /></IconButton>
-              </Tooltip>
-            )}
+            </div>
+            <div>
+              <NewConfigVar
+                app={this.props.app}
+                onComplete={this.reload}
+                config={this.state.config}
+              />
+            </div>
           </div>
-        </div>
-        <Collapse in={this.state.new}>
-          <NewConfigVar
-            app={this.props.app}
-            onComplete={this.reload}
-            config={this.state.config}
-          />
         </Collapse>
         <Divider />
         <Table className="config-list">
+          <TableHead>
+            <TableRow>
+              <TableCell><Typography variant="overline">Key</Typography></TableCell>
+              <TableCell><Typography variant="overline">Value</Typography></TableCell>
+              <TableCell>
+                <div style={style.header.actions.container}>
+                  {!this.state.new && (
+                    <Tooltip title="New Config" placement="bottom-start">
+                      <IconButton className="new-config" onClick={this.handleNewConfig}><AddIcon nativeColor="black" /></IconButton>
+                    </Tooltip>
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableHead>
           <TableBody>
             {this.renderConfigVars()}
           </TableBody>

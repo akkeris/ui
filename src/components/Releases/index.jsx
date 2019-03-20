@@ -94,6 +94,35 @@ const style = {
     top: '50%',
     marginTop: '-12px',
   },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  header: {
+    container: {
+      display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px',
+    },
+    title: {
+      flex: 1,
+    },
+    actions: {
+      container: {
+        width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      },
+      button: {
+        width: '50px',
+      },
+    },
+  },
 };
 
 function getDateDiff(date /* : Date */) {
@@ -383,27 +412,72 @@ export default class Releases extends Component {
       );
     });
   }
+  renderLogs() {
+    const { logsOpen, release, title } = this.state;
+    return (
+      <Dialog
+        className="logs"
+        open={logsOpen}
+        onClose={() => { this.handleClose(); }}
+        maxWidth="xl"
+        fullWidth
+      >
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent style={{ padding: '0px', margin: '0px' }}>
+          <Logs
+            build={release.slug.id}
+            app={this.props.app.name}
+            open={logsOpen}
+          />
+        </DialogContent>
+        <DialogActions>
+          <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
+            <RemoveIcon />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+
+  renderRevert() {
+    const { revertOpen, title, revert } = this.state;
+    return (
+      <Dialog
+        className="revert"
+        open={revertOpen}
+        onClose={() => { this.handleRevertClose(); }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          <div>
+            {getDateDiff(new Date(revert.created_at))} - {[
+              revert.description,
+              revert.source_blob.author,
+              revert.source_blob.commit ? `#${revert.source_blob.commit.substring(0, 7)}` : '',
+              revert.source_blob.message ? revert.source_blob.message.replace(/\s+/g, ' ') : '',
+            ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' ')).join(' ')}
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            className="ok"
+            color="primary"
+            onClick={() => { this.handleRevertGo(); }}
+          >Ok</Button>
+          <Button
+            className="cancel"
+            color="secondary"
+            onClick={() => { this.handleRevertClose(); }}
+          >Cancel</Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
 
   render() {
     const { releases, rowsPerPage, page, isElevated, restrictedSpace } = this.state;
-    const actions = [
-      <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
-        <RemoveIcon />
-      </IconButton>,
-    ];
-    const actionsRevert = [
-      <Button
-        className="ok"
-        color="primary"
-        onClick={() => { this.handleRevertGo(); }}
-      >Ok</Button>,
-      <Button
-        className="cancel"
-        color="secondary"
-        onClick={() => { this.handleRevertClose(); }}
-      >Cancel</Button>,
-    ];
-
     let newReleaseButton;
     if (!restrictedSpace || isElevated) {
       newReleaseButton = (
@@ -432,85 +506,54 @@ export default class Releases extends Component {
         </div>
       );
     }
+
     return (
       <div>
-        {this.state.release && (
-          <Dialog
-            className="logs"
-            open={this.state.logsOpen}
-            onClose={() => { this.handleClose(); }}
-            maxWidth="xl"
-            fullWidth
-          >
-            <DialogTitle>{this.state.title}</DialogTitle>
-            <DialogContent style={{ padding: '0px', margin: '0px' }}>
-              <Logs
-                build={this.state.release.slug.id}
-                app={this.props.app.name}
-                open={this.state.logsOpen}
-              />
-            </DialogContent>
-            <DialogActions>{actions}</DialogActions>
-          </Dialog>
-        )}
-        {this.state.revert && (
-          <Dialog
-            className="revert"
-            open={this.state.revertOpen}
-            onClose={() => { this.handleRevertClose(); }}
-            maxWidth="md"
-            fullWidth
-          >
-            <DialogTitle>{this.state.title}</DialogTitle>
-            <DialogContent>
-              <div>
-                {getDateDiff(new Date(this.state.revert.created_at))} - {[
-                  this.state.revert.description,
-                  this.state.revert.source_blob.author,
-                  this.state.revert.source_blob.commit ? `#${this.state.revert.source_blob.commit.substring(0, 7)}` : '',
-                  this.state.revert.source_blob.message ? this.state.revert.source_blob.message.replace(/\s+/g, ' ') : '',
-                ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' ')).join(' ')}
+        <Collapse in={this.state.new || this.state.newAuto}>
+          <div style={style.collapse.container}>
+            <div style={style.collapse.header.container}>
+              <Typography style={style.collapse.header.title} variant="overline">{this.state.new && 'New Build'}{this.state.newAuto && 'Attach to Repo'}</Typography>
+              <div >
+                {this.state.new && (
+                  <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
+                )}
+                {this.state.newAuto && (
+                  <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
+                )}
               </div>
-            </DialogContent>
-            <DialogActions>{actionsRevert}</DialogActions>
-          </Dialog>
-        )}
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px' }}>
-          <Typography style={{ flex: 1 }} variant="overline">Releases</Typography>
-          <div style={{ width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ width: '50px' }}>
+            </div>
+            <div>
+              {this.state.new && (
+                <NewBuild
+                  app={this.props.app.name}
+                  org={this.props.org}
+                  onComplete={message => this.reload(message)}
+                />
+              )}
+              {this.state.newAuto && (
+                <NewAutoBuild
+                  app={this.props.app.name}
+                  onComplete={message => this.reload(message)}
+                />
+              )}
+            </div>
+          </div>
+        </Collapse>
+        <div style={style.header.container}>
+          <Typography style={style.header.title} variant="overline">Release</Typography>
+          <div style={style.header.actions.container}>
+            <div style={style.header.actions.button}>
               {(!this.state.new && !this.state.newAuto) && (
                 <Tooltip title="Attach to Repo" placement="bottom-end">
                   <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
                 </Tooltip>
               )}
             </div>
-            <div style={{ width: '50px' }}>
+            <div style={style.header.actions.button}>
               {(!this.state.new && !this.state.newAuto) && newReleaseButton}
-              {this.state.new && (
-                <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
-              )}
-              {this.state.newAuto && (
-                <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
-              )}
             </div>
           </div>
         </div>
-        <Collapse in={this.state.new || this.state.newAuto}>
-          {this.state.new && (
-            <NewBuild
-              app={this.props.app.name}
-              org={this.props.org}
-              onComplete={message => this.reload(message)}
-            />
-          )}
-          {this.state.newAuto && (
-            <NewAutoBuild
-              app={this.props.app.name}
-              onComplete={message => this.reload(message)}
-            />
-          )}
-        </Collapse>
         <Divider />
         <Table className="release-list" style={{ overflow: 'visible' }}>
           <TableBody>
@@ -539,6 +582,8 @@ export default class Releases extends Component {
           autoHideDuration={3000}
           onClose={() => { this.handleSnackClose(); }}
         />
+        {this.state.release && this.renderLogs()}
+        {this.state.revert && this.renderRevert()}
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Button, Step, Stepper, StepLabel, Select, MenuItem, Typography,
+  Button, Step, Stepper, StepLabel, Select, MenuItem, Typography, CircularProgress,
 } from '@material-ui/core';
 import ConfirmationModal from '../ConfirmationModal';
 import AutoSuggest from '../AutoSuggest';
@@ -13,6 +13,7 @@ const style = {
     width: '100%',
     maxWidth: 700,
     margin: 'auto',
+    minHeight: 200,
   },
   buttons: {
     div: {
@@ -21,6 +22,20 @@ const style = {
     },
     back: {
       marginRight: 12,
+    },
+  },
+  refresh: {
+    div: {
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      width: '40px',
+      height: '50px',
+      paddingTop: '36px',
+      paddingBottom: '36px',
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
     },
   },
   h6: {
@@ -199,7 +214,7 @@ export default class AttachAddon extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0px 32px 48px 32px' };
+    const contentStyle = { margin: '0px 32px 24px' };
     if (finished) {
       this.submitAddonAttachment();
     } else {
@@ -257,6 +272,11 @@ export default class AttachAddon extends Component {
         {(!loading || finished) && (
           <div>
             {this.renderContent()}
+          </div>
+        )}
+        {loading && (
+          <div style={style.refresh.div}>
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         )}
         <ConfirmationModal

@@ -12,11 +12,12 @@ const style = {
     width: '100%',
     maxWidth: 700,
     margin: 'auto',
+    minHeight: 200,
   },
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 24,
+      marginBottom: 12,
     },
     back: {
       marginRight: 12,
