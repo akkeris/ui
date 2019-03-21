@@ -121,6 +121,8 @@ const style = {
     display: 'flex',
     flexWrap: 'wrap',
     alignItems: 'center',
+    flex: 19,
+    paddingLeft: '2px',
   },
   webhookUrl: {
     fontSize: '16px',
@@ -134,18 +136,6 @@ const style = {
   },
   tableRowHeight: {
     height: '58px',
-  },
-  titleGrid: {
-    paddingRight: '0 !important',
-    left: {
-      paddingLeft: '0px',
-      minWidth: '50%',
-    },
-    right: {
-      paddingRight: '32px',
-      display: 'flex',
-      alignItems: 'center',
-    },
   },
   webhookDetail: {
     container: {
@@ -195,6 +185,16 @@ const style = {
         inactive: {
           borderTop: '1px solid rgba(0, 0, 0, 0.3)', marginTop: '5px', paddingTop: '5px',
         },
+      },
+    },
+  },
+  webhookTitle: {
+    container: {
+      flex: 1, display: 'flex', alignItems: 'center', marginRight: '48px',
+    },
+    info: {
+      container: {
+        flex: 20, display: 'flex', alignItems: 'center',
       },
     },
   },
@@ -440,33 +440,28 @@ export default class Webhook extends Component {
       </Dialog>
     );
   }
-
   renderWebhookTitle() {
     return (
-      <Grid container style={style.titleGrid}>
-        <Grid item xs={6} style={style.titleGrid.left}>
-          <div style={style.titleContainer}>
-            {this.props.webhook.active ? (
-              <ActiveIcon color="primary" style={style.statusIcon} />
-            ) : (
-              <InactiveIcon style={{ ...style.statusIcon, color: 'rgba(0, 0, 0, 0.3)' }} />
-            )}
-            <div>
-              <div className={`webhook-title-url-${this.props.rowindex}`} style={style.webhookUrl}>
-                {this.props.webhook.url}
-              </div>
-              <div className={'webhook-title-id'} style={style.webhookId}>
-                {this.props.webhook.id}
-              </div>
+      <div style={style.webhookTitle.container}>
+        <div style={style.webhookTitle.info.container}>
+          {this.props.webhook.active ? (
+            <ActiveIcon color="primary" style={style.statusIcon} />
+          ) : (
+            <InactiveIcon style={{ ...style.statusIcon, color: 'rgba(0, 0, 0, 0.3)' }} />
+          )}
+          <div>
+            <div className={`webhook-title-url-${this.props.rowindex}`} style={style.webhookUrl}>
+              {this.props.webhook.url}
+            </div>
+            <div className={'webhook-title-id'} style={style.webhookId}>
+              {this.props.webhook.id}
             </div>
           </div>
-        </Grid>
-        <Grid item xs={6} style={style.titleGrid.right}>
-          <div style={style.eventsContainer}>
-            {this.renderEvents(this.props.webhook)}
-          </div>
-        </Grid>
-      </Grid>
+        </div>
+        <div style={style.eventsContainer}>
+          {this.renderEvents(this.props.webhook)}
+        </div>
+      </div>
     );
   }
 
@@ -707,6 +702,7 @@ export default class Webhook extends Component {
       <MuiThemeProvider theme={theme}>
         <ExpansionPanel style={style.expansionPanel} className={`webhook-item-${this.props.rowindex}`}>
           <ExpansionPanelSummary
+            style={{ marginRight: '18px' }}
             expandIcon={<ExpandMoreIcon />}
             className={'webhook-title'}
           >

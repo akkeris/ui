@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { grey, teal } from '@material-ui/core/colors';
 import {
-  Paper, Snackbar, CircularProgress, Table, TableBody, TableRow, TableCell,
+  Snackbar, CircularProgress, Table, TableBody, TableRow, TableCell,
   IconButton, Dialog, Button, DialogActions, DialogContent, DialogTitle,
-  Tooltip, TablePagination, TableFooter,
+  Tooltip, TablePagination, TableFooter, Divider, Typography, Collapse,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -94,6 +94,35 @@ const style = {
     top: '50%',
     marginTop: '-12px',
   },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  header: {
+    container: {
+      display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px',
+    },
+    title: {
+      flex: 1,
+    },
+    actions: {
+      container: {
+        width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      },
+      button: {
+        width: '50px',
+      },
+    },
+  },
 };
 
 function getDateDiff(date /* : Date */) {
@@ -173,7 +202,7 @@ export default class Releases extends Component {
       restrictedSpace = true;
     }
 
-    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line react/no-did-mount-set-state
+    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line 
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -337,18 +366,18 @@ export default class Releases extends Component {
         color: releaseColor,
       }, style.status);
       return (
-        <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current, height: '84px' }}>
-          <TableCell style={{ width: '28px', paddingLeft: '24px', paddingRight: '0px' }}>
-            <div style={{ position: 'relative', height: '100%' }}>
-              {!release.release ? (<BuildIcon style={style.mainIcon} />) : (<ReleaseIcon style={{
-                position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
-              }}
-              />)}
-              <StatusIcon style={statusIconStyle} />
+        <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current }}>
+          <TableCell style={{ display: 'flex', padding: '12px 24px', height: '64px', alignItems: 'center' }}>
+            <div style={{ width: '25px', paddingRight: '24px' }}>
+              <div style={{ position: 'relative', height: '100%' }}>
+                {!release.release ? (<BuildIcon style={style.mainIcon} />) : (<ReleaseIcon style={{
+                  position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
+                }}
+                />)}
+                <StatusIcon style={statusIconStyle} />
+              </div>
             </div>
-          </TableCell>
-          <TableCell>
-            <div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `}
               {info1.join(' ')}
               <br />
@@ -357,51 +386,98 @@ export default class Releases extends Component {
                 {getDateDiff(new Date(release.created_at))}
               </div>
             </div>
-          </TableCell>
-          <TableCell style={style.tableCell.icon}>
-            {release.source_blob.version &&
-            <Tooltip title="Commit" placement="top-end">
-              <IconButton style={style.iconButton} className="git" href={release.source_blob.version} ><GitCommitIcon /></IconButton>
-            </Tooltip>
-            }
-          </TableCell>
-          <TableCell style={style.tableCell.icon}>
-            {!release.release &&
-              <Tooltip title="Build Logs" placement="top-end">
-                <IconButton style={style.iconButton} className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
-              </Tooltip>
-            }
-            {!release.current && release.release &&
-              <Tooltip title="Rollback" placement="top-end">
-                <IconButton style={style.iconButton} className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
-              </Tooltip>
-            }
+            <div style={{ width: '112px', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ width: '50px' }}>
+                {release.source_blob.version &&
+                  <Tooltip title="Commit" placement="top-end">
+                    <IconButton style={style.iconButton} className="git" href={release.source_blob.version} ><GitCommitIcon /></IconButton>
+                  </Tooltip>
+                }
+              </div>
+              <div style={{ width: '50px' }}>
+                {!release.release &&
+                  <Tooltip title="Build Logs" placement="top-end">
+                    <IconButton style={style.iconButton} className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
+                  </Tooltip>
+                }
+                {!release.current && release.release &&
+                  <Tooltip title="Rollback" placement="top-end">
+                    <IconButton style={style.iconButton} className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
+                  </Tooltip>
+                }
+              </div>
+            </div>
           </TableCell>
         </TableRow>
       );
     });
   }
+  renderLogs() {
+    const { logsOpen, release, title } = this.state;
+    return (
+      <Dialog
+        className="logs"
+        open={logsOpen}
+        onClose={() => { this.handleClose(); }}
+        maxWidth="xl"
+        fullWidth
+      >
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent style={{ padding: '0px', margin: '0px' }}>
+          <Logs
+            build={release.slug.id}
+            app={this.props.app.name}
+            open={logsOpen}
+          />
+        </DialogContent>
+        <DialogActions>
+          <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
+            <RemoveIcon />
+          </IconButton>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+
+  renderRevert() {
+    const { revertOpen, title, revert } = this.state;
+    return (
+      <Dialog
+        className="revert"
+        open={revertOpen}
+        onClose={() => { this.handleRevertClose(); }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>{title}</DialogTitle>
+        <DialogContent>
+          <div>
+            {getDateDiff(new Date(revert.created_at))} - {[
+              revert.description,
+              revert.source_blob.author,
+              revert.source_blob.commit ? `#${revert.source_blob.commit.substring(0, 7)}` : '',
+              revert.source_blob.message ? revert.source_blob.message.replace(/\s+/g, ' ') : '',
+            ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' ')).join(' ')}
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            className="ok"
+            color="primary"
+            onClick={() => { this.handleRevertGo(); }}
+          >Ok</Button>
+          <Button
+            className="cancel"
+            color="secondary"
+            onClick={() => { this.handleRevertClose(); }}
+          >Cancel</Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
 
   render() {
     const { releases, rowsPerPage, page, isElevated, restrictedSpace } = this.state;
-    const actions = [
-      <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
-        <RemoveIcon />
-      </IconButton>,
-    ];
-    const actionsRevert = [
-      <Button
-        className="ok"
-        color="primary"
-        onClick={() => { this.handleRevertGo(); }}
-      >Ok</Button>,
-      <Button
-        className="cancel"
-        color="secondary"
-        onClick={() => { this.handleRevertClose(); }}
-      >Cancel</Button>,
-    ];
-
     let newReleaseButton;
     if (!restrictedSpace || isElevated) {
       newReleaseButton = (
@@ -430,81 +506,60 @@ export default class Releases extends Component {
         </div>
       );
     }
+
     return (
       <div>
-        {this.state.release && (
-          <Dialog
-            className="logs"
-            open={this.state.logsOpen}
-            onClose={() => { this.handleClose(); }}
-            maxWidth="xl"
-            fullWidth
-          >
-            <DialogTitle>{this.state.title}</DialogTitle>
-            <DialogContent style={{ padding: '0px', margin: '0px' }}>
-              <Logs
-                build={this.state.release.slug.id}
-                app={this.props.app.name}
-                open={this.state.logsOpen}
-              />
-            </DialogContent>
-            <DialogActions>{actions}</DialogActions>
-          </Dialog>
-        )}
-        {this.state.revert && (
-          <Dialog
-            className="revert"
-            open={this.state.revertOpen}
-            onClose={() => { this.handleRevertClose(); }}
-            maxWidth="md"
-            fullWidth
-          >
-            <DialogTitle>{this.state.title}</DialogTitle>
-            <DialogContent>
-              <div>
-                {getDateDiff(new Date(this.state.revert.created_at))} - {[
-                  this.state.revert.description,
-                  this.state.revert.source_blob.author,
-                  this.state.revert.source_blob.commit ? `#${this.state.revert.source_blob.commit.substring(0, 7)}` : '',
-                  this.state.revert.source_blob.message ? this.state.revert.source_blob.message.replace(/\s+/g, ' ') : '',
-                ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' ')).join(' ')}
+        <Collapse unmountOnExit mountOnEnter in={this.state.new || this.state.newAuto}>
+          <div style={style.collapse.container}>
+            <div style={style.collapse.header.container}>
+              <Typography style={style.collapse.header.title} variant="overline">{this.state.new && 'New Build'}{this.state.newAuto && 'Attach to Repo'}</Typography>
+              <div >
+                {this.state.new && (
+                  <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
+                )}
+                {this.state.newAuto && (
+                  <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
+                )}
               </div>
-            </DialogContent>
-            <DialogActions>{actionsRevert}</DialogActions>
-          </Dialog>
-        )}
-        {(!this.state.new && !this.state.newAuto) && (
-          <Paper elevation={0}>
-            <Tooltip title="Attach to Repo" placement="bottom-end">
-              <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
-            </Tooltip>
-            {newReleaseButton}
-          </Paper>
-        )}
-        {this.state.new && (
-          <div>
-            <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
-            <NewBuild
-              app={this.props.app.name}
-              org={this.props.org}
-              onComplete={
-                (message) => { this.reload(message); }
-              }
-            />
+            </div>
+            <div>
+              {this.state.new && (
+                <NewBuild
+                  app={this.props.app.name}
+                  org={this.props.org}
+                  onComplete={message => this.reload(message)}
+                />
+              )}
+              {this.state.newAuto && (
+                <NewAutoBuild
+                  app={this.props.app.name}
+                  onComplete={message => this.reload(message)}
+                />
+              )}
+            </div>
           </div>
-        )}
-        {this.state.newAuto && (
-          <div>
-            <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
-            <NewAutoBuild
-              app={this.props.app.name}
-              onComplete={(message) => { this.reload(message); }}
-            />
+        </Collapse>
+        <div style={style.header.container}>
+          <Typography style={style.header.title} variant="overline">Release</Typography>
+          <div style={style.header.actions.container}>
+            <div style={style.header.actions.button}>
+              {(!this.state.new && !this.state.newAuto) && (
+                <Tooltip title="Attach to Repo" placement="bottom-end">
+                  <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
+                </Tooltip>
+              )}
+            </div>
+            <div style={style.header.actions.button}>
+              {(!this.state.new && !this.state.newAuto) && newReleaseButton}
+            </div>
           </div>
-        )}
+        </div>
+        <Divider />
         <Table className="release-list" style={{ overflow: 'visible' }}>
           <TableBody>
-            {this.renderReleases(page, rowsPerPage)}
+            {(!this.state.releases || this.state.releases.length === 0) ? (
+              <TableRow><TableCell><span className="no-results">No Releases</span></TableCell></TableRow>
+            ) : this.renderReleases(page, rowsPerPage)}
           </TableBody>
           {releases.length !== 0 && (
             <TableFooter>
@@ -529,6 +584,8 @@ export default class Releases extends Component {
           autoHideDuration={3000}
           onClose={() => { this.handleSnackClose(); }}
         />
+        {this.state.release && this.renderLogs()}
+        {this.state.revert && this.renderRevert()}
       </div>
     );
   }

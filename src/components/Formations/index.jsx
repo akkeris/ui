@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  CircularProgress, Snackbar, IconButton, Paper,
-  Table, TableBody, TableHead, TableRow, TableCell, Tooltip,
+  CircularProgress, Snackbar, IconButton, TableCell, Tooltip, Typography, Collapse,
+  Table, TableBody, TableHead, TableRow,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -84,7 +84,6 @@ export default class Formations extends Component {
         loading: false,
       });
     }
-    console.log('sizes: ', JSON.stringify(sizes));
   }
 
   handleError = (message) => {
@@ -149,7 +148,6 @@ export default class Formations extends Component {
         onAlert={this.info}
         key={formation.id}
         sizes={this.state.sizes}
-        // sizeList={this.renderSizes()}
         onError={this.handleError}
         app={this.props.app}
       />
@@ -166,27 +164,36 @@ export default class Formations extends Component {
     }
     return (
       <div>
-        {!this.state.new && (
-          <Paper elevation={0}>
-            <Tooltip title="New Formation" placement="bottom-end">
-              <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
-            </Tooltip>
-          </Paper>
-        )}
-        {this.state.new && (
-          <div>
-            <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
-            <NewFormation app={this.props.app.name} onComplete={this.reload} />
+        <Collapse in={this.state.new} mountOnEnter unmountOnExit>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '6px 26px 0px' }}>
+              <Typography style={{ flex: 1 }} variant="overline">New Formation</Typography>
+              <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewFormationCancel}><RemoveIcon /></IconButton>
+            </div>
+            <NewFormation app={this.props.app} onComplete={this.reload} />
           </div>
-        )}
+        </Collapse>
         <Table className="formation-list">
           <TableHead>
             <TableRow>
-              <TableCell>Formation</TableCell>
+              <TableCell>
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="overline">Formation</Typography>
+                  <div style={{ paddingRight: '8px' }}>
+                    {!this.state.new && (
+                      <Tooltip title="New Formation" placement="bottom-end">
+                        <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {this.renderFormations()}
+            {(!this.state.formations || this.state.formations.length === 0) ? (
+              <TableRow><TableCell><span className="no-results">No Dynos</span></TableCell></TableRow>
+            ) : this.renderFormations()}
           </TableBody>
         </Table>
         <ConfirmationModal

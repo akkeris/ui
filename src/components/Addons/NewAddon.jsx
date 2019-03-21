@@ -12,6 +12,7 @@ const style = {
     width: '100%',
     maxWidth: 700,
     margin: 'auto',
+    minHeight: 200,
   },
   buttons: {
     div: {
@@ -27,8 +28,9 @@ const style = {
       marginLeft: 'auto',
       marginRight: 'auto',
       width: '40px',
-      height: '350px',
-      marginTop: '20%',
+      height: '50px',
+      paddingTop: '36px',
+      paddingBottom: '36px',
     },
     indicator: {
       display: 'inline-block',

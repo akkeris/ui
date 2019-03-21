@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, Table, TableBody, TableRow, TableCell, IconButton, Tooltip,
-  Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText,
-  Snackbar, Divider, Paper, Button, TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Snackbar, Divider, Button, TextField, Collapse, Typography, TableHead,
 } from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
@@ -13,6 +13,15 @@ import EditIcon from '@material-ui/icons/Edit';
 import api from '../../services/api';
 import NewConfigVar from './NewConfigVar';
 import ConfirmationModal from '../ConfirmationModal';
+
+// fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
+function isEmpty(obj) {
+  let empty = true;
+  Object.keys(obj).forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) { empty = false; }
+  });
+  return empty;
+}
 
 const style = {
   tableRow: {
@@ -47,6 +56,26 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+    },
+  },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  header: {
+    actions: {
+      container: {
+        display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+      },
     },
   },
 };
@@ -201,19 +230,19 @@ export default class ConfigVar extends Component {
         <TableCell style={style.configVar}>
           <div style={style.configVar.value}>{this.state.config[key]}</div>
         </TableCell>
-        <TableCell style={style.editIcon}>
-          <Tooltip title="Edit" placement="top-start">
-            <IconButton className="edit" onClick={() => this.handleEdit(key)}>
-              <EditIcon nativeColor="black" />
-            </IconButton>
-          </Tooltip>
-        </TableCell>
-        <TableCell style={style.removeIcon}>
-          <Tooltip title="Remove" placement="top-start">
-            <IconButton className="remove" onClick={() => this.handleConfirmation(key)}>
-              <RemoveIcon nativeColor="black" />
-            </IconButton>
-          </Tooltip>
+        <TableCell>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Tooltip title="Edit" placement="top-start">
+              <IconButton className="edit" onClick={() => this.handleEdit(key)}>
+                <EditIcon nativeColor="black" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Remove" placement="top-start">
+              <IconButton className="remove" onClick={() => this.handleConfirmation(key)}>
+                <RemoveIcon nativeColor="black" />
+              </IconButton>
+            </Tooltip>
+          </div>
         </TableCell>
       </TableRow>
     ));
@@ -227,42 +256,59 @@ export default class ConfigVar extends Component {
         </div>
       );
     }
+
     return (
       <div>
-        {!this.state.new && (
-          <Paper elevation={0}>
-            <Tooltip title="New Config" placement="bottom-start">
-              <IconButton className="new-config" onClick={this.handleNewConfig}><AddIcon nativeColor="black" /></IconButton>
-            </Tooltip>
-          </Paper>
-        )}
-        {this.state.new && (
-          <div>
-            <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon nativeColor="black" /></IconButton>
-            <NewConfigVar
-              app={this.props.app}
-              onComplete={this.reload}
-              config={this.state.config}
-            />
+        <Collapse unmountOnExit mountOnEnter in={this.state.new}>
+          <div style={style.collapse.container}>
+            <div style={style.collapse.header.container}>
+              <Typography style={style.collapse.header.title} variant="overline">New Config</Typography>
+              <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon nativeColor="black" /></IconButton>
+            </div>
+            <div>
+              <NewConfigVar
+                app={this.props.app}
+                onComplete={this.reload}
+                config={this.state.config}
+              />
+            </div>
           </div>
-        )}
+        </Collapse>
         <Divider />
         <Table className="config-list">
+          <colgroup>
+            <col style={{ width: '40%' }} />
+            <col style={{ width: '45%' }} />
+            <col style={{ width: '15%' }} />
+          </colgroup>
+          <TableHead>
+            <TableRow>
+              <TableCell><Typography variant="overline">Key</Typography></TableCell>
+              <TableCell><Typography variant="overline">Value</Typography></TableCell>
+              <TableCell>
+                <div style={style.header.actions.container}>
+                  {!this.state.new && (
+                    <Tooltip title="New Config" placement="bottom-start">
+                      <IconButton className="new-config" onClick={this.handleNewConfig}><AddIcon nativeColor="black" /></IconButton>
+                    </Tooltip>
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableHead>
           <TableBody>
-            {this.renderConfigVars()}
+            {isEmpty(this.state.config) ? (
+              <TableRow><TableCell><span className="no-results">No Config Vars</span></TableCell></TableRow>
+            ) : this.renderConfigVars()}
           </TableBody>
         </Table>
-        <Dialog className="config-error" open={this.state.submitFail}>
-          <DialogTitle>Error</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              {this.state.submitMessage}
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button className="ok" color="primary" onClick={this.handleDialogClose}>Ok</Button>
-          </DialogActions>
-        </Dialog>
+        <ConfirmationModal
+          className="config-error"
+          open={this.state.submitFail}
+          onOk={this.handleDialogClose}
+          title="Error"
+          message={this.state.submitMessage}
+        />
         <ConfirmationModal
           className="remove-config"
           open={this.state.confirmOpen}

@@ -17,7 +17,7 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
       marginRight: 12,

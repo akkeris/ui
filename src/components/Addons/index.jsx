@@ -3,16 +3,17 @@ import PropTypes from 'prop-types';
 import {
   Button, IconButton, Snackbar, Typography, CircularProgress, Dialog,
   Tooltip, Table, TableHead, TableBody, TableRow, TableCell,
-  DialogTitle, DialogContent, DialogActions,
+  DialogTitle, DialogContent, DialogActions, Collapse,
 } from '@material-ui/core';
 import { withTheme } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
-import AttachIcon from '@material-ui/icons/CallMerge';
 import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import NewAddon from './NewAddon';
 import AttachAddon from './AttachAddon';
 import ConfirmationModal from '../ConfirmationModal';
+import AttachmentIcon from '../Icons/AttachmentIcon';
+import DeleteAttachmentIcon from '../Icons/DeleteAttachmentIcon';
 
 // fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
 function isEmpty(obj) {
@@ -42,7 +43,7 @@ const style = {
     height: '58px',
   },
   tableRowPointer: {
-    height: '58px',
+    height: '72px',
     cursor: 'pointer',
   },
   tableRowColumn: {
@@ -68,6 +69,27 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+    },
+  },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  headerActions: {
+    container: {
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    },
+    button: {
+      width: '50px',
     },
   },
 };
@@ -117,7 +139,7 @@ class Addons extends Component {
       isElevated = (accountInfo && 'elevated_access' in accountInfo) ? accountInfo.elevated_access : true;
       restrictedSpace = true;
     }
-    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line react/no-did-mount-set-state
+    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -292,7 +314,7 @@ class Addons extends Component {
 
   renderAddons() {
     const { isElevated, restrictedSpace } = this.state;
-    return this.state.addons.map((addon) => {
+    return this.state.addons.map((addon, index) => {
       let deleteButton = (
         <IconButton
           disabled={(restrictedSpace && !isElevated) || addon.state === 'provisioning'}
@@ -313,23 +335,26 @@ class Addons extends Component {
       return (
         <TableRow
           hover
-          className={addon.addon_service.name}
+          className={`${addon.addon_service.name} addon-${index}`}
           key={addon.id}
           style={style.tableRowPointer}
         >
           <TableCell
             onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
           >
-            <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
-            <div style={style.tableRowColumn.sub}>{addon.id} {addon.state === 'provisioning' ? '- provisioning' : ''}</div>
+            <div>
+              <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
+              <div style={style.tableRowColumn.sub}>{addon.id} {addon.state === 'provisioning' ? '- provisioning' : ''}</div>
+            </div>
           </TableCell>
           <TableCell
             onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
+            colSpan={2}
           >
             <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
           </TableCell>
-          <TableCell style={style.tableRowColumn.icon}>
-            {deleteButton}
+          <TableCell>
+            <div style={{ paddingRight: '2px', textAlign: 'right' }}>{deleteButton}</div>
           </TableCell>
         </TableRow>
       );
@@ -346,7 +371,7 @@ class Addons extends Component {
           className="attachment-remove"
           onClick={() => this.handleAddonAttachmentConfirmation(attachment)}
         >
-          <RemoveIcon color={((restrictedSpace && !isElevated) || attachment.state === 'provisioning') ? 'disabled' : 'inherit'} />
+          <DeleteAttachmentIcon color={((restrictedSpace && !isElevated) || attachment.state === 'provisioning') ? 'disabled' : 'inherit'} />
         </IconButton>
       );
 
@@ -359,15 +384,17 @@ class Addons extends Component {
       return (
         <TableRow
           hover
-          className={`${attachment.name} addon-attachment-list-${index}`}
+          className={`${attachment.name} addon-attachment-${index}`}
           key={attachment.id}
           style={style.tableRowPointer}
         >
           <TableCell
             onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
           >
-            <div style={style.tableRowColumn.title}>{attachment.name}</div>
-            <div style={style.tableRowColumn.sub}>{attachment.id} {attachment.state === 'provisioning' ? '- provisioning' : ''}</div>
+            <div>
+              <div style={style.tableRowColumn.title}>{attachment.name}</div>
+              <div style={style.tableRowColumn.sub}>{attachment.id} {attachment.state === 'provisioning' ? '- provisioning' : ''}</div>
+            </div>
           </TableCell>
           <TableCell
             onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
@@ -379,8 +406,8 @@ class Addons extends Component {
           >
             <div style={style.tableRowColumn.title}>{attachment.addon.app.name}</div>
           </TableCell>
-          <TableCell style={style.tableRowColumn.icon}>
-            {deleteButton}
+          <TableCell>
+            <div style={{ textAlign: 'right' }}>{deleteButton}</div>
           </TableCell>
         </TableRow>
       );
@@ -413,69 +440,75 @@ class Addons extends Component {
     }
     return (
       <div style={{ overflow: 'visible' }}>
-        {(!this.state.new && !this.state.attach) && (
-          <div>
-            <Tooltip title="New Addon" placement="bottom-end">
-              <IconButton
-                className="new-addon"
-                onClick={this.handleNewAddon}
-                style={style.iconButton}
-              >
-                <AddIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Attach Addon" placement="bottom-end">
-              <IconButton
-                className="attach-addon"
-                onClick={this.handleAttachAddon}
-                style={style.iconButton}
-              >
-                <AttachIcon />
-              </IconButton>
-            </Tooltip>
+        <Collapse unmountOnExit mountOnEnter in={this.state.attach || this.state.new}>
+          <div style={style.collapse.container}>
+            <div style={style.collapse.header.container}>
+              <Typography style={style.collapse.header.title} variant="overline">{this.state.attach && 'Attach Addon'}{this.state.new && 'New Addon'}</Typography>
+              {this.state.new && <IconButton style={style.iconButton} className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton> }
+              {this.state.attach && <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton> }
+            </div>
+            <div>
+              {this.state.new &&
+                <NewAddon app={this.props.app.name} onComplete={this.reload} />
+              }
+              {this.state.attach &&
+                <AttachAddon app={this.props.app.name} onComplete={this.reload} />
+              }
+            </div>
           </div>
-        )}
-        {this.state.new && (
-          <div>
-            <IconButton style={style.iconButton} className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
-            <NewAddon app={this.props.app.name} onComplete={this.reload} />
-          </div>
-        )}
-        {this.state.attach && (
-          <div>
-            <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
-            <AttachAddon app={this.props.app.name} onComplete={this.reload} />
-          </div>
-        )}
+        </Collapse>
         <Table className="addon-list">
+          <colgroup>
+            <col style={{ width: '35%' }} />
+            <col style={{ width: '30%' }} />
+            <col style={{ width: '25%' }} />
+            <col style={{ width: '10%' }} />
+          </colgroup>
           <TableHead>
             <TableRow>
-              <TableCell>Addon</TableCell>
-              <TableCell>Plan</TableCell>
-              <TableCell style={style.tableRowColumn.icon}>Remove</TableCell>
+              <TableCell><Typography variant="overline">Addon</Typography></TableCell>
+              <TableCell><Typography variant="overline">Plan</Typography></TableCell>
+              <TableCell>{this.state.addonAttachments.length !== 0 && <Typography variant="overline">Attached From</Typography>}</TableCell>
+              <TableCell>
+                <div style={style.headerActions.container}>
+                  <div style={style.headerActions.button}>
+                    {!this.state.attach && !this.state.new && (
+                      <Tooltip title="Attach Addon" placement="bottom-end">
+                        <IconButton
+                          className="attach-addon"
+                          onClick={this.handleAttachAddon}
+                          style={style.iconButton}
+                        >
+                          <AttachmentIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </div>
+                  <div style={style.headerActions.button}>
+                    {!this.state.new && !this.state.attach && (
+                      <Tooltip title="New Addon" placement="bottom-end">
+                        <IconButton
+                          className="new-addon"
+                          onClick={this.handleNewAddon}
+                          style={style.iconButton}
+                        >
+                          <AddIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {this.state.addons.length > 0 ? this.renderAddons() : (
-              <TableRow><TableCell /><TableCell>No Results</TableCell><TableCell /></TableRow>
+            {this.state.addons.length === 0 && this.state.addonAttachments.length === 0 && (
+              <TableRow><TableCell colspan={4}><span className="no-results">No Addons</span></TableCell></TableRow>
             )}
+            {this.state.addons.length > 0 && this.renderAddons()}
+            {this.state.addonAttachments.length > 0 && this.renderAddonAttachments()}
           </TableBody>
         </Table>
-        {this.state.addonAttachments.length > 0 && (
-          <Table className="addon-attachment-list">
-            <TableHead>
-              <TableRow>
-                <TableCell>Attachment</TableCell>
-                <TableCell>Plan</TableCell>
-                <TableCell>Source</TableCell>
-                <TableCell style={style.tableRowColumn.icon}>Remove</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.renderAddonAttachments()}
-            </TableBody>
-          </Table>
-        )}
         <Dialog
           className="attached-apps-dialog"
           onClose={this.handleAddonDialogClose}
@@ -526,7 +559,7 @@ class Addons extends Component {
           open={this.state.confirmAttachmentOpen}
           onOk={this.handleRemoveAddonAttachment}
           onCancel={this.handleCancelAddonAttachmentConfirmation}
-          message="Are you sure you want to delete this attachment?"
+          message="Are you sure you want to remove this attachment from this app?"
         />
         <ConfirmationModal
           className="addon-error"

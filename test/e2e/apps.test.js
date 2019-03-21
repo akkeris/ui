@@ -343,8 +343,8 @@ test('Should be able to create view and release builds', async (t) => { // eslin
   await t
     .click('.app-list .testcafe-testcafe')
     .click('.releases-tab')
-    .expect(Selector('.release-list tbody').childElementCount)
-    .eql(0)
+    .expect(Selector('.release-list tbody').innerText)
+    .contains('No Releases')
 
     // Check new component shows
     .click('button.new-build')
@@ -564,10 +564,10 @@ test // eslint-disable-line no-undef
       .click('button.next')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Attached')
-      .expect(Selector('.addon-attachment-list').childElementCount)
+      .expect(Selector('.addon-list').childElementCount)
       .gt(0)
 
-      .click('.addon-attachment-list-0')
+      .click('.addon-attachment-0')
       .expect(Selector('.attached-apps-dialog').exists)
       .ok()
       .expect(Selector('.attachment-0').exists)
@@ -594,13 +594,13 @@ test // eslint-disable-line no-undef
       .click('.addons-tab')
       .click('.addon-list .lids-db button.addon-remove')
       .click('.remove-addon-confirm .ok')
-      .expect(Selector('.addon-list .lids-dbl').exists)
+      .expect(Selector('.addon-list .lids-db').exists)
       .notOk()
 
-      .click('.addon-attachment-list button.attachment-remove')
+      .click('.addon-list .addon-attachment-0 button.attachment-remove')
       .click('.remove-attachment-confirm .ok')
-      .expect(Selector('.addon-attachment-list').exists)
-      .notOk();
+      .expect(Selector('.addon-list tbody').innerText)
+      .contains('No Addons');
   })
   .after(async (t) => {
     await t

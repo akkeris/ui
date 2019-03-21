@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  CircularProgress, IconButton, Paper, Snackbar,
-  Table, TableHead, TableBody, TableRow, TableCell, Tooltip, Grid,
+  CircularProgress, IconButton, Snackbar, Typography, Collapse,
+  Table, TableHead, TableBody, TableRow, TableCell, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -13,10 +13,6 @@ import Webhook from './Webhook';
 import ConfirmationModal from '../ConfirmationModal';
 
 const style = {
-  headerLeftPadding: {
-    paddingLeft: '36px',
-    minWidth: '50%',
-  },
   refresh: {
     div: {
       marginLeft: 'auto',
@@ -32,6 +28,33 @@ const style = {
   },
   table: {
     overflow: 'auto',
+  },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  header: {
+    tableCell: {
+      padding: '0 26px 0 36px',
+    },
+    container: {
+      display: 'flex', alignItems: 'center',
+    },
+    title: {
+      flex: 2,
+    },
+    action: {
+      minWidth: '48px',
+    },
   },
 };
 
@@ -130,41 +153,45 @@ export default class Webhooks extends Component {
         </div>
       );
     }
+
     return (
       <div>
-        {!this.state.new ? (
-          <Paper elevation={0}>
-            <Tooltip placement="bottom-end" title="New Webhook">
-              <IconButton
-                className="new-webhook"
-                onClick={this.handleNewWebhook}
-              >
-                <AddIcon />
-              </IconButton>
-            </Tooltip>
-          </Paper>
-        ) : (
-          <div>
-            <IconButton className="webhook-cancel" onClick={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>
-            { <NewWebhook app={this.props.app} onComplete={this.reload} /> }
+        <Collapse unmountOnExit mountOnEnter in={this.state.new}>
+          <div style={style.collapse.container}>
+            <div style={style.collapse.header.container}>
+              <Typography style={style.collapse.header.title} variant="overline">{this.state.new && 'New Webhook'}</Typography>
+              {this.state.new && <IconButton className="webhook-cancel" onClick={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>}
+            </div>
+            <NewWebhook app={this.props.app} onComplete={this.reload} />
           </div>
-        )}
+        </Collapse>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell style={{ padding: 0, paddingBottom: '10px' }}>
-                <Grid container>
-                  <Grid item xs={6} style={style.headerLeftPadding}>Webhook</Grid>
-                  <Grid item xs={6}>Events</Grid>
-                </Grid>
+              <TableCell style={style.header.tableCell}>
+                <div style={style.header.container}>
+                  <Typography style={style.header.title} variant="overline">Webhook</Typography>
+                  <Typography style={style.header.title} variant="overline">Events</Typography>
+                  <div style={style.header.action}>
+                    {!this.state.new && (
+                      <Tooltip placement="bottom-end" title="New Webhook">
+                        <IconButton className="new-webhook" onClick={this.handleNewWebhook}>
+                          <AddIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
               </TableCell>
             </TableRow>
           </TableHead>
-          {this.state.webhooks && this.state.webhooks.length > 0 && (
-            <TableBody className="webhook-list">
-              {this.renderWebhooks()}
-            </TableBody>
-          )}
+          <TableBody className="webhook-list">
+            {(this.state.webhooks && this.state.webhooks.length) > 0 ? (
+              this.renderWebhooks()
+            ) : (
+              <TableRow><TableCell><span className="no-results" style={{ paddingLeft: '12px' }}>No Webhooks</span></TableCell></TableRow>
+            )}
+          </TableBody>
         </Table>
         <ConfirmationModal
           open={this.state.submitFail}
