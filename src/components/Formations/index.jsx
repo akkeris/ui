@@ -164,7 +164,7 @@ export default class Formations extends Component {
     }
     return (
       <div>
-        <Collapse in={this.state.new}>
+        <Collapse in={this.state.new} mountOnEnter unmountOnExit>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', padding: '6px 26px 0px' }}>
               <Typography style={{ flex: 1 }} variant="overline">New Formation</Typography>
@@ -192,7 +192,7 @@ export default class Formations extends Component {
           </TableHead>
           <TableBody>
             {(!this.state.formations || this.state.formations.length === 0) ? (
-              <TableRow><TableCell>No Dynos</TableCell></TableRow>
+              <TableRow><TableCell><span className="no-results">No Dynos</span></TableCell></TableRow>
             ) : this.renderFormations()}
           </TableBody>
         </Table>

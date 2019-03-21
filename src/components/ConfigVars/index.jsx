@@ -259,7 +259,7 @@ export default class ConfigVar extends Component {
 
     return (
       <div>
-        <Collapse in={this.state.new}>
+        <Collapse unmountOnExit mountOnEnter in={this.state.new}>
           <div style={style.collapse.container}>
             <div style={style.collapse.header.container}>
               <Typography style={style.collapse.header.title} variant="overline">New Config</Typography>
@@ -297,9 +297,8 @@ export default class ConfigVar extends Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            {console.log(this.state.config)}
             {isEmpty(this.state.config) ? (
-              <TableRow><TableCell>No Config Vars</TableCell></TableRow>
+              <TableRow><TableCell><span className="no-results">No Config Vars</span></TableCell></TableRow>
             ) : this.renderConfigVars()}
           </TableBody>
         </Table>

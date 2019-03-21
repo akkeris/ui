@@ -156,7 +156,7 @@ export default class Webhooks extends Component {
 
     return (
       <div>
-        <Collapse in={this.state.new}>
+        <Collapse unmountOnExit mountOnEnter in={this.state.new}>
           <div style={style.collapse.container}>
             <div style={style.collapse.header.container}>
               <Typography style={style.collapse.header.title} variant="overline">{this.state.new && 'New Webhook'}</Typography>
@@ -189,7 +189,7 @@ export default class Webhooks extends Component {
             {(this.state.webhooks && this.state.webhooks.length) > 0 ? (
               this.renderWebhooks()
             ) : (
-              <TableRow><TableCell><span style={{ paddingLeft: '12px' }}>No Webhooks</span></TableCell></TableRow>
+              <TableRow><TableCell><span className="no-results" style={{ paddingLeft: '12px' }}>No Webhooks</span></TableCell></TableRow>
             )}
           </TableBody>
         </Table>

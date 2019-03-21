@@ -141,7 +141,7 @@ export default class NewFormation extends Component {
   submitFormation = async () => {
     try {
       await api.createFormation(
-        this.props.app,
+        this.props.app.name,
         this.state.size,
         this.state.quantity,
         this.state.type,
@@ -397,6 +397,6 @@ export default class NewFormation extends Component {
 }
 
 NewFormation.propTypes = {
-  app: PropTypes.string.isRequired,
+  app: PropTypes.object.isRequired, // eslint-disable-line
   onComplete: PropTypes.func.isRequired,
 };

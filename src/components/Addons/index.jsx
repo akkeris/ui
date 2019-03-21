@@ -139,7 +139,7 @@ class Addons extends Component {
       isElevated = (accountInfo && 'elevated_access' in accountInfo) ? accountInfo.elevated_access : true;
       restrictedSpace = true;
     }
-    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line react/no-did-mount-set-state
+    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -314,7 +314,7 @@ class Addons extends Component {
 
   renderAddons() {
     const { isElevated, restrictedSpace } = this.state;
-    return this.state.addons.map((addon) => {
+    return this.state.addons.map((addon, index) => {
       let deleteButton = (
         <IconButton
           disabled={(restrictedSpace && !isElevated) || addon.state === 'provisioning'}
@@ -335,7 +335,7 @@ class Addons extends Component {
       return (
         <TableRow
           hover
-          className={addon.addon_service.name}
+          className={`${addon.addon_service.name} addon-${index}`}
           key={addon.id}
           style={style.tableRowPointer}
         >
@@ -384,7 +384,7 @@ class Addons extends Component {
       return (
         <TableRow
           hover
-          className={`${attachment.name} addon-attachment-list-${index}`}
+          className={`${attachment.name} addon-attachment-${index}`}
           key={attachment.id}
           style={style.tableRowPointer}
         >
@@ -440,7 +440,7 @@ class Addons extends Component {
     }
     return (
       <div style={{ overflow: 'visible' }}>
-        <Collapse in={this.state.attach || this.state.new}>
+        <Collapse unmountOnExit mountOnEnter in={this.state.attach || this.state.new}>
           <div style={style.collapse.container}>
             <div style={style.collapse.header.container}>
               <Typography style={style.collapse.header.title} variant="overline">{this.state.attach && 'Attach Addon'}{this.state.new && 'New Addon'}</Typography>
@@ -448,12 +448,16 @@ class Addons extends Component {
               {this.state.attach && <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton> }
             </div>
             <div>
-              {this.state.new && <NewAddon app={this.props.app.name} onComplete={this.reload} /> }
-              {this.state.attach && <AttachAddon app={this.props.app.name} onComplete={this.reload} /> }
+              {this.state.new &&
+                <NewAddon app={this.props.app.name} onComplete={this.reload} />
+              }
+              {this.state.attach &&
+                <AttachAddon app={this.props.app.name} onComplete={this.reload} />
+              }
             </div>
           </div>
         </Collapse>
-        <Table>
+        <Table className="addon-list">
           <colgroup>
             <col style={{ width: '35%' }} />
             <col style={{ width: '30%' }} />
@@ -499,7 +503,7 @@ class Addons extends Component {
           </TableHead>
           <TableBody>
             {this.state.addons.length === 0 && this.state.addonAttachments.length === 0 && (
-              <TableRow><TableCell colspan={4}><div>No Addons</div></TableCell></TableRow>
+              <TableRow><TableCell colspan={4}><span className="no-results">No Addons</span></TableCell></TableRow>
             )}
             {this.state.addons.length > 0 && this.renderAddons()}
             {this.state.addonAttachments.length > 0 && this.renderAddonAttachments()}

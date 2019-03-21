@@ -202,7 +202,7 @@ export default class Releases extends Component {
       restrictedSpace = true;
     }
 
-    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line react/no-did-mount-set-state
+    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line 
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -509,7 +509,7 @@ export default class Releases extends Component {
 
     return (
       <div>
-        <Collapse in={this.state.new || this.state.newAuto}>
+        <Collapse unmountOnExit mountOnEnter in={this.state.new || this.state.newAuto}>
           <div style={style.collapse.container}>
             <div style={style.collapse.header.container}>
               <Typography style={style.collapse.header.title} variant="overline">{this.state.new && 'New Build'}{this.state.newAuto && 'Attach to Repo'}</Typography>
@@ -558,7 +558,7 @@ export default class Releases extends Component {
         <Table className="release-list" style={{ overflow: 'visible' }}>
           <TableBody>
             {(!this.state.releases || this.state.releases.length === 0) ? (
-              <TableRow><TableCell>No Releases</TableCell></TableRow>
+              <TableRow><TableCell><span className="no-results">No Releases</span></TableCell></TableRow>
             ) : this.renderReleases(page, rowsPerPage)}
           </TableBody>
           {releases.length !== 0 && (
