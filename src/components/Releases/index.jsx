@@ -32,6 +32,11 @@ function addRestrictedTooltip(title, placement, children) {
   );
 }
 
+function trunc(str, count) {
+  if (!str || str.length < count) { return str; }
+  return `${str.substring(0, count)}...`;
+}
+
 const releaseLimit = 20;
 
 const style = {
@@ -367,7 +372,7 @@ export default class Releases extends Component {
       }, style.status);
       return (
         <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current }}>
-          <TableCell style={{ display: 'flex', padding: '12px 24px', height: '64px', alignItems: 'center' }}>
+          <TableCell style={{ display: 'flex', padding: '12px 24px', minHeight: '64px', alignItems: 'center' }}>
             <div style={{ width: '25px', paddingRight: '24px' }}>
               <div style={{ position: 'relative', height: '100%' }}>
                 {!release.release ? (<BuildIcon style={style.mainIcon} />) : (<ReleaseIcon style={{
@@ -381,7 +386,7 @@ export default class Releases extends Component {
               {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `}
               {info1.join(' ')}
               <br />
-              {info2.join(' ')}
+              {trunc(info2.join(' '), 250)}
               <div style={style.tableCell.sub}>
                 {getDateDiff(new Date(release.created_at))}
               </div>
