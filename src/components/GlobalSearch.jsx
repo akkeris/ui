@@ -184,6 +184,10 @@ class GlobalSearch extends Component {
     const { data: pipelines } = await api.getPipelines();
     const { data: sites } = await api.getSites();
 
+    apps.sort((a, b) => a.name.replace(/[-]/g, '').toLowerCase().localeCompare(b.name.replace(/[-]/g, '').toLowerCase()));
+    pipelines.sort((a, b) => a.name.replace(/[-]/g, '').toLowerCase().localeCompare(b.name.replace(/[-]/g, '').toLowerCase()));
+    sites.sort((a, b) => a.domain.replace(/[-._]/g, '').toLowerCase().localeCompare(b.domain.replace(/[-._]/g, '').toLowerCase()));
+
     this.setState({
       options: [
         {
