@@ -8,8 +8,6 @@ import RemoveIcon from '@material-ui/icons/Clear';
 
 import { NewPipeline } from '../../components/Pipelines';
 import api from '../../services/api';
-import util from '../../services/util';
-import AutoSuggest from '../../components/AutoSuggest';
 import History from '../../config/History';
 
 const style = {
@@ -98,10 +96,6 @@ class Pipelines extends Component {
     History.get().push(`/pipelines/${id}/review`);
   }
 
-  handleSearch = (searchText) => {
-    History.get().push(`/pipelines/${searchText}/review`);
-  }
-
   handleNewPipeline = () => {
     this.setState({ new: true });
   }
@@ -166,11 +160,6 @@ class Pipelines extends Component {
     return (
       <div>
         <Toolbar style={style.toolbar}>
-          <AutoSuggest
-            className="search"
-            data={util.filterName(this.state.pipelines)}
-            handleSearch={this.handleSearch}
-          />
           {!this.state.new && (
             <IconButton
               className="new-pipeline"

@@ -100,7 +100,11 @@ export default class Nav extends Component {
     });
   };
 
-  handleSearch = ({ uri }) => History.get().push(uri);
+  handleSearch = (value) => {
+    if (value && value.uri) {
+      History.get().push(value.uri);
+    }
+  }
 
   render() {
     let accountMenu = (

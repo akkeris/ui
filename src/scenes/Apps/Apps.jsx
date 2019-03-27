@@ -6,7 +6,6 @@ import AddIcon from '@material-ui/icons/Add';
 import api from '../../services/api';
 import AppList from '../../components/Apps/AppList';
 import util from '../../services/util';
-import AutoSuggest from '../../components/AutoSuggest';
 import History from '../../config/History';
 import CustomSelect from '../../components/CustomSelect';
 
@@ -53,7 +52,6 @@ const style = {
     minWidth: '145px',
   },
   regionContainer: {
-    marginLeft: '30px',
     minWidth: '145px',
   },
 };
@@ -92,10 +90,6 @@ export default class Apps extends Component {
       favorites,
       loading: false,
     });
-  }
-
-  handleSearch = (searchText) => {
-    History.get().push(`/apps/${searchText}/info`);
   }
 
   handleSpaceChange = (event) => {
@@ -143,11 +137,6 @@ export default class Apps extends Component {
     return (
       <div>
         <Toolbar style={style.toolbar} disableGutters>
-          <AutoSuggest
-            data={util.filterName(this.state.filteredApps)}
-            handleSearch={this.handleSearch}
-            className="search"
-          />
           <CustomSelect
             name="region"
             value={this.state.region}

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import AsyncSearch from 'react-select/lib/Async';
 import {
-  NoSsr, Typography, TextField, MenuItem, Paper, Divider, InputAdornment,
+  NoSsr, Typography, TextField, MenuItem, Paper, Divider, InputAdornment, CircularProgress,
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import { withStyles } from '@material-ui/core/styles';
@@ -10,28 +10,36 @@ import api from '../services/api';
 
 const styles = theme => ({
   rootBase: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     display: 'flex',
     alignItems: 'center',
     padding: '2px 4px',
-    marginRight: '48px',
-    borderRadius: '18px',
+    marginRight: '32px',
+    borderRadius: theme.shape.borderRadius,
     transition: 'all 0.2s ease',
+    '&:hover': {
+      backgroundColor: 'rgba(255,255,255,0.3)',
+    },
   },
   rootSm: { width: '250px' },
   rootLg: { width: '350px' },
   container: {
     flexGrow: 1,
   },
+  Input: {
+    color: 'white',
+  },
   input: {
     display: 'flex',
     padding: 0,
+    color: 'white',
   },
   valueContainer: {
     display: 'flex',
     flexWrap: 'wrap',
     flex: 1,
     alignItems: 'center',
+    color: 'white',
     overflow: 'hidden',
   },
   noOptionsMessage: {
@@ -39,19 +47,21 @@ const styles = theme => ({
   },
   singleValue: {
     fontSize: 16,
+    color: 'white',
   },
   placeholder: {
     position: 'absolute',
     left: 40,
     fontSize: 16,
+    color: '#AAAAAA',
   },
   paper: {
     position: 'absolute',
-    width: '98%',
     zIndex: 1,
     left: 0,
     right: 0,
-    margin: '0 auto',
+    width: '99%',
+    margin: '6px auto 0px',
   },
   divider: {
     height: theme.spacing.unit * 2,
@@ -66,7 +76,16 @@ const styles = theme => ({
   searchIcon: {
     marginLeft: '6px',
   },
+  loadingIndicator: {
+    color: 'white',
+    marginRight: '12px',
+  },
 });
+
+function trunc(str, count) {
+  if (!str || str.length < count) { return str; }
+  return `${str.substring(0, count)}...`;
+}
 
 const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
@@ -78,6 +97,7 @@ const Control = props => (
     InputProps={{
       disableUnderline: true,
       inputComponent,
+      className: props.selectProps.classes.Input,
       inputProps: {
         className: `${props.selectProps.classes.input} select-textfield`,
         inputRef: props.inputRef,
@@ -86,7 +106,7 @@ const Control = props => (
       },
       startAdornment: (
         <InputAdornment position="start">
-          <SearchIcon className={props.selectProps.classes.searchIcon} nativeColor="#3c4146" />
+          <SearchIcon className={props.selectProps.classes.searchIcon} nativeColor="white" />
         </InputAdornment>
       ),
     }}
@@ -150,7 +170,7 @@ const SingleValue = props => (
     className={props.selectProps.classes.singleValue}
     {...props.innerProps}
   >
-    {props.children}
+    {trunc(props.children, 25)}
   </Typography>
 );
 
@@ -158,8 +178,18 @@ const ValueContainer = props => (
   <div className={props.selectProps.classes.valueContainer}>{props.children}</div>  // eslint-disable-line
 );
 
+const LoadingIndicator = props => <CircularProgress size={20} className={props.selectProps.classes.loadingIndicator} color="inherit" />; // eslint-disable-line
+
 const components = {
-  Control, Menu, NoOptionsMessage, Option, SingleValue, ValueContainer, Placeholder, GroupHeading,
+  Control,
+  Menu,
+  NoOptionsMessage,
+  Option,
+  SingleValue,
+  ValueContainer,
+  Placeholder,
+  GroupHeading,
+  LoadingIndicator,
 };
 
 let timer = null;
@@ -177,8 +207,11 @@ class GlobalSearch extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { value } = this.state;
+    if (!value) {
+      return;
+    }
     const path = window.location.pathname;
-    if ((!path.includes(value.label) && !path.includes(value.value)) && prevState.value === value) {
+    if (!path.includes(value.label) && !path.includes(value.value) && prevState.value === value) {
       this.setState({ value: {} }); // eslint-disable-line react/no-did-update-set-state
     }
   }
@@ -218,6 +251,18 @@ class GlobalSearch extends Component {
 
   filter = input => option => option.label.toLowerCase().indexOf(input.toLowerCase()) > -1;
 
+  /* eslint-disable no-param-reassign */
+  orderResults = (options) => {
+    const path = window.location.pathname;
+    if (path.includes('/pipelines')) {
+      [options[0], options[1]] = [options[1], options[0]];
+    } else if (path.includes('/sites')) {
+      options.reverse();
+    }
+    return options;
+  }
+  /* eslint-enable no-param-reassign */
+
   // Search after 300ms so that we don't do unnecessary filtering while the user is typing
   // Return only the first 'maxOptions' results so the list doesn't get unnecessarily long
   search = (input, cb) => {
@@ -240,21 +285,28 @@ class GlobalSearch extends Component {
             options: options[2].options.filter(this.filter(input)).slice(0, maxOptions),
           },
         ];
-        cb(results);
+        cb(this.orderResults(results));
       }, 300);
     }
   }
 
   render() {
-    const { onSearch, classes, theme } = this.props;
+    const { onSearch, classes } = this.props;
     const { value } = this.state;
 
     const selectStyles = {
       input: base => ({
         ...base,
-        color: theme.palette.text.primary,
+        color: 'white',
         '& input': {
           font: 'inherit',
+        },
+      }),
+      dropdownIndicator: base => ({
+        ...base,
+        color: '#AAAAAA',
+        '&:hover': {
+          color: '#DDDDDD',
         },
       }),
     };
