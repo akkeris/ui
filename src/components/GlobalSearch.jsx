@@ -175,6 +175,14 @@ class GlobalSearch extends Component {
     api.notify.add({ name: 'globalSearch', cb: () => setTimeout(() => this.getOptions(), 2000) });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const { value } = this.state;
+    const path = window.location.pathname;
+    if ((!path.includes(value.label) && !path.includes(value.value)) && prevState.value === value) {
+      this.setState({ value: {} }); // eslint-disable-line react/no-did-update-set-state
+    }
+  }
+
   componentWillUnmount() {
     api.notify.remove('globalSearch');
   }
