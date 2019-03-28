@@ -44,18 +44,29 @@ test('Should show list of apps based on filter', async (t) => { // eslint-disabl
 
 test('Should throw error on non-existent app', async (t) => { // eslint-disable-line no-undef
   await t
-    .typeText('.search input', 'merp')
-    .pressKey('enter')
+    .typeText('.global-search input', '____')
+    .wait(2000)
+    .expect(Selector('.global-search-results').innerText)
+    .contains('No results', 'Search results found when none expected')
+    .navigateTo(`${baseUrl}/apps/merp/info`)
     .expect(Selector('.not-found-error').innerText)
     .contains('The specified application merp does not exist');
 });
 
 test('Should follow search to app and see all info', async (t) => { // eslint-disable-line no-undef
   await t
-    .typeText('.search input', 'api-default')
-    .pressKey('down').pressKey('enter')
+    .typeText('.global-search input', 'api-default')
+    .wait(2000).pressKey('enter')
     .expect(Selector('.card .header').innerText)
     .contains('api-default');
+});
+
+test('Should show apps as first group in global search', async (t) => { // eslint-disable-line no-undef
+  await t
+    .typeText('.global-search input', 't')
+    .wait(2000)
+    .expect(Selector('.global-search-results .group-heading').nth(0).innerText)
+    .contains('Apps', 'List of apps not first in search results');
 });
 
 test('Should be able to create and delete an app', async (t) => { // eslint-disable-line no-undef

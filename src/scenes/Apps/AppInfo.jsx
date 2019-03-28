@@ -204,7 +204,7 @@ export default class AppInfo extends Component {
           <ConfirmationModal
             open={submitFail}
             onOk={this.handleNotFoundClose}
-            message={notFoundMessage}
+            message={notFoundMessage || ''}
             title="Error"
             className="not-found-error"
           />
@@ -223,7 +223,7 @@ export default class AppInfo extends Component {
             }
           />
           <Tabs
-            fullWidth
+            variant="fullWidth"
             value={this.state.currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"
@@ -338,7 +338,7 @@ export default class AppInfo extends Component {
         <ConfirmationModal
           open={this.state.submitFail}
           onOk={this.handleClose}
-          message={this.state.submitMessage}
+          message={this.state.submitMessage || ''}
           title="Error"
           className="app-error"
         />

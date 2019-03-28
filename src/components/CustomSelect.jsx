@@ -68,7 +68,7 @@ class CustomSelect extends PureComponent {
 
 CustomSelect.propTypes = {
   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]),
-  value: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired, // eslint-disable-line
   style: PropTypes.object, // eslint-disable-line react/forbid-prop-types
   onChange: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,

@@ -25,6 +25,10 @@ const NewApp = Loadable({
 const AppInfo = Loadable({
   loader: () => import('../scenes/Apps/AppInfo'),
   loading: Loading,
+  render(loaded, props) {
+    const Component = loaded.default;
+    return <Component {...props} key={props.match.params.app} />;
+  },
 });
 
 const AppRoutes = () => (
@@ -52,6 +56,10 @@ const Pipelines = Loadable({
 const PipelineInfo = Loadable({
   loader: () => import('../scenes/Pipelines/PipelineInfo'),
   loading: Loading,
+  render(loaded, props) {
+    const Component = loaded.default;
+    return <Component {...props} key={props.match.params.pipeline} />;
+  },
 });
 
 const PipelineRoutes = () => (
@@ -136,6 +144,10 @@ const NewSite = Loadable({
 const SiteInfo = Loadable({
   loader: () => import('../scenes/Sites/SiteInfo'),
   loading: Loading,
+  render(loaded, props) {
+    const Component = loaded.default;
+    return <Component {...props} key={props.match.params.site} />;
+  },
 });
 
 const SitesRoutes = () => (

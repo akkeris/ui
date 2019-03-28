@@ -39,7 +39,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 
 */
 
-const GlobalTheme = () => createMuiTheme({
+const GlobalTheme = createMuiTheme({
   palette: {
     primary: { main: '#0097a7' },
     // type: 'dark',

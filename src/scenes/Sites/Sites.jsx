@@ -8,8 +8,6 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import SitesList from '../../components/Sites';
 import util from '../../services/util';
-import AutoSuggest from '../../components/AutoSuggest';
-import History from '../../config/History';
 import CustomSelect from '../../components/CustomSelect';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
@@ -55,7 +53,6 @@ const style = {
     marginBottom: '12px',
   },
   regionContainer: {
-    marginLeft: '30px',
     minWidth: '145px',
   },
 };
@@ -87,10 +84,6 @@ class Sites extends Component {
     });
   }
 
-  handleSearch = (searchText) => {
-    History.get().push(`/sites/${searchText}/info`);
-  }
-
   handleRegionChange = (event) => {
     const region = event.target.value;
     const sites = util.filterSites(this.state.sites, region);
@@ -117,11 +110,6 @@ class Sites extends Component {
     return (
       <div>
         <Toolbar style={style.toolbar} disableGutters>
-          <AutoSuggest
-            className="search"
-            data={util.filterDomain(this.state.filteredSites)}
-            handleSearch={this.handleSearch}
-          />
           <CustomSelect
             name="region"
             value={this.state.region}

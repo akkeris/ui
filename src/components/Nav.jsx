@@ -14,11 +14,13 @@ import RouterIcon from '@material-ui/icons/Router';
 import OrgIcon from '@material-ui/icons/Face';
 import InvoiceIcon from '@material-ui/icons/CreditCard';
 import MenuIcon from '@material-ui/icons/Menu';
+import GlobalSearch from './GlobalSearch';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
 import AccountMenu from './AccountMenu';
 import api from '../services/api';
+import History from '../config/History';
 
 const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
@@ -98,6 +100,12 @@ export default class Nav extends Component {
     });
   };
 
+  handleSearch = (value) => {
+    if (value && value.uri) {
+      History.get().push(value.uri);
+    }
+  }
+
   render() {
     let accountMenu = (
       <div />
@@ -132,6 +140,7 @@ export default class Nav extends Component {
                 <MenuIcon nativeColor="white" />
               </IconButton>
               {title}
+              <GlobalSearch onSearch={this.handleSearch} maxResults={10} />
               {accountMenu}
             </Toolbar>
           </AppBar>

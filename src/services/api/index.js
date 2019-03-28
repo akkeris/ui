@@ -1,5 +1,19 @@
 const axios = require('axios');
 
+const notify = new class Notify {
+  constructor() {
+    this.listeners = {};
+  }
+  add(listener) {
+    if (this.listeners[listener.name]) return;
+    this.listeners[listener.name] = listener.cb;
+  }
+  remove(listenerName) {
+    delete this.listeners[listenerName];
+  }
+  send = msg => Object.values(this.listeners).forEach(l => l(msg));
+}();
+
 function getApps() {
   return axios.get('/api/apps');
 }
@@ -9,15 +23,13 @@ function getApp(app) {
 }
 
 function deleteApp(app) {
+  notify.send('app delete');
   return axios.delete(`/api/apps/${app}`);
 }
 
 function createApp(name, org, space) {
-  return axios.post('/api/apps', {
-    org,
-    name,
-    space,
-  });
+  notify.send('app create');
+  return axios.post('/api/apps', { org, name, space });
 }
 
 function appSetup(blueprint) {
@@ -261,6 +273,7 @@ function getPipelineCouplings(pipeline) {
 }
 
 function createPipeline(pipeline) {
+  notify.send('pipe create');
   return axios.post('/api/pipelines', {
     name: pipeline,
   });
@@ -295,6 +308,7 @@ function deletePipelineCoupling(coupling) {
 }
 
 function deletePipeline(pipeline) {
+  notify.send('pipe delete');
   return axios.delete(`/api/pipelines/${pipeline}`);
 }
 
@@ -347,10 +361,12 @@ function getSite(site) {
 }
 
 function deleteSite(site) {
+  notify.send('site delete');
   return axios.delete(`/api/sites/${site}`);
 }
 
 function createSite(domain, region, isInternal) {
+  notify.send('site create');
   return axios.post('/api/sites', {
     domain,
     region,
@@ -474,4 +490,5 @@ export default {
   deleteFavorite,
   createFavorite,
   getHealthcheck,
+  notify,
 };

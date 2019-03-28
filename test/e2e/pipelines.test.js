@@ -27,16 +27,19 @@ test('Should show list of pipelines', async (t) => { // eslint-disable-line no-u
 
 test('Should throw error on non-existent pipeline', async (t) => { // eslint-disable-line no-undef
   await t
-    .typeText('.search input', 'merp')
-    .pressKey('enter')
+    .typeText('.global-search input', '____')
+    .wait(2000)
+    .expect(Selector('.global-search-results').innerText)
+    .contains('No results', 'Search results found when none expected')
+    .navigateTo(`${baseUrl}/pipelines/merp/info`)
     .expect(Selector('.not-found-error').innerText)
     .contains('The specified pipeline was not found.');
 });
 
 test('Should follow search to pipeline and see all info', async (t) => { // eslint-disable-line no-undef
   await t
-    .typeText('.search input', 'testpipeline')
-    .pressKey('enter')
+    .typeText('.global-search input', 'testpipeline')
+    .wait(2000).pressKey('enter')
     .expect(Selector('.card .header').innerText)
     .contains('testpipeline')
     .click('.review-tab')
@@ -44,6 +47,15 @@ test('Should follow search to pipeline and see all info', async (t) => { // esli
     .click('.staging-tab')
     .click('.prod-tab');
 });
+
+test('Should show pipelines as first group in global search', async (t) => { // eslint-disable-line no-undef
+  await t
+    .typeText('.global-search input', 't')
+    .wait(2000)
+    .expect(Selector('.global-search-results .group-heading').nth(0).innerText)
+    .contains('Pipelines', 'List of pipelines not first in search results');
+});
+
 
 test('Should be able to create and delete pipeline', async (t) => { // eslint-disable-line no-undef
   await t

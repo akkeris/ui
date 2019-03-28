@@ -67,9 +67,9 @@ export default class Orgs extends Component {
     this.setState({ orgs, loading: false });
   }
 
-  handleSearch = (searchText) => {
-    History.get().push(`/orgs/${searchText}`);
-  }
+  // handleSearch = (searchText) => {
+  //   // History.get().push(`/orgs/${searchText}`);
+  // }
 
   render() {
     if (this.state.loading) {
@@ -82,11 +82,11 @@ export default class Orgs extends Component {
     return (
       <div>
         <Toolbar style={style.toolbar}>
-          <AutoSuggest
+          {/* <AutoSuggest
             className="search"
             data={util.filterName(this.state.orgs)}
             handleSearch={this.handleSearch}
-          />
+          /> */}
           <Link to="/orgs/new" style={style.link}>
             <IconButton className="new-org" style={{ padding: '6px', marginBottom: '-6px' }} ><AddIcon style={{ color: 'white' }} /></IconButton>
           </Link>
