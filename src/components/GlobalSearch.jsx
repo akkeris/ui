@@ -93,13 +93,14 @@ const inputComponent = ({ inputRef, ...props }) => <div ref={inputRef} {...props
 
 const Control = props => (
   <TextField
+    className="global-search"
     fullWidth
     InputProps={{
       disableUnderline: true,
       inputComponent,
       className: props.selectProps.classes.Input,
       inputProps: {
-        className: `${props.selectProps.classes.input} select-textfield`,
+        className: `${props.selectProps.classes.input}`,
         inputRef: props.inputRef,
         children: props.children,
         ...props.innerProps,
@@ -115,7 +116,7 @@ const Control = props => (
 );
 
 const Menu = props => (
-  <Paper square className={props.selectProps.classes.paper} {...props.innerProps}>
+  <Paper square className={`${props.selectProps.classes.paper} global-search-results`} {...props.innerProps}>
     {props.children}
   </Paper>
 );
@@ -143,7 +144,7 @@ const Option = props => (
 );
 
 const GroupHeading = props => (
-  <div className={props.selectProps.classes.headingContainer}>
+  <div className={`${props.selectProps.classes.headingContainer} group-heading`}>
     <Typography
       color="textSecondary"
       className={props.selectProps.classes.groupHeading}
@@ -268,21 +269,21 @@ class GlobalSearch extends Component {
   search = (input, cb) => {
     clearTimeout(timer);
     const { options } = this.state;
-    const maxOptions = 10;
+    const { maxResults } = this.props;
     if (!options || options.length !== 3) { cb([]); } else {
       timer = setTimeout(() => {
         const results = [
           {
             label: 'Apps',
-            options: options[0].options.filter(this.filter(input)).slice(0, maxOptions),
+            options: options[0].options.filter(this.filter(input)).slice(0, maxResults),
           },
           {
             label: 'Pipelines',
-            options: options[1].options.filter(this.filter(input)).slice(0, maxOptions),
+            options: options[1].options.filter(this.filter(input)).slice(0, maxResults),
           },
           {
             label: 'Sites',
-            options: options[2].options.filter(this.filter(input)).slice(0, maxOptions),
+            options: options[2].options.filter(this.filter(input)).slice(0, maxResults),
           },
         ];
         cb(this.orderResults(results));
@@ -343,9 +344,14 @@ class GlobalSearch extends Component {
 /* eslint-disable */
 GlobalSearch.propTypes = {
   onSearch: PropTypes.func.isRequired,
+  maxResults: PropTypes.number, // Number of max results per category to show
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
 };
 /* eslint-enable */
+
+GlobalSearch.defaultProps = {
+  maxResults: 10,
+};
 
 export default withStyles(styles, { withTheme: true })(GlobalSearch);

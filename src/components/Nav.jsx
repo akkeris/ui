@@ -140,7 +140,7 @@ export default class Nav extends Component {
                 <MenuIcon nativeColor="white" />
               </IconButton>
               {title}
-              <GlobalSearch onSearch={this.handleSearch} />
+              <GlobalSearch onSearch={this.handleSearch} maxResults={10} />
               {accountMenu}
             </Toolbar>
           </AppBar>
