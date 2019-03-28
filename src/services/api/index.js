@@ -34,7 +34,7 @@ function patchApp(app, isMaintenance) {
   });
 }
 
-function getAudits(app, space, user, size) {
+function getAudits(app, space, size, user) {
   return axios.get(`/api/audits?app=${app}&space=${space}${user ? `&user=${user}` : ''}${size ? `&size=${size}` : ''}`);
 }
 

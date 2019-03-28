@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import SHA256 from 'crypto-js/sha256';
 import {
   CircularProgress, Table, TableHead, TableBody, TableRow, TableCell, Button, Typography,
-  Dialog, DialogContent, DialogActions, DialogTitle,
+  Dialog, DialogContent, DialogActions, DialogTitle, TableFooter, TablePagination,
 } from '@material-ui/core';
 
 import api from '../../services/api';
@@ -76,6 +76,8 @@ export default class Audits extends Component {
       loading: true,
       id: '',
       diagOpen: false,
+      page: 0,
+      rowsPerPage: 10,
     };
   }
 
@@ -84,7 +86,7 @@ export default class Audits extends Component {
   }
 
   getAudits = async () => {
-    const { data: audits } = await api.getAudits(this.props.app.simple_name, this.props.app.space.name);
+    const { data: audits } = await api.getAudits(this.props.app.simple_name, this.props.app.space.name, 100);
     this.setState({ audits, loading: false });
   }
 
@@ -95,6 +97,14 @@ export default class Audits extends Component {
     });
   }
 
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: event.target.value });
+  };
+
   handleDialogClose = () => {
     this.setState({
       diagOpen: false,
@@ -102,7 +112,7 @@ export default class Audits extends Component {
     });
   }
 
-  renderAudits() {
+  renderAudits(page, rowsPerPage) {
     const { audits } = this.state;
     if (audits.length === 0) {
       return (
@@ -115,7 +125,8 @@ export default class Audits extends Component {
         </TableRow>
       );
     }
-    return audits.map((audit) => {
+
+    return audits.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((audit) => {
       const id = SHA256(JSON.stringify(audit)).toString().substring(0, 7);
       return (
         <TableRow
@@ -153,6 +164,7 @@ export default class Audits extends Component {
   }
 
   render() {
+    const { rowsPerPage, page } = this.state;
     if (this.state.loading) {
       return (
         <div style={style.refresh.div}>
@@ -177,8 +189,21 @@ export default class Audits extends Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            {this.renderAudits()}
+            {this.renderAudits(page, rowsPerPage)}
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 50]}
+                colSpan={3}
+                count={this.state.audits.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onChangePage={this.handleChangePage}
+                onChangeRowsPerPage={this.handleChangeRowsPerPage}
+              />
+            </TableRow>
+          </TableFooter>
         </Table>
         <Dialog
           className="audit-dialog"
