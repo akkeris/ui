@@ -139,7 +139,8 @@ export default class NewApp extends Component {
   submitApp = async () => {
     try {
       await api.createApp(this.state.app, this.state.org.value, this.state.space.value);
-      History.get().push('/apps');
+      await api.createFavorite(`${this.state.app}-${this.state.space.value}`);
+      History.get().push(`/apps/${this.state.app}-${this.state.space.value}`);
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,
