@@ -105,6 +105,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .click('button.next')
 
     // Verify that app exists
+    .navigateTo(`${baseUrl}/apps`)
     .click('.space-dropdown')
     .click('#menu-space .testcafe')
     .expect(Selector('.app-list .testcafe-testcafe').exists)
@@ -173,6 +174,7 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .pressKey('enter')
       .click('button.next')
       .click('button.next')
+      .navigateTo(`${baseUrl}/apps`)
       .click('.space-dropdown')
       .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
@@ -415,6 +417,7 @@ test // eslint-disable-line no-undef
       .pressKey('enter')
       .click('button.next')
       .click('button.next')
+      .navigateTo(`${baseUrl}/apps`)
       .click('.space-dropdown')
       .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
