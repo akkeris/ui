@@ -436,6 +436,7 @@ test // eslint-disable-line no-undef
       .pressKey('enter')
       .click('button.next')
       .click('button.next')
+      .navigateTo(`${baseUrl}/apps`)
       .click('.space-dropdown')
       .click('#menu-space .testcafe')
       .expect(Selector('.app-list .testcafe2-testcafe').exists)
