@@ -89,11 +89,7 @@ export default class AppList extends Component {
         </TableCell>
         <TableCell style={style.tableRow}>
           <div style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-            {this.props.favorites && (
-              this.props.favorites.findIndex(x => x.name === app.name) > -1 ?
-                <FavoriteIcon /> :
-                null
-            )}
+            {app.isFavorite && <FavoriteIcon />}
           </div>
         </TableCell>
       </TableRow>
@@ -159,7 +155,19 @@ export default class AppList extends Component {
                 </Tooltip>
               </TableCell>
               <TableCell>
-                Favorite
+                <Tooltip
+                  title="Sort"
+                  placement="bottom-start"
+                  enterDelay={300}
+                >
+                  <TableSortLabel
+                    active={sortBy === 'favorites'}
+                    direction={sortDirection}
+                    onClick={this.handleSortChange('favorites')}
+                  >
+                    Favorite
+                  </TableSortLabel>
+                </Tooltip>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -187,10 +195,5 @@ export default class AppList extends Component {
 
 AppList.propTypes = {
   apps: PropTypes.arrayOf(PropTypes.object).isRequired,
-  favorites: PropTypes.arrayOf(PropTypes.object),
   onSortChange: PropTypes.func.isRequired,
-};
-
-AppList.defaultProps = {
-  favorites: null,
 };

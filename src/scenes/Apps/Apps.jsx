@@ -82,8 +82,13 @@ export default class Apps extends Component {
   getData = async () => {
     const { data: spaces } = await api.getSpaces();
     const { data: regions } = await api.getRegions();
-    const { data: apps } = await api.getApps();
+    let { data: apps } = await api.getApps();
     const { data: favorites } = await api.getFavorites();
+    apps = apps.map(app => ({
+      ...app,
+      isFavorite: (favorites.findIndex(x => x.name === app.name) > -1),
+    }));
+
     const options = [
       {
         label: 'Spaces',
@@ -101,7 +106,6 @@ export default class Apps extends Component {
       regions,
       apps,
       filteredApps: apps,
-      favorites,
       loading: false,
       options,
     }, () => {
@@ -143,6 +147,7 @@ export default class Apps extends Component {
 
   handleSort = () => {
     const { filteredApps, sort } = this.state;
+
     let sortedApps = [];
     if (sort !== '') {
       sortedApps = filteredApps.sort((a, b) => {
@@ -159,6 +164,10 @@ export default class Apps extends Component {
             return a.region.name.toLowerCase().localeCompare(b.region.name.toLowerCase());
           case 'regions-desc':
             return b.region.name.toLowerCase().localeCompare(a.region.name.toLowerCase());
+          case 'favorites-asc':
+            return a.isFavorite - b.isFavorite;
+          case 'favorites-desc':
+            return b.isFavorite - a.isFavorite;
           default:
             return 0;
         }
@@ -198,7 +207,6 @@ export default class Apps extends Component {
           <AppList
             className="apps"
             apps={this.state.filteredApps}
-            favorites={this.state.favorites}
             onSortChange={this.handleSortChange}
           />
         </Paper>
