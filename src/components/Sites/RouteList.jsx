@@ -132,30 +132,32 @@ export default class RouteList extends Component {
   };
 
   renderRoutes(page, rowsPerPage) {
-    return this.state.routes.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(route => (
-      <TableRow key={route.id} style={style.tableRow}>
-        <TableCell>
-          <div style={style.tableRowColumn.title}><a href={`https://${this.props.site.domain || this.props.site}${route.source_path}`}>{`https://${this.props.site.domain || this.props.site}${route.source_path}`}</a></div>
-          <div style={style.tableRowColumn.sub}>{route.id}</div>
-        </TableCell>
-        <TableCell style={style.tableRowColumn.icon}>
-          <ArrowIcon />
-        </TableCell>
-        <TableCell>
-          <div style={style.tableRowColumn.title}>{route.target_path}</div>
-          <div style={style.tableRowColumn.sub}>{route.app.name || route.app}</div>
-        </TableCell>
-        <TableCell style={style.tableRowColumn.icon}>
-          <div style={style.tableRowColumn.end}>
-            <IconButton
-              onClick={() => this.handleConfirmation(route)}
-            >
-              <RemoveIcon />
-            </IconButton>
-          </div>
-        </TableCell>
-      </TableRow>
-    ));
+    return this.state.routes
+      .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
+      .map(route => (
+        <TableRow key={route.id} style={style.tableRow}>
+          <TableCell>
+            <div style={style.tableRowColumn.title}><a href={`https://${this.props.site.domain || this.props.site}${route.source_path}`}>{`https://${this.props.site.domain || this.props.site}${route.source_path}`}</a></div>
+            <div style={style.tableRowColumn.sub}>{route.id}</div>
+          </TableCell>
+          <TableCell style={style.tableRowColumn.icon}>
+            <ArrowIcon />
+          </TableCell>
+          <TableCell>
+            <div style={style.tableRowColumn.title}>{route.target_path}</div>
+            <div style={style.tableRowColumn.sub}>{route.app.name || route.app}</div>
+          </TableCell>
+          <TableCell style={style.tableRowColumn.icon}>
+            <div style={style.tableRowColumn.end}>
+              <IconButton
+                onClick={() => this.handleConfirmation(route)}
+              >
+                <RemoveIcon />
+              </IconButton>
+            </div>
+          </TableCell>
+        </TableRow>
+      ));
   }
 
   render() {

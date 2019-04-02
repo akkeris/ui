@@ -1,12 +1,22 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import AsyncSearch from 'react-select/lib/Async';
+import AsyncSelect from 'react-select/lib/Async';
 import {
   NoSsr, Typography, TextField, MenuItem, Paper, Divider, InputAdornment, CircularProgress,
+  Chip,
 } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
+import { emphasize } from '@material-ui/core/styles/colorManipulator';
+import FilterIcon from '@material-ui/icons/FilterList';
+import CancelIcon from '@material-ui/icons/Cancel';
 import { withStyles } from '@material-ui/core/styles';
-import api from '../services/api';
+
+function isEmpty(obj) {
+  let empty = true;
+  Object.keys(obj).forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) { empty = false; }
+  });
+  return empty;
+}
 
 const styles = theme => ({
   rootBase: {
@@ -15,14 +25,15 @@ const styles = theme => ({
     alignItems: 'center',
     padding: '2px 4px',
     marginRight: '32px',
+    minWidth: '300px',
+    maxWidth: '800px',
+    height: '42px',
     borderRadius: theme.shape.borderRadius,
     transition: 'all 0.2s ease',
     '&:hover': {
       backgroundColor: 'rgba(255,255,255,0.25)',
     },
   },
-  rootSm: { width: '250px' },
-  rootLg: { width: '350px' },
   container: {
     flexGrow: 1,
   },
@@ -42,6 +53,15 @@ const styles = theme => ({
     color: 'white',
     overflow: 'hidden',
   },
+  chip: {
+    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 2}px`,
+  },
+  chipFocused: {
+    backgroundColor: emphasize(
+      theme.palette.type === 'light' ? theme.palette.grey[300] : theme.palette.grey[700],
+      0.08,
+    ),
+  },
   noOptionsMessage: {
     padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
   },
@@ -53,7 +73,7 @@ const styles = theme => ({
     position: 'absolute',
     left: 40,
     fontSize: 16,
-    color: '#AAAAAA',
+    color: '#DDDDDD',
   },
   paper: {
     position: 'absolute',
@@ -87,13 +107,11 @@ function trunc(str, count) {
   return `${str.substring(0, count)}...`;
 }
 
-const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
-
 const inputComponent = ({ inputRef, ...props }) => <div ref={inputRef} {...props} />;
 
 const Control = props => (
   <TextField
-    className="global-search"
+    className="filter-select"
     fullWidth
     InputProps={{
       disableUnderline: true,
@@ -107,7 +125,7 @@ const Control = props => (
       },
       startAdornment: (
         <InputAdornment position="start">
-          <SearchIcon className={props.selectProps.classes.searchIcon} nativeColor="white" />
+          <FilterIcon className={props.selectProps.classes.searchIcon} nativeColor="white" />
         </InputAdornment>
       ),
     }}
@@ -116,7 +134,7 @@ const Control = props => (
 );
 
 const Menu = props => (
-  <Paper square className={`${props.selectProps.classes.paper} global-search-results`} {...props.innerProps}>
+  <Paper square className={`${props.selectProps.classes.paper} filter-select-results`} {...props.innerProps}>
     {props.children}
   </Paper>
 );
@@ -175,6 +193,16 @@ const SingleValue = props => (
   </Typography>
 );
 
+const MultiValue = props => ( // eslint-disable-line
+  <Chip
+    tabIndex={-1}
+    label={props.children}
+    className={`${props.selectProps.classes.chip} ${props.isFocused && props.selectProps.classes.chipFocused}`}
+    onDelete={props.removeProps.onClick}
+    deleteIcon={<CancelIcon {...props.removeProps} />}
+  />
+);
+
 const ValueContainer = props => (
   <div className={props.selectProps.classes.valueContainer}>{props.children}</div>  // eslint-disable-line
 );
@@ -187,6 +215,7 @@ const components = {
   NoOptionsMessage,
   Option,
   SingleValue,
+  MultiValue,
   ValueContainer,
   Placeholder,
   GroupHeading,
@@ -195,105 +224,26 @@ const components = {
 
 let timer = null;
 
-class GlobalSearch extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { options: [], value: {}, focused: false };
-  }
-
-  componentDidMount() {
-    this.getOptions();
-    api.notify.add({ name: 'globalSearch', cb: () => setTimeout(() => this.getOptions(), 2000) });
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { value } = this.state;
-    if (!value) {
-      return;
-    }
-    const path = window.location.pathname;
-    if (!path.includes(value.label) && !path.includes(value.value) && prevState.value === value) {
-      this.setState({ value: {} }); // eslint-disable-line react/no-did-update-set-state
-    }
-  }
-
-  componentWillUnmount() {
-    api.notify.remove('globalSearch');
-  }
-
-  getOptions = async () => {
-    const { data: apps } = await api.getApps();
-    const { data: pipelines } = await api.getPipelines();
-    const { data: sites } = await api.getSites();
-
-    apps.sort((a, b) => a.name.replace(/[-]/g, '').toLowerCase().localeCompare(b.name.replace(/[-]/g, '').toLowerCase()));
-    pipelines.sort((a, b) => a.name.replace(/[-]/g, '').toLowerCase().localeCompare(b.name.replace(/[-]/g, '').toLowerCase()));
-    sites.sort((a, b) => a.domain.replace(/[-._]/g, '').toLowerCase().localeCompare(b.domain.replace(/[-._]/g, '').toLowerCase()));
-
-    this.setState({
-      options: [
-        {
-          label: 'Apps',
-          options: apps.map(app => ({ value: app.name, label: app.name, uri: `/apps/${app.name}/info` })),
-        },
-        {
-          label: 'Pipelines',
-          options: pipelines.map(pipe => ({ value: pipe.id, label: pipe.name, uri: `/pipelines/${pipe.id}/review` })),
-        },
-        {
-          label: 'Sites',
-          options: sites.map(site => ({ value: site.id, label: site.domain, uri: `/sites/${site.id}/info` })),
-        },
-      ],
-    });
-  }
-
-  focusChanged = () => this.setState({ focused: !this.state.focused });
-
+class FilterSelect extends PureComponent {
   filter = input => option => option.label.toLowerCase().indexOf(input.toLowerCase()) > -1;
-
-  /* eslint-disable no-param-reassign */
-  orderResults = (options) => {
-    const path = window.location.pathname;
-    if (path.includes('/pipelines')) {
-      [options[0], options[1]] = [options[1], options[0]];
-    } else if (path.includes('/sites')) {
-      options.reverse();
-    }
-    return options;
-  }
-  /* eslint-enable no-param-reassign */
 
   // Search after 300ms so that we don't do unnecessary filtering while the user is typing
   // Return only the first 'maxOptions' results so the list doesn't get unnecessarily long
   search = (input, cb) => {
     clearTimeout(timer);
-    const { options } = this.state;
-    const { maxResults } = this.props;
-    if (!options || options.length !== 3) { cb([]); } else {
-      timer = setTimeout(() => {
-        const results = [
-          {
-            label: 'Apps',
-            options: options[0].options.filter(this.filter(input)).slice(0, maxResults),
-          },
-          {
-            label: 'Pipelines',
-            options: options[1].options.filter(this.filter(input)).slice(0, maxResults),
-          },
-          {
-            label: 'Sites',
-            options: options[2].options.filter(this.filter(input)).slice(0, maxResults),
-          },
-        ];
-        cb(this.orderResults(results));
-      }, 300);
+    const { options, maxResults } = this.props;
+    if (!options || options.length === 0) {
+      cb([]);
+    } else {
+      timer = setTimeout(() => cb(options.map(item => ({
+        label: item.label,
+        options: item.options.filter(this.filter(input)).slice(0, maxResults),
+      }))), 300);
     }
   }
 
   render() {
-    const { onSearch, classes } = this.props;
-    const { value } = this.state;
+    const { onSelect, classes, filters, placeholder } = this.props;
 
     const selectStyles = {
       input: base => ({
@@ -303,36 +253,43 @@ class GlobalSearch extends Component {
           font: 'inherit',
         },
       }),
+      clearIndicator: base => ({
+        ...base,
+        color: '#DDDDDD',
+        '&:hover': {
+          color: 'white',
+        },
+      }),
       dropdownIndicator: base => ({
         ...base,
-        color: '#AAAAAA',
+        color: '#DDDDDD',
         '&:hover': {
-          color: '#DDDDDD',
+          color: 'white',
         },
+      }),
+      indicatorSeparator: base => ({
+        ...base,
+        color: '#DDDDDD',
       }),
     };
 
     return (
-      <div
-        className={`${classes.rootBase} ${(!this.state.focused && isEmpty(value)) ? classes.rootSm : classes.rootLg}`}
-        onBlur={this.focusChanged}
-        onFocus={this.focusChanged}
-      >
+      <div className={classes.rootBase}>
         <NoSsr>
           <div className={classes.container}>
-            <AsyncSearch
+            <AsyncSelect
               loadOptions={this.search}
               defaultOptions
               classes={classes}
               styles={selectStyles}
               components={components}
-              value={isEmpty(value) ? '' : value}
-              onChange={(inputValue) => {
-                this.setState({ value: inputValue });
-                onSearch(inputValue);
+              value={isEmpty(filters) ? '' : filters}
+              onChange={(inputValues) => {
+                onSelect(inputValues);
               }}
-              placeholder="Search"
+              placeholder={placeholder}
               noOptionsMessage={({ inputValue }) => (inputValue.length > 0 ? 'No results' : 'Start typing...')}
+              isMulti
             />
           </div>
         </NoSsr>
@@ -341,17 +298,30 @@ class GlobalSearch extends Component {
   }
 }
 
+/*
+  User-supplied Props (* required):
+    * onSelect - callback fn with value of selected option(s)
+      maxResults - number of max results per category to show
+    * options - Grouped array of options to select from
+        e.g. [ { label: 'Group1', options: [ label: 'Option1', value: 'option1' ] } ]
+    * filters - Array of user-typed filters
+*/
+
 /* eslint-disable */
-GlobalSearch.propTypes = {
-  onSearch: PropTypes.func.isRequired,
-  maxResults: PropTypes.number, // Number of max results per category to show
+FilterSelect.propTypes = {
+  onSelect: PropTypes.func.isRequired,
+  maxResults: PropTypes.number,
+  options: PropTypes.arrayOf(PropTypes.object).isRequired,
+  filters: PropTypes.arrayOf(PropTypes.object).isRequired,
+  placeholder: PropTypes.string,
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
 };
 /* eslint-enable */
 
-GlobalSearch.defaultProps = {
+FilterSelect.defaultProps = {
   maxResults: 10,
+  placeholder: 'Filter',
 };
 
-export default withStyles(styles, { withTheme: true })(GlobalSearch);
+export default withStyles(styles, { withTheme: true })(FilterSelect);

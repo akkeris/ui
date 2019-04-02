@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
   Toolbar, IconButton, CircularProgress, Paper, Table, TableBody, TableRow, TableCell,
-  Snackbar, Divider, Collapse, TableFooter, TablePagination,
+  Snackbar, Divider, Collapse, TableFooter, TablePagination, TableHead, TableSortLabel, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -75,11 +75,14 @@ class Pipelines extends Component {
     this.state = {
       loading: true,
       pipelines: [],
+      sortedPipelines: [],
       new: false,
       open: false,
       message: '',
       page: 0,
       rowsPerPage: 15,
+      sortBy: 'name',
+      sortDirection: 'asc',
     };
   }
 
@@ -89,7 +92,7 @@ class Pipelines extends Component {
 
   getPipelines = async () => {
     const { data: pipelines } = await api.getPipelines();
-    this.setState({ pipelines, loading: false });
+    this.setState({ pipelines, sortedPipelines: pipelines, loading: false });
   }
 
   handleRowSelection = (id) => {
@@ -124,9 +127,37 @@ class Pipelines extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
+  handleSortChange = column => () => {
+    const sb = column;
+    let sd = 'desc';
+    if (this.state.sortBy === column && this.state.sortDirection === 'desc') {
+      sd = 'asc';
+    }
+    this.setState({ sortBy: sb, sortDirection: sd });
+
+    const { sortedPipelines } = this.state;
+
+    const sp = sortedPipelines.sort((a, b) => {
+      switch (`${sb}-${sd}`) {
+        case 'name-asc':
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        case 'name-desc':
+          return b.name.toLowerCase().localeCompare(a.name.toLowerCase());
+        case 'date-asc':
+          return (a.updated_at < b.updated_at) ? -1 : ((a.updated_at > b.updated_at) ? 1 : 0); // eslint-disable-line
+        case 'date-desc':
+          return (b.updated_at < a.updated_at) ? -1 : ((b.updated_at > a.updated_at) ? 1 : 0); // eslint-disable-line
+        default:
+          return 0;
+      }
+    });
+
+    this.setState({ sortedPipelines: sp, page: 0 });
+  }
+
   renderPipelines() {
-    const { page, rowsPerPage, pipelines } = this.state;
-    return pipelines.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((pipeline) => { // eslint-disable-line
+    const { page, rowsPerPage, sortedPipelines } = this.state;
+    return sortedPipelines.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((pipeline) => { // eslint-disable-line
       const date = new Date(pipeline.updated_at);
       return (
         <TableRow
@@ -149,7 +180,7 @@ class Pipelines extends Component {
   }
 
   render() {
-    const { page, rowsPerPage, pipelines } = this.state;
+    const { page, rowsPerPage, pipelines, sortBy, sortDirection } = this.state;
     if (this.state.loading) {
       return (
         <div style={style.refresh.div}>
@@ -181,6 +212,40 @@ class Pipelines extends Component {
             </div>
           </Collapse>
           <Table className="pipeline-list">
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <Tooltip
+                    title="Sort"
+                    placement="bottom-start"
+                    enterDelay={300}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'name'}
+                      direction={sortDirection}
+                      onClick={this.handleSortChange('name')}
+                    >
+                      Pipeline
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Sort"
+                    placement="bottom-start"
+                    enterDelay={300}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'date'}
+                      direction={sortDirection}
+                      onClick={this.handleSortChange('date')}
+                    >
+                      Updated
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            </TableHead>
             <TableBody >
               {this.renderPipelines()}
             </TableBody>

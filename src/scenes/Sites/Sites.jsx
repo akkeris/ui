@@ -4,11 +4,9 @@ import {
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import { Link } from 'react-router-dom';
-
-import api from '../../services/api';
 import SitesList from '../../components/Sites';
-import util from '../../services/util';
-import CustomSelect from '../../components/CustomSelect';
+import FilterSelect from '../../components/FilterSelect';
+import api from '../../services/api';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
@@ -36,10 +34,11 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '12px 0',
+    padding: '16px 0 0',
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    maxHeight: 'unset !important',
   },
   link: {
     textDecoration: 'none',
@@ -66,6 +65,8 @@ class Sites extends Component {
       regions: [],
       region: '',
       loading: true,
+      filters: [],
+      sort: 'site-asc',
     };
   }
 
@@ -76,22 +77,76 @@ class Sites extends Component {
   getData = async () => {
     const { data: sites } = await api.getSites();
     const { data: regions } = await api.getRegions();
+
+    const options = [
+      {
+        label: 'Regions',
+        options: regions.map(region => ({ label: region.name, value: region.name, type: 'region' })),
+      },
+    ];
+
     this.setState({
-      sites: sites.sort((a, b) => a.domain > b.domain),
-      filteredSites: sites.sort((a, b) => a.domain > b.domain),
+      sites,
+      filteredSites: sites,
       regions,
       loading: false,
+      options,
+    }, () => {
+      let values;
+      try {
+        values = JSON.parse(localStorage.getItem('akkeris_site_filters'));
+      } catch (e) {
+        values = [];
+      }
+      this.handleFilterChange(values);
     });
   }
 
-  handleRegionChange = (event) => {
-    const region = event.target.value;
-    const sites = util.filterSites(this.state.sites, region);
-    this.setState({
-      region,
-      filteredSites: sites,
-    });
+  handleFilterChange = (values) => {
+    if (!values || values.length === 0) {
+      this.setState({ filteredSites: this.state.sites, filters: [] }, this.handleSort);
+      localStorage.setItem('akkeris_site_filters', JSON.stringify(values));
+      return;
+    }
+
+    const filterLabel = site => ({ label }) => label.toLowerCase().includes(site.region.name.toLowerCase());
+    const filteredSites = this.state.sites.filter(site => !(values.length > 0 && !values.some(filterLabel(site))));
+
+    this.setState({ filteredSites, filters: values }, this.handleSort);
+
+    localStorage.setItem('akkeris_site_filters', JSON.stringify(values));
   }
+
+
+  handleSort = () => {
+    const { filteredSites, sort } = this.state;
+    let sortedSites = [];
+    if (sort !== '') {
+      sortedSites = filteredSites.sort((a, b) => {
+        switch (sort) {
+          case 'site-asc':
+            return a.domain.replace(/[-._]/g, '').toLowerCase().localeCompare(b.domain.replace(/[-._]/g, '').toLowerCase());
+          case 'site-desc':
+            return b.domain.replace(/[-._]/g, '').toLowerCase().localeCompare(a.domain.replace(/[-._]/g, '').toLowerCase());
+          case 'updated-asc':
+            return (a.updated_at < b.updated_at) ? -1 : ((a.updated_at > b.updated_at) ? 1 : 0); // eslint-disable-line
+          case 'updated-desc':
+            return (b.updated_at < a.updated_at) ? -1 : ((b.updated_at > a.updated_at) ? 1 : 0); // eslint-disable-line
+          case 'region-asc':
+            return a.region.name.toLowerCase().localeCompare(b.region.name.toLowerCase());
+          case 'region-desc':
+            return b.region.name.toLowerCase().localeCompare(a.region.name.toLowerCase());
+          default:
+            return 0;
+        }
+      });
+    } else {
+      sortedSites = filteredSites;
+    }
+    this.setState({ filteredSites: sortedSites });
+  }
+
+  handleSortChange = (column, direction) => this.setState({ sort: `${column}-${direction}` }, this.handleSort);
 
   renderRegions() {
     return this.state.regions.map(region => (
@@ -110,24 +165,23 @@ class Sites extends Component {
     return (
       <div>
         <Toolbar style={style.toolbar} disableGutters>
-          <CustomSelect
-            name="region"
-            value={this.state.region}
-            onChange={this.handleRegionChange}
-            label="Filter by Region"
-            style={style.regionContainer}
-          >
-            <MenuItem className="all" value="all">All</MenuItem>
-            {this.renderRegions()}
-          </CustomSelect>
+          <FilterSelect
+            options={this.state.options}
+            onSelect={this.handleFilterChange}
+            filters={this.state.filters}
+            placeholder="Filter by Region"
+          />
           <Link to="/sites/new" style={style.link}>
-            <IconButton className="new-site" style={{ padding: '6px', marginBottom: '-6px' }}>
+            <IconButton className="new-site" style={{ padding: '6px' }}>
               <AddIcon style={{ color: 'white' }} />
             </IconButton>
           </Link>
         </Toolbar>
         <Paper style={style.paper}>
-          <SitesList sites={this.state.filteredSites} />
+          <SitesList
+            sites={this.state.filteredSites}
+            onSortChange={this.handleSortChange}
+          />
         </Paper>
       </div>
     );
