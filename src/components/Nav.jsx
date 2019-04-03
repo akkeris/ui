@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import deepmerge from 'deepmerge';
 import { Link } from 'react-router-dom';
 import {
-  AppBar, Drawer, Divider, List, ListItem, ListSubheader, ListItemIcon, ListItemText,
-  Toolbar, IconButton,
+  AppBar, Drawer, List, ListItem, ListItemIcon, ListItemText,
+  Toolbar, IconButton, Typography, Tooltip,
 } from '@material-ui/core';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import HomeIcon from '@material-ui/icons/Home';
@@ -24,6 +24,11 @@ import History from '../config/History';
 
 const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
+    MuiTypography: {
+      h5: {
+        fontFamily: 'ProximaNova',
+      },
+    },
     MuiListItemText: {
       primary: {
         fontFamily: 'ProximaNova',
@@ -38,38 +43,52 @@ const theme = parentTheme => deepmerge(parentTheme, {
       root: {
         minHeight: undefined,
         maxHeight: undefined,
+        paddingLeft: '8px !important',
       },
     },
   },
 });
 
 const style = {
+  container: {
+    marginTop: '64px',
+  },
   header: {
     backgroundColor: '#3c4146',
-  },
-  nav: {
-    backgroundColor: '#e72a7e',
   },
   link: {
     textDecoration: 'none',
     display: 'flex',
   },
   title: {
-    div: {
-      textTransform: 'uppercase',
-      fontWeight: 100,
-      fontSize: '18px',
-    },
     img: {
       width: '32px',
       height: '32px',
     },
-    app: {
-      fontWeight: 400,
-    },
+  },
+  routeTitle: {
+    paddingLeft: '24px', color: 'white',
   },
   drawerButton: {
     margin: '0px 18px 0px 0px',
+  },
+  drawer: {
+    zIndex: 1,
+    marginTop: '64px',
+    paddingTop: '12px',
+    transition: '.2s ease all',
+  },
+  drawerOpen: {
+    width: '200px',
+  },
+  drawerClosed: {
+    width: '64px',
+  },
+  navList: {
+    paddingLeft: '4px',
+  },
+  titleContainer: {
+    flexGrow: '1', display: 'flex', alignItems: 'center',
   },
 };
 
@@ -106,6 +125,30 @@ export default class Nav extends Component {
     }
   }
 
+  renderRouteTitle = () => {
+    const route = window.location.pathname.split('/')[1];
+    switch (route) {
+      case 'dashboard':
+        return 'Dashboard';
+      case 'apps':
+        return 'Apps';
+      case 'invoices':
+        return 'Invoices';
+      case 'orgs':
+        return 'Organizations';
+      case 'pipelines':
+        return 'Pipelines';
+      case 'sites':
+        return 'Sites';
+      case 'spaces':
+        return 'Spaces';
+      case 'app-setups':
+        return 'App Setups';
+      default:
+        return 'Page Not Found';
+    }
+  }
+
   render() {
     let accountMenu = (
       <div />
@@ -122,18 +165,23 @@ export default class Nav extends Component {
     }
 
     const title = (
-      <span style={{ flexGrow: '1', display: 'flex', alignItems: 'center' }}>
+      <span style={style.titleContainer}>
         <img alt="akkeris logo" src="/images/akkeris.svg" style={style.title.img} />
+        <Typography variant="h5" style={style.routeTitle}>
+          {this.renderRouteTitle()}
+        </Typography>
       </span>
     );
 
+    const route = window.location.pathname.split('/')[1];
+
     return (
       <MuiThemeProvider theme={theme}>
-        <div>
+        <div style={style.container}>
           <AppBar
             className="appbar"
             style={style.header}
-            position="static"
+            position="fixed"
           >
             <Toolbar>
               <IconButton onClick={this.handleToggle} style={style.drawerButton}>
@@ -145,71 +193,90 @@ export default class Nav extends Component {
             </Toolbar>
           </AppBar>
           <Drawer
+            variant="permanent"
             className="drawer"
-            open={this.state.open}
-            onClose={this.handleToggle}
-            PaperProps={{ style: { width: '250px' } }}
+            PaperProps={{
+              style: {
+                ...style.drawer,
+                ...(this.state.open ? style.drawerOpen : style.drawerClosed),
+              },
+            }}
           >
-            <header>
-              <AppBar
-                className="header"
-                position="static"
-                style={style.nav}
-              >
-                <Toolbar>
-                  <IconButton onClick={this.handleToggle} style={style.drawerButton}>
-                    <MenuIcon nativeColor="white" />
-                  </IconButton>
-                  {title}
-                </Toolbar>
-              </AppBar>
-            </header>
-            <List component="nav">
-              <ListSubheader>Navigation</ListSubheader>
+            <List
+              component="nav"
+              style={style.navList}
+            >
               <Link to="/dashboard" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktodashboard">
-                  <ListItemIcon><HomeIcon /></ListItemIcon>
-                  <ListItemText primary="Dashboard" />
-                </ListItem>
+                <Tooltip placement="right" title="Dashboard">
+                  <ListItem button className="linktodashboard">
+                    <ListItemIcon>
+                      <HomeIcon color={route === 'dashboard' ? 'primary' : undefined} />
+                    </ListItemIcon>
+                    <ListItemText primary="Dashboard" />
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/apps" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktoapps">
-                  <ListItemIcon><AppIcon /></ListItemIcon>
-                  <ListItemText primary="Apps" />
-                </ListItem>
+                <Tooltip placement="right" title="Apps">
+                  <ListItem button className="linktoapps">
+                    <ListItemIcon>
+                      <AppIcon color={route === 'apps' ? 'primary' : undefined} />
+                    </ListItemIcon>
+                    <ListItemText primary="Apps" />
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/invoices" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktoinvoices">
-                  <ListItemIcon><InvoiceIcon /></ListItemIcon>
-                  <ListItemText primary="Invoices" />
-                </ListItem>
+                <Tooltip placement="right" title="Invoices">
+                  <ListItem button className="linktoinvoices">
+                    <ListItemIcon>
+                      <InvoiceIcon color={route === 'invoices' ? 'primary' : undefined} />
+                    </ListItemIcon>
+                    <ListItemText primary="Invoices" />
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/orgs" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktoorgs">
-                  <ListItemIcon><OrgIcon /></ListItemIcon>
-                  <ListItemText primary="Organizations" />
-                </ListItem>
+                <Tooltip placement="right" title="Organizations">
+                  <ListItem button className="linktoorgs">
+                    <ListItemIcon>
+                      <OrgIcon color={route === 'orgs' ? 'primary' : undefined} />
+                    </ListItemIcon>
+                    <ListItemText primary="Organizations" />
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/pipelines" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktopipelines">
-                  <ListItemIcon><PipelinesIcon /></ListItemIcon>
-                  <ListItemText primary="Pipelines" />
-                </ListItem>
+                <Tooltip placement="right" title="Pipelines">
+                  <ListItem button className="linktopipelines">
+                    <ListItemIcon>
+                      <PipelinesIcon color={route === 'pipelines' ? 'primary' : undefined} />
+                    </ListItemIcon>
+                    <ListItemText primary="Pipelines" />
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/sites" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktosites">
-                  <ListItemIcon><RouterIcon /></ListItemIcon>
-                  <ListItemText primary="Sites" />
-                </ListItem>
+                <Tooltip placement="right" title="Sites">
+                  <ListItem button className="linktosites">
+                    <ListItemIcon>
+                      <RouterIcon color={route === 'sites' ? 'primary' : undefined} />
+                    </ListItemIcon>
+                    <ListItemText primary="Sites" />
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/spaces" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktospaces">
-                  <ListItemIcon><SpacesIcon /></ListItemIcon>
-                  <ListItemText primary="Spaces" />
-                </ListItem>
+                <Tooltip placement="right" title="Spaces">
+                  <ListItem button className="linktospaces">
+                    <ListItemIcon>
+                      <SpacesIcon color={route === 'spaces' ? 'primary' : undefined} />
+                    </ListItemIcon>
+                    <ListItemText primary="Spaces" />
+                  </ListItem>
+                </Tooltip>
               </Link>
             </List>
-            <Divider variant="inset" />
           </Drawer>
         </div>
       </MuiThemeProvider>

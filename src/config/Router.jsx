@@ -163,18 +163,20 @@ const Router = () => (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
       <MuiThemeProvider theme={globalTheme}>
         <Nav />
-        <Switch style={{ flex: 1 }}>
-          <Route exact path="/" render={() => <Redirect to="/apps" />} />
-          <Route path="/dashboard" component={DashboardRoutes} />
-          <Route path="/app-setups" component={AppSetupsRoutes} />
-          <Route path="/apps" component={AppRoutes} />
-          <Route path="/orgs" component={OrgRoutes} />
-          <Route path="/pipelines" component={PipelineRoutes} />
-          <Route path="/spaces" component={SpaceRoutes} />
-          <Route path="/invoices" component={InvoiceRoutes} />
-          <Route path="/sites" component={SitesRoutes} />
-          <Route component={PageNotFound} />
-        </Switch>
+        <div style={{ flex: 1, marginLeft: '64px' }}>
+          <Switch>
+            <Route exact path="/" render={() => <Redirect to="/apps" />} />
+            <Route path="/dashboard" component={DashboardRoutes} />
+            <Route path="/app-setups" component={AppSetupsRoutes} />
+            <Route path="/apps" component={AppRoutes} />
+            <Route path="/orgs" component={OrgRoutes} />
+            <Route path="/pipelines" component={PipelineRoutes} />
+            <Route path="/spaces" component={SpaceRoutes} />
+            <Route path="/invoices" component={InvoiceRoutes} />
+            <Route path="/sites" component={SitesRoutes} />
+            <Route component={PageNotFound} />
+          </Switch>
+        </div>
         <canvas id="canv" style={{ position: 'fixed', top: '0', left: '0', zIndex: '-1' }} />
         <Footer />
       </MuiThemeProvider>

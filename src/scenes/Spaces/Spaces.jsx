@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
   Toolbar, Table, TableBody, TableHead, TableRow, TableCell, IconButton, CircularProgress, Paper,
-  TableFooter, TablePagination,
+  TableFooter, TablePagination, TableSortLabel, Tooltip,
 } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import AddIcon from '@material-ui/icons/Add';
@@ -69,6 +69,9 @@ export default class Spaces extends Component {
       spaces: [],
       page: 0,
       rowsPerPage: 15,
+      sortBy: 'space',
+      sortDirection: 'asc',
+      sortedSpaces: [],
     };
   }
 
@@ -78,7 +81,7 @@ export default class Spaces extends Component {
 
   getSpaces = async () => {
     const { data: spaces } = await api.getSpaces();
-    this.setState({ spaces, loading: false });
+    this.setState({ spaces, sortedSpaces: spaces, loading: false });
   }
 
   handleChangePage = (event, page) => {
@@ -88,6 +91,42 @@ export default class Spaces extends Component {
   handleChangeRowsPerPage = (event) => {
     this.setState({ rowsPerPage: event.target.value });
   };
+
+  handleSortChange = column => () => {
+    const sb = column;
+    let sd = 'desc';
+    if (this.state.sortBy === column && this.state.sortDirection === 'desc') {
+      sd = 'asc';
+    }
+    this.setState({ sortBy: sb, sortDirection: sd });
+
+    const { sortedSpaces } = this.state;
+
+    const ss = sortedSpaces.sort((a, b) => {
+      switch (`${sb}-${sd}`) {
+        case 'space-asc':
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        case 'space-desc':
+          return b.name.toLowerCase().localeCompare(a.name.toLowerCase());
+        case 'app-asc':
+          return a.apps - b.apps;
+        case 'app-desc':
+          return b.apps - a.apps;
+        case 'compliance-asc':
+          return a.compliance.sort().join('').toLowerCase().localeCompare(b.compliance.sort().join('').toLowerCase());
+        case 'compliance-desc':
+          return b.compliance.sort().join('').toLowerCase().localeCompare(a.compliance.sort().join('').toLowerCase());
+        case 'stack-asc':
+          return a.stack.name.toLowerCase().localeCompare(b.stack.name.toLowerCase());
+        case 'stack-desc':
+          return b.stack.name.toLowerCase().localeCompare(a.stack.name.toLowerCase());
+        default:
+          return 0;
+      }
+    });
+
+    this.setState({ sortedSpaces: ss, page: 0 });
+  }
 
   renderSpaces(page, rowsPerPage) {
     return this.state.spaces.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(space => (
@@ -110,7 +149,7 @@ export default class Spaces extends Component {
   }
 
   render() {
-    const { spaces, page, rowsPerPage } = this.state;
+    const { spaces, page, rowsPerPage, sortBy, sortDirection } = this.state;
     if (this.state.loading) {
       return (
         <div style={style.refresh.div}>
@@ -131,10 +170,66 @@ export default class Spaces extends Component {
           <Table className="space-list" >
             <TableHead>
               <TableRow>
-                <TableCell>Space</TableCell>
-                <TableCell style={style.tableCell.icon}>Apps</TableCell>
-                <TableCell>Compliance</TableCell>
-                <TableCell>Stack</TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Sort"
+                    placement="bottom-start"
+                    enterDelay={300}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'space'}
+                      direction={sortDirection}
+                      onClick={this.handleSortChange('space')}
+                    >
+                      Space
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Sort"
+                    placement="bottom-start"
+                    enterDelay={300}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'app'}
+                      direction={sortDirection}
+                      onClick={this.handleSortChange('app')}
+                    >
+                      Apps
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Sort"
+                    placement="bottom-start"
+                    enterDelay={300}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'compliance'}
+                      direction={sortDirection}
+                      onClick={this.handleSortChange('compliance')}
+                    >
+                      Compliance
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Sort"
+                    placement="bottom-start"
+                    enterDelay={300}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'stack'}
+                      direction={sortDirection}
+                      onClick={this.handleSortChange('stack')}
+                    >
+                      Stack
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
