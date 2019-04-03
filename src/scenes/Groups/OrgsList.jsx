@@ -1,10 +1,24 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
-  Table, TableBody, TableRow, TableCell, TableFooter, TablePagination,
+  Table, TableBody, TableRow, TableCell, TableFooter, TablePagination, CircularProgress,
 } from '@material-ui/core';
+import api from '../../services/api';
 
 const style = {
+  refresh: {
+    div: {
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      width: '40px',
+      height: '40px',
+      paddingTop: '50px',
+      paddingBottom: '50px',
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
+    },
+  },
   tableRow: {
     height: '58px',
   },
@@ -23,9 +37,20 @@ export default class OrgList extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
+      loading: true,
+      orgs: [],
       page: 0,
       rowsPerPage: 15,
     };
+  }
+
+  componentDidMount() {
+    this.getOrgs();
+  }
+
+  getOrgs = async () => {
+    const { data: orgs } = await api.getOrgs();
+    this.setState({ orgs, loading: false });
   }
 
   handleChangePage = (event, page) => {
@@ -37,7 +62,7 @@ export default class OrgList extends Component {
   };
 
   renderOrgs(page, rowsPerPage) {
-    return this.props.orgs
+    return this.state.orgs
       .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
       .sort((a, b) => a.name.localeCompare(b.name))
       .map(org => (
@@ -51,8 +76,14 @@ export default class OrgList extends Component {
   }
 
   render() {
-    const { orgs } = this.props;
-    const { page, rowsPerPage } = this.state;
+    const { page, rowsPerPage, loading, orgs } = this.state;
+    if (loading) {
+      return (
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} color="primary" status="loading" />
+        </div>
+      );
+    }
     return (
       <div>
         <Table className="org-list">
@@ -79,7 +110,3 @@ export default class OrgList extends Component {
     );
   }
 }
-
-OrgList.propTypes = {
-  orgs: PropTypes.arrayOf(PropTypes.object).isRequired,
-};

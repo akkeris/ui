@@ -2,18 +2,15 @@ import React, { Component } from 'react';
 import deepmerge from 'deepmerge';
 import { Link } from 'react-router-dom';
 import {
-  AppBar, Drawer, List, ListItem, ListItemIcon, ListItemText,
-  Toolbar, IconButton, Typography, Tooltip,
+  AppBar, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography, Tooltip,
 } from '@material-ui/core';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import HomeIcon from '@material-ui/icons/Home';
 import AppIcon from '@material-ui/icons/DeveloperBoard';
-import SpacesIcon from '@material-ui/icons/Toys';
 import PipelinesIcon from '@material-ui/icons/DeviceHub';
 import RouterIcon from '@material-ui/icons/Router';
-import OrgIcon from '@material-ui/icons/Face';
+import GroupsIcon from '@material-ui/icons/Business';
 import InvoiceIcon from '@material-ui/icons/CreditCard';
-import MenuIcon from '@material-ui/icons/Menu';
 import GlobalSearch from './GlobalSearch';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
@@ -74,21 +71,28 @@ const style = {
   },
   drawer: {
     zIndex: 1,
-    marginTop: '64px',
     paddingTop: '12px',
     transition: '.2s ease all',
-  },
-  drawerOpen: {
-    width: '200px',
-  },
-  drawerClosed: {
+    height: '100%',
+    backgroundColor: 'unset',
+    border: 'none',
+    overflow: 'hidden',
     width: '64px',
   },
   navList: {
     paddingLeft: '4px',
+    height: '100%',
   },
   titleContainer: {
-    flexGrow: '1', display: 'flex', alignItems: 'center',
+    flexGrow: '1', display: 'flex', alignItems: 'center', marginLeft: '8px',
+  },
+  listIcon: {
+    color: 'white',
+    opacity: '.5',
+  },
+  listIconActive: {
+    color: 'white',
+    opacity: '1',
   },
 };
 
@@ -134,16 +138,14 @@ export default class Nav extends Component {
         return 'Apps';
       case 'invoices':
         return 'Invoices';
-      case 'orgs':
-        return 'Organizations';
       case 'pipelines':
         return 'Pipelines';
       case 'sites':
         return 'Sites';
-      case 'spaces':
-        return 'Spaces';
       case 'app-setups':
         return 'App Setups';
+      case 'groups':
+        return 'Groups';
       default:
         return 'Page Not Found';
     }
@@ -184,24 +186,12 @@ export default class Nav extends Component {
             position="fixed"
           >
             <Toolbar>
-              <IconButton onClick={this.handleToggle} style={style.drawerButton}>
-                <MenuIcon nativeColor="white" />
-              </IconButton>
               {title}
               <GlobalSearch onSearch={this.handleSearch} maxResults={10} />
               {accountMenu}
             </Toolbar>
           </AppBar>
-          <Drawer
-            variant="permanent"
-            className="drawer"
-            PaperProps={{
-              style: {
-                ...style.drawer,
-                ...(this.state.open ? style.drawerOpen : style.drawerClosed),
-              },
-            }}
-          >
+          <div style={style.drawer}>
             <List
               component="nav"
               style={style.navList}
@@ -210,7 +200,7 @@ export default class Nav extends Component {
                 <Tooltip placement="right" title="Dashboard">
                   <ListItem button className="linktodashboard">
                     <ListItemIcon>
-                      <HomeIcon color={route === 'dashboard' ? 'primary' : undefined} />
+                      <HomeIcon style={route === 'dashboard' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
                     <ListItemText primary="Dashboard" />
                   </ListItem>
@@ -220,7 +210,7 @@ export default class Nav extends Component {
                 <Tooltip placement="right" title="Apps">
                   <ListItem button className="linktoapps">
                     <ListItemIcon>
-                      <AppIcon color={route === 'apps' ? 'primary' : undefined} />
+                      <AppIcon style={route === 'apps' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
                     <ListItemText primary="Apps" />
                   </ListItem>
@@ -230,19 +220,19 @@ export default class Nav extends Component {
                 <Tooltip placement="right" title="Invoices">
                   <ListItem button className="linktoinvoices">
                     <ListItemIcon>
-                      <InvoiceIcon color={route === 'invoices' ? 'primary' : undefined} />
+                      <InvoiceIcon style={route === 'invoices' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
                     <ListItemText primary="Invoices" />
                   </ListItem>
                 </Tooltip>
               </Link>
-              <Link to="/orgs" style={style.link} onClick={this.handleClose}>
-                <Tooltip placement="right" title="Organizations">
-                  <ListItem button className="linktoorgs">
+              <Link to="/groups" style={style.link} onClick={this.handleClose}>
+                <Tooltip placement="right" title="Groups">
+                  <ListItem button className="linktogroups">
                     <ListItemIcon>
-                      <OrgIcon color={route === 'orgs' ? 'primary' : undefined} />
+                      <GroupsIcon style={route === 'groups' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
-                    <ListItemText primary="Organizations" />
+                    <ListItemText primary="Groups" />
                   </ListItem>
                 </Tooltip>
               </Link>
@@ -250,7 +240,7 @@ export default class Nav extends Component {
                 <Tooltip placement="right" title="Pipelines">
                   <ListItem button className="linktopipelines">
                     <ListItemIcon>
-                      <PipelinesIcon color={route === 'pipelines' ? 'primary' : undefined} />
+                      <PipelinesIcon style={route === 'pipelines' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
                     <ListItemText primary="Pipelines" />
                   </ListItem>
@@ -260,24 +250,14 @@ export default class Nav extends Component {
                 <Tooltip placement="right" title="Sites">
                   <ListItem button className="linktosites">
                     <ListItemIcon>
-                      <RouterIcon color={route === 'sites' ? 'primary' : undefined} />
+                      <RouterIcon style={route === 'sites' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
                     <ListItemText primary="Sites" />
                   </ListItem>
                 </Tooltip>
               </Link>
-              <Link to="/spaces" style={style.link} onClick={this.handleClose}>
-                <Tooltip placement="right" title="Spaces">
-                  <ListItem button className="linktospaces">
-                    <ListItemIcon>
-                      <SpacesIcon color={route === 'spaces' ? 'primary' : undefined} />
-                    </ListItemIcon>
-                    <ListItemText primary="Spaces" />
-                  </ListItem>
-                </Tooltip>
-              </Link>
             </List>
-          </Drawer>
+          </div>
         </div>
       </MuiThemeProvider>
     );
