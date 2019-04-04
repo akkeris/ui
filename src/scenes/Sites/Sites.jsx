@@ -50,6 +50,7 @@ const style = {
     marginRight: 'auto',
     marginTop: '12px',
     marginBottom: '12px',
+    overflow: 'auto',
   },
   regionContainer: {
     minWidth: '145px',
@@ -109,8 +110,13 @@ class Sites extends Component {
       return;
     }
 
-    const filterLabel = site => ({ label }) => label.toLowerCase().includes(site.region.name.toLowerCase());
-    const filteredSites = this.state.sites.filter(site => !(values.length > 0 && !values.some(filterLabel(site))));
+    const filterLabel = site => ({ label }) => (
+      label.toLowerCase().includes(site.region.name.toLowerCase())
+    );
+
+    const filteredSites = this.state.sites.filter(site => (
+      !(values.length > 0 && !values.some(filterLabel(site)))),
+    );
 
     this.setState({ filteredSites, filters: values }, this.handleSort);
 

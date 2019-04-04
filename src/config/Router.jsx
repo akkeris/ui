@@ -69,24 +69,24 @@ const PipelineRoutes = () => (
   </Switch>
 );
 
-const Groups = Loadable({
-  loader: () => import('../scenes/Groups/Groups'),
+const Collections = Loadable({
+  loader: () => import('../scenes/Collections/Collections'),
   loading: Loading,
 });
 const NewOrg = Loadable({
-  loader: () => import('../scenes/Groups/NewOrg'),
+  loader: () => import('../scenes/Collections/NewOrg'),
   loading: Loading,
 });
 const NewSpace = Loadable({
-  loader: () => import('../scenes/Groups/NewSpace'),
+  loader: () => import('../scenes/Collections/NewSpace'),
   loading: Loading,
 });
 
-const GroupsRoutes = () => (
+const CollectionsRoutes = () => (
   <Switch>
-    <Route exact path="/groups/new-space" component={NewSpace} />
-    <Route exact path="/groups/new-org" component={NewOrg} />
-    <Route exact path="/groups" component={Groups} />
+    <Route exact path="/collections/new-space" component={NewSpace} />
+    <Route exact path="/collections/new-org" component={NewOrg} />
+    <Route exact path="/collections" component={Collections} />
   </Switch>
 );
 
@@ -154,19 +154,20 @@ const Router = () => (
         <div style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%' }}>
           <Nav />
           <div style={{ flex: 1, marginTop: '64px' }}>
-            <Switch>
-              <Route exact path="/" render={() => <Redirect to="/apps" />} />
-              <Route path="/dashboard" component={DashboardRoutes} />
-              <Route path="/app-setups" component={AppSetupsRoutes} />
-              <Route path="/apps" component={AppRoutes} />
-              <Route path="/pipelines" component={PipelineRoutes} />
-              <Route path="/invoices" component={InvoiceRoutes} />
-              <Route path="/sites" component={SitesRoutes} />
-              <Route path="/groups" component={GroupsRoutes} />
-              <Route component={PageNotFound} />
-            </Switch>
+            <div style={{ width: 'calc(100% - 64px)' }}>
+              <Switch>
+                <Route exact path="/" render={() => <Redirect to="/apps" />} />
+                <Route path="/dashboard" component={DashboardRoutes} />
+                <Route path="/app-setups" component={AppSetupsRoutes} />
+                <Route path="/apps" component={AppRoutes} />
+                <Route path="/pipelines" component={PipelineRoutes} />
+                <Route path="/invoices" component={InvoiceRoutes} />
+                <Route path="/sites" component={SitesRoutes} />
+                <Route path="/collections" component={CollectionsRoutes} />
+                <Route component={PageNotFound} />
+              </Switch>
+            </div>
           </div>
-          <canvas id="canv" style={{ position: 'fixed', top: '0', left: '0', zIndex: '-1' }} />
         </div>
         <Footer />
       </MuiThemeProvider>

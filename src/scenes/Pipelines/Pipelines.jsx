@@ -39,6 +39,7 @@ const style = {
     marginRight: 'auto',
     marginTop: '12px',
     marginBottom: '12px',
+    overflow: 'auto',
   },
   tableRow: {
     height: '58px',

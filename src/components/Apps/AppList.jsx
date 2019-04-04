@@ -99,7 +99,7 @@ export default class AppList extends Component {
   render() {
     const { rowsPerPage, page, sortBy, sortDirection } = this.state;
     return (
-      <div style={{ marginBottom: '12px' }}>
+      <div style={{ marginBottom: '12px', overflow: 'auto' }}>
         <Table className="app-list">
           <colgroup>
             <col style={{ width: '40%' }} />

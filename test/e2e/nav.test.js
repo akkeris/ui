@@ -15,20 +15,19 @@ fixture('Navigation') // eslint-disable-line no-undef
   });
 
 test('Should show title bar and navigation', async (t) => { // eslint-disable-line no-undef
-  const button = Selector('.appbar button');
-
   await t
-    .click(button)
-    .expect(Selector('.linktoapps').innerText)
-    .contains('Apps')
-    .expect(Selector('.linktopipelines').innerText)
-    .contains('Pipelines')
-    .expect(Selector('.linktospaces').innerText)
-    .contains('Spaces')
-    .expect(Selector('.linktoorgs').innerText)
-    .contains('Organizations')
-    .expect(Selector('.linktoinvoices').innerText)
-    .contains('Invoices');
+    .expect(Selector('.linktodashboard').exists)
+    .ok()
+    .expect(Selector('.linktoapps').exists)
+    .ok()
+    .expect(Selector('.linktoinvoices').exists)
+    .ok()
+    .expect(Selector('.linktocollections').exists)
+    .ok()
+    .expect(Selector('.linktopipelines').exists)
+    .ok()
+    .expect(Selector('.linktosites').exists)
+    .ok();
 });
 
 test('Should show account menu and logout', async (t) => { // eslint-disable-line no-undef

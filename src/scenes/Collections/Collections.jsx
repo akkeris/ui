@@ -15,6 +15,7 @@ const style = {
     marginLeft: 'auto',
     marginRight: 'auto',
     marginBottom: '12px',
+    overflow: 'auto',
   },
   toolbar: {
     backgroundColor: 'rgba(0,0,0,0)',
@@ -29,7 +30,7 @@ const style = {
   },
 };
 
-export default class Groups extends Component {
+export default class Collections extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -43,7 +44,7 @@ export default class Groups extends Component {
 
   handleNew = () => {
     const { tab } = this.state;
-    History.get().push(`/groups/${tab === 0 ? 'new-space' : 'new-org'}`);
+    History.get().push(`/collections/${tab === 0 ? 'new-space' : 'new-org'}`);
   }
 
   render() {
@@ -56,7 +57,7 @@ export default class Groups extends Component {
             className="new-group"
             style={{ marginLeft: 'auto', padding: '6px', marginBottom: '-6px' }}
           >
-            <AddIcon style={{ color: 'white' }} />
+            <AddIcon style={{ color: 'white' }} className={tab === 0 ? 'new-space' : 'new-org'} />
           </IconButton>
         </Toolbar>
         <Paper style={style.paper}>
@@ -67,8 +68,8 @@ export default class Groups extends Component {
             textColor="inherit"
             centered
           >
-            <Tab label="Spaces" />
-            <Tab label="Orgs" />
+            <Tab label="Spaces" className="spaces-tab" />
+            <Tab label="Orgs" className="orgs-tab" />
           </Tabs>
           {tab === 0 && <SpacesList />}
           {tab === 1 && <OrgList />}

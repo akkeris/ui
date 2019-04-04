@@ -35,7 +35,6 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginBottom: '12px',
   },
   tableRow: {
     height: '58px',

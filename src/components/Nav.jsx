@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import deepmerge from 'deepmerge';
 import { Link } from 'react-router-dom';
 import {
-  AppBar, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography, Tooltip,
+  AppBar, List, ListItem, ListItemIcon, Toolbar, Typography, Tooltip,
 } from '@material-ui/core';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import HomeIcon from '@material-ui/icons/Home';
@@ -144,8 +144,8 @@ export default class Nav extends Component {
         return 'Sites';
       case 'app-setups':
         return 'App Setups';
-      case 'groups':
-        return 'Groups';
+      case 'collections':
+        return 'Collections';
       default:
         return 'Page Not Found';
     }
@@ -202,7 +202,6 @@ export default class Nav extends Component {
                     <ListItemIcon>
                       <HomeIcon style={route === 'dashboard' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
-                    <ListItemText primary="Dashboard" />
                   </ListItem>
                 </Tooltip>
               </Link>
@@ -212,7 +211,6 @@ export default class Nav extends Component {
                     <ListItemIcon>
                       <AppIcon style={route === 'apps' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
-                    <ListItemText primary="Apps" />
                   </ListItem>
                 </Tooltip>
               </Link>
@@ -222,17 +220,15 @@ export default class Nav extends Component {
                     <ListItemIcon>
                       <InvoiceIcon style={route === 'invoices' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
-                    <ListItemText primary="Invoices" />
                   </ListItem>
                 </Tooltip>
               </Link>
-              <Link to="/groups" style={style.link} onClick={this.handleClose}>
-                <Tooltip placement="right" title="Groups">
-                  <ListItem button className="linktogroups">
+              <Link to="/collections" style={style.link} onClick={this.handleClose}>
+                <Tooltip placement="right" title="Collections">
+                  <ListItem button className="linktocollections">
                     <ListItemIcon>
-                      <GroupsIcon style={route === 'groups' ? style.listIconActive : style.listIcon} />
+                      <GroupsIcon style={route === 'collections' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
-                    <ListItemText primary="Groups" />
                   </ListItem>
                 </Tooltip>
               </Link>
@@ -242,7 +238,6 @@ export default class Nav extends Component {
                     <ListItemIcon>
                       <PipelinesIcon style={route === 'pipelines' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
-                    <ListItemText primary="Pipelines" />
                   </ListItem>
                 </Tooltip>
               </Link>
@@ -252,7 +247,6 @@ export default class Nav extends Component {
                     <ListItemIcon>
                       <RouterIcon style={route === 'sites' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
-                    <ListItemText primary="Sites" />
                   </ListItem>
                 </Tooltip>
               </Link>
