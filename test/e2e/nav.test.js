@@ -42,6 +42,6 @@ test('Should show account menu and logout', async (t) => { // eslint-disable-lin
     .expect(logout.innerText)
     .contains('Logout')
     .click(logout)
-    .expect(Selector('button.login').innerText)
-    .contains('Login');
+    .expect(Selector('h1').innerText)
+    .contains('You Have Been Logged Out');
 });
