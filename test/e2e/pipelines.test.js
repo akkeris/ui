@@ -71,6 +71,7 @@ test('Should be able to create and delete pipeline', async (t) => { // eslint-di
     .click('button.next')
 
     // check if pipeline was created
+    .navigateTo(`${baseUrl}/pipelines`)
     .click('.pipeline-list .testcafe')
     .expect(Selector('.card .header').innerText)
     .contains('testcafe')
@@ -108,8 +109,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafepipe1-testcafe').exists)
       .ok()
 
@@ -125,8 +126,9 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .click('.filter-select-clear')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafepipe2-testcafe').exists)
       .ok()
 
@@ -142,8 +144,9 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .click('.filter-select-clear')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafepipe3-testcafe').exists)
       .ok()
 
@@ -185,6 +188,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.new-pipeline')
       .typeText('.pipeline-name input', 'testcafe')
       .click('button.next')
+      .navigateTo(`${baseUrl}/pipelines`)
       .click('.pipeline-list .testcafe')
       .expect(Selector('.card .header').innerText)
       .contains('testcafe');
@@ -196,8 +200,9 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.info-tab')
       .click('button.delete')
       .click('.delete-confirm .ok')
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .click('.filter-select-clear')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafepipe1').exists)
       .notOk()
 
@@ -206,8 +211,9 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.info-tab')
       .click('button.delete')
       .click('.delete-confirm .ok')
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .click('.filter-select-clear')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafepipe2').exists)
       .notOk()
 
@@ -216,8 +222,9 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.info-tab')
       .click('button.delete')
       .click('.delete-confirm .ok')
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .click('.filter-select-clear')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafepipe3').exists)
       .notOk()
 

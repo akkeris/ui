@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import AsyncSelect from 'react-select/lib/Async';
+import { ClearIndicator } from 'react-select/lib/components/indicators';
 import {
   NoSsr, Typography, TextField, MenuItem, Paper, Divider, InputAdornment, CircularProgress,
   Chip,
@@ -116,9 +117,9 @@ const Control = props => (
     InputProps={{
       disableUnderline: true,
       inputComponent,
-      className: props.selectProps.classes.Input,
+      className: `${props.selectProps.classes.Input}`,
       inputProps: {
-        className: `${props.selectProps.classes.input}`,
+        className: `${props.selectProps.classes.input} filter-select-input`,
         inputRef: props.inputRef,
         children: props.children,
         ...props.innerProps,
@@ -154,6 +155,7 @@ const Option = props => (
     buttonRef={props.innerRef}
     selected={props.isFocused}
     component="div"
+    className={props.children}
     style={{ fontWeight: props.isSelected ? 500 : 400 }}
     {...props.innerProps}
   >
@@ -209,6 +211,9 @@ const ValueContainer = props => (
 
 const LoadingIndicator = props => <CircularProgress size={20} className={props.selectProps.classes.loadingIndicator} color="inherit" />; // eslint-disable-line
 
+const CustomClearIndicator = props => <div className="filter-select-clear"><ClearIndicator {...props} /></div>;
+
+
 const components = {
   Control,
   Menu,
@@ -220,6 +225,7 @@ const components = {
   Placeholder,
   GroupHeading,
   LoadingIndicator,
+  ClearIndicator: CustomClearIndicator,
 };
 
 let timer = null;
@@ -288,6 +294,7 @@ class FilterSelect extends PureComponent {
                 onSelect(inputValues);
               }}
               placeholder={placeholder}
+              Cle
               noOptionsMessage={({ inputValue }) => (inputValue.length > 0 ? 'No results' : 'Start typing...')}
               isMulti
             />

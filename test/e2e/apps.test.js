@@ -22,22 +22,22 @@ test('Should show list of apps based on filter', async (t) => { // eslint-disabl
     .expect(Selector('.app-list .api-default').innerText)
     .contains('api-default')
 
-    .click('.region-dropdown')
-    .expect(Selector('#menu-region .us-seattle').innerText)
-    .contains('us-seattle')
+    .click('.filter-select-input')
+    .expect(Selector('.filter-select-results .us-seattle').exists)
+    .ok()
+    .click('.filter-select-results .us-seattle')
 
-    .click('#menu-region .us-seattle')
+    .click('.filter-select-input')
+    .expect(Selector('.filter-select-results .default').exists)
+    .ok()
+    .click('.filter-select-results .default')
 
-    .click('.space-dropdown')
-    .expect(Selector('#menu-space .default').innerText)
-    .contains('default')
-
-    .click('#menu-space .default')
     .expect(Selector('.app-list .api-default').innerText)
     .contains('default')
 
-    .click('.space-dropdown')
-    .click('#menu-space .test')
+    .click('.filter-select-clear')
+    .typeText(Selector('.filter-select-input input'), 'test')
+    .click('.filter-select-results .test')
     .expect(Selector('.app-list tbody').childElementCount)
     .eql(0);
 });
@@ -106,8 +106,8 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
 
     // Verify that app exists
     .navigateTo(`${baseUrl}/apps`)
-    .click('.space-dropdown')
-    .click('#menu-space .testcafe')
+    .typeText(Selector('.filter-select-input input'), 'testcafe')
+    .click('.filter-select-results .testcafe')
     .expect(Selector('.app-list .testcafe-testcafe').exists)
     .ok()
 
@@ -130,11 +130,12 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .expect(Selector('.new-app-error').innerText)
     .contains('The requested application already exists.')
     .click('.ok')
-
     .navigateTo(`${baseUrl}/apps`)
-    // check if app was created
-    .click('.space-dropdown')
-    .click('#menu-space .testcafe')
+    .click('.filter-select-clear')
+
+  // check if app was created
+    .typeText(Selector('.filter-select-input input'), 'testcafe')
+    .click('.filter-select-results .testcafe')
     .click('.app-list .testcafe-testcafe')
     .expect(Selector('.card .header').innerText)
     .contains('testcafe-testcafe')
@@ -175,8 +176,8 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok();
   })
@@ -418,8 +419,8 @@ test // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok()
 
@@ -437,8 +438,9 @@ test // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .click('.filter-select-clear')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafe2-testcafe').exists)
       .ok();
   })('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef
