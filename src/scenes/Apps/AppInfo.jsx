@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {
-  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, Tooltip, IconButton,
+  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
+  Tooltip, IconButton, Menu, MenuItem, Divider,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
@@ -13,6 +14,8 @@ import LogIcon from '@material-ui/icons/Visibility';
 import ConfigIcon from '@material-ui/icons/Tune';
 import AppIcon from '@material-ui/icons/Launch';
 import ReleaseIcon from '@material-ui/icons/Cloud';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+
 import GitIcon from '../../components/Icons/GitIcon';
 import WebhookIcon from '../../components/Icons/WebhookIcon';
 import Formations from '../../components/Formations';
@@ -60,6 +63,7 @@ export default class AppInfo extends Component {
       loading: true,
       submitMessage: '',
       submitFail: false,
+      anchorEl: null,
       open: false,
       message: '',
       currentTab: 'info',
@@ -107,9 +111,13 @@ export default class AppInfo extends Component {
     }
   }
 
-  handleClose = () => {
-    this.setState({ submitFail: false });
-  }
+  handleMenuClick = (event) => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
+
+  handleMenuClose = () => {
+    this.setState({ anchorEl: null });
+  };
 
   handleFavorite = () => {
     if (this.state.isFavorite) {
@@ -146,6 +154,8 @@ export default class AppInfo extends Component {
   }
 
   renderHeaderActions() {
+    const { anchorEl } = this.state;
+    const menuOpen = Boolean(anchorEl);
     return (
       <div style={{ display: 'flex', justifyContent: this.state.app.git_url ? 'space-between' : 'space-evenly' }}>
         {this.state.app.git_url && (
@@ -177,6 +187,24 @@ export default class AppInfo extends Component {
             {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
           </IconButton>
         </Tooltip>
+
+        <IconButton
+          onClick={this.handleMenuClick}
+        >
+          <MoreVertIcon />
+        </IconButton>
+        <Menu
+          id="long-menu"
+          open={menuOpen}
+          anchorEl={anchorEl}
+          onClose={this.handleMenuClose}
+        >
+          <MenuItem onClick={this.handleClose}>
+                Merp
+          </MenuItem>
+          <Divider />
+          <MenuItem />
+        </Menu>
       </div>
     );
   }
