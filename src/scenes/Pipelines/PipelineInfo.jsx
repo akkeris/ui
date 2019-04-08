@@ -229,6 +229,7 @@ export default class PipelineInfo extends Component {
             value={this.state.currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"
+            indicatorColor="primary"
           >
             <Tab
               disableRipple

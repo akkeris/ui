@@ -157,6 +157,7 @@ export default class SiteInfo extends Component {
             value={this.state.currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"
+            indicatorColor="primary"
           >
             <Tab
               className="info-tab"

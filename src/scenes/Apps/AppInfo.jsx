@@ -227,6 +227,7 @@ export default class AppInfo extends Component {
             value={this.state.currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"
+            indicatorColor="primary"
           >
             <Tab
               disableRipple
