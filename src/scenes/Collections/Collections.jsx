@@ -64,7 +64,7 @@ export default class Collections extends Component {
           <Tabs
             value={tab}
             onChange={this.handleChange}
-            indicatorColor="secondary"
+            indicatorColor="primary"
             textColor="inherit"
             centered
           >
