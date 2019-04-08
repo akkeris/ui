@@ -223,10 +223,11 @@ export default class AppInfo extends Component {
             }
           />
           <Tabs
-            variant="fullWidth"
+            fullWidth
             value={this.state.currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"
+            indicatorColor="primary"
           >
             <Tab
               disableRipple
