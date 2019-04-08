@@ -69,35 +69,24 @@ const PipelineRoutes = () => (
   </Switch>
 );
 
-const Orgs = Loadable({
-  loader: () => import('../scenes/Orgs/Orgs'),
+const Collections = Loadable({
+  loader: () => import('../scenes/Collections/Collections'),
   loading: Loading,
 });
 const NewOrg = Loadable({
-  loader: () => import('../scenes/Orgs/NewOrg'),
-  loading: Loading,
-});
-
-const OrgRoutes = () => (
-  <Switch>
-    <Route exact path="/orgs" component={Orgs} />
-    <Route exact path="/orgs/new" component={NewOrg} />
-  </Switch>
-);
-
-const Spaces = Loadable({
-  loader: () => import('../scenes/Spaces/Spaces'),
+  loader: () => import('../scenes/Collections/NewOrg'),
   loading: Loading,
 });
 const NewSpace = Loadable({
-  loader: () => import('../scenes/Spaces/NewSpace'),
+  loader: () => import('../scenes/Collections/NewSpace'),
   loading: Loading,
 });
 
-const SpaceRoutes = () => (
+const CollectionsRoutes = () => (
   <Switch>
-    <Route exact path="/spaces" component={Spaces} />
-    <Route exact path="/spaces/new" component={NewSpace} />
+    <Route exact path="/collections/new-space" component={NewSpace} />
+    <Route exact path="/collections/new-org" component={NewOrg} />
+    <Route exact path="/collections" component={Collections} />
   </Switch>
 );
 
@@ -162,20 +151,24 @@ const Router = () => (
   <BrowserRouter history={History.get()}>
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
       <MuiThemeProvider theme={globalTheme}>
-        <Nav />
-        <Switch style={{ flex: 1 }}>
-          <Route exact path="/" render={() => <Redirect to="/apps" />} />
-          <Route path="/dashboard" component={DashboardRoutes} />
-          <Route path="/app-setups" component={AppSetupsRoutes} />
-          <Route path="/apps" component={AppRoutes} />
-          <Route path="/orgs" component={OrgRoutes} />
-          <Route path="/pipelines" component={PipelineRoutes} />
-          <Route path="/spaces" component={SpaceRoutes} />
-          <Route path="/invoices" component={InvoiceRoutes} />
-          <Route path="/sites" component={SitesRoutes} />
-          <Route component={PageNotFound} />
-        </Switch>
-        <canvas id="canv" style={{ position: 'fixed', top: '0', left: '0', zIndex: '-1' }} />
+        <div style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%' }}>
+          <Nav />
+          <div style={{ flex: 1, marginTop: '64px' }}>
+            <div style={{ width: 'calc(100% - 64px)' }}>
+              <Switch>
+                <Route exact path="/" render={() => <Redirect to="/apps" />} />
+                <Route path="/dashboard" component={DashboardRoutes} />
+                <Route path="/app-setups" component={AppSetupsRoutes} />
+                <Route path="/apps" component={AppRoutes} />
+                <Route path="/pipelines" component={PipelineRoutes} />
+                <Route path="/invoices" component={InvoiceRoutes} />
+                <Route path="/sites" component={SitesRoutes} />
+                <Route path="/collections" component={CollectionsRoutes} />
+                <Route component={PageNotFound} />
+              </Switch>
+            </div>
+          </div>
+        </div>
         <Footer />
       </MuiThemeProvider>
     </div>

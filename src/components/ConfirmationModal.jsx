@@ -75,7 +75,7 @@ ConfirmationModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onOk: PropTypes.func.isRequired,
   onCancel: PropTypes.func,
-  message: PropTypes.string.isRequired,
+  message: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
   title: PropTypes.string,
   className: PropTypes.string,
   actions: PropTypes.object, // eslint-disable-line react/forbid-prop-types

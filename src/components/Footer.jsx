@@ -42,6 +42,7 @@ const style = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 100,
   },
   paragraph: {
     margin: '0 auto',

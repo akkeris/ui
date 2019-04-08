@@ -50,8 +50,8 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok()
       .navigateTo(`${baseUrl}/dashboard`);
@@ -73,24 +73,16 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
 test('Should allow favorite of app and addition or removal to dashboard', async (t) => { // eslint-disable-line no-undef
   await t
     .expect(Selector('.favorites-list tbody').childElementCount)
-    .eql(0)
-
-    .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
-    .click('button.favorite-app')
-
-    .navigateTo(`${baseUrl}/dashboard`)
-    .expect(Selector('.favorites-list tbody').childElementCount)
     .gt(0)
-
     .expect(Selector('.favorites-list .testcafe-testcafe').innerText)
-    .contains('testcafe-testcafe')
+    .contains('testcafe-testcafe', 'App was not automatically added as favorite on creation')
 
     .click('.favorites-list .testcafe-testcafe')
     .click('button.favorite-app')
 
     .navigateTo(`${baseUrl}/dashboard`)
     .expect(Selector('.favorites-list tbody').childElementCount)
-    .eql(0);
+    .eql(0, 'App was not successfully removed as a favorite');
 });
 
 fixture('Recents Tab') // eslint-disable-line no-undef
@@ -118,8 +110,8 @@ fixture('Recents Tab') // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok()
       .navigateTo(`${baseUrl}/dashboard`)

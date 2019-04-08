@@ -263,7 +263,7 @@ class AppOverview extends Component {
               {'Last Release and Most Recent Changes'}
             </div>
             <div style={style.tableCell.sub}>
-              {Date(this.props.app.released_at).toLocaleString()}
+              {new Date(this.props.app.released_at).toString()}
             </div>
           </div>
           <FormGroup>

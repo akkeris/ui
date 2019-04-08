@@ -2,18 +2,15 @@ import React, { Component } from 'react';
 import deepmerge from 'deepmerge';
 import { Link } from 'react-router-dom';
 import {
-  AppBar, Drawer, Divider, List, ListItem, ListSubheader, ListItemIcon, ListItemText,
-  Toolbar, IconButton,
+  AppBar, List, ListItem, ListItemIcon, Toolbar, Typography, Tooltip,
 } from '@material-ui/core';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import HomeIcon from '@material-ui/icons/Home';
 import AppIcon from '@material-ui/icons/DeveloperBoard';
-import SpacesIcon from '@material-ui/icons/Toys';
 import PipelinesIcon from '@material-ui/icons/DeviceHub';
 import RouterIcon from '@material-ui/icons/Router';
-import OrgIcon from '@material-ui/icons/Face';
+import GroupsIcon from '@material-ui/icons/Business';
 import InvoiceIcon from '@material-ui/icons/CreditCard';
-import MenuIcon from '@material-ui/icons/Menu';
 import GlobalSearch from './GlobalSearch';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
@@ -24,6 +21,11 @@ import History from '../config/History';
 
 const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
+    MuiTypography: {
+      h5: {
+        fontFamily: 'ProximaNova',
+      },
+    },
     MuiListItemText: {
       primary: {
         fontFamily: 'ProximaNova',
@@ -38,38 +40,59 @@ const theme = parentTheme => deepmerge(parentTheme, {
       root: {
         minHeight: undefined,
         maxHeight: undefined,
+        paddingLeft: '8px !important',
       },
     },
   },
 });
 
 const style = {
+  container: {
+    marginTop: '64px',
+  },
   header: {
     backgroundColor: '#3c4146',
-  },
-  nav: {
-    backgroundColor: '#e72a7e',
   },
   link: {
     textDecoration: 'none',
     display: 'flex',
   },
   title: {
-    div: {
-      textTransform: 'uppercase',
-      fontWeight: 100,
-      fontSize: '18px',
-    },
     img: {
       width: '32px',
       height: '32px',
     },
-    app: {
-      fontWeight: 400,
-    },
+  },
+  routeTitle: {
+    paddingLeft: '24px', color: 'white',
   },
   drawerButton: {
     margin: '0px 18px 0px 0px',
+  },
+  drawer: {
+    zIndex: 1,
+    paddingTop: '12px',
+    transition: '.2s ease all',
+    height: '100%',
+    backgroundColor: 'unset',
+    border: 'none',
+    overflow: 'hidden',
+    width: '64px',
+  },
+  navList: {
+    paddingLeft: '4px',
+    height: '100%',
+  },
+  titleContainer: {
+    flexGrow: '1', display: 'flex', alignItems: 'center', marginLeft: '8px',
+  },
+  listIcon: {
+    color: 'white',
+    opacity: '.5',
+  },
+  listIconActive: {
+    color: 'white',
+    opacity: '1',
   },
 };
 
@@ -106,6 +129,28 @@ export default class Nav extends Component {
     }
   }
 
+  renderRouteTitle = () => {
+    const route = window.location.pathname.split('/')[1];
+    switch (route) {
+      case 'dashboard':
+        return 'Dashboard';
+      case 'apps':
+        return 'Apps';
+      case 'invoices':
+        return 'Invoices';
+      case 'pipelines':
+        return 'Pipelines';
+      case 'sites':
+        return 'Sites';
+      case 'app-setups':
+        return 'App Setups';
+      case 'collections':
+        return 'Collections';
+      default:
+        return 'Page Not Found';
+    }
+  }
+
   render() {
     let accountMenu = (
       <div />
@@ -122,95 +167,91 @@ export default class Nav extends Component {
     }
 
     const title = (
-      <span style={{ flexGrow: '1', display: 'flex', alignItems: 'center' }}>
+      <span style={style.titleContainer}>
         <img alt="akkeris logo" src="/images/akkeris.svg" style={style.title.img} />
+        <Typography variant="h5" style={style.routeTitle}>
+          {this.renderRouteTitle()}
+        </Typography>
       </span>
     );
 
+    const route = window.location.pathname.split('/')[1];
+
     return (
       <MuiThemeProvider theme={theme}>
-        <div>
+        <div style={style.container}>
           <AppBar
             className="appbar"
             style={style.header}
-            position="static"
+            position="fixed"
           >
             <Toolbar>
-              <IconButton onClick={this.handleToggle} style={style.drawerButton}>
-                <MenuIcon nativeColor="white" />
-              </IconButton>
               {title}
               <GlobalSearch onSearch={this.handleSearch} maxResults={10} />
               {accountMenu}
             </Toolbar>
           </AppBar>
-          <Drawer
-            className="drawer"
-            open={this.state.open}
-            onClose={this.handleToggle}
-            PaperProps={{ style: { width: '250px' } }}
-          >
-            <header>
-              <AppBar
-                className="header"
-                position="static"
-                style={style.nav}
-              >
-                <Toolbar>
-                  <IconButton onClick={this.handleToggle} style={style.drawerButton}>
-                    <MenuIcon nativeColor="white" />
-                  </IconButton>
-                  {title}
-                </Toolbar>
-              </AppBar>
-            </header>
-            <List component="nav">
-              <ListSubheader>Navigation</ListSubheader>
+          <div style={style.drawer}>
+            <List
+              component="nav"
+              style={style.navList}
+            >
               <Link to="/dashboard" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktodashboard">
-                  <ListItemIcon><HomeIcon /></ListItemIcon>
-                  <ListItemText primary="Dashboard" />
-                </ListItem>
+                <Tooltip placement="right" title="Dashboard">
+                  <ListItem button className="linktodashboard">
+                    <ListItemIcon>
+                      <HomeIcon style={route === 'dashboard' ? style.listIconActive : style.listIcon} />
+                    </ListItemIcon>
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/apps" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktoapps">
-                  <ListItemIcon><AppIcon /></ListItemIcon>
-                  <ListItemText primary="Apps" />
-                </ListItem>
+                <Tooltip placement="right" title="Apps">
+                  <ListItem button className="linktoapps">
+                    <ListItemIcon>
+                      <AppIcon style={route === 'apps' ? style.listIconActive : style.listIcon} />
+                    </ListItemIcon>
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/invoices" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktoinvoices">
-                  <ListItemIcon><InvoiceIcon /></ListItemIcon>
-                  <ListItemText primary="Invoices" />
-                </ListItem>
+                <Tooltip placement="right" title="Invoices">
+                  <ListItem button className="linktoinvoices">
+                    <ListItemIcon>
+                      <InvoiceIcon style={route === 'invoices' ? style.listIconActive : style.listIcon} />
+                    </ListItemIcon>
+                  </ListItem>
+                </Tooltip>
               </Link>
-              <Link to="/orgs" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktoorgs">
-                  <ListItemIcon><OrgIcon /></ListItemIcon>
-                  <ListItemText primary="Organizations" />
-                </ListItem>
+              <Link to="/collections" style={style.link} onClick={this.handleClose}>
+                <Tooltip placement="right" title="Collections">
+                  <ListItem button className="linktocollections">
+                    <ListItemIcon>
+                      <GroupsIcon style={route === 'collections' ? style.listIconActive : style.listIcon} />
+                    </ListItemIcon>
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/pipelines" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktopipelines">
-                  <ListItemIcon><PipelinesIcon /></ListItemIcon>
-                  <ListItemText primary="Pipelines" />
-                </ListItem>
+                <Tooltip placement="right" title="Pipelines">
+                  <ListItem button className="linktopipelines">
+                    <ListItemIcon>
+                      <PipelinesIcon style={route === 'pipelines' ? style.listIconActive : style.listIcon} />
+                    </ListItemIcon>
+                  </ListItem>
+                </Tooltip>
               </Link>
               <Link to="/sites" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktosites">
-                  <ListItemIcon><RouterIcon /></ListItemIcon>
-                  <ListItemText primary="Sites" />
-                </ListItem>
-              </Link>
-              <Link to="/spaces" style={style.link} onClick={this.handleClose}>
-                <ListItem button className="linktospaces">
-                  <ListItemIcon><SpacesIcon /></ListItemIcon>
-                  <ListItemText primary="Spaces" />
-                </ListItem>
+                <Tooltip placement="right" title="Sites">
+                  <ListItem button className="linktosites">
+                    <ListItemIcon>
+                      <RouterIcon style={route === 'sites' ? style.listIconActive : style.listIcon} />
+                    </ListItemIcon>
+                  </ListItem>
+                </Tooltip>
               </Link>
             </List>
-            <Divider variant="inset" />
-          </Drawer>
+          </div>
         </div>
       </MuiThemeProvider>
     );

@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import {
-  Toolbar, IconButton, MenuItem, CircularProgress, Paper,
+  Toolbar, IconButton, CircularProgress, Paper,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import api from '../../services/api';
 import AppList from '../../components/Apps/AppList';
-import util from '../../services/util';
 import History from '../../config/History';
-import CustomSelect from '../../components/CustomSelect';
+import FilterSelect from '../../components/FilterSelect';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
@@ -32,10 +31,11 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '16px 0',
+    padding: '16px 0 0',
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    maxHeight: 'unset !important',
   },
   link: {
     textDecoration: 'none',
@@ -69,6 +69,9 @@ export default class Apps extends Component {
       spaces: [],
       regions: [],
       loading: true,
+      options: [],
+      filters: [],
+      sort: 'apps-asc',
     };
   }
 
@@ -79,52 +82,104 @@ export default class Apps extends Component {
   getData = async () => {
     const { data: spaces } = await api.getSpaces();
     const { data: regions } = await api.getRegions();
-    const { data: apps } = await api.getApps();
+    let { data: apps } = await api.getApps();
     const { data: favorites } = await api.getFavorites();
+    apps = apps.map(app => ({
+      ...app,
+      isFavorite: (favorites.findIndex(x => x.name === app.name) > -1),
+    }));
+
+    const options = [
+      {
+        label: 'Spaces',
+        options: spaces.map(space => ({ label: space.name, value: space.name, type: 'space' })),
+      },
+      {
+        label: 'Regions',
+        options: regions.map(region => ({ label: region.name, value: region.name, type: 'region' })),
+      },
+    ];
+
     this.setState({
       spaces,
       filteredSpaces: spaces,
       regions,
       apps,
       filteredApps: apps,
-      favorites,
       loading: false,
+      options,
+    }, () => {
+      let values;
+      try {
+        values = JSON.parse(localStorage.getItem('akkeris_app_filters'));
+      } catch (e) {
+        values = [];
+      }
+      this.handleFilterChange(values);
     });
   }
 
-  handleSpaceChange = (event) => {
-    const space = event.target.value;
-    const apps = util.filterApps(this.state.apps, space);
-    this.setState({
-      space,
-      filteredApps: apps,
+  handleFilterChange = (values) => {
+    if (!values || values.length === 0) {
+      this.setState({ filteredApps: this.state.apps, filters: [] }, this.handleSort);
+      localStorage.setItem('akkeris_app_filters', JSON.stringify(values));
+      return;
+    }
+
+    const regionFilters = values.filter(({ type }) => type === 'region');
+    const spaceFilters = values.filter(({ type }) => type === 'space');
+
+    const filterLabel = (app, type) => ({ label }) => label.toLowerCase().includes(app[type === 'region' ? 'region' : 'space'].name.toLowerCase());
+
+    const filteredApps = this.state.apps.filter((app) => {
+      if (regionFilters.length > 0 && !regionFilters.some(filterLabel(app, 'region'))) {
+        return false;
+      } else if (spaceFilters.length > 0 && !spaceFilters.some(filterLabel(app, 'space'))) {
+        return false;
+      }
+      return true;
     });
+
+    this.setState({ filteredApps, filters: values }, this.handleSort);
+
+    localStorage.setItem('akkeris_app_filters', JSON.stringify(values));
   }
 
-  handleRegionChange = (event) => {
-    const region = event.target.value;
-    const apps = util.filterAppsByRegion(this.state.apps, region);
-    const spaces = util.filterSpacesByRegion(this.state.spaces, region);
+  handleSort = () => {
+    const { filteredApps, sort } = this.state;
 
-    this.setState({
-      space: '',
-      region: event.target.value,
-      filteredApps: apps,
-      filteredSpaces: spaces,
-    });
+    let sortedApps = [];
+    if (sort !== '') {
+      sortedApps = filteredApps.sort((a, b) => {
+        switch (sort) {
+          case 'apps-asc':
+            return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+          case 'apps-desc':
+            return b.name.toLowerCase().localeCompare(a.name.toLowerCase());
+          case 'spaces-asc':
+            return a.space.name.toLowerCase().localeCompare(b.space.name.toLowerCase());
+          case 'spaces-desc':
+            return b.space.name.toLowerCase().localeCompare(a.space.name.toLowerCase());
+          case 'regions-asc':
+            return a.region.name.toLowerCase().localeCompare(b.region.name.toLowerCase());
+          case 'regions-desc':
+            return b.region.name.toLowerCase().localeCompare(a.region.name.toLowerCase());
+          case 'favorites-asc':
+            return a.isFavorite - b.isFavorite;
+          case 'favorites-desc':
+            return b.isFavorite - a.isFavorite;
+          default:
+            return 0;
+        }
+      });
+    } else {
+      sortedApps = filteredApps;
+    }
+
+    this.setState({ filteredApps: sortedApps });
   }
 
-  renderSpaces() {
-    return this.state.filteredSpaces.map(space => (
-      <MenuItem className={space.name} key={space.id} value={space.name}>{space.name}</MenuItem>
-    ));
-  }
-
-  renderRegions() {
-    return this.state.regions.map(region => (
-      <MenuItem className={region.name} key={region.id} value={region.name}>{region.name}</MenuItem>
-    ));
-  }
+  handleSortChange = (column, direction) => this.setState({ sort: `${column}-${direction}` }, this.handleSort);
 
   render() {
     if (this.state.loading) {
@@ -134,35 +189,26 @@ export default class Apps extends Component {
         </div>
       );
     }
+
     return (
       <div>
         <Toolbar style={style.toolbar} disableGutters>
-          <CustomSelect
-            name="region"
-            value={this.state.region}
-            onChange={this.handleRegionChange}
-            label="Filter by Region"
-            style={style.regionContainer}
-          >
-            <MenuItem className="all" value="all">All</MenuItem>
-            {this.renderRegions()}
-          </CustomSelect>
-          <CustomSelect
-            name="space"
-            value={this.state.space}
-            onChange={this.handleSpaceChange}
-            label="Filter by Space"
-            style={style.spaceContainer}
-          >
-            <MenuItem className="all" value="all">All</MenuItem>
-            {this.renderSpaces()}
-          </CustomSelect>
-          <IconButton style={{ marginLeft: 'auto', padding: '6px', marginBottom: '-6px' }} onClick={() => History.get().push('/apps/new')} className="new-app">
+          <FilterSelect
+            options={this.state.options}
+            onSelect={this.handleFilterChange}
+            filters={this.state.filters}
+            placeholder="Filter by Region or Space"
+          />
+          <IconButton style={{ marginLeft: 'auto', padding: '6px' }} onClick={() => History.get().push('/apps/new')} className="new-app">
             <AddIcon style={{ color: 'white' }} />
           </IconButton>
         </Toolbar>
         <Paper style={style.paper}>
-          <AppList className="apps" apps={this.state.filteredApps} favorites={this.state.favorites} />
+          <AppList
+            className="apps"
+            apps={this.state.filteredApps}
+            onSortChange={this.handleSortChange}
+          />
         </Paper>
       </div>
     );

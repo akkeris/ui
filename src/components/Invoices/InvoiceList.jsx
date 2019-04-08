@@ -125,7 +125,7 @@ class InvoiceList extends Component {
   render() {
     const { theme } = this.props;
     return (
-      <div>
+      <div style={{ overflow: 'auto' }}>
         <Card>
           <CardHeader title="Billing Information" subheader={`Current Usage: ${formatMoney(this.getInvoiceTotal())}`} />
         </Card>
