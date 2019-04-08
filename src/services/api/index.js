@@ -209,6 +209,14 @@ function createAutoBuild(app, repo, branch, statusCheck, autoDeploy, username, t
   });
 }
 
+function getAutoBuild(app) {
+  return axios.get(`/api/apps/${app}/builds/auto/github`);
+}
+
+function deleteAutoBuild(app) {
+  return axios.delete(`/api/apps/${app}/builds/auto/github`);
+}
+
 function redoBuild(app, build) {
   return axios.put(`/api/apps/${app}/builds/${build}`);
 }
@@ -458,6 +466,8 @@ export default {
   createRelease,
   patchConfig,
   createAutoBuild,
+  getAutoBuild,
+  deleteAutoBuild,
   redoBuild,
   patchApp,
   restartFormation,
