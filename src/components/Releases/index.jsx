@@ -19,9 +19,6 @@ import SuccessIcon from '@material-ui/icons/CheckCircle';
 import Logs from './Logs';
 import api from '../../services/api';
 import NewBuild from './NewBuild';
-import NewAutoBuild from './NewAutoBuild';
-
-import AutoBuildIcon from '../Icons/CircuitBoard';
 import GitCommitIcon from '../Icons/GitCommitIcon';
 
 function addRestrictedTooltip(title, placement, children) {
@@ -178,7 +175,6 @@ export default class Releases extends Component {
       title: '',
       revert: null,
       revertOpen: false,
-      newAuto: false,
       rowsPerPage: 15,
       page: 0,
       isElevated: false,
@@ -284,14 +280,6 @@ export default class Releases extends Component {
     this.setState({ new: false });
   }
 
-  handleNewAutoBuild = () => {
-    this.setState({ newAuto: true });
-  }
-
-  handleNewAutoBuildCancel = () => {
-    this.setState({ newAuto: false });
-  }
-
   handleOpen(release) {
     this.setState({
       logsOpen: true,
@@ -324,7 +312,6 @@ export default class Releases extends Component {
     this.setState({
       loading: false,
       new: false,
-      newAuto: false,
       snackOpen: true,
       message,
     });
@@ -514,16 +501,13 @@ export default class Releases extends Component {
 
     return (
       <div>
-        <Collapse unmountOnExit mountOnEnter in={this.state.new || this.state.newAuto}>
+        <Collapse unmountOnExit mountOnEnter in={this.state.new}>
           <div style={style.collapse.container}>
             <div style={style.collapse.header.container}>
-              <Typography style={style.collapse.header.title} variant="overline">{this.state.new && 'New Build'}{this.state.newAuto && 'Attach to Repo'}</Typography>
+              <Typography style={style.collapse.header.title} variant="overline">{this.state.new && 'New Build'}</Typography>
               <div >
                 {this.state.new && (
                   <IconButton style={style.iconButton} className="build-cancel" onClick={() => { this.handleNewBuildCancel(); }}><RemoveIcon /></IconButton>
-                )}
-                {this.state.newAuto && (
-                  <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleNewAutoBuildCancel(); }}><RemoveIcon /></IconButton>
                 )}
               </div>
             </div>
@@ -535,28 +519,13 @@ export default class Releases extends Component {
                   onComplete={message => this.reload(message)}
                 />
               )}
-              {this.state.newAuto && (
-                <NewAutoBuild
-                  app={this.props.app.name}
-                  onComplete={message => this.reload(message)}
-                />
-              )}
             </div>
           </div>
         </Collapse>
         <div style={style.header.container}>
           <Typography style={style.header.title} variant="overline">Release</Typography>
-          <div style={style.header.actions.container}>
-            <div style={style.header.actions.button}>
-              {(!this.state.new && !this.state.newAuto) && (
-                <Tooltip title="Attach to Repo" placement="bottom-end">
-                  <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
-                </Tooltip>
-              )}
-            </div>
-            <div style={style.header.actions.button}>
-              {(!this.state.new && !this.state.newAuto) && newReleaseButton}
-            </div>
+          <div style={style.header.actions.button}>
+            {(!this.state.new) && newReleaseButton}
           </div>
         </div>
         <Divider />

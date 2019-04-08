@@ -2,13 +2,17 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, Switch, List, ListItem, ListItemText, Button,
-  GridList, GridListTile, FormGroup, FormControlLabel, Tooltip,
+  GridList, GridListTile, FormGroup, FormControlLabel, Tooltip, Typography, Collapse, IconButton,
+  Snackbar,
+  Divider,
 } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Clear';
+import AutoBuildIcon from '../Icons/CircuitBoard';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
+import NewAutoBuild from '../Releases/NewAutoBuild';
 import History from '../../config/History';
 
 function addRestrictedTooltip(title, children) {
@@ -83,6 +87,35 @@ const style = {
   removeIcon: {
     paddingRight: '5px',
   },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  header: {
+    container: {
+      display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px',
+    },
+    title: {
+      flex: 1,
+    },
+    actions: {
+      container: {
+        width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      },
+      button: {
+        width: '50px',
+      },
+    },
+  },
 };
 
 class AppOverview extends Component {
@@ -92,15 +125,19 @@ class AppOverview extends Component {
       loading: true,
       open: false,
       mOpen: false,
+      rOpen: false,
       submitFail: false,
       submitMessage: '',
       isMaintenance: false,
       isElevated: false,
       restrictedSpace: false,
+      autoBuild: null,
+      newAuto: false,
+      snackOpen: false,
     };
   }
 
-  componentWillMount() {
+  async componentDidMount() {
     const { app, accountInfo } = this.props;
 
     // If this is a production app, check for the elevated_access role to determine
@@ -118,12 +155,41 @@ class AppOverview extends Component {
       restrictedSpace = true;
     }
 
+    let autoBuild;
+    try {
+      autoBuild = await api.getAutoBuild(this.props.app.name);
+    } catch (err) {
+      autoBuild = null;
+    }
+
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       isMaintenance: app.maintenance,
-      loading: false,
       isElevated,
       restrictedSpace,
+      autoBuild: autoBuild ? autoBuild.data : null,
+      loading: false,
     });
+  }
+
+  getRepo = async () => {
+    let autoBuild;
+    try {
+      autoBuild = await api.getAutoBuild(this.props.app.name);
+    } catch (err) {
+      this.setState({
+        submitMessage: err.response.data,
+        submitFail: true,
+        rOpen: false,
+        loading: false,
+        autoBuild: null,
+      });
+    }
+
+    this.setState({
+      autoBuild: autoBuild ? autoBuild.data : null,
+      loading: false,
+    });
+
   }
 
   handleConfirmation = () => {
@@ -148,6 +214,18 @@ class AppOverview extends Component {
     });
   }
 
+  handleRepoConfirmation = () => {
+    this.setState({
+      rOpen: true,
+    });
+  }
+
+  handleCancelRepoConfirmation = () => {
+    this.setState({
+      rOpen: false,
+    });
+  }
+
   handleClose = () => {
     this.setState({ submitFail: false });
   }
@@ -163,6 +241,32 @@ class AppOverview extends Component {
         open: false,
       });
     }
+  }
+
+  handleRemoveRepo = async () => {
+    try {
+      await api.deleteAutoBuild(this.props.app.name);
+      this.setState({ autoBuild: null, rOpen: false, loading: false });
+    } catch (error) {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        rOpen: false,
+        loading: false,
+      });
+    }
+  }
+
+  handleConfigureAutoBuild = () => {
+    this.setState({ newAuto: true });
+  }
+
+  handleConfigureAutoBuildCancel = () => {
+    this.setState({ newAuto: false });
+  }
+
+  handleSnackClose() {
+    this.setState({ snackOpen: false });
   }
 
   handleMaintenanceToggle = async () => {
@@ -181,7 +285,18 @@ class AppOverview extends Component {
     }
   }
 
+  reload = (message) => {
+    this.setState({
+      loading: false,
+      newAuto: false,
+      snackOpen: true,
+      message,
+    });
+    this.getRepo();
+  }
+
   render() {
+    console.log(this.state.autoBuild);
     const { isElevated, restrictedSpace } = this.state;
     if (this.state.loading) {
       return (
@@ -205,6 +320,32 @@ class AppOverview extends Component {
       </Button>
     );
 
+    const deleteRepoButton = (
+      <Button
+        variant="contained"
+        className="deleteRepo"
+        style={style.button}
+        onClick={this.handleRepoConfirmation}
+        color="primary"
+      >
+        <RemoveIcon style={style.removeIcon} nativeColor={isElevated ? 'white' : undefined} />
+        <span style={style.deleteButtonLabel}>Remove Repo</span>
+      </Button>
+    );
+
+    const configureRepoButton = (
+      <Button
+        variant="contained"
+        className="configureRepo"
+        style={style.button}
+        onClick={this.handleConfigureAutoBuild}
+        color="primary"
+      >
+        <AutoBuildIcon style={style.removeIcon} nativeColor={isElevated ? 'white' : undefined} />
+        <span style={style.deleteButtonLabel}>Configure Repo</span>
+      </Button>
+    );
+
     // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
     if (restrictedSpace && !isElevated) {
       deleteButton = addRestrictedTooltip('Elevated access required', deleteButton);
@@ -212,6 +353,8 @@ class AppOverview extends Component {
 
     return (
       <div>
+        
+        <Divider />
         <GridList style={style.gridList} cellHeight={'auto'}>
           <GridListTile style={{ padding: '0px' }}>
             <List>
@@ -246,18 +389,69 @@ class AppOverview extends Component {
           primary="Current Image"
           secondary={this.props.app.image}
         />
-        {this.props.app.git_url && (
-          <ListItemText
-            style={style.currentImage.visible}
-            primary="Git"
-            secondary={
-              <a style={style.link} href={this.props.app.git_url}>
-                {this.props.app.git_url}
-              </a>
-            }
-          />
+        {this.state.autoBuild ? (
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0px 24px' }}>
+            <div>
+              <div style={style.tableCell.main}>
+                {'Git Repo'}
+              </div>
+              <div style={style.tableCell.sub}>
+                <a style={style.link} href={this.state.autoBuild.repo}>
+                  {this.state.autoBuild.repo}
+                </a>
+              </div>
+            </div>
+            <div>
+              <div style={style.tableCell.main}>
+                {'Branch'}
+              </div>
+              <div style={style.tableCell.sub}>
+                {this.state.autoBuild.branch}
+              </div>
+            </div>
+            <div>
+              <div style={style.tableCell.main}>
+                {'User'}
+              </div>
+              <div style={style.tableCell.sub}>
+                {this.state.autoBuild.username}
+              </div>
+            </div>
+            <div>{deleteRepoButton}</div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0px 24px' }}>
+            <div>
+              <div style={style.tableCell.main}>
+                {'Git Repo'}
+              </div>
+              <div style={style.tableCell.sub}>
+                {'Not Configured'}
+              </div>
+            </div>
+
+            {!this.state.newAuto && configureRepoButton }
+          </div>
         )}
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0px 24px' }}>
+        <div>
+          <Collapse unmountOnExit mountOnEnter in={this.state.newAuto}>
+            <div style={style.collapse.container}>
+              <div style={style.collapse.header.container}>
+                <Typography style={style.collapse.header.title} variant="overline">{'Attach to Repo'}</Typography>
+                <div >
+                  <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleConfigureAutoBuildCancel(); }}><RemoveIcon /></IconButton>
+                </div>
+              </div>
+              <div>
+                <NewAutoBuild
+                  app={this.props.app.name}
+                  onComplete={message => this.reload(message)}
+                />
+              </div>
+            </div>
+          </Collapse>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
           <div>
             <div style={style.tableCell.main}>
               {'Last Release and Most Recent Changes'}
@@ -296,11 +490,26 @@ class AppOverview extends Component {
           title="Confirm Maintenance"
         />
         <ConfirmationModal
+          className="repo-confirm"
+          open={this.state.rOpen}
+          onOk={this.handleRemoveRepo}
+          onCancel={this.handleCancelRepoConfirmation}
+          message={'Are you sure you want to disconnect your repo?'}
+          title="Confirm Repo Removal"
+        />
+        <ConfirmationModal
           className="error"
           open={this.state.loading || this.state.submitFail}
           onOk={this.handleClose}
           message={this.state.submitMessage}
           title="Error"
+        />
+        <Snackbar
+          className="auto-snack"
+          open={this.state.snackOpen}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={() => { this.handleSnackClose(); }}
         />
       </div>
     );
