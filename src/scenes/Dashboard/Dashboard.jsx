@@ -102,7 +102,7 @@ export default class Dashboard extends Component {
       <div style={{ marginBottom: '12px' }}>
         <Card className="card" style={{ overflow: 'visible' }}>
           <Tabs
-            fullWidth
+            variant="fullWidth"
             value={this.state.currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"

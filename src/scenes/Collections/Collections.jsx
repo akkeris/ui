@@ -3,6 +3,8 @@ import {
   Paper, Tabs, Tab, Toolbar, IconButton,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import OrgsIcon from '@material-ui/icons/Work';
+import SpacesIcon from '@material-ui/icons/GroupWork';
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import History from '../../config/History';
 import OrgList from './OrgsList';
@@ -66,10 +68,20 @@ export default class Collections extends Component {
             onChange={this.handleChange}
             indicatorColor="primary"
             textColor="inherit"
-            fullWidth
+            variant="fullWidth"
           >
-            <Tab label="Spaces" className="spaces-tab" />
-            <Tab label="Orgs" className="orgs-tab" />
+            <Tab
+              label="Spaces"
+              className="spaces-tab"
+              disableRipple
+              icon={<SpacesIcon />}
+            />
+            <Tab
+              label="Orgs"
+              className="orgs-tab"
+              disableRipple
+              icon={<OrgsIcon />}
+            />
           </Tabs>
           {tab === 0 && <SpacesList />}
           {tab === 1 && <OrgList />}
