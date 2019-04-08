@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  Tab, Tabs, CircularProgress, Card, Paper,
+  Tab, Tabs, CircularProgress, Paper,
 } from '@material-ui/core';
 
 import FavoriteIcon from '@material-ui/icons/Favorite';
@@ -31,10 +31,11 @@ const style = {
   },
   paper: {
     maxWidth: '1024px',
-    minWidth: '800px',
     marginLeft: 'auto',
     marginRight: 'auto',
+    marginBottom: '12px',
     marginTop: '12px',
+    overflow: 'auto',
   },
 };
 
@@ -100,7 +101,7 @@ export default class Dashboard extends Component {
     }
     return (
       <div style={{ marginBottom: '12px' }}>
-        <Card className="card" style={{ overflow: 'visible' }}>
+        <Paper className="paper" style={style.paper}>
           <Tabs
             variant="fullWidth"
             value={this.state.currentTab}
@@ -122,16 +123,16 @@ export default class Dashboard extends Component {
             />
           </Tabs>
           {currentTab === 'favorites' && (
-            <Paper>
-              <FavoritesList className="favorites" favorites={this.state.favorites} />
-            </Paper>
+
+            <FavoritesList className="favorites" favorites={this.state.favorites} />
+
           )}
           {currentTab === 'recent' && (
-            <Paper>
-              <RecentsList className="recents" recents={util.getHistory()} />
-            </Paper>
+
+            <RecentsList className="recents" recents={util.getHistory()} />
+
           )}
-        </Card>
+        </Paper>
       </div>
     );
   }
