@@ -153,7 +153,7 @@ export default class SiteInfo extends Component {
             subheader={this.state.site.region.name}
           />
           <Tabs
-            variant="fullWidth"
+            fullWidth
             value={this.state.currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"

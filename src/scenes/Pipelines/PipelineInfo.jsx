@@ -225,7 +225,7 @@ export default class PipelineInfo extends Component {
             }
           />
           <Tabs
-            variant="fullWidth"
+            fullWidth
             value={this.state.currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"
