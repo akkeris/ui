@@ -341,7 +341,7 @@ function getInvoices(past12, token) {
       if (past12) {
         response.data = response.data.slice(-12);
       }
-      Promise.all(response.data.map(x => axios.get(`/api${x['$ref']}`), { cancelToken: token })).then((res) => { // eslint-disable-line dot-notation
+      Promise.all(response.data.map(x => axios.get(`/api${x['$ref']}`, { cancelToken: token }))).then((res) => { // eslint-disable-line dot-notation
         resolve(res.map(x => x.data));
       }).catch((e) => { reject(e); });
     }).catch((e) => { reject(e); });
