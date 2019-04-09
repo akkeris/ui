@@ -88,14 +88,14 @@ app.get('/log-plex/:id', (req, res) => {
 });
 
 app.use((req, res, next) => {
-  if (req.session.token || req.path === '/oauth/callback' || req.path === '/logout') {
+  if (req.session.token || req.path === '/oauth/callback' || req.path === '/logout' || req.path === '/main.css') {
     next();
   } else {
     req.session.redirect = req.originalUrl;
     if (process.env.OAUTH_SCOPES) {
       res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}&scope=${encodeURIComponent(process.env.OAUTH_SCOPES)}`);
     } else {
-      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);   
+      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
     }
   }
 });
@@ -142,14 +142,18 @@ app.get('/healthcheck', (req, res) => {
 /* eslint-enable no-param-reassign */
 
 app.get('/logout', (req, res) => {
-  const reqopts = { url: `${authEndpoint}/authorizations/${req.session.token}`, headers: { 'user-agent': 'akkerisui', accept: 'application/json' } };
+  const reqopts = {
+    url: `${authEndpoint}/authorizations/${req.session.token}`,
+    headers: { 'user-agent': 'akkerisui', accept: 'application/json' },
+    followRedirect: false,
+    maxRedirects: 0,
+  };
+  req.session.destroy();
   request.delete(reqopts, (error, response, body) => {
     if (error) {
       return console.error('delete failed:', error);
     }
-    console.log('Logout successful!  Server responded with:', body);
   });
-  req.session.destroy();
   if (process.env.NODE_ENV === 'dev') {
     res.sendFile(path.resolve('public', 'logout.html'));
   } else {
