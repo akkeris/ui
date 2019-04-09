@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { CircularProgress, Paper } from '@material-ui/core';
-
+import axios from 'axios';
 import api from '../../services/api';
 import InvoiceList from '../../components/Invoices/InvoiceList';
 
@@ -53,11 +53,26 @@ export default class Invoices extends Component {
 
   componentDidMount() {
     this.getInvoices();
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    if (this.cancelSource.token) {
+      this.cancelSource.cancel();
+    }
+    this._isMounted = false;
   }
 
   getInvoices = async () => {
-    const invoices = await api.getInvoices(true);
-    this.setState({ invoices, loading: false });
+    this.cancelSource = axios.CancelToken.source();
+    try {
+      const invoices = await api.getInvoices(true, this.cancelSource.token);
+      if (this._isMounted) {
+        this.setState({ invoices, loading: false });
+      }
+    } catch (err) {
+      if (!axios.isCancel(err)) { console.err(err); }
+    }
   }
 
   render() {
