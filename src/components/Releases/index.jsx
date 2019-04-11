@@ -15,6 +15,7 @@ import RevertIcon from '@material-ui/icons/Replay';
 import PendingIcon from '@material-ui/icons/Lens';
 import ErrorIcon from '@material-ui/icons/Cancel';
 import SuccessIcon from '@material-ui/icons/CheckCircle';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 import Logs from './Logs';
 import api from '../../services/api';
@@ -121,7 +122,7 @@ const style = {
     },
     actions: {
       container: {
-        width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        width: '174px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       },
       button: {
         width: '50px',
@@ -331,91 +332,107 @@ export default class Releases extends Component {
     this.getReleases();
   }
 
+  refresh() {
+    this.setState({
+      loading: true,
+      new: false,
+      newAuto: false,
+      snackOpen: false,
+    });
+    this.getReleases();
+  }
+
   renderReleases(page, rowsPerPage) {
-    return this.state.releases.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((release, index) => {
+    return this.state.releases
+      .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
+      .map((release, index) => {
       // release status indicator
-      let releaseColor = grey[500];
-      let StatusIcon = PendingIcon;
-      switch (release.status) {
-        case 'succeeded':
-          releaseColor = 'limegreen';
-          StatusIcon = SuccessIcon;
-          break;
-        case 'failed':
-          releaseColor = 'red';
-          StatusIcon = ErrorIcon;
-          break;
-        case 'pending':
-          releaseColor = 'orange';
-          break;
-        default:
-          releaseColor = grey[500];
-          break;
-      }
-      let current = null;
-      if (release.current) {
-        current = teal[50];
-      }
+        let releaseColor = grey[500];
+        let StatusIcon = PendingIcon;
+        switch (release.status) {
+          case 'succeeded':
+            releaseColor = 'limegreen';
+            StatusIcon = SuccessIcon;
+            break;
+          case 'failed':
+            releaseColor = 'red';
+            StatusIcon = ErrorIcon;
+            break;
+          case 'pending':
+            releaseColor = 'orange';
+            break;
+          default:
+            releaseColor = grey[500];
+            break;
+        }
+        let current = null;
+        if (release.current) {
+          current = teal[50];
+        }
 
-      const info1 = [
-        release.description,
-        release.source_blob.author,
-      ];
-      const info2 = [
-        release.source_blob.commit ? `#${release.source_blob.commit.substring(0, 7)}` : '',
-        release.source_blob.message ? release.source_blob.message.replace(/\s+/g, ' ') : '',
-      ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' '));
+        const info1 = [
+          release.description,
+          release.source_blob.author,
+        ];
+        const info2 = [
+          release.source_blob.commit ? `#${release.source_blob.commit.substring(0, 7)}` : '',
+          release.source_blob.message ? release.source_blob.message.replace(/\s+/g, ' ') : '',
+        ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' '));
 
-      const statusIconStyle = Object.assign({
-        fillColor: releaseColor,
-        color: releaseColor,
-      }, style.status);
-      return (
-        <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current }}>
-          <TableCell style={{ display: 'flex', padding: '12px 24px', minHeight: '64px', alignItems: 'center' }}>
-            <div style={{ width: '25px', paddingRight: '24px' }}>
-              <div style={{ position: 'relative', height: '100%' }}>
-                {!release.release ? (<BuildIcon style={style.mainIcon} />) : (<ReleaseIcon style={{
-                  position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
-                }}
-                />)}
-                <StatusIcon style={statusIconStyle} />
+        const statusIconStyle = Object.assign({
+          fillColor: releaseColor,
+          color: releaseColor,
+        }, style.status);
+        return (
+          <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current }}>
+            <TableCell style={{ display: 'flex', padding: '12px 24px', minHeight: '64px', alignItems: 'center' }}>
+              <div style={{ width: '25px', paddingRight: '24px' }}>
+                <div style={{ position: 'relative', height: '100%' }}>
+                  {!release.release ? (
+                    <BuildIcon style={style.mainIcon} />
+                  ) : (
+                    <ReleaseIcon style={{
+                      position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
+                    }}
+                    />
+                  )}
+                  <StatusIcon style={statusIconStyle} />
+                </div>
               </div>
-            </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `}
-              {info1.join(' ')}
-              <br />
-              {trunc(info2.join(' '), 250)}
-              <div style={style.tableCell.sub}>
-                {getDateDiff(new Date(release.created_at))}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `}
+                {info1.join(' ')}
+                <br />
+                {trunc(info2.join(' '), 250)}
+                <div style={style.tableCell.sub}>
+                  {getDateDiff(new Date(release.created_at))}
+                </div>
               </div>
-            </div>
-            <div style={{ width: '112px', display: 'flex', justifyContent: 'space-between' }}>
-              <div style={{ width: '50px' }}>
-                {release.source_blob.version &&
+              <div style={{ width: '112px', display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ width: '50px' }}>
+                  {release.source_blob.version &&
                   <Tooltip title="Commit" placement="top-end">
                     <IconButton style={style.iconButton} className="git" href={release.source_blob.version} ><GitCommitIcon /></IconButton>
                   </Tooltip>
-                }
-              </div>
-              <div style={{ width: '50px' }}>
-                {!release.release &&
+                  }
+                </div>
+                <div style={{ width: '50px' }}>
+                  {!release.release &&
                   <Tooltip title="Build Logs" placement="top-end">
                     <IconButton style={style.iconButton} className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
                   </Tooltip>
-                }
-                {!release.current && release.release &&
+                  }
+                  {!release.current && release.release &&
                   <Tooltip title="Rollback" placement="top-end">
                     <IconButton style={style.iconButton} className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
                   </Tooltip>
-                }
+                  }
+                </div>
               </div>
-            </div>
-          </TableCell>
-        </TableRow>
-      );
-    });
+            </TableCell>
+          </TableRow>
+        );
+      });
   }
   renderLogs() {
     const { logsOpen, release, title } = this.state;
@@ -504,14 +521,6 @@ export default class Releases extends Component {
       ));
     }
 
-    if (this.state.loading) {
-      return (
-        <div style={style.refresh.div}>
-          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-        </div>
-      );
-    }
-
     return (
       <div>
         <Collapse unmountOnExit mountOnEnter in={this.state.new || this.state.newAuto}>
@@ -549,8 +558,27 @@ export default class Releases extends Component {
           <div style={style.header.actions.container}>
             <div style={style.header.actions.button}>
               {(!this.state.new && !this.state.newAuto) && (
+                <Tooltip title="Refresh" placement="bottom-end">
+                  <IconButton
+                    style={style.iconButton}
+                    className="refresh"
+                    onClick={() => { this.refresh(); }}
+                  >
+                    <RefreshIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </div>
+            <div style={style.header.actions.button}>
+              {(!this.state.new && !this.state.newAuto) && (
                 <Tooltip title="Attach to Repo" placement="bottom-end">
-                  <IconButton style={style.iconButton} className="new-autobuild" onClick={() => { this.handleNewAutoBuild(); }}><AutoBuildIcon /></IconButton>
+                  <IconButton
+                    style={style.iconButton}
+                    className="new-autobuild"
+                    onClick={() => { this.handleNewAutoBuild(); }}
+                  >
+                    <AutoBuildIcon />
+                  </IconButton>
                 </Tooltip>
               )}
             </div>
@@ -560,28 +588,34 @@ export default class Releases extends Component {
           </div>
         </div>
         <Divider />
-        <Table className="release-list" style={{ overflow: 'visible' }}>
-          <TableBody>
-            {(!this.state.releases || this.state.releases.length === 0) ? (
-              <TableRow><TableCell><span className="no-results">No Releases</span></TableCell></TableRow>
-            ) : this.renderReleases(page, rowsPerPage)}
-          </TableBody>
-          {releases.length !== 0 && (
-            <TableFooter>
-              <TableRow>
-                <TablePagination
-                  rowsPerPageOptions={[15, 25, 50]}
-                  colSpan={3}
-                  count={releases.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onChangePage={this.handleChangePage}
-                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                />
-              </TableRow>
-            </TableFooter>
-          )}
-        </Table>
+        {this.state.loading ? (
+          <div style={style.refresh.div}>
+            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+          </div>
+        ) : (
+          <Table className="release-list" style={{ overflow: 'visible' }}>
+            <TableBody>
+              {(!this.state.releases || this.state.releases.length === 0) ? (
+                <TableRow><TableCell><span className="no-results">No Releases</span></TableCell></TableRow>
+              ) : this.renderReleases(page, rowsPerPage)}
+            </TableBody>
+            {releases.length !== 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[15, 25, 50]}
+                    colSpan={3}
+                    count={releases.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
+          </Table>
+        )}
         <Snackbar
           className="release-snack"
           open={this.state.snackOpen}

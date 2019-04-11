@@ -129,7 +129,9 @@ export default class Apps extends Component {
     const regionFilters = values.filter(({ type }) => type === 'region');
     const spaceFilters = values.filter(({ type }) => type === 'space');
 
-    const filterLabel = (app, type) => ({ label }) => label.toLowerCase().includes(app[type === 'region' ? 'region' : 'space'].name.toLowerCase());
+    const filterLabel = (app, type) => ({ label }) => (
+      label.toLowerCase().localeCompare(app[type === 'region' ? 'region' : 'space'].name.toLowerCase()) === 0
+    );
 
     const filteredApps = this.state.apps.filter((app) => {
       if (regionFilters.length > 0 && !regionFilters.some(filterLabel(app, 'region'))) {
