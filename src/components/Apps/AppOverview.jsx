@@ -189,7 +189,6 @@ class AppOverview extends Component {
       autoBuild: autoBuild ? autoBuild.data : null,
       loading: false,
     });
-
   }
 
   handleConfirmation = () => {
@@ -296,7 +295,6 @@ class AppOverview extends Component {
   }
 
   render() {
-    console.log(this.state.autoBuild);
     const { isElevated, restrictedSpace } = this.state;
     if (this.state.loading) {
       return (
@@ -353,7 +351,6 @@ class AppOverview extends Component {
 
     return (
       <div>
-        
         <Divider />
         <GridList style={style.gridList} cellHeight={'auto'}>
           <GridListTile style={{ padding: '0px' }}>

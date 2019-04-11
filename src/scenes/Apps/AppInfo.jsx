@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
-  Tooltip, IconButton, Menu, MenuItem, Divider,
+  Tooltip, IconButton, Menu, MenuItem, Divider, ListItemIcon, ListItemText,
+  Switch, ListItemSecondaryAction, Dialog, DialogTitle, Typography,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
@@ -15,6 +16,8 @@ import ConfigIcon from '@material-ui/icons/Tune';
 import AppIcon from '@material-ui/icons/Launch';
 import ReleaseIcon from '@material-ui/icons/Cloud';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import RemoveIcon from '@material-ui/icons/Clear';
+import AutoBuildIcon from '../../components/Icons/CircuitBoard';
 
 import GitIcon from '../../components/Icons/GitIcon';
 import WebhookIcon from '../../components/Icons/WebhookIcon';
@@ -30,6 +33,7 @@ import api from '../../services/api';
 import util from '../../services/util';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import NewAutoBuild from '../../components/Releases/NewAutoBuild';
 
 const style = {
   iconButton: {
@@ -65,6 +69,11 @@ export default class AppInfo extends Component {
       submitFail: false,
       anchorEl: null,
       open: false,
+      rOpen: false,
+      dOpen: false,
+      mOpen: false,
+      newAuto: false,
+      isMaintenance: false,
       message: '',
       currentTab: 'info',
       basePath: `/apps/${this.props.match.params.app}`,
@@ -89,6 +98,7 @@ export default class AppInfo extends Component {
         accountInfo: accountResponse.data,
         isFavorite: favoriteResponse.data.findIndex(x => x.name === appResponse.data.name) > -1,
         loading: false,
+        isMaintenance: appResponse.data.maintenance,
       });
     } catch (err) {
       this.setState({
@@ -111,6 +121,10 @@ export default class AppInfo extends Component {
     }
   }
 
+  handleClose = () => {
+    this.setState({ submitFail: false });
+  };
+
   handleMenuClick = (event) => {
     this.setState({ anchorEl: event.currentTarget });
   };
@@ -118,6 +132,97 @@ export default class AppInfo extends Component {
   handleMenuClose = () => {
     this.setState({ anchorEl: null });
   };
+
+  handleRemoveApp = async () => {
+    try {
+      await api.deleteApp(this.state.app.name);
+      History.get().push('/apps');
+    } catch (error) {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        open: false,
+        dOpen: false,
+      });
+    }
+  }
+
+  handleRepoConfirmation = () => {
+    this.setState({
+      rOpen: true,
+      anchorEl: null,
+    });
+  }
+
+  handleCancelRepoConfirmation = () => {
+    this.setState({
+      rOpen: false,
+      anchorEl: null,
+    });
+  }
+
+  handleConfirmation = () => {
+    this.setState({ dOpen: true, anchorEl: null });
+  }
+
+  handleCancelConfirmation = () => {
+    this.setState({ dOpen: false, anchorEl: null });
+  }
+
+  handleMaintenanceConfirmation = (event, isInputChecked) => {
+    this.setState({
+      mOpen: true,
+      isMaintenance: isInputChecked,
+      anchorEl: null,
+    });
+  }
+
+  handleCancelMaintenanceConfirmation = () => {
+    this.setState({
+      mOpen: false,
+      isMaintenance: !this.state.isMaintenance,
+      anchorEl: null,
+    });
+  }
+
+  handleMaintenanceToggle = async () => {
+    this.setState({ loading: true });
+    try {
+      await api.patchApp(this.state.app.name, this.state.isMaintenance);
+      this.reload('Maintenance Mode Updated');
+      this.setState({ mOpen: false, loading: false });
+    } catch (error) {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        loading: false,
+        mOpen: false,
+      });
+    }
+  }
+
+  handleRemoveRepo = async () => {
+    try {
+      await api.deleteAutoBuild(this.state.app.name);
+      this.setState({ rOpen: false });
+      this.reload('Repo Detached');
+    } catch (error) {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        rOpen: false,
+        loading: false,
+      });
+    }
+  }
+
+  handleConfigureAutoBuild = () => {
+    this.setState({ newAuto: true, anchorEl: null });
+  }
+
+  handleConfigureAutoBuildCancel = () => {
+    this.setState({ newAuto: false, anchorEl: null });
+  }
 
   handleFavorite = () => {
     if (this.state.isFavorite) {
@@ -140,6 +245,7 @@ export default class AppInfo extends Component {
   reload = (message) => {
     this.setState({
       open: true,
+      newAuto: false,
       message,
     });
   }
@@ -158,26 +264,6 @@ export default class AppInfo extends Component {
     const menuOpen = Boolean(anchorEl);
     return (
       <div style={{ display: 'flex', justifyContent: this.state.app.git_url ? 'space-between' : 'space-evenly' }}>
-        {this.state.app.git_url && (
-          <Tooltip title="Github Repo" placement="top-end">
-            <IconButton
-              style={style.iconButton}
-              className="github"
-              onClick={() => window.open(this.state.app.git_url, '_blank')}
-            >
-              <GitIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-        <Tooltip title="Live App" placement="top-end">
-          <IconButton
-            style={style.iconButton}
-            className="live-app"
-            onClick={() => window.open(this.state.app.web_url, '_blank')}
-          >
-            <AppIcon />
-          </IconButton>
-        </Tooltip>
         <Tooltip title="Favorite" placement="top-end">
           <IconButton
             style={style.iconButton}
@@ -187,7 +273,6 @@ export default class AppInfo extends Component {
             {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
           </IconButton>
         </Tooltip>
-
         <IconButton
           onClick={this.handleMenuClick}
         >
@@ -199,11 +284,66 @@ export default class AppInfo extends Component {
           anchorEl={anchorEl}
           onClose={this.handleMenuClose}
         >
-          <MenuItem onClick={this.handleClose}>
-                Merp
+          <MenuItem onClick={() => window.open(this.state.app.web_url, '_blank')}>
+            <ListItemIcon
+              className="live-app"
+            >
+              <AppIcon />
+            </ListItemIcon>
+            <ListItemText primary="Live App" />
           </MenuItem>
-          <Divider />
-          <MenuItem />
+          {this.state.app.git_url && (
+            <MenuItem onClick={() => window.open(this.state.app.git_url, '_blank')} >
+              <ListItemIcon
+                className="github"
+              >
+                <GitIcon />
+              </ListItemIcon>
+              <ListItemText primary="Github" />
+            </MenuItem>
+          )}
+          <MenuItem style={{ minWidth: '200px' }}>
+            <ListItemIcon>
+              <ReleaseIcon />
+            </ListItemIcon>
+            <ListItemText primary="Maintenance" />
+            <ListItemSecondaryAction>
+              <Switch
+                className="toggle"
+                checked={this.state.isMaintenance}
+                onChange={this.handleMaintenanceConfirmation}
+              />
+            </ListItemSecondaryAction>
+          </MenuItem>
+          {this.state.app.git_url ? (
+            <MenuItem onClick={this.handleRepoConfirmation}>
+              <ListItemIcon
+                className="remove-repo"
+              >
+                <AutoBuildIcon color="secondary" />
+              </ListItemIcon>
+              <ListItemText primary="Detach Repo" />
+            </MenuItem>
+          ) : (
+            <MenuItem onClick={this.handleConfigureAutoBuild}>
+              <ListItemIcon
+                className="configure-repo"
+              >
+                <AutoBuildIcon />
+              </ListItemIcon>
+              <ListItemText primary="Configure Repo" />
+            </MenuItem>
+          )}
+
+          <Divider variant="inset" />
+          <MenuItem onClick={this.handleConfirmation}>
+            <ListItemIcon
+              className="delete-app"
+            >
+              <RemoveIcon color="secondary" />
+            </ListItemIcon>
+            <ListItemText primary="Delete App" />
+          </MenuItem>
         </Menu>
       </div>
     );
@@ -251,7 +391,7 @@ export default class AppInfo extends Component {
             }
           />
           <Tabs
-            fullWidth
+            variant="fullWidth"
             value={this.state.currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"
@@ -364,6 +504,50 @@ export default class AppInfo extends Component {
             />
           )}
         </Card>
+        <ConfirmationModal
+          className="delete-confirm"
+          open={this.state.dOpen}
+          onOk={this.handleRemoveApp}
+          onCancel={this.handleCancelConfirmation}
+          message="Are you sure you want to delete this app?"
+        />
+        <ConfirmationModal
+          className="maintenance-confirm"
+          open={this.state.mOpen}
+          onOk={this.handleMaintenanceToggle}
+          onCancel={this.handleCancelMaintenanceConfirmation}
+          message={!this.state.isMaintenance ? (
+            'Are you sure you want to take this app out of maintenance?'
+          ) : (
+            'Are you sure you want to put this app in maintenance?'
+          )}
+          title="Confirm Maintenance"
+        />
+        <ConfirmationModal
+          className="repo-confirm"
+          open={this.state.rOpen}
+          onOk={this.handleRemoveRepo}
+          onCancel={this.handleCancelRepoConfirmation}
+          message={'Are you sure you want to disconnect your repo?'}
+          title="Confirm Repo Removal"
+        />
+        <Dialog
+          open={this.state.newAuto}
+          onClose={this.handleConfigureAutoBuildCancel}
+        >
+          <DialogTitle id="repo-configure">
+            Attach Repo
+            <IconButton aria-label="Close" onClick={this.handleConfigureAutoBuildCancel} style={{ float: 'right' }}>
+              <RemoveIcon />
+            </IconButton>
+          </DialogTitle>
+          <div style={{ padding: '12px' }}>
+            <NewAutoBuild
+              app={this.state.app.name}
+              onComplete={message => this.reload(message)}
+            />
+          </div>
+        </Dialog>
         <ConfirmationModal
           open={this.state.submitFail}
           onOk={this.handleClose}
