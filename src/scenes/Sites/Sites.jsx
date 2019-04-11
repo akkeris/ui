@@ -111,7 +111,7 @@ class Sites extends Component {
     }
 
     const filterLabel = site => ({ label }) => (
-      label.toLowerCase().includes(site.region.name.toLowerCase())
+      label.toLowerCase().localeCompare(site.region.name.toLowerCase()) === 0
     );
 
     const filteredSites = this.state.sites.filter(site => (
