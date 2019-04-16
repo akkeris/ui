@@ -1,27 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  CircularProgress, Switch, List, ListItem, ListItemText, Button,
-  GridList, GridListTile, FormGroup, FormControlLabel, Tooltip, Typography, Collapse, IconButton,
-  Snackbar,
+  CircularProgress, List, ListItem, ListItemText,
+  GridList, GridListTile, Snackbar,
   Divider,
 } from '@material-ui/core';
-import RemoveIcon from '@material-ui/icons/Clear';
-import AutoBuildIcon from '../Icons/CircuitBoard';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
-import NewAutoBuild from '../Releases/NewAutoBuild';
-import History from '../../config/History';
-
-function addRestrictedTooltip(title, children) {
-  return (
-    <Tooltip title={title} placement="top">
-      <div>{children}</div>
-    </Tooltip>
-  );
-}
 
 const style = {
   link: {
@@ -138,22 +125,7 @@ class AppOverview extends Component {
   }
 
   async componentDidMount() {
-    const { app, accountInfo } = this.props;
-
-    // If this is a production app, check for the elevated_access role to determine
-    // whether or not to enable the delete app button.
-
-    // There is still an API call on the backend that controls access to the actual
-    // deletion of the app, this is merely for convienence.
-
-    let isElevated = false;
-    let restrictedSpace = false;
-    if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
-      // If we don't have the elevated_access object in the accountInfo object,
-      // default to enabling the button (access will be controlled on the API)
-      isElevated = (accountInfo && 'elevated_access' in accountInfo) ? accountInfo.elevated_access : true;
-      restrictedSpace = true;
-    }
+    const { app } = this.props;
 
     let autoBuild;
     try {
@@ -164,11 +136,20 @@ class AppOverview extends Component {
 
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       isMaintenance: app.maintenance,
-      isElevated,
-      restrictedSpace,
       autoBuild: autoBuild ? autoBuild.data : null,
       loading: false,
     });
+    this._isMounted = true;
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.app !== this.props.app) {
+      this.getRepo();
+    }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   getRepo = async () => {
@@ -176,13 +157,23 @@ class AppOverview extends Component {
     try {
       autoBuild = await api.getAutoBuild(this.props.app.name);
     } catch (err) {
-      this.setState({
-        submitMessage: err.response.data,
-        submitFail: true,
-        rOpen: false,
-        loading: false,
-        autoBuild: null,
-      });
+      if (err.response.status === 404) {
+        if (this._isMounted) {
+          this.setState({
+            rOpen: false,
+            loading: false,
+            autoBuild: null,
+          });
+        }
+      } else if (this._isMounted) {
+        this.setState({
+          submitMessage: err.response.data,
+          submitFail: true,
+          rOpen: false,
+          loading: false,
+          autoBuild: null,
+        });
+      }
     }
 
     this.setState({
@@ -191,98 +182,13 @@ class AppOverview extends Component {
     });
   }
 
-  handleConfirmation = () => {
-    this.setState({ open: true });
-  }
-
-  handleCancelConfirmation = () => {
-    this.setState({ open: false });
-  }
-
-  handleMaintenanceConfirmation = (event, isInputChecked) => {
-    this.setState({
-      mOpen: true,
-      isMaintenance: isInputChecked,
-    });
-  }
-
-  handleCancelMaintenanceConfirmation = () => {
-    this.setState({
-      mOpen: false,
-      isMaintenance: !this.state.isMaintenance,
-    });
-  }
-
-  handleRepoConfirmation = () => {
-    this.setState({
-      rOpen: true,
-    });
-  }
-
-  handleCancelRepoConfirmation = () => {
-    this.setState({
-      rOpen: false,
-    });
-  }
-
-  handleClose = () => {
-    this.setState({ submitFail: false });
-  }
-
-  handleRemoveApp = async () => {
-    try {
-      await api.deleteApp(this.props.app.name);
-      History.get().push('/apps');
-    } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        open: false,
-      });
-    }
-  }
-
-  handleRemoveRepo = async () => {
-    try {
-      await api.deleteAutoBuild(this.props.app.name);
-      this.setState({ autoBuild: null, rOpen: false, loading: false });
-    } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        rOpen: false,
-        loading: false,
-      });
-    }
-  }
-
-  handleConfigureAutoBuild = () => {
-    this.setState({ newAuto: true });
-  }
-
-  handleConfigureAutoBuildCancel = () => {
-    this.setState({ newAuto: false });
-  }
-
   handleSnackClose() {
     this.setState({ snackOpen: false });
   }
 
-  handleMaintenanceToggle = async () => {
-    this.setState({ loading: true });
-    try {
-      await api.patchApp(this.props.app.name, this.state.isMaintenance);
-      this.props.onComplete('Maintenance Mode Updated');
-      this.setState({ mOpen: false, loading: false });
-    } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        loading: false,
-        mOpen: false,
-      });
-    }
-  }
+  handleClose = () => {
+    this.setState({ submitFail: false });
+  };
 
   reload = (message) => {
     this.setState({
@@ -291,62 +197,15 @@ class AppOverview extends Component {
       snackOpen: true,
       message,
     });
-    this.getRepo();
   }
 
   render() {
-    const { isElevated, restrictedSpace } = this.state;
     if (this.state.loading) {
       return (
         <div style={style.refresh.div}>
           <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
         </div>
       );
-    }
-
-    let deleteButton = (
-      <Button
-        variant="contained"
-        className="delete"
-        style={style.button}
-        onClick={this.handleConfirmation}
-        color="secondary"
-        disabled={(restrictedSpace && !isElevated)}
-      >
-        <RemoveIcon style={style.removeIcon} nativeColor={isElevated ? 'white' : undefined} />
-        <span style={style.deleteButtonLabel}>Delete App</span>
-      </Button>
-    );
-
-    const deleteRepoButton = (
-      <Button
-        variant="contained"
-        className="deleteRepo"
-        style={style.button}
-        onClick={this.handleRepoConfirmation}
-        color="primary"
-      >
-        <RemoveIcon style={style.removeIcon} nativeColor={isElevated ? 'white' : undefined} />
-        <span style={style.deleteButtonLabel}>Remove Repo</span>
-      </Button>
-    );
-
-    const configureRepoButton = (
-      <Button
-        variant="contained"
-        className="configureRepo"
-        style={style.button}
-        onClick={this.handleConfigureAutoBuild}
-        color="primary"
-      >
-        <AutoBuildIcon style={style.removeIcon} nativeColor={isElevated ? 'white' : undefined} />
-        <span style={style.deleteButtonLabel}>Configure Repo</span>
-      </Button>
-    );
-
-    // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
-    if (restrictedSpace && !isElevated) {
-      deleteButton = addRestrictedTooltip('Elevated access required', deleteButton);
     }
 
     return (
@@ -384,7 +243,7 @@ class AppOverview extends Component {
         <ListItemText
           style={this.props.app.repo ? style.currentImage.visible : style.currentImage.hidden}
           primary="Current Image"
-          secondary={this.props.app.image}
+          secondary={this.props.app.image ? this.props.app.image : 'No Releases'}
         />
         {this.state.autoBuild ? (
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0px 24px' }}>
@@ -414,7 +273,6 @@ class AppOverview extends Component {
                 {this.state.autoBuild.username}
               </div>
             </div>
-            <div>{deleteRepoButton}</div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0px 24px' }}>
@@ -426,28 +284,8 @@ class AppOverview extends Component {
                 {'Not Configured'}
               </div>
             </div>
-
-            {!this.state.newAuto && configureRepoButton }
           </div>
         )}
-        <div>
-          <Collapse unmountOnExit mountOnEnter in={this.state.newAuto}>
-            <div style={style.collapse.container}>
-              <div style={style.collapse.header.container}>
-                <Typography style={style.collapse.header.title} variant="overline">{'Attach to Repo'}</Typography>
-                <div >
-                  <IconButton style={style.iconButton} className="auto-cancel" onClick={() => { this.handleConfigureAutoBuildCancel(); }}><RemoveIcon /></IconButton>
-                </div>
-              </div>
-              <div>
-                <NewAutoBuild
-                  app={this.props.app.name}
-                  onComplete={message => this.reload(message)}
-                />
-              </div>
-            </div>
-          </Collapse>
-        </div>
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
           <div>
             <div style={style.tableCell.main}>
@@ -457,43 +295,8 @@ class AppOverview extends Component {
               {new Date(this.props.app.released_at).toString()}
             </div>
           </div>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  className="toggle"
-                  checked={this.state.isMaintenance}
-                  onChange={this.handleMaintenanceConfirmation}
-                />
-              }
-              label="Maintenance"
-              labelPlacement="start"
-            />
-          </FormGroup>
-          <div>{deleteButton}</div>
         </div>
         <Audits app={this.props.app} />
-        <ConfirmationModal className="delete-confirm" open={this.state.open} onOk={this.handleRemoveApp} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this app?" />
-        <ConfirmationModal
-          className="maintenance-confirm"
-          open={this.state.mOpen}
-          onOk={this.handleMaintenanceToggle}
-          onCancel={this.handleCancelMaintenanceConfirmation}
-          message={!this.state.isMaintenance ? (
-            'Are you sure you want to take this app out of maintenance?'
-          ) : (
-            'Are you sure you want to put this app in maintenance?'
-          )}
-          title="Confirm Maintenance"
-        />
-        <ConfirmationModal
-          className="repo-confirm"
-          open={this.state.rOpen}
-          onOk={this.handleRemoveRepo}
-          onCancel={this.handleCancelRepoConfirmation}
-          message={'Are you sure you want to disconnect your repo?'}
-          title="Confirm Repo Removal"
-        />
         <ConfirmationModal
           className="error"
           open={this.state.loading || this.state.submitFail}
@@ -515,8 +318,6 @@ class AppOverview extends Component {
 
 AppOverview.propTypes = {
   app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  onComplete: PropTypes.func.isRequired,
-  accountInfo: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
 export default AppOverview;

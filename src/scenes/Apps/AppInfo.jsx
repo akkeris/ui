@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
   Tooltip, IconButton, Menu, MenuItem, Divider, ListItemIcon, ListItemText,
-  Switch, ListItemSecondaryAction, Dialog, DialogTitle, Typography,
+  Switch, ListItemSecondaryAction, Dialog, DialogTitle, Collapse, Typography,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
@@ -53,7 +53,28 @@ const style = {
       color: 'white',
     },
   },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
 };
+
+function addRestrictedTooltip(title, children) {
+  return (
+    <Tooltip title={title} placement="top">
+      <div>{children}</div>
+    </Tooltip>
+  );
+}
 
 const tabs = ['info', 'dynos', 'releases', 'addons', 'config', 'logs', 'metrics', 'webhooks'];
 
@@ -74,6 +95,8 @@ export default class AppInfo extends Component {
       mOpen: false,
       newAuto: false,
       isMaintenance: false,
+      isElevated: false,
+      restrictedSpace: false,
       message: '',
       currentTab: 'info',
       basePath: `/apps/${this.props.match.params.app}`,
@@ -85,6 +108,17 @@ export default class AppInfo extends Component {
       const appResponse = await api.getApp(this.props.match.params.app);
       const favoriteResponse = await api.getFavorites();
       const accountResponse = await api.getAccount();
+
+      let isElevated = false;
+      let restrictedSpace = false;
+      if (appResponse.data.space.compliance.includes('prod') || appResponse.data.space.compliance.includes('socs')) {
+      // If we don't have the elevated_access object in the accountInfo object,
+      // default to enabling the button (access will be controlled on the API)
+        isElevated = (accountResponse.data && 'elevated_access' in accountResponse.data) ? accountResponse.data.elevated_access : true;
+        restrictedSpace = true;
+      }
+
+      this._isMounted = true;
 
       // If current tab not provided or invalid, rewrite it to be /info
       let currentTab = this.props.match.params.tab;
@@ -98,6 +132,8 @@ export default class AppInfo extends Component {
         accountInfo: accountResponse.data,
         isFavorite: favoriteResponse.data.findIndex(x => x.name === appResponse.data.name) > -1,
         loading: false,
+        restrictedSpace,
+        isElevated,
         isMaintenance: appResponse.data.maintenance,
       });
     } catch (err) {
@@ -119,6 +155,10 @@ export default class AppInfo extends Component {
       }
       this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
     }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   handleClose = () => {
@@ -186,7 +226,6 @@ export default class AppInfo extends Component {
   }
 
   handleMaintenanceToggle = async () => {
-    this.setState({ loading: true });
     try {
       await api.patchApp(this.state.app.name, this.state.isMaintenance);
       this.reload('Maintenance Mode Updated');
@@ -204,7 +243,8 @@ export default class AppInfo extends Component {
   handleRemoveRepo = async () => {
     try {
       await api.deleteAutoBuild(this.state.app.name);
-      this.setState({ rOpen: false });
+      const appResponse = await api.getApp(this.props.match.params.app);
+      this.setState({ rOpen: false, loading: false, app: appResponse.data });
       this.reload('Repo Detached');
     } catch (error) {
       this.setState({
@@ -250,6 +290,23 @@ export default class AppInfo extends Component {
     });
   }
 
+  reloadAutoBuild = async (message) => {
+    this.setState({ newAuto: false });
+    try {
+      const appResponse = await api.getApp(this.props.match.params.app);
+      if (this._isMounted) {
+        this.setState({ open: true, app: appResponse.data, message });
+      }
+    } catch (error) {
+      this.setState({
+        submitMessage: error.response.data,
+        submitFail: true,
+        rOpen: false,
+        loading: false,
+      });
+    }
+  }
+
   changeActiveTab = (event, newTab) => {
     if (this.state.currentTab !== newTab) {
       this.setState({
@@ -260,10 +317,25 @@ export default class AppInfo extends Component {
   }
 
   renderHeaderActions() {
-    const { anchorEl } = this.state;
+    const { anchorEl, restrictedSpace, isElevated } = this.state;
     const menuOpen = Boolean(anchorEl);
+
+    let deleteButton = (
+      <MenuItem onClick={this.handleConfirmation} disabled={(restrictedSpace && !isElevated)} >
+        <ListItemIcon
+          className="delete-app"
+        >
+          <RemoveIcon color="secondary" nativeColor={isElevated ? 'white' : undefined} />
+        </ListItemIcon>
+        <ListItemText primary="Delete App" />
+      </MenuItem>
+    );
+    if (restrictedSpace && !isElevated) {
+      deleteButton = addRestrictedTooltip('Elevated access required', deleteButton);
+    }
+
     return (
-      <div style={{ display: 'flex', justifyContent: this.state.app.git_url ? 'space-between' : 'space-evenly' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
         <Tooltip title="Favorite" placement="top-end">
           <IconButton
             style={style.iconButton}
@@ -336,14 +408,7 @@ export default class AppInfo extends Component {
           )}
 
           <Divider variant="inset" />
-          <MenuItem onClick={this.handleConfirmation}>
-            <ListItemIcon
-              className="delete-app"
-            >
-              <RemoveIcon color="secondary" />
-            </ListItemIcon>
-            <ListItemText primary="Delete App" />
-          </MenuItem>
+          {deleteButton}
         </Menu>
       </div>
     );
@@ -390,6 +455,7 @@ export default class AppInfo extends Component {
               this.renderHeaderActions()
             }
           />
+
           <Tabs
             variant="fullWidth"
             value={this.state.currentTab}
@@ -454,11 +520,28 @@ export default class AppInfo extends Component {
               value="logs"
             />
           </Tabs>
+          <Collapse
+            in={this.state.newAuto}
+            unmountOnExit
+            mountOnEnter
+          >
+            <div style={style.collapse.container}>
+              <div style={style.collapse.header.container}>
+                <Typography style={style.collapse.header.title} variant="overline">Attach Repo</Typography>
+                <IconButton className="config-cancel" onClick={this.handleConfigureAutoBuildCancel}><RemoveIcon /></IconButton>
+              </div>
+              <div>
+                <NewAutoBuild
+                  app={this.state.app.name}
+                  onComplete={message => this.reloadAutoBuild(message)}
+                />
+              </div>
+            </div>
+          </Collapse>
           {currentTab === 'info' && (
             <AppOverview
               app={this.state.app}
               onComplete={this.reload}
-              accountInfo={this.state.accountInfo}
             />
           )}
           {currentTab === 'dynos' && (
@@ -531,23 +614,6 @@ export default class AppInfo extends Component {
           message={'Are you sure you want to disconnect your repo?'}
           title="Confirm Repo Removal"
         />
-        <Dialog
-          open={this.state.newAuto}
-          onClose={this.handleConfigureAutoBuildCancel}
-        >
-          <DialogTitle id="repo-configure">
-            Attach Repo
-            <IconButton aria-label="Close" onClick={this.handleConfigureAutoBuildCancel} style={{ float: 'right' }}>
-              <RemoveIcon />
-            </IconButton>
-          </DialogTitle>
-          <div style={{ padding: '12px' }}>
-            <NewAutoBuild
-              app={this.state.app.name}
-              onComplete={message => this.reload(message)}
-            />
-          </div>
-        </Dialog>
         <ConfirmationModal
           open={this.state.submitFail}
           onOk={this.handleClose}

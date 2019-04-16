@@ -12,7 +12,7 @@ import api from '../../services/api';
 const style = {
   stepper: {
     width: '100%',
-    maxWidth: 800,
+    maxWidth: 700,
     margin: 'auto',
   },
   buttons: {
