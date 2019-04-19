@@ -321,6 +321,7 @@ class GlobalSearch extends Component {
         <NoSsr>
           <div className={classes.container}>
             <AsyncSearch
+              ref={(c) => { this.asyncSearch = c; }}
               loadOptions={this.search}
               defaultOptions
               classes={classes}
@@ -328,8 +329,8 @@ class GlobalSearch extends Component {
               components={components}
               value={isEmpty(value) ? '' : value}
               onChange={(inputValue) => {
-                this.setState({ value: inputValue });
                 onSearch(inputValue);
+                this.asyncSearch.blur();
               }}
               placeholder="Search"
               noOptionsMessage={({ inputValue }) => (inputValue.length > 0 ? 'No results' : 'Start typing...')}
