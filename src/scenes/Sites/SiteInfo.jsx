@@ -35,6 +35,7 @@ const style = {
     marginRight: 'auto',
     marginTop: '12px',
     overflow: 'visible',
+    marginBottom: '12px',
   },
   rightIcon: {
     float: 'right',

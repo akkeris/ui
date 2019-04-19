@@ -64,7 +64,6 @@ fixture('App Setups Page') // eslint-disable-line no-undef
       .click('button.app-menu-button')
       .expect(Selector('.delete-app').exists)
       .ok()
-      .click('button.app-menu-button')
       .click('.delete-app')
       .expect(Selector('.delete-confirm').exists)
       .ok()
