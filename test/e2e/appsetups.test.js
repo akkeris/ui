@@ -61,9 +61,10 @@ fixture('App Setups Page') // eslint-disable-line no-undef
     await t
       .navigateTo(`${baseUrl}/apps/akkeristest1-testcafe`)
       .wait(10000)
-      .expect(Selector('.delete').exists)
+      .click('button.app-menu-button')
+      .expect(Selector('.delete-app').exists)
       .ok()
-      .click('.delete')
+      .click('.delete-app')
       .expect(Selector('.delete-confirm').exists)
       .ok()
       .click('.delete-confirm .ok');

@@ -198,7 +198,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       // App 1
       .navigateTo(`${baseUrl}/apps/testcafepipe1-testcafe`)
       .click('.info-tab')
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
       .click('.delete-confirm .ok')
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
@@ -209,7 +210,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       // App 2
       .navigateTo(`${baseUrl}/apps/testcafepipe2-testcafe`)
       .click('.info-tab')
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
       .click('.delete-confirm .ok')
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
@@ -220,7 +222,8 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       // App 3
       .navigateTo(`${baseUrl}/apps/testcafepipe3-testcafe`)
       .click('.info-tab')
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
       .click('.delete-confirm .ok')
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')

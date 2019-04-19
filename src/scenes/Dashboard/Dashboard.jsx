@@ -66,7 +66,7 @@ export default class Dashboard extends Component {
         loading: false,
       });
     } catch (err) {
-      console.log(err);
+      console.log(err); // eslint-disable-line
     }
   }
 

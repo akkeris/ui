@@ -12,7 +12,7 @@ import api from '../../services/api';
 const style = {
   stepper: {
     width: '100%',
-    maxWidth: 800,
+    maxWidth: 700,
     margin: 'auto',
   },
   buttons: {
@@ -70,6 +70,9 @@ export default class NewAutoBuild extends Component {
         loading: stepIndex >= 4,
         errorText: null,
       });
+      if (stepIndex >= 4) {
+        this.submitBuild();
+      }
     }
   }
 
@@ -150,6 +153,7 @@ export default class NewAutoBuild extends Component {
               error={errorText && errorText.length > 0}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              fullWidth
             />
             <Typography variant="body1" style={style.stepDescription}>
               {'The repo URL (e.g. https://github.com/foo/bar).'}
@@ -277,11 +281,8 @@ export default class NewAutoBuild extends Component {
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
+    const { stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'hidden' };
-    if (finished) {
-      this.submitBuild();
-    }
 
     return (
       <div style={contentStyle}>
