@@ -335,7 +335,7 @@ export default class AppInfo extends Component {
     }
 
     return (
-      <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '102px', float: 'right' }}>
         <Tooltip title="Favorite" placement="top-end">
           <IconButton
             style={style.iconButton}
