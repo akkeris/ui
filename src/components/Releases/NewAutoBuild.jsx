@@ -70,6 +70,9 @@ export default class NewAutoBuild extends Component {
         loading: stepIndex >= 4,
         errorText: null,
       });
+      if (stepIndex >= 4) {
+        this.submitBuild();
+      }
     }
   }
 
@@ -277,11 +280,8 @@ export default class NewAutoBuild extends Component {
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
+    const { stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'hidden' };
-    if (finished) {
-      this.submitBuild();
-    }
 
     return (
       <div style={contentStyle}>
