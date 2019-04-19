@@ -17,10 +17,10 @@ const style = {
   },
   currentImage: {
     visible: {
-      padding: '0 24px 20px',
+      padding: '12px 24px 20px',
     },
     hidden: {
-      padding: '0 24px 20px 24px',
+      padding: '12px 24px 20px 24px',
     },
   },
   refresh: {
@@ -240,52 +240,61 @@ class AppOverview extends Component {
             </List>
           </GridListTile>
         </GridList>
+        <Divider variant="middle" />
+        {this.state.autoBuild ? (
+          <GridList style={style.gridList} cellHeight={'auto'}>
+            <GridListTile style={{ padding: '0px' }}>
+              <List>
+                <ListItem style={style.listItem}>
+                  <ListItemText
+                    primary="Git Repo"
+                    secondary={
+                      <a style={style.link} href={this.state.autoBuild.repo}>
+                        {this.state.autoBuild.repo}
+                      </a>
+                    }
+                  />
+                </ListItem>
+                <ListItem style={style.listItem}>
+                  <ListItemText
+                    primary="Auto Deploy"
+                    secondary={this.state.autoBuild.auto_deploy.toString()}
+                  />
+                </ListItem>
+              </List>
+            </GridListTile>
+            <GridListTile style={{ padding: '0px' }}>
+              <List>
+                <ListItem style={style.listItem}>
+                  <ListItemText
+                    primary="User"
+                    secondary={this.state.autoBuild.username}
+                  />
+                </ListItem>
+                <ListItem style={style.listItem}>
+                  <ListItemText
+                    primary="Branch"
+                    secondary={this.state.autoBuild.branch}
+                  />
+                </ListItem>
+              </List>
+            </GridListTile>
+          </GridList>
+        ) : (
+          <GridList style={style.gridList} cellHeight={'auto'}>
+            <GridListTile style={{ padding: '0px' }}>
+              <List>
+                <ListItemText primary="Git Repo" secondary={'Not Configured'} />
+              </List>
+            </GridListTile>
+          </GridList>
+        )}
+        <Divider variant="middle" />
         <ListItemText
           style={this.props.app.repo ? style.currentImage.visible : style.currentImage.hidden}
           primary="Current Image"
           secondary={this.props.app.image ? this.props.app.image : 'No Releases'}
         />
-        {this.state.autoBuild ? (
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0px 24px' }}>
-            <div>
-              <div style={style.tableCell.main}>
-                {'Git Repo'}
-              </div>
-              <div style={style.tableCell.sub}>
-                <a style={style.link} href={this.state.autoBuild.repo}>
-                  {this.state.autoBuild.repo}
-                </a>
-              </div>
-            </div>
-            <div>
-              <div style={style.tableCell.main}>
-                {'Branch'}
-              </div>
-              <div style={style.tableCell.sub}>
-                {this.state.autoBuild.branch}
-              </div>
-            </div>
-            <div>
-              <div style={style.tableCell.main}>
-                {'User'}
-              </div>
-              <div style={style.tableCell.sub}>
-                {this.state.autoBuild.username}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0px 24px' }}>
-            <div>
-              <div style={style.tableCell.main}>
-                {'Git Repo'}
-              </div>
-              <div style={style.tableCell.sub}>
-                {'Not Configured'}
-              </div>
-            </div>
-          </div>
-        )}
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
           <div>
             <div style={style.tableCell.main}>

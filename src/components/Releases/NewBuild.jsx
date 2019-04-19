@@ -119,6 +119,7 @@ export default class NewBuild extends Component {
               error={errorText && errorText.length > 0}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              fullWidth
             />
             <Typography variant="body1" style={style.stepDescription}>
               {`

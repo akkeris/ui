@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
   Tooltip, IconButton, Menu, MenuItem, Divider, ListItemIcon, ListItemText,
-  Switch, ListItemSecondaryAction, Dialog, DialogTitle, Collapse, Typography,
+  Switch, ListItemSecondaryAction, Collapse, Typography,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
@@ -364,16 +364,6 @@ export default class AppInfo extends Component {
             </ListItemIcon>
             <ListItemText primary="Live App" />
           </MenuItem>
-          {this.state.app.git_url && (
-            <MenuItem onClick={() => window.open(this.state.app.git_url, '_blank')} >
-              <ListItemIcon
-                className="github"
-              >
-                <GitIcon />
-              </ListItemIcon>
-              <ListItemText primary="Github" />
-            </MenuItem>
-          )}
           <MenuItem style={{ minWidth: '200px' }}>
             <ListItemIcon>
               <ReleaseIcon />
@@ -387,6 +377,16 @@ export default class AppInfo extends Component {
               />
             </ListItemSecondaryAction>
           </MenuItem>
+          {this.state.app.git_url && (
+            <MenuItem onClick={() => window.open(this.state.app.git_url, '_blank')} >
+              <ListItemIcon
+                className="github"
+              >
+                <GitIcon />
+              </ListItemIcon>
+              <ListItemText primary="Github" />
+            </MenuItem>
+          )}
           {this.state.app.git_url ? (
             <MenuItem onClick={this.handleRepoConfirmation}>
               <ListItemIcon

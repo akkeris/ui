@@ -153,6 +153,7 @@ export default class NewAutoBuild extends Component {
               error={errorText && errorText.length > 0}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              fullWidth
             />
             <Typography variant="body1" style={style.stepDescription}>
               {'The repo URL (e.g. https://github.com/foo/bar).'}

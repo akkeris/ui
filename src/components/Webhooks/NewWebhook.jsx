@@ -202,6 +202,7 @@ export default class NewWebhook extends Component {
               error={!!errorText}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              fullWidth
             />
             <Typography variant="body1" style={style.stepDescription}>
               {'Enter a URL for the new webhook (defaults to http).'}
