@@ -141,7 +141,8 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .contains('testcafe-testcafe')
 
     // delete the app
-    .click('button.delete')
+    .click('button.app-menu-button')
+    .click('.delete-app')
     .expect(Selector('.delete-confirm').innerText)
     .contains('Are you sure you want to delete this app?')
 
@@ -187,7 +188,8 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
@@ -211,6 +213,7 @@ test('Should follow search to app and see all info', async (t) => { // eslint-di
 test('Should be able to toggle into maintenance mode', async (t) => { // eslint-disable-line no-undef
   await t
     .click('.app-list .testcafe-testcafe')
+    .click('button.app-menu-button')
     .click('.toggle')
     .expect(Selector('.maintenance-confirm').innerText)
     .contains('Are you sure you want to put this app in maintenance?')
@@ -625,7 +628,8 @@ test // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm .ok')
@@ -636,7 +640,8 @@ test // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')

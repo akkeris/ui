@@ -62,7 +62,8 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
@@ -123,7 +124,8 @@ fixture('Recents Tab') // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')

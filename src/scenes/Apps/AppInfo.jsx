@@ -347,6 +347,7 @@ export default class AppInfo extends Component {
         </Tooltip>
         <IconButton
           onClick={this.handleMenuClick}
+          className="app-menu-button"
         >
           <MoreVertIcon />
         </IconButton>
@@ -355,6 +356,7 @@ export default class AppInfo extends Component {
           open={menuOpen}
           anchorEl={anchorEl}
           onClose={this.handleMenuClose}
+          className="app-menu"
         >
           <MenuItem onClick={() => window.open(this.state.app.web_url, '_blank')}>
             <ListItemIcon
