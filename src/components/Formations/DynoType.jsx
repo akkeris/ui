@@ -237,17 +237,13 @@ export default class DynoType extends Component {
 
   renderSizes() {
     const { sizes } = this.props;
-    return sizes.map((size) => { //eslint-disable-line
-      if (!size.deprecated || size.name === this.state.size) {
-        return (
-          <MenuItem
-            className={size.name}
-            key={size.name}
-            value={`${size.name}`}
-          >{`${size.name} - ${size.resources.limits.memory}`}</MenuItem>
-        );
-      }
-    });
+    return sizes.map(size =>
+      (<MenuItem
+        className={size.name}
+        key={size.name}
+        value={`${size.name}`}
+      >{`${size.name} - ${size.resources.limits.memory}`}</MenuItem>),
+    );
   }
 
   renderDynos() {

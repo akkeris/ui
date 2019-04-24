@@ -66,7 +66,7 @@ export default class NewFormation extends Component {
     const { data: formationSizes } = await api.getFormationSizes();
     const sizes = [];
     formationSizes.forEach((size) => {
-      if (size.name.indexOf('prod') === -1 || !size.deprecated) {
+      if (size.name.indexOf('prod') === -1) {
         sizes.push(size);
       }
     });
@@ -172,7 +172,7 @@ export default class NewFormation extends Component {
         key={size.name}
         value={size.name}
         className={size.name}
-        label={`${size.resources.limits.memory} (${size.name})`}
+        label={`${size.name} : ${size.description}`}
         control={
           <Radio color="primary" />
         }
