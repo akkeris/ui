@@ -66,7 +66,7 @@ export default class NewFormation extends Component {
     const { data: formationSizes } = await api.getFormationSizes();
     const sizes = [];
     formationSizes.forEach((size) => {
-      if (size.name.indexOf('prod') === -1) {
+      if (size.name.indexOf('prod') === -1 || !size.deprecated) {
         sizes.push(size);
       }
     });
