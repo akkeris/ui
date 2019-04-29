@@ -172,7 +172,7 @@ export default class NewFormation extends Component {
         key={size.name}
         value={size.name}
         className={size.name}
-        label={`${size.resources.limits.memory} (${size.name})`}
+        label={`${size.name} : ${size.description}`}
         control={
           <Radio color="primary" />
         }

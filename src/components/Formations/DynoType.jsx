@@ -242,7 +242,8 @@ export default class DynoType extends Component {
         className={size.name}
         key={size.name}
         value={`${size.name}`}
-      >{`${size.name} - ${size.resources.limits.memory}`}</MenuItem>));
+      >{`${size.name} - ${size.resources.limits.memory}`}</MenuItem>),
+    );
   }
 
   renderDynos() {
