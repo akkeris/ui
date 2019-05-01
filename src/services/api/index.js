@@ -1,5 +1,19 @@
 const axios = require('axios');
 
+const notify = new class Notify {
+  constructor() {
+    this.listeners = {};
+  }
+  add(listener) {
+    if (this.listeners[listener.name]) return;
+    this.listeners[listener.name] = listener.cb;
+  }
+  remove(listenerName) {
+    delete this.listeners[listenerName];
+  }
+  send = msg => Object.values(this.listeners).forEach(l => l(msg));
+}();
+
 function getApps() {
   return axios.get('/api/apps');
 }
@@ -9,15 +23,13 @@ function getApp(app) {
 }
 
 function deleteApp(app) {
+  notify.send('app delete');
   return axios.delete(`/api/apps/${app}`);
 }
 
 function createApp(name, org, space) {
-  return axios.post('/api/apps', {
-    org,
-    name,
-    space,
-  });
+  notify.send('app create');
+  return axios.post('/api/apps', { org, name, space });
 }
 
 function appSetup(blueprint) {
@@ -34,7 +46,7 @@ function patchApp(app, isMaintenance) {
   });
 }
 
-function getAudits(app, space, user, size) {
+function getAudits(app, space, size, user) {
   return axios.get(`/api/audits?app=${app}&space=${space}${user ? `&user=${user}` : ''}${size ? `&size=${size}` : ''}`);
 }
 
@@ -197,6 +209,14 @@ function createAutoBuild(app, repo, branch, statusCheck, autoDeploy, username, t
   });
 }
 
+function getAutoBuild(app) {
+  return axios.get(`/api/apps/${app}/builds/auto/github`);
+}
+
+function deleteAutoBuild(app) {
+  return axios.delete(`/api/apps/${app}/builds/auto/github`);
+}
+
 function redoBuild(app, build) {
   return axios.put(`/api/apps/${app}/builds/${build}`);
 }
@@ -261,6 +281,7 @@ function getPipelineCouplings(pipeline) {
 }
 
 function createPipeline(pipeline) {
+  notify.send('pipe create');
   return axios.post('/api/pipelines', {
     name: pipeline,
   });
@@ -295,6 +316,7 @@ function deletePipelineCoupling(coupling) {
 }
 
 function deletePipeline(pipeline) {
+  notify.send('pipe delete');
   return axios.delete(`/api/pipelines/${pipeline}`);
 }
 
@@ -321,13 +343,13 @@ function getLogPlex(url, cb) {
   });
 }
 
-function getInvoices(past12) {
+function getInvoices(past12, token) {
   return new Promise((resolve, reject) => {
-    axios.get('/api/account/invoices').then((response) => {
+    axios.get('/api/account/invoices', { cancelToken: token }).then((response) => {
       if (past12) {
         response.data = response.data.slice(-12);
       }
-      Promise.all(response.data.map(x => axios.get(`/api${x['$ref']}`))).then((res) => { // eslint-disable-line dot-notation
+      Promise.all(response.data.map(x => axios.get(`/api${x['$ref']}`, { cancelToken: token }))).then((res) => { // eslint-disable-line dot-notation
         resolve(res.map(x => x.data));
       }).catch((e) => { reject(e); });
     }).catch((e) => { reject(e); });
@@ -347,10 +369,12 @@ function getSite(site) {
 }
 
 function deleteSite(site) {
+  notify.send('site delete');
   return axios.delete(`/api/sites/${site}`);
 }
 
 function createSite(domain, region, isInternal) {
+  notify.send('site create');
   return axios.post('/api/sites', {
     domain,
     region,
@@ -397,6 +421,10 @@ function createFavorite(app) {
   });
 }
 
+function getHealthcheck(uri) {
+  return axios.get(`/healthcheck?uri=${encodeURIComponent(uri)}`);
+}
+
 export default {
   appSetup,
   getAppSetup,
@@ -438,6 +466,8 @@ export default {
   createRelease,
   patchConfig,
   createAutoBuild,
+  getAutoBuild,
+  deleteAutoBuild,
   redoBuild,
   patchApp,
   restartFormation,
@@ -469,4 +499,6 @@ export default {
   getFavorites,
   deleteFavorite,
   createFavorite,
+  getHealthcheck,
+  notify,
 };

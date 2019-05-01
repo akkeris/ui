@@ -1,19 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { CircularProgress } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import Ansi from 'ansi-to-react';
 
 import api from '../../services/api';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   logs: {
@@ -86,17 +76,13 @@ export default class Logs extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress size={50} style={style.refresh.indicator} />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress size={50} style={style.refresh.indicator} />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <pre style={style.logs}><Ansi>{this.state.logs}</Ansi></pre>
-      </MuiThemeProvider>
+      <pre style={style.logs}><Ansi>{this.state.logs}</Ansi></pre>
     );
   }
 }

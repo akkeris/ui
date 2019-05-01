@@ -22,40 +22,51 @@ test('Should show list of apps based on filter', async (t) => { // eslint-disabl
     .expect(Selector('.app-list .api-default').innerText)
     .contains('api-default')
 
-    .click('.region-dropdown')
-    .expect(Selector('#menu-region .us-seattle').innerText)
-    .contains('us-seattle')
+    .click('.filter-select-input')
+    .expect(Selector('.filter-select-results .us-seattle').exists)
+    .ok()
+    .click('.filter-select-results .us-seattle')
 
-    .click('#menu-region .us-seattle')
+    .click('.filter-select-input')
+    .expect(Selector('.filter-select-results .default').exists)
+    .ok()
+    .click('.filter-select-results .default')
 
-    .click('.space-dropdown')
-    .expect(Selector('#menu-space .default').innerText)
-    .contains('default')
-
-    .click('#menu-space .default')
     .expect(Selector('.app-list .api-default').innerText)
     .contains('default')
 
-    .click('.space-dropdown')
-    .click('#menu-space .test')
+    .click('.filter-select-clear')
+    .typeText(Selector('.filter-select-input input'), 'test')
+    .click('.filter-select-results .test')
     .expect(Selector('.app-list tbody').childElementCount)
     .eql(0);
 });
 
 test('Should throw error on non-existent app', async (t) => { // eslint-disable-line no-undef
   await t
-    .typeText('.search input', 'merp')
-    .pressKey('enter')
+    .typeText('.global-search input', '____')
+    .wait(2000)
+    .expect(Selector('.global-search-results').innerText)
+    .contains('No results', 'Search results found when none expected')
+    .navigateTo(`${baseUrl}/apps/merp/info`)
     .expect(Selector('.not-found-error').innerText)
     .contains('The specified application merp does not exist');
 });
 
 test('Should follow search to app and see all info', async (t) => { // eslint-disable-line no-undef
   await t
-    .typeText('.search input', 'api-default')
-    .pressKey('down').pressKey('enter')
+    .typeText('.global-search input', 'api-default')
+    .wait(2000).pressKey('enter')
     .expect(Selector('.card .header').innerText)
     .contains('api-default');
+});
+
+test('Should show apps as first group in global search', async (t) => { // eslint-disable-line no-undef
+  await t
+    .typeText('.global-search input', 't')
+    .wait(2000)
+    .expect(Selector('.global-search-results .group-heading').nth(0).innerText)
+    .contains('Apps', 'List of apps not first in search results');
 });
 
 test('Should be able to create and delete an app', async (t) => { // eslint-disable-line no-undef
@@ -94,8 +105,9 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .click('button.next')
 
     // Verify that app exists
-    .click('.space-dropdown')
-    .click('#menu-space .testcafe')
+    .navigateTo(`${baseUrl}/apps`)
+    .typeText(Selector('.filter-select-input input'), 'testcafe')
+    .click('.filter-select-results .testcafe')
     .expect(Selector('.app-list .testcafe-testcafe').exists)
     .ok()
 
@@ -118,17 +130,19 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .expect(Selector('.new-app-error').innerText)
     .contains('The requested application already exists.')
     .click('.ok')
-
     .navigateTo(`${baseUrl}/apps`)
-    // check if app was created
-    .click('.space-dropdown')
-    .click('#menu-space .testcafe')
+    .click('.filter-select-clear')
+
+  // check if app was created
+    .typeText(Selector('.filter-select-input input'), 'testcafe')
+    .click('.filter-select-results .testcafe')
     .click('.app-list .testcafe-testcafe')
     .expect(Selector('.card .header').innerText)
     .contains('testcafe-testcafe')
 
     // delete the app
-    .click('button.delete')
+    .click('button.app-menu-button')
+    .click('.delete-app')
     .expect(Selector('.delete-confirm').innerText)
     .contains('Are you sure you want to delete this app?')
 
@@ -162,8 +176,9 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .pressKey('enter')
       .click('button.next')
       .click('button.next')
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .navigateTo(`${baseUrl}/apps`)
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok();
   })
@@ -173,7 +188,8 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
@@ -197,6 +213,7 @@ test('Should follow search to app and see all info', async (t) => { // eslint-di
 test('Should be able to toggle into maintenance mode', async (t) => { // eslint-disable-line no-undef
   await t
     .click('.app-list .testcafe-testcafe')
+    .click('button.app-menu-button')
     .click('.toggle')
     .expect(Selector('.maintenance-confirm').innerText)
     .contains('Are you sure you want to put this app in maintenance?')
@@ -343,8 +360,8 @@ test('Should be able to create view and release builds', async (t) => { // eslin
   await t
     .click('.app-list .testcafe-testcafe')
     .click('.releases-tab')
-    .expect(Selector('.release-list tbody').childElementCount)
-    .eql(0)
+    .expect(Selector('.release-list tbody').innerText)
+    .contains('No Releases')
 
     // Check new component shows
     .click('button.new-build')
@@ -404,8 +421,9 @@ test // eslint-disable-line no-undef
       .pressKey('enter')
       .click('button.next')
       .click('button.next')
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .navigateTo(`${baseUrl}/apps`)
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafe-testcafe').exists)
       .ok()
 
@@ -422,8 +440,10 @@ test // eslint-disable-line no-undef
       .pressKey('enter')
       .click('button.next')
       .click('button.next')
-      .click('.space-dropdown')
-      .click('#menu-space .testcafe')
+      .navigateTo(`${baseUrl}/apps`)
+      .click('.filter-select-clear')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
       .expect(Selector('.app-list .testcafe2-testcafe').exists)
       .ok();
   })('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef
@@ -564,10 +584,10 @@ test // eslint-disable-line no-undef
       .click('button.next')
       .expect(Selector('.addon-snack').innerText)
       .contains('Addon Attached')
-      .expect(Selector('.addon-attachment-list').childElementCount)
+      .expect(Selector('.addon-list').childElementCount)
       .gt(0)
 
-      .click('.addon-attachment-list-0')
+      .click('.addon-attachment-0')
       .expect(Selector('.attached-apps-dialog').exists)
       .ok()
       .expect(Selector('.attachment-0').exists)
@@ -594,13 +614,13 @@ test // eslint-disable-line no-undef
       .click('.addons-tab')
       .click('.addon-list .lids-db button.addon-remove')
       .click('.remove-addon-confirm .ok')
-      .expect(Selector('.addon-list .lids-dbl').exists)
+      .expect(Selector('.addon-list .lids-db').exists)
       .notOk()
 
-      .click('.addon-attachment-list button.attachment-remove')
+      .click('.addon-list .addon-attachment-0 button.attachment-remove')
       .click('.remove-attachment-confirm .ok')
-      .expect(Selector('.addon-attachment-list').exists)
-      .notOk();
+      .expect(Selector('.addon-list tbody').innerText)
+      .contains('No Addons');
   })
   .after(async (t) => {
     await t
@@ -608,7 +628,8 @@ test // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm .ok')
@@ -619,7 +640,8 @@ test // eslint-disable-line no-undef
       .click('.info-tab')
 
     // delete the app
-      .click('button.delete')
+      .click('button.app-menu-button')
+      .click('.delete-app')
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')

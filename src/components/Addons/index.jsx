@@ -3,16 +3,17 @@ import PropTypes from 'prop-types';
 import {
   Button, IconButton, Snackbar, Typography, CircularProgress, Dialog,
   Tooltip, Table, TableHead, TableBody, TableRow, TableCell,
-  DialogTitle, DialogContent, DialogContentText, DialogActions,
+  DialogTitle, DialogContent, DialogActions, Collapse,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { withTheme } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
-import AttachIcon from '@material-ui/icons/CallMerge';
 import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import NewAddon from './NewAddon';
 import AttachAddon from './AttachAddon';
 import ConfirmationModal from '../ConfirmationModal';
+import AttachmentIcon from '../Icons/AttachmentIcon';
+import DeleteAttachmentIcon from '../Icons/DeleteAttachmentIcon';
 
 // fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
 function isEmpty(obj) {
@@ -31,27 +32,6 @@ function addRestrictedTooltip(title, placement, children) {
   );
 }
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiPaper: {
-      root: {
-        boxShadow: '0 !important',
-      },
-    },
-    MuiDialog: {
-      paper: {
-        width: '40%',
-      },
-    },
-  },
-});
-
 const style = {
   iconButton: {
     color: 'black',
@@ -63,7 +43,7 @@ const style = {
     height: '58px',
   },
   tableRowPointer: {
-    height: '58px',
+    height: '72px',
     cursor: 'pointer',
   },
   tableRowColumn: {
@@ -91,9 +71,30 @@ const style = {
       position: 'relative',
     },
   },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  headerActions: {
+    container: {
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    },
+    button: {
+      width: '50px',
+    },
+  },
 };
 
-export default class Addons extends Component {
+class Addons extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -138,7 +139,7 @@ export default class Addons extends Component {
       isElevated = (accountInfo && 'elevated_access' in accountInfo) ? accountInfo.elevated_access : true;
       restrictedSpace = true;
     }
-    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line react/no-did-mount-set-state
+    this.setState({ isElevated, restrictedSpace }); // eslint-disable-line
   }
   componentWillUnmount() {
     this._isMounted = false;
@@ -192,7 +193,7 @@ export default class Addons extends Component {
         </TableCell>
         <TableCell>
           {attachment.owner && (
-            <div className="attachment-owner" style={{ color: muiTheme.palette.secondary.main }}>Owner</div>
+            <div className="attachment-owner" style={{ color: this.props.theme.palette.secondary.main }}>Owner</div>
           )}
         </TableCell>
       </TableRow>
@@ -313,7 +314,7 @@ export default class Addons extends Component {
 
   renderAddons() {
     const { isElevated, restrictedSpace } = this.state;
-    return this.state.addons.map((addon) => {
+    return this.state.addons.map((addon, index) => {
       let deleteButton = (
         <IconButton
           disabled={(restrictedSpace && !isElevated) || addon.state === 'provisioning'}
@@ -334,23 +335,26 @@ export default class Addons extends Component {
       return (
         <TableRow
           hover
-          className={addon.addon_service.name}
+          className={`${addon.addon_service.name} addon-${index}`}
           key={addon.id}
           style={style.tableRowPointer}
         >
           <TableCell
             onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
           >
-            <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
-            <div style={style.tableRowColumn.sub}>{addon.id} {addon.state === 'provisioning' ? '- provisioning' : ''}</div>
+            <div>
+              <div style={style.tableRowColumn.title}>{addon.addon_service.name}</div>
+              <div style={style.tableRowColumn.sub}>{addon.id} {addon.state === 'provisioning' ? '- provisioning' : ''}</div>
+            </div>
           </TableCell>
           <TableCell
             onClick={() => this.setState({ currentAddon: addon, addonDialogOpen: true })}
+            colSpan={2}
           >
             <div style={style.tableRowColumn.title}>{addon.plan.name}</div>
           </TableCell>
-          <TableCell style={style.tableRowColumn.icon}>
-            {deleteButton}
+          <TableCell>
+            <div style={{ paddingRight: '2px', textAlign: 'right' }}>{deleteButton}</div>
           </TableCell>
         </TableRow>
       );
@@ -367,7 +371,7 @@ export default class Addons extends Component {
           className="attachment-remove"
           onClick={() => this.handleAddonAttachmentConfirmation(attachment)}
         >
-          <RemoveIcon color={((restrictedSpace && !isElevated) || attachment.state === 'provisioning') ? 'disabled' : 'inherit'} />
+          <DeleteAttachmentIcon color={((restrictedSpace && !isElevated) || attachment.state === 'provisioning') ? 'disabled' : 'inherit'} />
         </IconButton>
       );
 
@@ -380,15 +384,17 @@ export default class Addons extends Component {
       return (
         <TableRow
           hover
-          className={`${attachment.name} addon-attachment-list-${index}`}
+          className={`${attachment.name} addon-attachment-${index}`}
           key={attachment.id}
           style={style.tableRowPointer}
         >
           <TableCell
             onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
           >
-            <div style={style.tableRowColumn.title}>{attachment.name}</div>
-            <div style={style.tableRowColumn.sub}>{attachment.id} {attachment.state === 'provisioning' ? '- provisioning' : ''}</div>
+            <div>
+              <div style={style.tableRowColumn.title}>{attachment.name}</div>
+              <div style={style.tableRowColumn.sub}>{attachment.id} {attachment.state === 'provisioning' ? '- provisioning' : ''}</div>
+            </div>
           </TableCell>
           <TableCell
             onClick={() => this.setState({ currentAddon: attachment, addonDialogOpen: true })}
@@ -400,8 +406,8 @@ export default class Addons extends Component {
           >
             <div style={style.tableRowColumn.title}>{attachment.addon.app.name}</div>
           </TableCell>
-          <TableCell style={style.tableRowColumn.icon}>
-            {deleteButton}
+          <TableCell>
+            <div style={{ textAlign: 'right' }}>{deleteButton}</div>
           </TableCell>
         </TableRow>
       );
@@ -427,160 +433,159 @@ export default class Addons extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={{ overflow: 'visible' }}>
-          {(!this.state.new && !this.state.attach) && (
-            <div>
-              <Tooltip title="New Addon" placement="bottom-end">
-                <IconButton
-                  className="new-addon"
-                  onClick={this.handleNewAddon}
-                  style={style.iconButton}
-                >
-                  <AddIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Attach Addon" placement="bottom-end">
-                <IconButton
-                  className="attach-addon"
-                  onClick={this.handleAttachAddon}
-                  style={style.iconButton}
-                >
-                  <AttachIcon />
-                </IconButton>
-              </Tooltip>
+      <div style={{ overflow: 'visible' }}>
+        <Collapse unmountOnExit mountOnEnter in={this.state.attach || this.state.new}>
+          <div style={style.collapse.container}>
+            <div style={style.collapse.header.container}>
+              <Typography style={style.collapse.header.title} variant="overline">{this.state.attach && 'Attach Addon'}{this.state.new && 'New Addon'}</Typography>
+              {this.state.new && <IconButton style={style.iconButton} className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton> }
+              {this.state.attach && <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton> }
             </div>
-          )}
-          {this.state.new && (
             <div>
-              <IconButton style={style.iconButton} className="addon-cancel" onClick={this.handleNewAddonCancel}><RemoveIcon /></IconButton>
-              <NewAddon app={this.props.app.name} onComplete={this.reload} />
+              {this.state.new &&
+                <NewAddon app={this.props.app.name} onComplete={this.reload} />
+              }
+              {this.state.attach &&
+                <AttachAddon app={this.props.app.name} onComplete={this.reload} />
+              }
             </div>
-          )}
-          {this.state.attach && (
-            <div>
-              <IconButton style={style.iconButton} className="attach-cancel" onClick={this.handleAttachAddonCancel}><RemoveIcon /></IconButton>
-              <AttachAddon app={this.props.app.name} onComplete={this.reload} />
-            </div>
-          )}
-          <Table className="addon-list">
-            <TableHead>
-              <TableRow>
-                <TableCell>Addon</TableCell>
-                <TableCell>Plan</TableCell>
-                <TableCell style={style.tableRowColumn.icon}>Remove</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.state.addons.length > 0 ? this.renderAddons() : (
-                <TableRow><TableCell /><TableCell>No Results</TableCell><TableCell /></TableRow>
-              )}
-            </TableBody>
-          </Table>
-          {this.state.addonAttachments.length > 0 && (
-            <Table className="addon-attachment-list">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Attachment</TableCell>
-                  <TableCell>Plan</TableCell>
-                  <TableCell>Source</TableCell>
-                  <TableCell style={style.tableRowColumn.icon}>Remove</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {this.renderAddonAttachments()}
-              </TableBody>
-            </Table>
-          )}
-          <Dialog
-            className="attached-apps-dialog"
-            onClose={this.handleAddonDialogClose}
-            open={this.state.addonDialogOpen}
-          >
-            <DialogTitle>
-              {this.renderDialogTitle()}
-            </DialogTitle>
-            <DialogContent>
-              {!isEmpty(this.state.currentAddon) && (
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell colSpan="2">App</TableCell>
-                      <TableCell>Ownership</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {this.state.currentAddon.attached_to &&
+          </div>
+        </Collapse>
+        <Table className="addon-list">
+          <colgroup>
+            <col style={{ width: '35%' }} />
+            <col style={{ width: '30%' }} />
+            <col style={{ width: '25%' }} />
+            <col style={{ width: '10%' }} />
+          </colgroup>
+          <TableHead>
+            <TableRow>
+              <TableCell><Typography variant="overline">Addon</Typography></TableCell>
+              <TableCell><Typography variant="overline">Plan</Typography></TableCell>
+              <TableCell>{this.state.addonAttachments.length !== 0 && <Typography variant="overline">Attached From</Typography>}</TableCell>
+              <TableCell>
+                <div style={style.headerActions.container}>
+                  <div style={style.headerActions.button}>
+                    {!this.state.attach && !this.state.new && (
+                      <Tooltip title="Attach Addon" placement="bottom-end">
+                        <IconButton
+                          className="attach-addon"
+                          onClick={this.handleAttachAddon}
+                          style={style.iconButton}
+                        >
+                          <AttachmentIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </div>
+                  <div style={style.headerActions.button}>
+                    {!this.state.new && !this.state.attach && (
+                      <Tooltip title="New Addon" placement="bottom-end">
+                        <IconButton
+                          className="new-addon"
+                          onClick={this.handleNewAddon}
+                          style={style.iconButton}
+                        >
+                          <AddIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.state.addons.length === 0 && this.state.addonAttachments.length === 0 && (
+              <TableRow><TableCell colspan={4}><span className="no-results">No Addons</span></TableCell></TableRow>
+            )}
+            {this.state.addons.length > 0 && this.renderAddons()}
+            {this.state.addonAttachments.length > 0 && this.renderAddonAttachments()}
+          </TableBody>
+        </Table>
+        <Dialog
+          className="attached-apps-dialog"
+          onClose={this.handleAddonDialogClose}
+          open={this.state.addonDialogOpen}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            {this.renderDialogTitle()}
+          </DialogTitle>
+          <DialogContent>
+            {!isEmpty(this.state.currentAddon) && (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell colSpan="2">App</TableCell>
+                    <TableCell>Ownership</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {this.state.currentAddon.attached_to &&
                       this.state.currentAddon.attached_to.map((attachment, index) =>
                         this.formatAttachment(attachment, index),
                       )}
-                  </TableBody>
-                </Table>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={this.handleAddonDialogClose}
-              >
+                </TableBody>
+              </Table>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              className="ok"
+              color="primary"
+              onClick={this.handleAddonDialogClose}
+            >
                 Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <ConfirmationModal
-            className="remove-addon-confirm"
-            open={this.state.confirmAddonOpen}
-            onOk={this.handleRemoveAddon}
-            onCancel={this.handleCancelAddonConfirmation}
-            message="Are you sure you want to delete this addon?"
-          />
-          <ConfirmationModal
-            className="remove-attachment-confirm"
-            open={this.state.confirmAttachmentOpen}
-            onOk={this.handleRemoveAddonAttachment}
-            onCancel={this.handleCancelAddonAttachmentConfirmation}
-            message="Are you sure you want to delete this attachment?"
-          />
-          <Dialog
-            className="addon-error"
-            open={this.state.submitFail}
-          >
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                className="ok"
-                color="primary"
-                onClick={this.handleDialogClose}
-              >
-                Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Snackbar
-            className="addon-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
-          />
-        </div>
-      </MuiThemeProvider>
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <ConfirmationModal
+          className="remove-addon-confirm"
+          open={this.state.confirmAddonOpen}
+          onOk={this.handleRemoveAddon}
+          onCancel={this.handleCancelAddonConfirmation}
+          message="Are you sure you want to delete this addon?"
+        />
+        <ConfirmationModal
+          className="remove-attachment-confirm"
+          open={this.state.confirmAttachmentOpen}
+          onOk={this.handleRemoveAddonAttachment}
+          onCancel={this.handleCancelAddonAttachmentConfirmation}
+          message="Are you sure you want to remove this attachment from this app?"
+        />
+        <ConfirmationModal
+          className="addon-error"
+          open={this.state.submitFail}
+          onOk={this.handleDialogClose}
+          message={this.state.submitMessage}
+          title="Error"
+        />
+        <Snackbar
+          className="addon-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }
 
+/* eslint-disable react/forbid-prop-types */
 Addons.propTypes = {
-  app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  accountInfo: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+  app: PropTypes.object.isRequired,
+  accountInfo: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
 };
+/* eslint-enable react/forbid-prop-types */
+
+export default withTheme()(Addons);

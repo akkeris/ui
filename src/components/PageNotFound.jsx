@@ -1,16 +1,5 @@
 import React from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { blue } from '@material-ui/core/colors';
 import { Paper } from '@material-ui/core';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: blue,
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   header: {
@@ -34,16 +23,12 @@ const style = {
 
 function PageNotFound() {
   return (
-    <MuiThemeProvider theme={muiTheme}>
-      <div>
-        <Paper style={style.paper}>
-          <div className="internal">
-            <div className="status" style={style.header}>Uh oh... 404</div>
-            <div style={style.subheader}>{'Sorry - We couldn\'t find the page you\'re looking for 🤷'}</div>
-          </div>
-        </Paper>
+    <Paper style={style.paper}>
+      <div className="internal">
+        <div className="status" style={style.header}>Uh oh... 404</div>
+        <div style={style.subheader}>{'Sorry - We couldn\'t find the page you\'re looking for 🤷'}</div>
       </div>
-    </MuiThemeProvider>
+    </Paper>
   );
 }
 

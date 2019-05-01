@@ -3,39 +3,8 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, TextField, Typography, Collapse,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#0097a7',
-    },
-  },
-  typography: {
-    // map old typography variants to v2 (still throws warnings)
-    useNextVariants: true,
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
-    MuiButton: {
-      root: {
-        marginRight: '15px',
-      },
-    },
-    MuiFormControl: {
-      root: {
-        marginBottom: '15px',
-      },
-    },
-  },
-});
 
 const style = {
   stepper: {
@@ -46,10 +15,10 @@ const style = {
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 12,
+      marginBottom: 24,
     },
     back: {
-      marginRight: 12,
+      marginRight: 15,
     },
   },
   stepDescription: {
@@ -150,6 +119,7 @@ export default class NewBuild extends Component {
               error={errorText && errorText.length > 0}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              fullWidth
             />
             <Typography variant="body1" style={style.stepDescription}>
               {`
@@ -261,34 +231,32 @@ export default class NewBuild extends Component {
       loading, stepIndex, submitFail, submitMessage,
     } = this.state;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel>Url</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Branch</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Version</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            {this.renderContent()}
-          </Collapse>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="new-build-error"
-          />
-        </div>
-      </MuiThemeProvider>
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel>Url</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Branch</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Version</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Confirm</StepLabel>
+          </Step>
+        </Stepper>
+        <Collapse in={!loading}>
+          {this.renderContent()}
+        </Collapse>
+        <ConfirmationModal
+          open={submitFail}
+          onOk={this.handleClose}
+          message={submitMessage}
+          title="Error"
+          className="new-build-error"
+        />
+      </div>
     );
   }
 }

@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import {
-  Button, IconButton, Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
-  Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
+  IconButton, Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
 } from '@material-ui/core';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
 import LaptopIcon from '@material-ui/icons/Computer';
@@ -16,54 +14,6 @@ import util from '../../services/util';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { Stage } from '../../components/Pipelines';
 import History from '../../config/History';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiTabs: {
-      root: {
-        backgroundColor: '#3c4146',
-        color: 'white',
-        maxWidth: '1024px',
-      },
-    },
-    MuiTab: {
-      root: {
-        minWidth: '120px !important',
-      },
-    },
-    MuiCardContent: {
-      root: {
-        display: 'flex',
-        flexFlow: 'row-reverse',
-        padding: '0px 16px 0px 0px !important',
-      },
-    },
-    MuiCard: {
-      root: {
-        maxWidth: '1024px',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        marginTop: '12px',
-      },
-    },
-    MuiCardHeader: {
-      title: {
-        fontSize: '15px',
-        fontWeight: '500',
-      },
-      subheader: {
-        fontSize: '14px',
-        fontWeight: '500',
-      },
-    },
-  },
-});
 
 const style = {
   iconButton: {
@@ -249,113 +199,90 @@ export default class PipelineInfo extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-            <Dialog
-              className="not-found-error"
-              open={this.state.submitFail}
-            >
-              <DialogTitle>Error</DialogTitle>
-              <DialogContent>
-                <DialogContentText>{this.state.submitMessage}</DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button
-                  onClick={this.handleNotFoundClose}
-                  color="primary"
-                >
-                  Ok
-                </Button>
-              </DialogActions>
-            </Dialog>
-          </div>
-        </MuiThemeProvider>);
-    }
-    return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <Card className="card" style={style.card}>
-            <CardHeader
-              className="header"
-              title={this.state.pipeline.name}
-              subheader={this.state.pipeline.id}
-              action={
-                <IconButton className="delete-pipeline" style={style.iconButton} onClick={this.handleConfirmation}>
-                  <RemoveIcon />
-                </IconButton>
-              }
-            />
-            <Tabs
-              fullWidth
-              value={this.state.currentTab}
-              onChange={this.changeActiveTab}
-              scrollButtons="off"
-            >
-              <Tab
-                disableRipple
-                className="review-tab"
-                icon={<LaptopIcon />}
-                label="Review"
-                value="review"
-              />
-              <Tab
-                disableRipple
-                className="dev-tab"
-                icon={<Forward />}
-                label="Development"
-                value="development"
-              />
-              <Tab
-                disableRipple
-                className="staging-tab"
-                icon={<Forward />}
-                label="Staging"
-                value="staging"
-              />
-              <Tab
-                disableRipple
-                className="prod-tab"
-                icon={<GlobeIcon />}
-                label="Production"
-                value="production"
-              />
-            </Tabs>
-            {this.renderTabContent()}
-          </Card>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           <ConfirmationModal
-            open={this.state.confirmOpen}
-            onOk={this.handleRemovePipeline}
-            onCancel={this.handleCancelConfirmation}
-            message="Are you sure you want to delete this pipeline?"
-          />
-          <Dialog
-            className="error"
+            className="not-found-error"
             open={this.state.submitFail}
-          >
-            <DialogTitle>Error</DialogTitle>
-            <DialogContent>
-              <DialogContentText>{this.state.submitMessage}</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                color="primary"
-                onClick={this.handleClose}
-                className="ok"
-              >
-              Ok
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Snackbar
-            className="pipeline-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
+            onOk={this.handleNotFoundClose}
+            message={this.state.submitMessage}
+            title="Error"
           />
         </div>
-      </MuiThemeProvider>
+      );
+    }
+    return (
+      <div>
+        <Card className="card" style={style.card}>
+          <CardHeader
+            className="header"
+            title={this.state.pipeline.name}
+            subheader={this.state.pipeline.id}
+            action={
+              <IconButton className="delete-pipeline" style={style.iconButton} onClick={this.handleConfirmation}>
+                <RemoveIcon />
+              </IconButton>
+            }
+          />
+          <Tabs
+            variant="fullWidth"
+            value={this.state.currentTab}
+            onChange={this.changeActiveTab}
+            scrollButtons="off"
+            indicatorColor="primary"
+          >
+            <Tab
+              disableRipple
+              className="review-tab"
+              icon={<LaptopIcon />}
+              label="Review"
+              value="review"
+            />
+            <Tab
+              disableRipple
+              className="dev-tab"
+              icon={<Forward />}
+              label="Development"
+              value="development"
+            />
+            <Tab
+              disableRipple
+              className="staging-tab"
+              icon={<Forward />}
+              label="Staging"
+              value="staging"
+            />
+            <Tab
+              disableRipple
+              className="prod-tab"
+              icon={<GlobeIcon />}
+              label="Production"
+              value="production"
+            />
+          </Tabs>
+          {this.renderTabContent()}
+        </Card>
+        <ConfirmationModal
+          open={this.state.confirmOpen}
+          onOk={this.handleRemovePipeline}
+          onCancel={this.handleCancelConfirmation}
+          message="Are you sure you want to delete this pipeline?"
+        />
+        <ConfirmationModal
+          className="error"
+          open={this.state.submitFail}
+          onOk={this.handleClose}
+          message={this.state.submitMessage}
+          title="Error"
+        />
+        <Snackbar
+          className="pipeline-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }

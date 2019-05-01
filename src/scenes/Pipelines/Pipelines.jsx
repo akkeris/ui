@@ -1,37 +1,14 @@
 import React, { Component } from 'react';
 import {
   Toolbar, IconButton, CircularProgress, Paper, Table, TableBody, TableRow, TableCell,
-  Snackbar, Divider, Collapse, TableFooter, TablePagination,
+  Snackbar, Divider, Collapse, TableFooter, TablePagination, TableHead, TableSortLabel, Tooltip,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
 
 import { NewPipeline } from '../../components/Pipelines';
 import api from '../../services/api';
-import util from '../../services/util';
-import Search from '../../components/Search';
 import History from '../../config/History';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiToolbar: {
-      root: {
-        minHeight: '48px !important',
-        maxHeight: '48px !important',
-      },
-    },
-    MuiIconButton: {
-      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
-    },
-  },
-});
 
 const style = {
   refresh: {
@@ -54,6 +31,7 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
+    padding: '12px 0px',
   },
   paper: {
     maxWidth: '1024px',
@@ -61,6 +39,7 @@ const style = {
     marginRight: 'auto',
     marginTop: '12px',
     marginBottom: '12px',
+    overflow: 'auto',
   },
   tableRow: {
     height: '58px',
@@ -83,7 +62,8 @@ const style = {
   },
   icon: {
     marginLeft: 'auto',
-    color: 'white',
+    padding: '6px',
+    marginBottom: '-6px',
   },
   cancelIcon: {
     margin: '5px',
@@ -96,11 +76,14 @@ class Pipelines extends Component {
     this.state = {
       loading: true,
       pipelines: [],
+      sortedPipelines: [],
       new: false,
       open: false,
       message: '',
       page: 0,
       rowsPerPage: 15,
+      sortBy: 'name',
+      sortDirection: 'asc',
     };
   }
 
@@ -110,15 +93,11 @@ class Pipelines extends Component {
 
   getPipelines = async () => {
     const { data: pipelines } = await api.getPipelines();
-    this.setState({ pipelines, loading: false });
+    this.setState({ pipelines, sortedPipelines: pipelines, loading: false });
   }
 
   handleRowSelection = (id) => {
     History.get().push(`/pipelines/${id}/review`);
-  }
-
-  handleSearch = (searchText) => {
-    History.get().push(`/pipelines/${searchText}/review`);
   }
 
   handleNewPipeline = () => {
@@ -149,9 +128,37 @@ class Pipelines extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
+  handleSortChange = column => () => {
+    const sb = column;
+    let sd = 'desc';
+    if (this.state.sortBy === column && this.state.sortDirection === 'desc') {
+      sd = 'asc';
+    }
+    this.setState({ sortBy: sb, sortDirection: sd });
+
+    const { sortedPipelines } = this.state;
+
+    const sp = sortedPipelines.sort((a, b) => {
+      switch (`${sb}-${sd}`) {
+        case 'name-asc':
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        case 'name-desc':
+          return b.name.toLowerCase().localeCompare(a.name.toLowerCase());
+        case 'date-asc':
+          return (a.updated_at < b.updated_at) ? -1 : ((a.updated_at > b.updated_at) ? 1 : 0); // eslint-disable-line
+        case 'date-desc':
+          return (b.updated_at < a.updated_at) ? -1 : ((b.updated_at > a.updated_at) ? 1 : 0); // eslint-disable-line
+        default:
+          return 0;
+      }
+    });
+
+    this.setState({ sortedPipelines: sp, page: 0 });
+  }
+
   renderPipelines() {
-    const { page, rowsPerPage, pipelines } = this.state;
-    return pipelines.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((pipeline) => {
+    const { page, rowsPerPage, sortedPipelines } = this.state;
+    return sortedPipelines.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map((pipeline) => { // eslint-disable-line
       const date = new Date(pipeline.updated_at);
       return (
         <TableRow
@@ -174,75 +181,100 @@ class Pipelines extends Component {
   }
 
   render() {
-    const { page, rowsPerPage, pipelines } = this.state;
+    const { page, rowsPerPage, pipelines, sortBy, sortDirection } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>);
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
+      );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <Toolbar style={style.toolbar}>
-            <Search
-              className="search"
-              data={util.filterName(this.state.pipelines)}
-              handleSearch={this.handleSearch}
-            />
-            {!this.state.new && (
-              <IconButton
-                className="new-pipeline"
-                style={style.icon}
-                onClick={this.handleNewPipeline}
-              >
-                <AddIcon />
+      <div>
+        <Toolbar style={style.toolbar}>
+          {!this.state.new && (
+            <IconButton
+              className="new-pipeline"
+              style={style.icon}
+              onClick={this.handleNewPipeline}
+            >
+              <AddIcon style={{ color: 'white' }} />
+            </IconButton>
+          )}
+        </Toolbar>
+        <Paper style={style.paper}>
+          <Collapse in={this.state.new}>
+            <div>
+              <IconButton className="cancel" onClick={this.handleNewPipelineCancel} style={style.cancelIcon}>
+                <RemoveIcon nativeColor="black" />
               </IconButton>
+              <NewPipeline onComplete={this.reload} />
+              <Divider style={{ marginTop: '15px' }} />
+            </div>
+          </Collapse>
+          <Table className="pipeline-list">
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <Tooltip
+                    title="Sort"
+                    placement="bottom-start"
+                    enterDelay={300}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'name'}
+                      direction={sortDirection}
+                      onClick={this.handleSortChange('name')}
+                    >
+                      Pipeline
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip
+                    title="Sort"
+                    placement="bottom-start"
+                    enterDelay={300}
+                  >
+                    <TableSortLabel
+                      active={sortBy === 'date'}
+                      direction={sortDirection}
+                      onClick={this.handleSortChange('date')}
+                    >
+                      Updated
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody >
+              {this.renderPipelines()}
+            </TableBody>
+            {pipelines.length !== 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[15, 25, 50]}
+                    colSpan={4}
+                    count={pipelines.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
             )}
-          </Toolbar>
-          <Paper style={style.paper}>
-            <Collapse in={this.state.new}>
-              <div>
-                <IconButton className="cancel" onClick={this.handleNewPipelineCancel} style={style.cancelIcon}>
-                  <RemoveIcon nativeColor="black" />
-                </IconButton>
-                <NewPipeline onComplete={this.reload} />
-                <Divider style={{ marginTop: '15px' }} />
-              </div>
-            </Collapse>
-
-            <Table className="pipeline-list">
-              <TableBody >
-                {this.renderPipelines()}
-              </TableBody>
-              {pipelines.length !== 0 && (
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      rowsPerPageOptions={[15, 25, 50]}
-                      colSpan={4}
-                      count={pipelines.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onChangePage={this.handleChangePage}
-                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                    />
-                  </TableRow>
-                </TableFooter>
-              )}
-            </Table>
-          </Paper>
-          <Snackbar
-            className="pipelines-snack"
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
-          />
-        </div>
-      </MuiThemeProvider>
+          </Table>
+        </Paper>
+        <Snackbar
+          className="pipelines-snack"
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }

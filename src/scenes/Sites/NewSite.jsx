@@ -5,22 +5,17 @@ import {
   Typography,
   FormControl, FormControlLabel, RadioGroup, Radio,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
-
 const style = {
+  stepper: {
+    width: '100%',
+    margin: 'auto',
+    maxWidth: 900,
+  },
   buttons: {
     div: {
       marginTop: 24,
@@ -254,7 +249,7 @@ export default class NewSite extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 94px', overflow: 'hidden' };
     if (finished) {
       this.submitSite();
     }
@@ -285,42 +280,40 @@ export default class NewSite extends Component {
     const { loading, stepIndex, submitFail, submitMessage, domain, region, internal } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <Paper style={style.paper}>
-          <div style={style.div}>
-            <Stepper activeStep={stepIndex}>
-              <Step>
-                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain)}>
+      <Paper style={style.paper}>
+        <div style={style.div}>
+          <Stepper activeStep={stepIndex} style={style.stepper}>
+            <Step>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain)}>
                   Create domain
-                </StepLabel>
-              </Step>
-              <Step>
-                <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(region)}>
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(region)}>
                   Select Region
-                </StepLabel>
-              </Step>
-              <Step>
-                <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(internal ? 'internal' : 'external')}>
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(internal ? 'internal' : 'external')}>
                   Select Availability
-                </StepLabel>
-              </Step>
-              <Step>
-                <StepLabel>Confirm</StepLabel>
-              </Step>
-            </Stepper>
-            <Collapse in={!loading}>
-              {this.renderContent()}
-            </Collapse>
-            <ConfirmationModal
-              open={submitFail}
-              onOk={this.handleClose}
-              message={submitMessage}
-              title="Error"
-              className="error"
-            />
-          </div>
-        </Paper>
-      </MuiThemeProvider>
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
+            </Step>
+          </Stepper>
+          <Collapse in={!loading}>
+            {this.renderContent()}
+          </Collapse>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="error"
+          />
+        </div>
+      </Paper>
     );
   }
 }

@@ -2,18 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   Table, TableBody, TableHead, TableRow, TableCell, TableFooter, TablePagination,
+  Tooltip, TableSortLabel,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import History from '../../config/History';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   tableRow: {
@@ -37,6 +28,8 @@ export default class SitesList extends Component {
     this.state = {
       page: 0,
       rowsPerPage: 15,
+      sortBy: 'site',
+      sortDirection: 'asc',
     };
   }
 
@@ -52,10 +45,19 @@ export default class SitesList extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
+  handleSortChange = column => () => {
+    const sortBy = column;
+    let sortDirection = 'desc';
+    if (this.state.sortBy === column && this.state.sortDirection === 'desc') {
+      sortDirection = 'asc';
+    }
+    this.setState({ sortBy, sortDirection, page: 0 });
+    this.props.onSortChange(sortBy, sortDirection);
+  }
+
   renderSites(page, rowsPerPage) {
     return this.props.sites
       .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
-      .sort((a, b) => a.domain.localeCompare(b.domain))
       .map((site) => {
         const date = new Date(site.updated_at);
         return (
@@ -83,43 +85,89 @@ export default class SitesList extends Component {
 
   render() {
     const { sites } = this.props;
-    const { page, rowsPerPage } = this.state;
+    const { page, rowsPerPage, sortBy, sortDirection } = this.state;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <Table className="site-list">
-            <TableHead>
+      <div>
+        <Table className="site-list">
+          <colgroup>
+            <col style={{ width: '40%' }} />
+            <col style={{ width: '40%' }} />
+            <col style={{ width: '20%' }} />
+          </colgroup>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <Tooltip
+                  title="Sort"
+                  placement="bottom-start"
+                  enterDelay={300}
+                >
+                  <TableSortLabel
+                    active={sortBy === 'site'}
+                    direction={sortDirection}
+                    onClick={this.handleSortChange('site')}
+                  >
+                    Site
+                  </TableSortLabel>
+                </Tooltip>
+              </TableCell>
+              <TableCell>
+                <Tooltip
+                  title="Sort"
+                  placement="bottom-start"
+                  enterDelay={300}
+                >
+                  <TableSortLabel
+                    active={sortBy === 'updated'}
+                    direction={sortDirection}
+                    onClick={this.handleSortChange('updated')}
+                  >
+                    Updated
+                  </TableSortLabel>
+                </Tooltip>
+              </TableCell>
+              <TableCell>
+                <Tooltip
+                  title="Sort"
+                  placement="bottom-start"
+                  enterDelay={300}
+                >
+                  <TableSortLabel
+                    active={sortBy === 'region'}
+                    direction={sortDirection}
+                    onClick={this.handleSortChange('region')}
+                  >
+                    Region
+                  </TableSortLabel>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.renderSites(page, rowsPerPage)}
+          </TableBody>
+          {sites.length !== 0 && (
+            <TableFooter>
               <TableRow>
-                <TableCell>Site</TableCell>
-                <TableCell>Updated</TableCell>
-                <TableCell>Region</TableCell>
+                <TablePagination
+                  rowsPerPageOptions={[15, 25, 50]}
+                  colSpan={3}
+                  count={sites.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onChangePage={this.handleChangePage}
+                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.renderSites(page, rowsPerPage)}
-            </TableBody>
-            {sites.length !== 0 && (
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[15, 25, 50]}
-                    colSpan={3}
-                    count={sites.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                  />
-                </TableRow>
-              </TableFooter>
-            )}
-          </Table>
-        </div>
-      </MuiThemeProvider>
+            </TableFooter>
+          )}
+        </Table>
+      </div>
     );
   }
 }
 
 SitesList.propTypes = {
   sites: PropTypes.arrayOf(PropTypes.object).isRequired,
+  onSortChange: PropTypes.func.isRequired,
 };

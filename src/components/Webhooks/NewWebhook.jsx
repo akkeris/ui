@@ -4,29 +4,16 @@ import {
   Step, Stepper, StepLabel, Button, Checkbox, Grid, TextField, IconButton, Typography,
   Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, FormControlLabel,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import HelpIcon from '@material-ui/icons/Help';
 import api from '../../services/api';
 import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
 import ConfirmationModal from '../ConfirmationModal';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiCheckbox: {
-      root: {
-        padding: '2px 12px',
-      },
-    },
-  },
-});
-
 const style = {
+  checkbox: {
+    marginRight: '6px',
+    padding: '6px',
+  },
   eventsHeader: {
     display: 'flex',
     flexDirection: 'row',
@@ -35,7 +22,6 @@ const style = {
     width: '70px',
   },
   eventsLabel: {
-    // color: 'rgba(0, 0, 0, 0.3)',
     fontSize: '14px',
     paddingRight: '8px',
   },
@@ -216,6 +202,7 @@ export default class NewWebhook extends Component {
               error={!!errorText}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              fullWidth
             />
             <Typography variant="body1" style={style.stepDescription}>
               {'Enter a URL for the new webhook (defaults to http).'}
@@ -238,7 +225,7 @@ export default class NewWebhook extends Component {
               </Tooltip>
             </div>
             {this.renderEventsInfoDialog()}
-            <div className="events">
+            <div className="events" style={{ padding: '6px' }}>
               <Grid container spacing={8} style={style.gridContainer}>
                 {this.renderEventCheckboxes(this.webhook)}
                 <Grid item xs={12} style={style.checkAllContainer}>
@@ -250,6 +237,7 @@ export default class NewWebhook extends Component {
                         className="checkbox-check-all"
                         checked={checkedAll}
                         onChange={this.handleCheckAll}
+                        style={style.checkbox}
                       />
                     }
                     label="Check All"
@@ -314,6 +302,7 @@ export default class NewWebhook extends Component {
               value={event}
               checked={this.state.events.includes(event)}
               onChange={this.handleCheck}
+              style={style.checkbox}
             />
           }
           label={event}
@@ -346,7 +335,7 @@ export default class NewWebhook extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 57px', overflow: 'visible' };
+    const contentStyle = { margin: '0 32px', overflow: 'visible' };
     if (finished) {
       this.submitWebHook();
     } else {
@@ -378,34 +367,32 @@ export default class NewWebhook extends Component {
   render() {
     const { stepIndex, submitFail, submitMessage } = this.state;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel>Choose URL</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Select Events</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Choose Secret</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <div>
-            {this.renderContent()}
-          </div>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="new-webhook-error"
-          />
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel>Choose URL</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Select Events</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Choose Secret</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Confirm</StepLabel>
+          </Step>
+        </Stepper>
+        <div>
+          {this.renderContent()}
         </div>
-      </MuiThemeProvider>
+        <ConfirmationModal
+          open={submitFail}
+          onOk={this.handleClose}
+          message={submitMessage}
+          title="Error"
+          className="new-webhook-error"
+        />
+      </div>
     );
   }
 }

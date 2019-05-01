@@ -1,71 +1,14 @@
 import React, { Component } from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
-  Toolbar, IconButton, Select, MenuItem,
-  CircularProgress, Paper, FormControl, InputLabel,
+  Toolbar, IconButton, CircularProgress, Paper,
 } from '@material-ui/core';
-import { Link } from 'react-router-dom';
 import AddIcon from '@material-ui/icons/Add';
-
 import api from '../../services/api';
 import AppList from '../../components/Apps/AppList';
-import util from '../../services/util';
-import Search from '../../components/Search';
 import History from '../../config/History';
+import FilterSelect from '../../components/FilterSelect';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiIconButton: {
-      root: { color: 'white', padding: '6px', marginBottom: '-6px' },
-    },
-    MuiToolbar: {
-      root: {
-        minHeight: '48px !important',
-        maxHeight: '48px !important',
-      },
-    },
-    MuiInputLabel: {
-      root: { color: 'white !important' },
-      shrink: { color: 'white !important' },
-      animated: { color: 'white !important' },
-    },
-    MuiSelect: {
-      root: { color: 'white' },
-      icon: { color: 'white' },
-      select: { color: 'white !important' },
-    },
-    MuiInput: {
-      input: {
-        '&::placeholder': {
-          color: 'white',
-        },
-        color: 'white',
-      },
-      underline: {
-        // Border color when input is not selected
-        '&:before': {
-          borderBottom: '1px solid rgb(200, 200, 200)',
-        },
-        // Border color when input is selected
-        '&:after': {
-          borderBottom: '2px solid white',
-        },
-        // Border color on hover
-        '&:hover:not([class^=".MuiInput-disabled-"]):not([class^=".MuiInput-focused-"]):not([class^=".MuiInput-error-"]):before': {
-          borderBottom: '1px solid rgb(200, 200, 200)',
-        },
-      },
-    },
-  },
-});
 
 const style = {
   refresh: {
@@ -88,10 +31,11 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '16px 0',
+    padding: '16px 0 0',
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    maxHeight: 'unset !important',
   },
   link: {
     textDecoration: 'none',
@@ -108,7 +52,6 @@ const style = {
     minWidth: '145px',
   },
   regionContainer: {
-    marginLeft: '30px',
     minWidth: '145px',
   },
 };
@@ -126,6 +69,9 @@ export default class Apps extends Component {
       spaces: [],
       regions: [],
       loading: true,
+      options: [],
+      filters: [],
+      sort: 'apps-asc',
     };
   }
 
@@ -136,114 +82,137 @@ export default class Apps extends Component {
   getData = async () => {
     const { data: spaces } = await api.getSpaces();
     const { data: regions } = await api.getRegions();
-    const { data: apps } = await api.getApps();
+    let { data: apps } = await api.getApps();
     const { data: favorites } = await api.getFavorites();
+    apps = apps.map(app => ({
+      ...app,
+      isFavorite: (favorites.findIndex(x => x.name === app.name) > -1),
+    }));
+
+    const options = [
+      {
+        label: 'Spaces',
+        options: spaces.map(space => ({ label: space.name, value: space.name, type: 'space' })),
+      },
+      {
+        label: 'Regions',
+        options: regions.map(region => ({ label: region.name, value: region.name, type: 'region' })),
+      },
+    ];
+
     this.setState({
       spaces,
       filteredSpaces: spaces,
       regions,
       apps,
       filteredApps: apps,
-      favorites,
       loading: false,
+      options,
+    }, () => {
+      let values;
+      try {
+        values = JSON.parse(localStorage.getItem('akkeris_app_filters'));
+      } catch (e) {
+        values = [];
+      }
+      this.handleFilterChange(values);
     });
   }
 
-  handleSearch = (searchText) => {
-    History.get().push(`/apps/${searchText}/info`);
-  }
+  handleFilterChange = (values) => {
+    if (!values || values.length === 0) {
+      this.setState({ filteredApps: this.state.apps, filters: [] }, this.handleSort);
+      localStorage.setItem('akkeris_app_filters', JSON.stringify(values));
+      return;
+    }
 
-  handleSpaceChange = (event) => {
-    const space = event.target.value;
-    const apps = util.filterApps(this.state.apps, space);
-    this.setState({
-      space,
-      filteredApps: apps,
+    const regionFilters = values.filter(({ type }) => type === 'region');
+    const spaceFilters = values.filter(({ type }) => type === 'space');
+
+    const filterLabel = (app, type) => ({ label }) => (
+      label.toLowerCase().localeCompare(app[type === 'region' ? 'region' : 'space'].name.toLowerCase()) === 0
+    );
+
+    const filteredApps = this.state.apps.filter((app) => {
+      if (regionFilters.length > 0 && !regionFilters.some(filterLabel(app, 'region'))) {
+        return false;
+      } else if (spaceFilters.length > 0 && !spaceFilters.some(filterLabel(app, 'space'))) {
+        return false;
+      }
+      return true;
     });
+
+    this.setState({ filteredApps, filters: values }, this.handleSort);
+
+    localStorage.setItem('akkeris_app_filters', JSON.stringify(values));
   }
 
-  handleRegionChange = (event) => {
-    const region = event.target.value;
-    const apps = util.filterAppsByRegion(this.state.apps, region);
-    const spaces = util.filterSpacesByRegion(this.state.spaces, region);
+  handleSort = () => {
+    const { filteredApps, sort } = this.state;
 
-    this.setState({
-      space: '',
-      region: event.target.value,
-      filteredApps: apps,
-      filteredSpaces: spaces,
-    });
+    let sortedApps = [];
+    if (sort !== '') {
+      sortedApps = filteredApps.sort((a, b) => {
+        switch (sort) {
+          case 'apps-asc':
+            return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+          case 'apps-desc':
+            return b.name.toLowerCase().localeCompare(a.name.toLowerCase());
+          case 'spaces-asc':
+            return a.space.name.toLowerCase().localeCompare(b.space.name.toLowerCase());
+          case 'spaces-desc':
+            return b.space.name.toLowerCase().localeCompare(a.space.name.toLowerCase());
+          case 'regions-asc':
+            return a.region.name.toLowerCase().localeCompare(b.region.name.toLowerCase());
+          case 'regions-desc':
+            return b.region.name.toLowerCase().localeCompare(a.region.name.toLowerCase());
+          case 'favorites-asc':
+            return a.isFavorite - b.isFavorite;
+          case 'favorites-desc':
+            return b.isFavorite - a.isFavorite;
+          default:
+            return 0;
+        }
+      });
+    } else {
+      sortedApps = filteredApps;
+    }
+
+    this.setState({ filteredApps: sortedApps });
   }
 
-  renderSpaces() {
-    return this.state.filteredSpaces.map(space => (
-      <MenuItem className={space.name} key={space.id} value={space.name}>{space.name}</MenuItem>
-    ));
-  }
-
-  renderRegions() {
-    return this.state.regions.map(region => (
-      <MenuItem className={region.name} key={region.id} value={region.name}>{region.name}</MenuItem>
-    ));
-  }
+  handleSortChange = (column, direction) => this.setState({ sort: `${column}-${direction}` }, this.handleSort);
 
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div className="loading" style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>);
-    }
-    return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          <Toolbar style={style.toolbar} disableGutters>
-            <Search
-              data={util.filterName(this.state.filteredApps)}
-              handleSearch={this.handleSearch}
-              className="search"
-            />
-            <FormControl style={style.regionContainer}>
-              <InputLabel htmlFor="region-select">Filter by Region</InputLabel>
-              <Select
-                className="region-dropdown"
-                value={this.state.region}
-                onChange={this.handleRegionChange}
-                inputProps={{
-                  name: 'region',
-                  id: 'region-select',
-                }}
-              >
-                <MenuItem className="all" value="all">All</MenuItem>
-                {this.renderRegions()}
-              </Select>
-            </FormControl>
-            <FormControl style={style.spaceContainer}>
-              <InputLabel htmlFor="space-select">Filter by Space</InputLabel>
-              <Select
-                className="space-dropdown"
-                value={this.state.space}
-                onChange={this.handleSpaceChange}
-                inputProps={{
-                  name: 'space',
-                  id: 'space-select',
-                }}
-              >
-                <MenuItem className="all" value="all">All</MenuItem>
-                {this.renderSpaces()}
-              </Select>
-            </FormControl>
-            <Link to="/apps/new" style={style.link}>
-              <IconButton className="new-app"><AddIcon /></IconButton>
-            </Link>
-          </Toolbar>
-          <Paper style={style.paper}>
-            <AppList className="apps" apps={this.state.filteredApps} favorites={this.state.favorites} />
-          </Paper>
+        <div className="loading" style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
         </div>
-      </MuiThemeProvider>
+      );
+    }
+
+    return (
+      <div>
+        <Toolbar style={style.toolbar} disableGutters>
+          <FilterSelect
+            options={this.state.options}
+            onSelect={this.handleFilterChange}
+            filters={this.state.filters}
+            placeholder="Filter by Region or Space"
+          />
+          <IconButton style={{ marginLeft: 'auto', padding: '6px' }} onClick={() => History.get().push('/apps/new')} className="new-app">
+            <AddIcon style={{ color: 'white' }} />
+          </IconButton>
+        </Toolbar>
+        <Paper style={style.paper}>
+          <AppList
+            className="apps"
+            apps={this.state.filteredApps}
+            onSortChange={this.handleSortChange}
+          />
+        </Paper>
+      </div>
     );
   }
 }

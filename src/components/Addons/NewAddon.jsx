@@ -3,42 +3,16 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, CircularProgress, LinearProgress, Button, Typography,
 } from '@material-ui/core';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import Select from '../Select';
+import Search from '../Search';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
-    MuiButton: {
-      root: {
-        marginRight: '15px',
-      },
-    },
-    MuiFormControl: {
-      root: {
-        marginBottom: '15px',
-      },
-    },
-  },
-});
 
 const style = {
   stepper: {
     width: '100%',
     maxWidth: 700,
     margin: 'auto',
+    minHeight: 200,
   },
   buttons: {
     div: {
@@ -54,8 +28,9 @@ const style = {
       marginLeft: 'auto',
       marginRight: 'auto',
       width: '40px',
-      height: '350px',
-      marginTop: '20%',
+      height: '50px',
+      paddingTop: '36px',
+      paddingBottom: '36px',
     },
     indicator: {
       display: 'inline-block',
@@ -212,7 +187,7 @@ export default class NewAddon extends Component {
         return (
           <div>
             <div style={style.selectContainer}>
-              <Select
+              <Search
                 options={groupedServices}
                 value={service}
                 onChange={this.handleServiceChange}
@@ -228,7 +203,7 @@ export default class NewAddon extends Component {
         return (
           <div>
             <div style={style.selectContainer}>
-              <Select
+              <Search
                 options={plans}
                 value={plan ? plan.id : ''}
                 onChange={this.handlePlanChange}
@@ -283,6 +258,7 @@ export default class NewAddon extends Component {
               className="back"
               disabled={stepIndex === 0}
               onClick={this.handlePrev}
+              style={style.buttons.back}
             >
               Back
             </Button>
@@ -329,7 +305,7 @@ export default class NewAddon extends Component {
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <div>
         <div style={provisionStyle}>
           <Stepper activeStep={stepIndex}>
             <Step>
@@ -367,7 +343,7 @@ export default class NewAddon extends Component {
           <label>{provisionMessage}</label> {/* eslint-disable-line */}
           <LinearProgress variant="determinate" value={provisionStatus * 100} />
         </div>
-      </MuiThemeProvider>
+      </div>
     );
   }
 }

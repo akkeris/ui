@@ -1,11 +1,13 @@
 import React from 'react';
 import { Router as BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import Loadable from 'react-loadable';
 import Loading from '../components/Loading';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
 
 import History from './History';
+import globalTheme from './GlobalTheme';
 
 const PageNotFound = Loadable({
   loader: () => import('../components/PageNotFound'),
@@ -23,6 +25,10 @@ const NewApp = Loadable({
 const AppInfo = Loadable({
   loader: () => import('../scenes/Apps/AppInfo'),
   loading: Loading,
+  render(loaded, props) {
+    const Component = loaded.default;
+    return <Component {...props} key={props.match.params.app} />;
+  },
 });
 
 const AppRoutes = () => (
@@ -50,6 +56,10 @@ const Pipelines = Loadable({
 const PipelineInfo = Loadable({
   loader: () => import('../scenes/Pipelines/PipelineInfo'),
   loading: Loading,
+  render(loaded, props) {
+    const Component = loaded.default;
+    return <Component {...props} key={props.match.params.pipeline} />;
+  },
 });
 
 const PipelineRoutes = () => (
@@ -59,35 +69,24 @@ const PipelineRoutes = () => (
   </Switch>
 );
 
-const Orgs = Loadable({
-  loader: () => import('../scenes/Orgs/Orgs'),
+const Collections = Loadable({
+  loader: () => import('../scenes/Collections/Collections'),
   loading: Loading,
 });
 const NewOrg = Loadable({
-  loader: () => import('../scenes/Orgs/NewOrg'),
-  loading: Loading,
-});
-
-const OrgRoutes = () => (
-  <Switch>
-    <Route exact path="/orgs" component={Orgs} />
-    <Route exact path="/orgs/new" component={NewOrg} />
-  </Switch>
-);
-
-const Spaces = Loadable({
-  loader: () => import('../scenes/Spaces/Spaces'),
+  loader: () => import('../scenes/Collections/NewOrg'),
   loading: Loading,
 });
 const NewSpace = Loadable({
-  loader: () => import('../scenes/Spaces/NewSpace'),
+  loader: () => import('../scenes/Collections/NewSpace'),
   loading: Loading,
 });
 
-const SpaceRoutes = () => (
+const CollectionsRoutes = () => (
   <Switch>
-    <Route exact path="/spaces" component={Spaces} />
-    <Route exact path="/spaces/new" component={NewSpace} />
+    <Route exact path="/collections/new-space" component={NewSpace} />
+    <Route exact path="/collections/new-org" component={NewOrg} />
+    <Route exact path="/collections" component={Collections} />
   </Switch>
 );
 
@@ -134,6 +133,10 @@ const NewSite = Loadable({
 const SiteInfo = Loadable({
   loader: () => import('../scenes/Sites/SiteInfo'),
   loading: Loading,
+  render(loaded, props) {
+    const Component = loaded.default;
+    return <Component {...props} key={props.match.params.site} />;
+  },
 });
 
 const SitesRoutes = () => (
@@ -145,27 +148,31 @@ const SitesRoutes = () => (
 );
 
 const Router = () => (
-  <div>
-    <BrowserRouter history={History.get()}>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
-        <Nav />
-        <Switch style={{ flex: 1 }}>
-          <Route exact path="/" render={() => <Redirect to="/apps" />} />
-          <Route path="/dashboard" component={DashboardRoutes} />
-          <Route path="/app-setups" component={AppSetupsRoutes} />
-          <Route path="/apps" component={AppRoutes} />
-          <Route path="/orgs" component={OrgRoutes} />
-          <Route path="/pipelines" component={PipelineRoutes} />
-          <Route path="/spaces" component={SpaceRoutes} />
-          <Route path="/invoices" component={InvoiceRoutes} />
-          <Route path="/sites" component={SitesRoutes} />
-          <Route component={PageNotFound} />
-        </Switch>
-        <canvas id="canv" style={{ position: 'fixed', top: '0', left: '0', zIndex: '-1' }} />
+  <BrowserRouter history={History.get()}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
+      <MuiThemeProvider theme={globalTheme}>
+        <div style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%' }}>
+          <Nav />
+          <div style={{ flex: 1, marginTop: '64px' }}>
+            <div style={{ width: 'calc(100% - 64px)' }}>
+              <Switch>
+                <Route exact path="/" render={() => <Redirect to="/apps" />} />
+                <Route path="/dashboard" component={DashboardRoutes} />
+                <Route path="/app-setups" component={AppSetupsRoutes} />
+                <Route path="/apps" component={AppRoutes} />
+                <Route path="/pipelines" component={PipelineRoutes} />
+                <Route path="/invoices" component={InvoiceRoutes} />
+                <Route path="/sites" component={SitesRoutes} />
+                <Route path="/collections" component={CollectionsRoutes} />
+                <Route component={PageNotFound} />
+              </Switch>
+            </div>
+          </div>
+        </div>
         <Footer />
-      </div>
-    </BrowserRouter>
-  </div>
+      </MuiThemeProvider>
+    </div>
+  </BrowserRouter>
 );
 
 export default Router;

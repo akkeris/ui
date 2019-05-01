@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { CircularProgress, ListSubheader, Divider } from '@material-ui/core';
 import CPUIcon from '@material-ui/icons/Memory';
 import { pink } from '@material-ui/core/colors';
@@ -11,15 +10,6 @@ import Charts from './Charts';
 
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable max-len */
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   refresh: {
@@ -148,13 +138,9 @@ export default class Metrics extends Component {
   render() {
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div>
-            <div style={style.refresh.div}>
-              <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-            </div>
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     } else if (this.state.reading) {
       const charts = [];
@@ -223,18 +209,14 @@ export default class Metrics extends Component {
         );
       }
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div>
-            {notesDom}
-            {charts}
-          </div>
-        </MuiThemeProvider>
+        <div>
+          {notesDom}
+          {charts}
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div />
-      </MuiThemeProvider>
+      <div />
     );
   }
 }

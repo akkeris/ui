@@ -3,23 +3,14 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import ConfirmationModal from '../ConfirmationModal';
 import api from '../../services/api';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   stepper: {
     width: '100%',
     margin: 'auto',
+    maxWidth: 700,
   },
   buttons: {
     div: {
@@ -165,23 +156,21 @@ export default class NewPipeline extends Component {
   render() {
     const { stepIndex, submitFail, submitMessage } = this.state;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel>Create Pipeline</StepLabel>
-            </Step>
-          </Stepper>
-          {this.renderContent()}
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="new-pipeline-error"
-          />
-        </div>
-      </MuiThemeProvider>
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel>Create Pipeline</StepLabel>
+          </Step>
+        </Stepper>
+        {this.renderContent()}
+        <ConfirmationModal
+          open={submitFail}
+          onOk={this.handleClose}
+          message={submitMessage}
+          title="Error"
+          className="new-pipeline-error"
+        />
+      </div>
     );
   }
 }

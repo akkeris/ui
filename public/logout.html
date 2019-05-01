@@ -17,11 +17,39 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"/>
     <link rel="manifest" href="/site.webmanifest"/>
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"/>
+    <style type="text/css">
+      .card {
+        /* Add shadows to create the "card" effect */
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        transition: 0.3s;
+        border-radius: 5px; /* 5px rounded corners */
+        width: 92%;
+        max-width: 600px;
+        background-color: white;
+        text-align: center;
+        margin: 30px auto;
+      }
+
+      /* On mouse-over, add a deeper shadow */
+      .card:hover {
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+      }
+
+      /* Add some padding inside the card container */
+      .container {
+        padding: 2px 16px;
+      }
+    </style>
   </head>
 
   <body>
     <div id="app"></div>
-
+    <div class="card">
+      <div class="container">
+        <h1><b>You Have Been Logged Out</b></h1> 
+      </div>
+    </div>
+    
     <!-- This script adds the Roboto font to our project. For more detail go to this site:  http://www.google.com/fonts#UsePlace:use/Collection:Roboto:400,300,500 -->
     <script>
       var WebFontConfig = {
@@ -36,6 +64,6 @@
         s.parentNode.insertBefore(wf, s);
       })();
     </script>
-    <script src="/app.js"></script>
+    
   </body>
 </html>

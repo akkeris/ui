@@ -3,26 +3,16 @@ import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper,
   Typography,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 import api from '../../services/api';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
-
 const style = {
   stepper: {
     width: '100%',
-    maxWidth: 700,
     margin: 'auto',
+    maxWidth: 900,
   },
   buttons: {
     div: {
@@ -200,7 +190,7 @@ export default class NewOrg extends Component {
 
   renderContent() {
     const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 58px', overflow: 'hidden' };
+    const contentStyle = { margin: '0 94px', overflow: 'hidden' };
 
     if (finished) {
       this.submitOrg();
@@ -233,35 +223,33 @@ export default class NewOrg extends Component {
     const { loading, stepIndex, submitFail, submitMessage, org } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <Paper style={style.paper}>
-          <div style={style.div}>
-            <Stepper activeStep={stepIndex}>
-              <Step>
-                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org)}>
+      <Paper style={style.paper}>
+        <div style={style.div}>
+          <Stepper activeStep={stepIndex} style={style.stepper}>
+            <Step>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org)}>
                   Create org name
-                </StepLabel>
-              </Step>
-              <Step>
-                <StepLabel>Describe org</StepLabel>
-              </Step>
-              <Step>
-                <StepLabel>Confirm</StepLabel>
-              </Step>
-            </Stepper>
-            <Collapse in={!loading}>
-              {this.renderContent()}
-            </Collapse>
-            <ConfirmationModal
-              open={submitFail}
-              onOk={this.handleClose}
-              message={submitMessage}
-              title="Error"
-              className="error"
-            />
-          </div>
-        </Paper>
-      </MuiThemeProvider>
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Describe org</StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
+            </Step>
+          </Stepper>
+          <Collapse in={!loading}>
+            {this.renderContent()}
+          </Collapse>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="error"
+          />
+        </div>
+      </Paper>
     );
   }
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import deepmerge from 'deepmerge';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import {
   Table, TableHead, TableBody, TableRow, TableCell, Paper, IconButton, Typography,
 } from '@material-ui/core';
@@ -13,12 +14,18 @@ const releasesLink = '';
 const akkerisSupportLink = '';
 const kubernetesSupportLink = 'https://kubernetes.io/';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: 'ProximaNova',
+const theme = parentTheme => deepmerge(parentTheme, {
+  overrides: {
+    MuiTableCell: {
+      root: {
+        fontFamily: 'ProximaNova',
+      },
+    },
+    MuiTypography: {
+      body2: {
+        fontFamily: 'ProximaNova',
+      },
+    },
   },
 });
 
@@ -35,6 +42,7 @@ const style = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 100,
   },
   paragraph: {
     margin: '0 auto',
@@ -72,7 +80,7 @@ const style = {
 };
 
 const Footer = () => (
-  <MuiThemeProvider theme={muiTheme}>
+  <MuiThemeProvider theme={theme}>
     <Paper style={style.footer}>
       <div style={style.div}>
         <Table style={style.table.body}>

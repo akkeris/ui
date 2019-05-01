@@ -27,18 +27,29 @@ test('Should show list of sites', async (t) => { // eslint-disable-line no-undef
 
 test('Should throw error on non-existent site', async (t) => { // eslint-disable-line no-undef
   await t
-    .typeText('.search input', 'merp')
-    .pressKey('enter')
+    .typeText('.global-search input', '____')
+    .wait(2000)
+    .expect(Selector('.global-search-results').innerText)
+    .contains('No results', 'Search results found when none expected')
+    .navigateTo(`${baseUrl}/sites/merp/info`)
     .expect(Selector('.not-found-error').innerText)
     .contains('The specified site was not found.');
 });
 
 test('Should follow search to site and see all info', async (t) => { // eslint-disable-line no-undef
   await t
-    .typeText('.search input', 'testsite')
-    .pressKey('enter')
+    .typeText('.global-search input', 'testsite')
+    .wait(2000).pressKey('enter')
     .expect(Selector('.card .header').innerText)
     .contains('testsite');
+});
+
+test('Should show sites as first group in global search', async (t) => { // eslint-disable-line no-undef
+  await t
+    .typeText('.global-search input', 't')
+    .wait(2000)
+    .expect(Selector('.global-search-results .group-heading').nth(0).innerText)
+    .contains('Sites', 'List of sites not first in search results');
 });
 
 test('Should be able to create and delete site', async (t) => { // eslint-disable-line no-undef

@@ -5,40 +5,8 @@ import {
   FormControl, FormLabel, FormControlLabel, MenuItem, Typography,
   Button, TextField, Select, Collapse,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiStepper: {
-      root: {
-        padding: '24px 0px',
-      },
-    },
-    MuiButton: {
-      root: {
-        marginRight: '15px',
-      },
-    },
-    MuiSwitchBase: {
-      root: {
-        padding: '8px',
-      },
-    },
-    MuiFormControlLabel: {
-      root: {
-        marginLeft: '-8px',
-      },
-    },
-  },
-});
 
 const style = {
   radio: {
@@ -55,7 +23,7 @@ const style = {
       marginBottom: 12,
     },
     back: {
-      marginRight: 12,
+      marginRight: 15,
     },
   },
   stepDescription: {
@@ -173,7 +141,7 @@ export default class NewFormation extends Component {
   submitFormation = async () => {
     try {
       await api.createFormation(
-        this.props.app,
+        this.props.app.name,
         this.state.size,
         this.state.quantity,
         this.state.type,
@@ -204,7 +172,7 @@ export default class NewFormation extends Component {
         key={size.name}
         value={size.name}
         className={size.name}
-        label={`${size.resources.limits.memory} (${size.name})`}
+        label={`${size.name} : ${size.description}`}
         control={
           <Radio color="primary" />
         }
@@ -389,47 +357,46 @@ export default class NewFormation extends Component {
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type)}>
-                Select Type</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(quantity)}>
-                Select Quantity</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(size)}>
-                Select Size</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel> {/* optional={stepIndex > 3 && renderCaption(service.label)}> */}
-                Describe Port/Command</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>
-                Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            {this.renderContent()}
-          </Collapse>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="new-error"
-          />
-        </div>
-      </MuiThemeProvider>
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type)}>
+              Select Type
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(quantity)}>
+              Select Quantity
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(size)}>
+              Select Size
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Describe Port/Command</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Confirm</StepLabel>
+          </Step>
+        </Stepper>
+        <Collapse in={!loading}>
+          {this.renderContent()}
+        </Collapse>
+        <ConfirmationModal
+          open={submitFail}
+          onOk={this.handleClose}
+          message={submitMessage}
+          title="Error"
+          className="new-error"
+        />
+      </div>
     );
   }
 }
 
 NewFormation.propTypes = {
-  app: PropTypes.string.isRequired,
+  app: PropTypes.object.isRequired, // eslint-disable-line
   onComplete: PropTypes.func.isRequired,
 };

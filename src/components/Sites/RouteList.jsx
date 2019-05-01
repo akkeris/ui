@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-
 import {
   Table, TableHead, TableBody, TableRow, TableCell, Paper, TablePagination,
   CircularProgress, Snackbar, IconButton, Tooltip, TableFooter,
@@ -14,24 +12,13 @@ import api from '../../services/api';
 import NewRoute from './NewRoute';
 import ConfirmationModal from '../ConfirmationModal';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
-
 const style = {
   refresh: {
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
       width: '40px',
       height: '40px',
-      marginTop: '15%',
-      marginBottom: '5%',
+      padding: '10% 0',
+      margin: '0 auto',
     },
     indicator: {
       display: 'inline-block',
@@ -145,96 +132,94 @@ export default class RouteList extends Component {
   };
 
   renderRoutes(page, rowsPerPage) {
-    return this.state.routes.slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage).map(route => (
-      <TableRow key={route.id} style={style.tableRow}>
-        <TableCell>
-          <div style={style.tableRowColumn.title}><a href={`https://${this.props.site.domain || this.props.site}${route.source_path}`}>{`https://${this.props.site.domain || this.props.site}${route.source_path}`}</a></div>
-          <div style={style.tableRowColumn.sub}>{route.id}</div>
-        </TableCell>
-        <TableCell style={style.tableRowColumn.icon}>
-          <ArrowIcon />
-        </TableCell>
-        <TableCell>
-          <div style={style.tableRowColumn.title}>{route.target_path}</div>
-          <div style={style.tableRowColumn.sub}>{route.app.name || route.app}</div>
-        </TableCell>
-        <TableCell style={style.tableRowColumn.icon}>
-          <div style={style.tableRowColumn.end}>
-            <IconButton
-              onClick={() => this.handleConfirmation(route)}
-            >
-              <RemoveIcon />
-            </IconButton>
-          </div>
-        </TableCell>
-      </TableRow>
-    ));
+    return this.state.routes
+      .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
+      .map(route => (
+        <TableRow key={route.id} style={style.tableRow}>
+          <TableCell>
+            <div style={style.tableRowColumn.title}><a href={`https://${this.props.site.domain || this.props.site}${route.source_path}`}>{`https://${this.props.site.domain || this.props.site}${route.source_path}`}</a></div>
+            <div style={style.tableRowColumn.sub}>{route.id}</div>
+          </TableCell>
+          <TableCell style={style.tableRowColumn.icon}>
+            <ArrowIcon />
+          </TableCell>
+          <TableCell>
+            <div style={style.tableRowColumn.title}>{route.target_path}</div>
+            <div style={style.tableRowColumn.sub}>{route.app.name || route.app}</div>
+          </TableCell>
+          <TableCell style={style.tableRowColumn.icon}>
+            <div style={style.tableRowColumn.end}>
+              <IconButton
+                onClick={() => this.handleConfirmation(route)}
+              >
+                <RemoveIcon />
+              </IconButton>
+            </div>
+          </TableCell>
+        </TableRow>
+      ));
   }
 
   render() {
     const { routes, page, rowsPerPage } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
-          {!this.state.new && (
-            <Paper elevation={0}>
-              <Tooltip title="New Route" placement="bottom-start">
-                <IconButton onClick={this.handleNewRoute}><AddIcon /></IconButton>
-              </Tooltip>
-            </Paper>
-          )}
-          {this.state.new && (
-            <div>
-              <IconButton onClick={this.handleNewRouteCancel}><RemoveIcon /></IconButton>
-              <NewRoute site={this.props.site} onComplete={this.reload} />
-            </div>
-          )}
-          <Table>
-            <TableHead>
+      <div>
+        {!this.state.new && (
+          <Paper elevation={0}>
+            <Tooltip title="New Route" placement="bottom-start">
+              <IconButton onClick={this.handleNewRoute}><AddIcon /></IconButton>
+            </Tooltip>
+          </Paper>
+        )}
+        {this.state.new && (
+          <div>
+            <IconButton onClick={this.handleNewRouteCancel}><RemoveIcon /></IconButton>
+            <NewRoute site={this.props.site} onComplete={this.reload} />
+          </div>
+        )}
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Source</TableCell>
+              <TableCell style={style.tableRowColumn.icon} />
+              <TableCell>Target</TableCell>
+              <TableCell style={style.tableRowColumn.icon} />
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.renderRoutes(page, rowsPerPage)}
+          </TableBody>
+          {routes.length !== 0 && (
+            <TableFooter>
               <TableRow>
-                <TableCell>Source</TableCell>
-                <TableCell style={style.tableRowColumn.icon} />
-                <TableCell>Target</TableCell>
-                <TableCell style={style.tableRowColumn.icon} />
+                <TablePagination
+                  rowsPerPageOptions={[15, 25, 50]}
+                  colSpan={4}
+                  count={routes.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onChangePage={this.handleChangePage}
+                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {this.renderRoutes(page, rowsPerPage)}
-            </TableBody>
-            {routes.length !== 0 && (
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[15, 25, 50]}
-                    colSpan={4}
-                    count={routes.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                  />
-                </TableRow>
-              </TableFooter>
-            )}
-          </Table>
-          <ConfirmationModal open={this.state.confirmOpen} onOk={this.handleRemoveRoute} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this Route?" />
-          <Snackbar
-            open={this.state.open}
-            message={this.state.message}
-            autoHideDuration={3000}
-            onClose={this.handleRequestClose}
-          />
-        </div>
-      </MuiThemeProvider>
+            </TableFooter>
+          )}
+        </Table>
+        <ConfirmationModal open={this.state.confirmOpen} onOk={this.handleRemoveRoute} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this Route?" />
+        <Snackbar
+          open={this.state.open}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={this.handleRequestClose}
+        />
+      </div>
     );
   }
 }

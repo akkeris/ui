@@ -52,7 +52,7 @@ We use a redis cache for session storage.  Create an encryption secret and add i
 ## Testing
 ---
 
-E2E testing are testcafe scripts in the test/e2e folder.
+E2E testing is availble as testcafe scripts in the test/e2e folder.
 Bot User is required.  Create config.env or set env variables
 
 * BASE_URL

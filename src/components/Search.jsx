@@ -1,231 +1,193 @@
-import React, { Component } from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { TextField, MenuItem, Paper, withStyles } from '@material-ui/core';
-import parse from 'autosuggest-highlight/parse';
-import Autosuggest from 'react-autosuggest';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import SelectComponent from 'react-select';
+import {
+  NoSsr, Typography, TextField, MenuItem, Paper, Divider,
+} from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
+  root: {
+    flexGrow: 1,
+  },
   input: {
-    width: '300px',
+    display: 'flex',
+    padding: 0,
   },
-  container: {
-    position: 'relative',
-    width: '300px',
+  valueContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    flex: 1,
+    alignItems: 'center',
+    overflow: 'hidden',
   },
-  suggestionsContainerOpen: {
+  noOptionsMessage: {
+    padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+  },
+  singleValue: {
+    fontSize: 16,
+  },
+  placeholder: {
+    position: 'absolute',
+    left: 2,
+    fontSize: 16,
+  },
+  paper: {
     position: 'absolute',
     zIndex: 1,
     left: 0,
     right: 0,
   },
-  suggestion: {
-    display: 'block',
-  },
-  suggestionsList: {
-    margin: 0,
-    padding: 0,
-    listStyleType: 'none',
-  },
   divider: {
     height: theme.spacing.unit * 2,
   },
+  groupHeading: {
+    marginBottom: '6px',
+  },
 });
 
-/* eslint-disable react/default-props-match-prop-types, react/prop-types */
+const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
-class Search extends Component {
-  constructor(props, context) {
-    super(props, context);
-    this.popperNode = null;
-    this.state = {
-      single: '',
-      popper: '',
-      suggestions: [],
-    };
+const inputComponent = ({ inputRef, ...props }) => <div ref={inputRef} {...props} />;
 
-    const { color } = this.props;
-
-    this.muiTheme = createMuiTheme({
-      palette: {
-        primary: { main: '#0097a7' },
+const Control = props => (
+  <TextField
+    fullWidth
+    InputProps={{
+      inputComponent,
+      inputProps: {
+        className: `${props.selectProps.classes.input} select-textfield`,
+        inputRef: props.inputRef,
+        children: props.children,
+        ...props.innerProps,
       },
-      overrides: {
-        MuiInput: {
-          input: {
-            '&::placeholder': {
-              color,
-            },
-            color,
-          },
-          underline: {
-            // Border color when input is not selected
-            '&:before': {
-              borderBottom: '1px solid rgb(200, 200, 200)',
-            },
-            // Border color when input is selected
-            '&:after': {
-              borderBottom: `1px solid ${color}`,
-            },
-            // Border color on hover
-            '&:hover:not([class^=".MuiInput-disabled-"]):not([class^=".MuiInput-focused-"]):not([class^=".MuiInput-error-"]):before': {
-              borderBottom: '1px solid rgb(200, 200, 200)',
-            },
-          },
-        },
-      },
-    });
-  }
+    }}
+    {...props.selectProps.textFieldProps}
+  />
+);
 
-  getSuggestions = (value) => {
-    const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
-    let results = 0;
-    const maxResults = 5;
+const Menu = props => (
+  <Paper square className={props.selectProps.classes.paper} {...props.innerProps}>
+    {props.children}
+  </Paper>
+);
 
-    if (inputLength === 0) { return []; }
+const NoOptionsMessage = props => (
+  <Typography
+    color="textSecondary"
+    className={props.selectProps.classes.noOptionsMessage}
+    {...props.innerProps}
+  >
+    {props.children}
+  </Typography>
+);
 
-    return this.props.data.filter((suggestion) => {
-      const keep = results < maxResults && suggestion.toLowerCase().includes(inputValue);
-      if (keep) {
-        results += 1;
-      }
-      return keep;
-    });
-  }
+const Option = props => (
+  <MenuItem
+    buttonRef={props.innerRef}
+    selected={props.isFocused}
+    component="div"
+    style={{ fontWeight: props.isSelected ? 500 : 400 }}
+    {...props.innerProps}
+  >
+    {props.children}
+  </MenuItem>
+);
 
-  getSuggestionValue = suggestion => suggestion;
+const GroupHeading = props => (
+  <div style={{ marginLeft: '12px', marginRight: '12px' }}>
+    <Typography
+      color="textSecondary"
+      className={props.selectProps.classes.groupHeading}
+      {...props.innerProps}
+    >
+      {props.children}
+    </Typography>
+    <Divider />
+  </div>
+);
 
-  catchReturn = (event, value) => {
-    if (event.key === 'Enter') {
-      this.props.handleSearch(value);
-      event.preventDefault();
-    }
-  }
+const Placeholder = props => (
+  <Typography
+    color="textSecondary"
+    className={props.selectProps.classes.placeholder}
+    {...props.innerProps}
+  >
+    {props.children}
+  </Typography>
+);
 
-  handleSuggestionsFetchRequested = ({ value }) => {
-    this.setState({ suggestions: this.getSuggestions(value) });
-  }
+const SingleValue = props => (
+  <Typography
+    className={props.selectProps.classes.singleValue}
+    {...props.innerProps}
+  >
+    {props.children}
+  </Typography>
+);
 
-  handleSuggestionsClearRequested = () => {
-    this.setState({ suggestions: [] });
-  }
+const ValueContainer = props => (
+  <div className={props.selectProps.classes.valueContainer}>{props.children}</div>  // eslint-disable-line
+);
 
-  handleChange = name => (event, { newValue }) => {
-    this.setState({ [name]: newValue });
-  }
+const components = {
+  Control, Menu, NoOptionsMessage, Option, SingleValue, ValueContainer, Placeholder, GroupHeading,
+};
 
-  handleSuggestionSelected = (event, { suggestion }) => {
-    this.props.handleSearch(suggestion);
-  }
-
-  // https://github.com/moroshko/autosuggest-highlight/issues/5#issuecomment-392333344
-  customMatch = (text, query) => {
-    const results = [];
-    const trimmedQuery = query.trim().toLowerCase();
-    const textLower = text.toLowerCase();
-    const queryLength = trimmedQuery.length;
-    let indexOf = textLower.indexOf(trimmedQuery);
-    while (indexOf > -1) {
-      results.push([indexOf, indexOf + queryLength]);
-      indexOf = textLower.indexOf(query, indexOf + queryLength);
-    }
-    return results;
-  }
-
-  // Render the individual suggestion, highlighting the query inside the text
-  renderSuggestion = (suggestion, { query, isHighlighted }) => {
-    const matches = this.customMatch(suggestion, query);
-    const parts = parse(suggestion, matches);
-    return (
-      <MenuItem selected={isHighlighted} component="div">
-        <div>
-          {parts.map((part, index) => (part.highlight ? (
-            <span key={String(index)} style={{ fontWeight: 500 }}>
-              {part.text}
-            </span>
-          ) : (
-            <strong key={String(index)} style={{ fontWeight: 300 }}>
-              {part.text}
-            </strong>
-          )))}
-        </div>
-      </MenuItem>
-    );
-  }
-
-  renderInputComponent(inputProps) { // eslint-disable-line class-methods-use-this
-    const { catchReturn, errorText, value, muiTheme, ...other } = inputProps;
-    return (
-      <MuiThemeProvider theme={muiTheme}>
-        <TextField
-          onKeyPress={event => catchReturn(event, value)}
-          error={errorText ? true : undefined}
-          {...other}
-        />
-      </MuiThemeProvider>
-    );
-  }
-
-
+class Search extends PureComponent {
   render() {
-    const { classes, errorText, className, placeholder } = this.props;
-    const autoSuggestProps = {
-      renderInputComponent: this.renderInputComponent,
-      suggestions: this.state.suggestions,
-      onSuggestionsFetchRequested: this.handleSuggestionsFetchRequested,
-      onSuggestionsClearRequested: this.handleSuggestionsClearRequested,
-      getSuggestionValue: this.getSuggestionValue,
-      renderSuggestion: this.renderSuggestion,
-      onSuggestionSelected: this.handleSuggestionSelected,
+    const { onChange, value, classes, theme, placeholder, options, error } = this.props;
+
+    const selectStyles = {
+      input: base => ({
+        ...base,
+        color: theme.palette.text.primary,
+        '& input': {
+          font: 'inherit',
+        },
+      }),
     };
 
     return (
-      <div className={className}>
-        <Autosuggest
-          {...autoSuggestProps}
-          inputProps={{
-            catchReturn: this.catchReturn,
-            errorText,
-            muiTheme: this.muiTheme,
-            placeholder,
-            label: errorText || undefined,
-            value: this.state.single,
-            onChange: this.handleChange('single'),
-          }}
-          theme={{
-            input: classes.input,
-            container: classes.container,
-            suggestionsContainerOpen: classes.suggestionsContainerOpen,
-            suggestionsList: classes.suggestionsList,
-            suggestion: classes.suggestion,
-          }}
-          renderSuggestionsContainer={options => (
-            <Paper {...options.containerProps} square>
-              {options.children}
-            </Paper>
-          )}
-        />
+      <div className={classes.root}>
+        <NoSsr>
+          <SelectComponent
+            textFieldProps={{ error }}
+            classes={classes}
+            styles={selectStyles}
+            options={options}
+            components={components}
+            value={isEmpty(value) ? '' : value}
+            onChange={onChange}
+            placeholder={placeholder}
+          />
+        </NoSsr>
       </div>
     );
   }
 }
 
+/* eslint-disable */
+
+//  Props:
+//    onChange - Callback function executed when an option is selected
+//    value - Currently selected option - should be changed by onChange
+//    placeholder - Text to display when no option is selected
+//    options - Array of objects { value: '', label: '' } to display as selectable options
+
 Search.propTypes = {
-  color: PropTypes.string,
-  data: PropTypes.arrayOf(PropTypes.string).isRequired,
-  errorText: PropTypes.string,
-  handleSearch: PropTypes.func,
-  className: PropTypes.string,
-  placeholder: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.object.isRequired,
+  placeholder: PropTypes.string.isRequired,
+  options: PropTypes.array.isRequired,
+  classes: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
+  error: PropTypes.bool,
 };
 
 Search.defaultProps = {
-  errorText: '',
-  handleSearch: () => {},
-  className: '',
-  placeholder: 'Search',
-  color: 'white',
-};
+  error: false,
+}
+/* eslint-enable */
 
-export default withStyles(styles)(Search);
+export default withStyles(styles, { withTheme: true })(Search);

@@ -1,18 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
+import {
+  Table, TableBody, TableRow, TableFooter, TableCell, TablePagination, TableHead,
+  TableSortLabel, Tooltip,
+} from '@material-ui/core';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import History from '../../config/History';
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-});
 
 const style = {
   tableRow: {
@@ -49,6 +42,8 @@ export default class AppList extends Component {
   state = {
     page: 0,
     rowsPerPage: 15,
+    sortBy: 'apps',
+    sortDirection: 'asc',
   }
 
   handleRowSelection = (app) => {
@@ -63,8 +58,18 @@ export default class AppList extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
+  handleSortChange = column => () => {
+    const sortBy = column;
+    let sortDirection = 'desc';
+    if (this.state.sortBy === column && this.state.sortDirection === 'desc') {
+      sortDirection = 'asc';
+    }
+    this.setState({ sortBy, sortDirection, page: 0 });
+    this.props.onSortChange(sortBy, sortDirection);
+  }
+
   renderApps(page, rowsPerPage) {
-    return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
+    return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => ( // eslint-disable-line
       <TableRow
         className={app.name}
         key={app.id}
@@ -77,48 +82,118 @@ export default class AppList extends Component {
           <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>
         </TableCell>
         <TableCell style={style.tableRow}>
-          {this.props.favorites && (
-            this.props.favorites.findIndex(x => x.name === app.name) > -1 ? <FavoriteIcon style={{ float: 'right' }} /> : null
-          )}
+          <div style={style.tableRowColumn.main}>{app.space.name}</div>
+        </TableCell>
+        <TableCell style={style.tableRow}>
+          <div style={style.tableRowColumn.main}>{app.region.name}</div>
+        </TableCell>
+        <TableCell style={style.tableRow}>
+          <div style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+            {app.isFavorite && <FavoriteIcon />}
+          </div>
         </TableCell>
       </TableRow>
     ));
   }
 
   render() {
-    const { rowsPerPage, page } = this.state;
+    const { rowsPerPage, page, sortBy, sortDirection } = this.state;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={{ marginBottom: '12px' }}>
-          <Table className="app-list">
-            <TableBody>
-              {this.renderApps(page, rowsPerPage)}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TablePagination
-                  rowsPerPageOptions={[15, 25, 50]}
-                  colSpan={3}
-                  count={this.props.apps.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onChangePage={this.handleChangePage}
-                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                />
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </div>
-      </MuiThemeProvider>
+      <div style={{ marginBottom: '12px', overflow: 'auto' }}>
+        <Table className="app-list">
+          <colgroup>
+            <col style={{ width: '40%' }} />
+            <col style={{ width: '30%' }} />
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '10%' }} />
+          </colgroup>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <Tooltip
+                  title="Sort"
+                  placement="bottom-start"
+                  enterDelay={300}
+                >
+                  <TableSortLabel
+                    active={sortBy === 'apps'}
+                    direction={sortDirection}
+                    onClick={this.handleSortChange('apps')}
+                  >
+                    App
+                  </TableSortLabel>
+                </Tooltip>
+              </TableCell>
+              <TableCell>
+                <Tooltip
+                  title="Sort"
+                  placement="bottom-start"
+                  enterDelay={300}
+                >
+                  <TableSortLabel
+                    active={sortBy === 'spaces'}
+                    direction={sortDirection}
+                    onClick={this.handleSortChange('spaces')}
+                  >
+                    Space
+                  </TableSortLabel>
+                </Tooltip>
+              </TableCell>
+              <TableCell>
+                <Tooltip
+                  title="Sort"
+                  placement="bottom-start"
+                  enterDelay={300}
+                >
+                  <TableSortLabel
+                    active={sortBy === 'regions'}
+                    direction={sortDirection}
+                    onClick={this.handleSortChange('regions')}
+                  >
+                    Region
+                  </TableSortLabel>
+                </Tooltip>
+              </TableCell>
+              <TableCell>
+                <Tooltip
+                  title="Sort"
+                  placement="bottom-start"
+                  enterDelay={300}
+                >
+                  <TableSortLabel
+                    active={sortBy === 'favorites'}
+                    direction={sortDirection}
+                    onClick={this.handleSortChange('favorites')}
+                  >
+                    Favorite
+                  </TableSortLabel>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.renderApps(page, rowsPerPage)}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[15, 25, 50]}
+                colSpan={4}
+                count={this.props.apps.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onChangePage={this.handleChangePage}
+                onChangeRowsPerPage={this.handleChangeRowsPerPage}
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </div>
     );
   }
 }
 
 AppList.propTypes = {
   apps: PropTypes.arrayOf(PropTypes.object).isRequired,
-  favorites: PropTypes.arrayOf(PropTypes.object),
-};
-
-AppList.defaultProps = {
-  favorites: null,
+  onSortChange: PropTypes.func.isRequired,
 };

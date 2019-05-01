@@ -4,25 +4,15 @@ import {
   FormGroup, FormControlLabel, Switch, Typography, FormControl, Radio, RadioGroup, FormLabel,
   Step, Stepper, StepLabel, Button, TextField, Collapse,
 } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import gh from 'parse-github-url';
 import ConfirmationModal from '../ConfirmationModal';
 
 import api from '../../services/api';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#0097a7',
-    },
-  },
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-});
-
 const style = {
   stepper: {
     width: '100%',
-    maxWidth: 800,
+    maxWidth: 700,
     margin: 'auto',
   },
   buttons: {
@@ -80,6 +70,9 @@ export default class NewAutoBuild extends Component {
         loading: stepIndex >= 4,
         errorText: null,
       });
+      if (stepIndex >= 4) {
+        this.submitBuild();
+      }
     }
   }
 
@@ -160,6 +153,7 @@ export default class NewAutoBuild extends Component {
               error={errorText && errorText.length > 0}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              fullWidth
             />
             <Typography variant="body1" style={style.stepDescription}>
               {'The repo URL (e.g. https://github.com/foo/bar).'}
@@ -287,11 +281,8 @@ export default class NewAutoBuild extends Component {
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
+    const { stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'hidden' };
-    if (finished) {
-      this.submitBuild();
-    }
 
     return (
       <div style={contentStyle}>
@@ -324,45 +315,43 @@ export default class NewAutoBuild extends Component {
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     const account = userSelection === 'bot' ? 'Service Account' : username;
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div style={style.stepper}>
-          <Stepper activeStep={stepIndex}>
-            <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(gh(repo).repo)}>
+      <div style={style.stepper}>
+        <Stepper activeStep={stepIndex}>
+          <Step>
+            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(gh(repo).repo)}>
                 Input Repo
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(branch.length === 0 ? 'master' : branch)}>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(branch.length === 0 ? 'master' : branch)}>
                 Input Branch
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(account)}>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(account)}>
                 Input GitHub User
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>
                 Options
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            {this.renderContent()}
-          </Collapse>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="new-auto-build-error"
-          />
-        </div>
-      </MuiThemeProvider>
+            </StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Confirm</StepLabel>
+          </Step>
+        </Stepper>
+        <Collapse in={!loading}>
+          {this.renderContent()}
+        </Collapse>
+        <ConfirmationModal
+          open={submitFail}
+          onOk={this.handleClose}
+          message={submitMessage}
+          title="Error"
+          className="new-auto-build-error"
+        />
+      </div>
     );
   }
 }

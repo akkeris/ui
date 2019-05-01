@@ -9,7 +9,6 @@ const webpack = require('webpack');
 const webpackMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 const config = require('./webpack-dev-server.config.js');
-const jsonminify = require('jsonminify');
 
 const port = process.env.PORT || 3000;
 const clientID = process.env.CLIENT_ID;
@@ -17,7 +16,6 @@ const clientSecret = process.env.CLIENT_SECRET;
 const clientURI = process.env.CLIENT_URI || 'http://localhost:3000';
 const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
-const authUserEndpoint = process.env.OAUTH_USER_ENDPOINT || `${authEndpoint}/user`;
 const https = require('https');
 
 const app = express();
@@ -90,14 +88,14 @@ app.get('/log-plex/:id', (req, res) => {
 });
 
 app.use((req, res, next) => {
-  if (req.session.token || req.path === '/oauth/callback') {
+  if (req.session.token || req.path === '/oauth/callback' || req.path === '/logout' || req.path === '/main.css') {
     next();
   } else {
     req.session.redirect = req.originalUrl;
-    if(process.env.OAUTH_SCOPES) {
+    if (process.env.OAUTH_SCOPES) {
       res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}&scope=${encodeURIComponent(process.env.OAUTH_SCOPES)}`);
     } else {
-      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);      
+      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
     }
   }
 });
@@ -131,11 +129,36 @@ app.use('/api', proxy(`${akkerisApi}`, {
     return reqOpts;
   },
 }));
+
+app.get('/healthcheck', (req, res) => {
+  const url = decodeURIComponent(req.query.uri);
+  if (url) {
+    request({ url }).on('error', e => res.end(e)).pipe(res);
+  } else {
+    res.sendStatus(400);
+  }
+});
+
 /* eslint-enable no-param-reassign */
 
 app.get('/logout', (req, res) => {
-  req.session.token = null;
-  res.redirect(`${authEndpoint}/logout`);
+  const reqopts = {
+    url: `${authEndpoint}/authorizations/${req.session.token}`,
+    headers: { 'user-agent': 'akkerisui', accept: 'application/json' },
+    followRedirect: false,
+    maxRedirects: 0,
+  };
+  req.session.destroy();
+  request.delete(reqopts, (error, response, body) => {
+    if (error) {
+      return console.error('delete failed:', error);
+    }
+  });
+  if (process.env.NODE_ENV === 'dev') {
+    res.sendFile(path.resolve('public', 'logout.html'));
+  } else {
+    res.sendFile(path.resolve('build', 'logout.html'));
+  }
 });
 
 app.get('/user', (req, res) => {
@@ -169,7 +192,6 @@ if (process.env.NODE_ENV === 'dev') {
     res.sendFile(path.resolve('build', 'index.html'));
   });
 }
-
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) {

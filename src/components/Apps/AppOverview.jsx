@@ -1,52 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import {
-  CircularProgress, Switch, List, ListItem, ListItemText, Button, Dialog,
-  GridList, GridListTile, Table, TableBody, TableRow, TableCell,
-  DialogActions, DialogContent, DialogContentText,
-  FormGroup, FormControlLabel, Tooltip,
+  CircularProgress, List, ListItem, ListItemText,
+  GridList, GridListTile, Snackbar,
+  Divider,
 } from '@material-ui/core';
-import RemoveIcon from '@material-ui/icons/Clear';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
-import History from '../../config/History';
-
-function addRestrictedTooltip(title, children) {
-  return (
-    <Tooltip title={title} placement="top">
-      <div>{children}</div>
-    </Tooltip>
-  );
-}
-
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
-  overrides: {
-    MuiDialog: {
-      paper: {
-        width: '40%',
-      },
-    },
-    MuiTableCell: {
-      root: {
-        borderBottom: 'none',
-      },
-    },
-    MuiFormGroup: {
-      root: {
-        alignContent: 'center',
-      },
-    },
-  },
-});
 
 const style = {
   link: {
@@ -55,10 +17,10 @@ const style = {
   },
   currentImage: {
     visible: {
-      padding: '0 24px 10px 24px',
+      padding: '12px 24px 20px',
     },
     hidden: {
-      padding: '0 24px 18px 24px',
+      padding: '12px 24px 20px 24px',
     },
   },
   refresh: {
@@ -80,6 +42,13 @@ const style = {
   },
   gridList: {
     overflowY: 'auto',
+    margin: '0px 24px',
+  },
+  gridListTile: {
+    padding: '0px',
+  },
+  listItem: {
+    padding: '12px 0px',
   },
   tableCell: {
     main: {
@@ -89,6 +58,7 @@ const style = {
       paddingLeft: '24px',
       marginLeft: '0px',
       paddingRight: '16px',
+      borderBottom: 'none',
     },
     sub: {
       fontSize: '14px',
@@ -104,6 +74,35 @@ const style = {
   removeIcon: {
     paddingRight: '5px',
   },
+  collapse: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      container: {
+        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+      },
+      title: {
+        flex: 1,
+      },
+    },
+  },
+  header: {
+    container: {
+      display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px',
+    },
+    title: {
+      flex: 1,
+    },
+    actions: {
+      container: {
+        width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      },
+      button: {
+        width: '50px',
+      },
+    },
+  },
 };
 
 class AppOverview extends Component {
@@ -113,238 +112,221 @@ class AppOverview extends Component {
       loading: true,
       open: false,
       mOpen: false,
+      rOpen: false,
       submitFail: false,
       submitMessage: '',
       isMaintenance: false,
       isElevated: false,
       restrictedSpace: false,
+      autoBuild: null,
+      newAuto: false,
+      snackOpen: false,
     };
   }
 
-  componentWillMount() {
-    const { app, accountInfo } = this.props;
+  async componentDidMount() {
+    const { app } = this.props;
 
-    // If this is a production app, check for the elevated_access role to determine
-    // whether or not to enable the delete app button.
-
-    // There is still an API call on the backend that controls access to the actual
-    // deletion of the app, this is merely for convienence.
-
-    let isElevated = false;
-    let restrictedSpace = false;
-    if (app.space.compliance.includes('prod') || app.space.compliance.includes('socs')) {
-      // If we don't have the elevated_access object in the accountInfo object,
-      // default to enabling the button (access will be controlled on the API)
-      isElevated = (accountInfo && 'elevated_access' in accountInfo) ? accountInfo.elevated_access : true;
-      restrictedSpace = true;
+    let autoBuild;
+    try {
+      autoBuild = await api.getAutoBuild(this.props.app.name);
+    } catch (err) {
+      autoBuild = null;
     }
 
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       isMaintenance: app.maintenance,
+      autoBuild: autoBuild ? autoBuild.data : null,
       loading: false,
-      isElevated,
-      restrictedSpace,
     });
+    this._isMounted = true;
   }
 
-  handleConfirmation = () => {
-    this.setState({ open: true });
+  componentDidUpdate(prevProps) {
+    if (prevProps.app !== this.props.app) {
+      this.getRepo();
+    }
   }
 
-  handleCancelConfirmation = () => {
-    this.setState({ open: false });
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
-  handleMaintenanceConfirmation = (event, isInputChecked) => {
+  getRepo = async () => {
+    let autoBuild;
+    try {
+      autoBuild = await api.getAutoBuild(this.props.app.name);
+    } catch (err) {
+      if (err.response.status === 404) {
+        if (this._isMounted) {
+          this.setState({
+            rOpen: false,
+            loading: false,
+            autoBuild: null,
+          });
+        }
+      } else if (this._isMounted) {
+        this.setState({
+          submitMessage: err.response.data,
+          submitFail: true,
+          rOpen: false,
+          loading: false,
+          autoBuild: null,
+        });
+      }
+    }
+
     this.setState({
-      mOpen: true,
-      isMaintenance: isInputChecked,
+      autoBuild: autoBuild ? autoBuild.data : null,
+      loading: false,
     });
   }
 
-  handleCancelMaintenanceConfirmation = () => {
-    this.setState({
-      mOpen: false,
-      isMaintenance: !this.state.isMaintenance,
-    });
+  handleSnackClose() {
+    this.setState({ snackOpen: false });
   }
 
   handleClose = () => {
     this.setState({ submitFail: false });
-  }
+  };
 
-  handleRemoveApp = async () => {
-    try {
-      await api.deleteApp(this.props.app.name);
-      History.get().push('/apps');
-    } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        open: false,
-      });
-    }
-  }
-
-  handleMaintenanceToggle = async () => {
-    this.setState({ loading: true });
-    try {
-      await api.patchApp(this.props.app.name, this.state.isMaintenance);
-      this.props.onComplete('Maintenance Mode Updated');
-      this.setState({ mOpen: false, loading: false });
-    } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        loading: false,
-        mOpen: false,
-      });
-    }
+  reload = (message) => {
+    this.setState({
+      loading: false,
+      newAuto: false,
+      snackOpen: true,
+      message,
+    });
   }
 
   render() {
-    const { isElevated, restrictedSpace } = this.state;
     if (this.state.loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        </MuiThemeProvider>
+        <div style={style.refresh.div}>
+          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+        </div>
       );
     }
 
-    let deleteButton = (
-      <Button
-        variant="contained"
-        className="delete"
-        style={style.button}
-        onClick={this.handleConfirmation}
-        color="secondary"
-        disabled={(restrictedSpace && !isElevated)}
-      >
-        <RemoveIcon style={style.removeIcon} nativeColor={isElevated ? 'white' : undefined} />
-        <span style={style.deleteButtonLabel}>Delete App</span>
-      </Button>
-    );
-
-    // Wrap the delete button in a tooltip to avoid confusion as to why it is disabled
-    if (restrictedSpace && !isElevated) {
-      deleteButton = addRestrictedTooltip('Elevated access required', deleteButton);
-    }
-
     return (
-      <MuiThemeProvider theme={muiTheme}>
-        <div>
+      <div>
+        <Divider />
+        <GridList style={style.gridList} cellHeight={'auto'}>
+          <GridListTile style={{ padding: '0px' }}>
+            <List>
+              <ListItem style={style.listItem}>
+                <ListItemText primary="Organization" secondary={this.props.app.organization.name} />
+              </ListItem>
+              <ListItem style={style.listItem}>
+                <ListItemText primary="ID" secondary={`${this.props.app.id}`} />
+              </ListItem>
+            </List>
+          </GridListTile>
+          <GridListTile style={{ padding: '0px' }}>
+            <List>
+              <ListItem style={style.listItem}>
+                <ListItemText
+                  primary="URL"
+                  secondary={
+                    <a style={style.link} href={this.props.app.web_url}>
+                      {this.props.app.web_url}
+                    </a>
+                  }
+                />
+              </ListItem>
+              <ListItem style={style.listItem}>
+                <ListItemText primary="Discovery" secondary={`${this.props.app.simple_name.toUpperCase()}_SERVICE_HOST, ${this.props.app.simple_name.toUpperCase()}_SERVICE_PORT`} />
+              </ListItem>
+            </List>
+          </GridListTile>
+        </GridList>
+        <Divider variant="middle" />
+        {this.state.autoBuild ? (
           <GridList style={style.gridList} cellHeight={'auto'}>
-            <GridListTile>
+            <GridListTile style={{ padding: '0px' }}>
               <List>
-                <ListItem>
-                  <ListItemText primary="Organization" secondary={this.props.app.organization.name} />
-                </ListItem>
-                <ListItem>
-                  <ListItemText primary="ID" secondary={`${this.props.app.id}`} />
-                </ListItem>
-              </List>
-            </GridListTile>
-            <GridListTile>
-              <List>
-                <ListItem>
+                <ListItem style={style.listItem}>
                   <ListItemText
-                    primary="URL"
+                    primary="Git Repo"
                     secondary={
-                      <a style={style.link} href={this.props.app.web_url}>
-                        {this.props.app.web_url}
+                      <a style={style.link} href={this.state.autoBuild.repo}>
+                        {this.state.autoBuild.repo}
                       </a>
                     }
                   />
                 </ListItem>
-                <ListItem>
-                  <ListItemText primary="Discovery" secondary={`${this.props.app.simple_name.toUpperCase()}_SERVICE_HOST, ${this.props.app.simple_name.toUpperCase()}_SERVICE_PORT`} />
+                <ListItem style={style.listItem}>
+                  <ListItemText
+                    primary="Auto Deploy"
+                    secondary={this.state.autoBuild.auto_deploy.toString()}
+                  />
+                </ListItem>
+              </List>
+            </GridListTile>
+            <GridListTile style={{ padding: '0px' }}>
+              <List>
+                <ListItem style={style.listItem}>
+                  <ListItemText
+                    primary="User"
+                    secondary={this.state.autoBuild.username}
+                  />
+                </ListItem>
+                <ListItem style={style.listItem}>
+                  <ListItemText
+                    primary="Branch"
+                    secondary={this.state.autoBuild.branch}
+                  />
                 </ListItem>
               </List>
             </GridListTile>
           </GridList>
-          <ListItemText
-            style={this.props.app.repo ? style.currentImage.visible : style.currentImage.hidden}
-            primary="Current Image"
-            secondary={this.props.app.image}
-          />
-          {this.props.app.git_url && (
-            <ListItemText
-              style={style.currentImage.visible}
-              primary="Git"
-              secondary={
-                <a style={style.link} href={this.props.app.git_url}>
-                  {this.props.app.git_url}
-                </a>
-              }
-            />
-          )}
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell style={style.tableCell.header}>
-                  <div style={style.tableCell.main}>{'Last Release and Most Recent Changes'}</div>
-                  <div style={style.tableCell.sub}>
-                    {Date(this.props.app.released_at).toLocaleString()}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          className="toggle"
-                          checked={this.state.isMaintenance}
-                          onChange={this.handleMaintenanceConfirmation}
-                        />
-                      }
-                      label="Maintenance"
-                      labelPlacement="start"
-                    />
-                  </FormGroup>
-                </TableCell>
-                <TableCell >
-                  <div style={style.tableCell.end}>{deleteButton}</div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <Audits app={this.props.app} />
-          <ConfirmationModal className="delete-confirm" open={this.state.open} onOk={this.handleRemoveApp} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this app?" />
-          <ConfirmationModal
-            className="maintenance-confirm"
-            open={this.state.mOpen}
-            onOk={this.handleMaintenanceToggle}
-            onCancel={this.handleCancelMaintenanceConfirmation}
-            message={!this.state.isMaintenance ? (
-              'Are you sure you want to take this app out of maintenance?'
-            ) : (
-              'Are you sure you want to put this app in maintenance?'
-            )}
-            title="Confirm Maintenance"
-          />
-          <Dialog className="error" open={this.state.loading || this.state.submitFail}>
-            <DialogContent>
-              <DialogContentText>
-                {this.state.submitMessage}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button className="ok" color="primary" onClick={this.handleClose}>Ok</Button>
-            </DialogActions>
-          </Dialog>
+        ) : (
+          <GridList style={style.gridList} cellHeight={'auto'}>
+            <GridListTile style={{ padding: '0px' }}>
+              <List>
+                <ListItemText primary="Git Repo" secondary={'Not Configured'} />
+              </List>
+            </GridListTile>
+          </GridList>
+        )}
+        <Divider variant="middle" />
+        <ListItemText
+          style={this.props.app.repo ? style.currentImage.visible : style.currentImage.hidden}
+          primary="Current Image"
+          secondary={this.props.app.image ? this.props.app.image : 'No Releases'}
+        />
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
+          <div>
+            <div style={style.tableCell.main}>
+              {'Last Release and Most Recent Changes'}
+            </div>
+            <div style={style.tableCell.sub}>
+              {new Date(this.props.app.released_at).toString()}
+            </div>
+          </div>
         </div>
-      </MuiThemeProvider>
+        <Audits app={this.props.app} />
+        <ConfirmationModal
+          className="error"
+          open={this.state.loading || this.state.submitFail}
+          onOk={this.handleClose}
+          message={this.state.submitMessage}
+          title="Error"
+        />
+        <Snackbar
+          className="auto-snack"
+          open={this.state.snackOpen}
+          message={this.state.message}
+          autoHideDuration={3000}
+          onClose={() => { this.handleSnackClose(); }}
+        />
+      </div>
     );
   }
 }
 
 AppOverview.propTypes = {
   app: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  onComplete: PropTypes.func.isRequired,
-  accountInfo: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
 export default AppOverview;

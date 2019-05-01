@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import deepmerge from 'deepmerge';
 import { CircularProgress, Typography, IconButton } from '@material-ui/core';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import { Refresh, Fullscreen, FullscreenExit } from '@material-ui/icons';
 import PropTypes from 'prop-types';
 import { LazyLog, ScrollFollow } from 'react-lazylog';
@@ -8,13 +9,7 @@ import Loading from 'react-lazylog/build/Loading';
 import Ansi from 'ansi-to-react';
 import api from '../../services/api';
 
-const muiTheme = createMuiTheme({
-  palette: {
-    primary: { main: '#0097a7' },
-  },
-  typography: {
-    fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"',
-  },
+const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiIconButton: {
       root: {
@@ -128,7 +123,7 @@ export default class Logs extends Component {
     const { app } = this.props;
     if (loading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProvider theme={theme}>
           <div style={style.refresh.div}>
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
@@ -136,7 +131,7 @@ export default class Logs extends Component {
       );
     } else if (reading) {
       return (
-        <MuiThemeProvider theme={muiTheme}>
+        <MuiThemeProvider theme={theme}>
           <div style={expanded ? style.expanded : undefined}>
             <div style={style.logsHeader.rootContainer}>
               <div style={style.logsHeader.statusContainer}>
@@ -177,7 +172,7 @@ export default class Logs extends Component {
       );
     }
     return (
-      <MuiThemeProvider theme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <div />
       </MuiThemeProvider>
     );
