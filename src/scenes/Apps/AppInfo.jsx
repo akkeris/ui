@@ -98,12 +98,17 @@ export default class AppInfo extends Component {
       isElevated: false,
       restrictedSpace: false,
       message: '',
-      currentTab: 'info',
       basePath: `/apps/${this.props.match.params.app}`,
     };
   }
 
   async componentDidMount() {
+    // Landed on an invalid tab
+    const currentTab = this.props.match.params.tab;
+    if (!currentTab || !tabs.includes(currentTab)) {
+      History.get().replace(`${this.state.basePath}/info`);
+    }
+
     try {
       const appResponse = await api.getApp(this.props.match.params.app);
       const favoriteResponse = await api.getFavorites();
@@ -120,14 +125,7 @@ export default class AppInfo extends Component {
 
       this._isMounted = true;
 
-      // If current tab not provided or invalid, rewrite it to be /info
-      let currentTab = this.props.match.params.tab;
-      if (!currentTab || !tabs.includes(currentTab)) {
-        currentTab = 'info';
-        history.replaceState(null, '', `${this.state.basePath}/info`);
-      }
       this.setState({
-        currentTab,
         app: appResponse.data,
         accountInfo: accountResponse.data,
         isFavorite: favoriteResponse.data.findIndex(x => x.name === appResponse.data.name) > -1,
@@ -146,14 +144,13 @@ export default class AppInfo extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    // If we changed tabs through the back or forward button, update currentTab
-    if (prevProps.match.params.tab !== this.props.match.params.tab && this.props.history.action === 'POP') {
-      let currentTab = this.props.match.params.tab;
-      if (!tabs.includes(currentTab)) {
-        currentTab = 'info';
-        history.replaceState(null, '', `${this.state.basePath}/info`);
+    const currentTab = this.props.match.params.tab;
+    const prevTab = prevProps.match.params.tab;
+    // Handle bad tab navigation (not provided or not valid)
+    if (prevTab !== currentTab) {
+      if (!currentTab || !tabs.includes(currentTab)) {
+        History.get().replace(`${this.state.basePath}/info`);
       }
-      this.setState({ currentTab }); // eslint-disable-line react/no-did-update-set-state
     }
   }
 
@@ -308,11 +305,9 @@ export default class AppInfo extends Component {
   }
 
   changeActiveTab = (event, newTab) => {
-    if (this.state.currentTab !== newTab) {
-      this.setState({
-        currentTab: newTab,
-      });
-      history.pushState(null, '', `${this.state.basePath}/${newTab}`);
+    const currentTab = this.props.match.params.tab;
+    if (currentTab !== newTab) {
+      History.get().push(`${this.state.basePath}/${newTab}`);
     }
   }
 
@@ -408,7 +403,6 @@ export default class AppInfo extends Component {
               <ListItemText primary="Configure Repo" />
             </MenuItem>
           )}
-
           <Divider variant="inset" />
           {deleteButton}
         </Menu>
@@ -417,7 +411,8 @@ export default class AppInfo extends Component {
   }
 
   render() {
-    const { currentTab, loading, submitMessage, submitFail } = this.state;
+    const { loading, submitMessage, submitFail } = this.state;
+    const currentTab = this.props.match.params.tab;
     if (loading) {
       let notFoundMessage;
       if (submitFail) {
@@ -460,7 +455,7 @@ export default class AppInfo extends Component {
 
           <Tabs
             variant="fullWidth"
-            value={this.state.currentTab}
+            value={currentTab}
             onChange={this.changeActiveTab}
             scrollButtons="off"
             indicatorColor="primary"
@@ -637,5 +632,4 @@ export default class AppInfo extends Component {
 
 AppInfo.propTypes = {
   match: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
-  history: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
