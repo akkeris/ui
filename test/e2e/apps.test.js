@@ -213,6 +213,38 @@ test('Should follow search to app and see all info', async (t) => { // eslint-di
 test('Should be able to toggle into maintenance mode', async (t) => { // eslint-disable-line no-undef
   await t
     .click('.app-list .testcafe-testcafe')
+
+    // In order to put an app in maintenance mode, you have to have a dyno running something
+
+    // Create dyno
+    .click('.dynos-tab')
+    .click('button.new-formation')
+    .typeText('.new-type input', 'web')
+    .click('button.next')
+    .click('button.next') // quantity (1)
+    .click('button.next') // size (gp1)
+    .typeText('.new-port input', '8000', { replace: true })
+    .click('button.next')
+    .click('button.next') // summary
+    .expect(Selector('.formation-snack').innerText)
+    .contains('New Formation Added')
+
+    // Create a new build
+    .click('.releases-tab')
+    .click('button.new-build')
+    .typeText('.url input', 'docker://registry.hub.docker.com/crccheck/hello-world:latest') // 1.2MB web server test image
+    .click('button.next')
+    .click('button.next') // branch
+    .click('button.next') // version
+    .click('button.next') // summary
+
+    .expect(Selector('.release-snack').innerText)
+    .contains('New Deployment Requested')
+    .expect(Selector('.release-list tbody').childElementCount)
+    .gt(0)
+
+    .wait(60000) // Wait 1 minute
+
     .click('button.app-menu-button')
     .click('.toggle')
     .expect(Selector('.maintenance-confirm').innerText)
@@ -220,16 +252,7 @@ test('Should be able to toggle into maintenance mode', async (t) => { // eslint-
     .click('.maintenance-confirm .ok')
 
     .expect(Selector('.app-snack').innerText)
-    .contains('Maintenance Mode Updated')
-
-    .expect(Selector('.audit-list tbody').childElementCount)
-    .gt(0)
-    .expect(Selector('.audit-list tbody tr').innerText)
-    .contains('feature_change')
-    .click('.audit-list tbody tr')
-    .expect(Selector('.audit-info tbody').childElementCount)
-    .gt(0)
-    .click('button.ok');
+    .contains('Maintenance Mode Updated');
 });
 
 test('Should be able to create edit and delete formations', async (t) => { // eslint-disable-line no-undef
@@ -278,17 +301,17 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     // Check step 2 caption
     .expect(Selector('.step-1-label .step-label-caption').innerText)
     .contains('2')
-    .click('.new-size .constellation')
+    .click('.new-size .gp2')
     .click('button.next')
 
     // Check step 3 caption
     .expect(Selector('.step-2-label .step-label-caption').innerText)
-    .contains('constellation')
+    .contains('gp2')
     .click('button.next')
 
     // Check stepper summary
     .expect(Selector('.new-formation-summary').innerText)
-    .contains('[2] web dyno(s) will be created with size constellation, and will use the default port.')
+    .contains('[2] web dyno(s) will be created with size gp2, and will use the default port.')
     .click('button.next')
 
     .expect(Selector('.formation-snack').innerText)
@@ -326,13 +349,13 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     // Size
     .click('.formation-list .web .web-info button.edit')
     .click('.formation-list .web .web-info .size-select')
-    .click('.scout')
+    .click('.gp1')
     .click('.formation-list .web .web-info button.save')
     .expect(Selector('.formation-snack').innerText)
     .contains('Updated Formation')
     .click('.formation-list .web')
     .expect(Selector('.formation-list .web .web-info .size-select').innerText)
-    .contains('scout')
+    .contains('gp1')
 
     // Quantity
     .click('.formation-list .web .web-info button.edit')
