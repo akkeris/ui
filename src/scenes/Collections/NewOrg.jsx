@@ -113,7 +113,7 @@ export default class NewOrg extends Component {
   submitOrg = async () => {
     try {
       await api.createOrg(this.state.org, this.state.description);
-      History.get().push('/orgs');
+      History.get().push('/collections');
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

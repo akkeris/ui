@@ -151,7 +151,7 @@ export default class NewApp extends Component {
         this.state.compliance,
         this.state.stack,
       );
-      History.get().push('/spaces');
+      History.get().push('/collections');
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,
