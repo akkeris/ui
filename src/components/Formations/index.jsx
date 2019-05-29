@@ -203,13 +203,18 @@ export default class Formations extends Component {
           </TableHead>
           <TableBody>
             {this.state.loading && (
-              <div style={style.refresh.div}>
-                <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-              </div>
+              <TableRow>
+                <TableCell>
+                  <div style={style.refresh.div}>
+                    <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+                  </div>
+                </TableCell>
+              </TableRow>
             )}
-            {!this.state.loading && ((!this.state.formations || this.state.formations.length === 0) ? (
-              <TableRow><TableCell><span className="no-results">No Dynos</span></TableCell></TableRow>
-            ) : this.renderFormations()
+            {!this.state.loading && (
+              (!this.state.formations || this.state.formations.length === 0) ? (
+                <TableRow><TableCell><span className="no-results">No Dynos</span></TableCell></TableRow>
+              ) : this.renderFormations()
             )}
           </TableBody>
         </Table>
