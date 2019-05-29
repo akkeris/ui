@@ -106,7 +106,7 @@ export default class DynoType extends Component {
       expanded: false,
       errorText: '',
       healthy: false,
-      checkingHealth: true,
+      checkingHealth: (props.formation.quantity > 0),
       displayStatus: false,
     };
   }
@@ -116,13 +116,19 @@ export default class DynoType extends Component {
   }
 
   checkHealth = async () => {
-    const { app } = this.props;
+    const { app, formation } = this.props;
     const { healthcheck } = this.state;
+
+    // Only do healthcheck if there's something to check
+    if (formation.quantity < 1) {
+      return;
+    }
 
     let url;
 
     if (healthcheck !== null && healthcheck !== '') {
-      url = `${app.web_url}${healthcheck}`;
+      // Ensure there's only one slash between the URL and healthcheck
+      url = `${app.web_url.replace(/\/+$/, '')}/${healthcheck.replace(/^\/+/, '')}`;
     } else {
       this.setState({ displayStatus: false });
       return;
@@ -206,8 +212,7 @@ export default class DynoType extends Component {
         this.state.quantity,
         this.state.command === '' ? null : this.state.command,
         this.state.port === '' ? null : this.state.port,
-        this.state.healthcheck === '' ? null : this.state.healthcheck,
-        this.state.healthcheck === '',
+        this.state.healthcheck === '' ? null : `/${this.state.healthcheck.replace(/^\/+/, '')}`,
       );
       this.props.onComplete('Updated Formation');
     } catch (error) {
@@ -231,7 +236,9 @@ export default class DynoType extends Component {
       size,
       healthcheck: this.props.formation.healthcheck,
       edit: false,
-      displayStatus: this.props.formation.healthcheck !== null,
+      displayStatus: (
+        this.props.formation.healthcheck !== null && this.props.formation.quantity > 0
+      ),
     });
   }
 
@@ -352,6 +359,13 @@ export default class DynoType extends Component {
   renderInfoRow() {
     const port = this.state.port === null ? '' : this.state.port;
     const healthcheck = this.state.healthcheck === null ? '' : this.state.healthcheck;
+
+    // Ensure there is no trailing slash on the app url
+    let webUrl = '';
+    if (this.props.formation.type === 'web') {
+      webUrl = this.props.app.web_url.replace(/\/+$/, '');
+    }
+
     return (
       <div
         style={{ display: 'flex', flexDirection: 'column', backgroundColor: this.state.edit ? 'rgba(0,0,0,0.05)' : undefined }}
@@ -482,7 +496,7 @@ export default class DynoType extends Component {
                 helperText={this.state.errorText}
                 error={this.state.errorText.length > 0}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{this.props.app.web_url}</InputAdornment>,
+                  startAdornment: <InputAdornment position="start">{webUrl}</InputAdornment>,
                 }}
                 inputProps={{ style: { width: 'auto', flex: 1 } }} // eslint-disable-line
                 onBlur={() => this.checkHealth()}
