@@ -204,6 +204,12 @@ export default class DynoType extends Component {
   }
 
   handlePatchFormation = async () => {
+    let { healthcheck } = this.state;
+    if (!healthcheck || healthcheck === '') {
+      healthcheck = null;
+    } else {
+      healthcheck = `/${this.state.healthcheck.replace(/^\/+/, '')}`;
+    }
     try {
       await api.patchFormation(
         this.props.app.name,
@@ -212,7 +218,7 @@ export default class DynoType extends Component {
         this.state.quantity,
         this.state.command === '' ? null : this.state.command,
         this.state.port === '' ? null : this.state.port,
-        this.state.healthcheck === '' ? null : `/${this.state.healthcheck.replace(/^\/+/, '')}`,
+        healthcheck,
         this.state.healthcheck === null || this.state.healthcheck === '',
       );
       this.props.onComplete('Updated Formation');
