@@ -213,6 +213,7 @@ export default class DynoType extends Component {
         this.state.command === '' ? null : this.state.command,
         this.state.port === '' ? null : this.state.port,
         this.state.healthcheck === '' ? null : `/${this.state.healthcheck.replace(/^\/+/, '')}`,
+        this.state.healthcheck === null || this.state.healthcheck === '',
       );
       this.props.onComplete('Updated Formation');
     } catch (error) {
@@ -237,7 +238,7 @@ export default class DynoType extends Component {
       healthcheck: this.props.formation.healthcheck,
       edit: false,
       displayStatus: (
-        this.props.formation.healthcheck !== null && this.props.formation.quantity > 0
+        this.props.formation.healthcheck !== null && this.props.formation.healthcheck !== '' && this.props.formation.quantity > 0
       ),
     });
   }
