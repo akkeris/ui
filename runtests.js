@@ -48,6 +48,7 @@ async function runTests() {
           localDir: 'screenshots',
           s3Params: {
             Bucket: process.env.TAAS_ARTIFACT_BUCKET,
+            Prefix: process.env.TAAS_RUNID,
           },
         };
 
