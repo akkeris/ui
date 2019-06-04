@@ -18,6 +18,18 @@ const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
 const https = require('https');
 
+const t = require('./runtests');
+
+if (process.env.RUN_TESTCAFE) {
+  if (!process.env.SELENIUM_SERVER) {
+    console.error('Selenium server address is required.');
+    console.error('Please supply SELENIUM_SERVER environment variable.');
+    process.exit(-1);
+  }
+  t.runTests();
+  return;
+}
+
 const app = express();
 
 app.use(session({
@@ -199,52 +211,3 @@ app.listen(port, '0.0.0.0', (err) => {
   }
   console.info(`==> 🌎 Listening on port %s. Open up ${clientURI} in your browser.`, port, port);
 });
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function runTests() {
-  console.log('Running tests!');
-
-  // Give react some time to spin up
-  if (process.env.NODE_ENV === 'dev') {
-    console.log('Sleeping for 20 seconds...');
-    await sleep(20000);
-  }
-
-  const createTestCafe = require('testcafe'); // eslint-disable-line
-
-  const tests = process.env.TESTCAFE_TESTS ? process.env.TESTCAFE_TESTS : 'test/e2e/*';
-
-  try {
-    const testcafe = await createTestCafe();
-    const testResult = await testcafe
-      .createRunner()
-      .src(tests)
-      .browsers('selenium:chrome')
-      .reporter('spec')
-      .run();
-
-    if (testResult === 0) {
-      console.log('All tests passed!');
-    } else {
-      console.log(`${testResult} TESTS FAILED`);
-    }
-
-    testcafe.close();
-    process.exit(testResult);
-  } catch (err) {
-    console.error(err);
-    process.exit(-1);
-  }
-}
-
-if (process.env.RUN_TESTCAFE) {
-  if (!process.env.SELENIUM_SERVER) {
-    console.error('Selenium server address is required.');
-    console.error('Please supply SELENIUM_SERVER environment variable.');
-    process.exit(-1);
-  }
-  runTests();
-}
