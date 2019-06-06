@@ -15,7 +15,10 @@ async function runTests() {
   }
 
   const tests = process.env.TESTCAFE_TESTS ? process.env.TESTCAFE_TESTS : 'test/e2e/*';
-  const browsers = process.env.SELENIUM_BROWSERS ? process.env.SELENIUM_BROWSERS : 'selenium:chrome';
+
+  const browsers = process.env.SELENIUM_BROWSERS ?
+    process.env.SELENIUM_BROWSERS.split(',') :
+    'selenium:chrome';
 
   try {
     const testcafe = await createTestCafe();
