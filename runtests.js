@@ -28,7 +28,8 @@ async function runTests() {
       .src(tests)
       .browsers(browsers)
       .reporter('spec')
-      .screenshots('screenshots', true)
+      .screenshots('screenshots', true, '${DATE}_${TIME}/${FIXTURE}/${TEST}/${BROWSER}/${FILE_INDEX}.png') // eslint-disable-line
+      .concurrency(process.env.CONCURRENCY ? process.env.CONCURRENCY : 1)
       .run();
 
     if (testResult === 0) {
