@@ -219,7 +219,8 @@ export default class DynoType extends Component {
         this.state.command === '' ? null : this.state.command,
         this.state.port === '' ? null : this.state.port,
         healthcheck,
-        this.state.healthcheck === null || this.state.healthcheck === '',
+        this.props.formation.type === 'web' ?
+          (this.state.healthcheck === null || this.state.healthcheck === '') : undefined,
       );
       this.props.onComplete('Updated Formation');
     } catch (error) {
