@@ -18,15 +18,10 @@ const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
 const https = require('https');
 
-const t = require('./runtests');
+const tests = require('./test/runtests');
 
 if (process.env.RUN_TESTCAFE) {
-  if (!process.env.SELENIUM_SERVER) {
-    console.error('Selenium server address is required.');
-    console.error('Please supply SELENIUM_SERVER environment variable.');
-    process.exit(-1);
-  }
-  t.runTests();
+  tests.runTests();
   return;
 }
 
