@@ -87,3 +87,5 @@ env.ds1.sh
 ### VisualStudioCode ###
 .vscode/*
 .history
+
+screenshots/*

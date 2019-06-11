@@ -116,7 +116,13 @@ async function runTests() {
   try {
     const testcafe = await createTestCafe();
 
-    const tests = process.env.TESTCAFE_TESTS ? process.env.TESTCAFE_TESTS.split(',') : 'e2e/*';
+    let tests;
+    if (process.env.TESTCAFE_TESTS) {
+      const t = process.env.TESTCAFE_TESTS.split(',');
+      tests = t.map(test => `${__dirname}/**/${test}`);
+    } else {
+      tests = `${__dirname}/**/e2e/*`;
+    }
 
     const testResult = await testcafe
       .createRunner()
