@@ -1,5 +1,7 @@
 import { Selector } from 'testcafe';
 
+const utils = require('../utils');
+
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
@@ -53,6 +55,7 @@ test('Should show sites as first group in global search', async (t) => { // esli
 });
 
 test('Should be able to create and delete site', async (t) => { // eslint-disable-line no-undef
+  const siteName = utils.randomString();
   await t
     // navigate to new app page
     .click('.new-site')
@@ -62,12 +65,12 @@ test('Should be able to create and delete site', async (t) => { // eslint-disabl
     .expect(Selector('.site-name').innerText)
     .contains('field required')
 
-    .typeText('.site-name input', 'testcafe')
+    .typeText('.site-name input', siteName)
     .click('button.next')
 
     // Check step 1 caption
     .expect(Selector('.step-0-label .step-label-caption').innerText)
-    .contains('testcafe')
+    .contains(siteName)
 
     // field validation
     .click('.us-seattle')
@@ -82,13 +85,13 @@ test('Should be able to create and delete site', async (t) => { // eslint-disabl
     .expect(Selector('.step-2-label .step-label-caption').innerText)
     .contains('external')
     .expect(Selector('.new-site-summary').innerText)
-    .contains('The external site testcafe will be created in the region us-seattle.')
+    .contains(`The external site ${siteName} will be created in the region us-seattle.`)
     .click('button.next')
 
     // check if site was created
-    .click('.site-list .testcafe')
+    .click(`.site-list .${siteName}`)
     .expect(Selector('.card .header').innerText)
-    .contains('testcafe')
+    .contains(siteName)
 
     // delete the site
     .click('button.delete')
@@ -97,6 +100,6 @@ test('Should be able to create and delete site', async (t) => { // eslint-disabl
 
     // confirm delete and make sure site no longer exists
     .click('.confirm .ok')
-    .expect(Selector('.site-list .testcafe').exists)
+    .expect(Selector(`.site-list .${siteName}`).exists)
     .notOk();
 });

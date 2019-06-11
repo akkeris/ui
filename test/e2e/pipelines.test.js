@@ -1,5 +1,7 @@
 import { Selector } from 'testcafe';
 
+const utils = require('../utils');
+
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
@@ -58,6 +60,7 @@ test('Should show pipelines as first group in global search', async (t) => { // 
 
 
 test('Should be able to create and delete pipeline', async (t) => { // eslint-disable-line no-undef
+  const pipelineName = utils.randomString();
   await t
     // navigate to new app page
     .click('.new-pipeline')
@@ -67,14 +70,14 @@ test('Should be able to create and delete pipeline', async (t) => { // eslint-di
     .expect(Selector('.pipeline-name').innerText)
     .contains('field required')
 
-    .typeText('.pipeline-name input', 'testcafe')
+    .typeText('.pipeline-name input', pipelineName)
     .click('button.next')
 
     // check if pipeline was created
     .navigateTo(`${baseUrl}/pipelines`)
-    .click('.pipeline-list .testcafe')
+    .click(`.pipeline-list .${pipelineName}`)
     .expect(Selector('.card .header').innerText)
-    .contains('testcafe')
+    .contains(pipelineName)
 
     // delete the pipeline
     .click('button.delete-pipeline')
@@ -83,13 +86,21 @@ test('Should be able to create and delete pipeline', async (t) => { // eslint-di
 
     // confirm delete and make sure pipeline no longer exists
     .click('.confirm .ok')
-    .expect(Selector('.pipeline-list .testcafe').exists)
+    .expect(Selector(`.pipeline-list .${pipelineName}`).exists)
     .notOk();
 });
 
 fixture('Pipeline Info Page') // eslint-disable-line no-undef
   .page(baseUrl)
   .beforeEach(async (t) => {
+    const appName = utils.randomString();
+    const appName2 = utils.randomString();
+    const appName3 = utils.randomString();
+    const pipelineName = utils.randomString();
+    t.ctx.appName = appName; // eslint-disable-line no-param-reassign
+    t.ctx.appName2 = appName2; // eslint-disable-line no-param-reassign
+    t.ctx.appName3 = appName3; // eslint-disable-line no-param-reassign
+    t.ctx.pipelineName = pipelineName; // eslint-disable-line no-param-reassign
     await t
 
       // login
@@ -99,7 +110,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
 
       // App 1
       .click('.new-app')
-      .typeText('.app-name input', 'testcafepipe1')
+      .typeText('.app-name input', appName)
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
@@ -111,12 +122,12 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/apps`)
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafepipe1-testcafe').exists)
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .ok()
 
       // App 2
       .click('.new-app')
-      .typeText('.app-name input', 'testcafepipe2')
+      .typeText('.app-name input', appName2)
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
@@ -129,12 +140,12 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafepipe2-testcafe').exists)
+      .expect(Selector(`.app-list .${appName2}-testcafe`).exists)
       .ok()
 
       // App 3
       .click('.new-app')
-      .typeText('.app-name input', 'testcafepipe3')
+      .typeText('.app-name input', appName3)
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
@@ -147,11 +158,11 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafepipe3-testcafe').exists)
+      .expect(Selector(`.app-list .${appName3}-testcafe`).exists)
       .ok()
 
       // Config for app 3
-      .navigateTo(`${baseUrl}/apps/testcafepipe3-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName3}-testcafe`)
       .click('.config-tab')
       .click('button.new-config')
       .click('.next')
@@ -167,7 +178,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
 
       // Build and Release for app 1
       .navigateTo(`${baseUrl}/apps`)
-      .navigateTo(`${baseUrl}/apps/testcafepipe1-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.releases-tab')
 
       // Create new release
@@ -186,17 +197,22 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
 
       .navigateTo(`${baseUrl}/pipelines`)
       .click('.new-pipeline')
-      .typeText('.pipeline-name input', 'testcafe')
+      .typeText('.pipeline-name input', pipelineName)
       .click('button.next')
       .navigateTo(`${baseUrl}/pipelines`)
-      .click('.pipeline-list .testcafe')
+      .click(`.pipeline-list .${pipelineName}`)
       .expect(Selector('.card .header').innerText)
-      .contains('testcafe');
+      .contains(pipelineName);
   })
   .afterEach(async (t) => { // Cleanup
+    const appName = t.ctx.appName;
+    const appName2 = t.ctx.appName2;
+    const appName3 = t.ctx.appName3;
+    const pipelineName = t.ctx.pipelineName;
+
     await t
       // App 1
-      .navigateTo(`${baseUrl}/apps/testcafepipe1-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.info-tab')
       .click('button.app-menu-button')
       .click('.delete-app')
@@ -204,11 +220,11 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafepipe1').exists)
+      .expect(Selector(`.app-list ${appName}`).exists)
       .notOk()
 
       // App 2
-      .navigateTo(`${baseUrl}/apps/testcafepipe2-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName2}-testcafe`)
       .click('.info-tab')
       .click('button.app-menu-button')
       .click('.delete-app')
@@ -216,11 +232,11 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafepipe2').exists)
+      .expect(Selector(`.app-list .${appName2}`).exists)
       .notOk()
 
       // App 3
-      .navigateTo(`${baseUrl}/apps/testcafepipe3-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName3}-testcafe`)
       .click('.info-tab')
       .click('button.app-menu-button')
       .click('.delete-app')
@@ -228,18 +244,21 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafepipe3').exists)
+      .expect(Selector(`.app-list .${appName3}`).exists)
       .notOk()
 
       // Pipeline
-      .navigateTo(`${baseUrl}/pipelines/testcafe`)
+      .navigateTo(`${baseUrl}/pipelines/${pipelineName}`)
       .click('button.delete-pipeline')
       .click('.confirm .ok')
-      .expect(Selector('.pipeline-list .testcafe').exists)
+      .expect(Selector(`.pipeline-list .${pipelineName}`).exists)
       .notOk();
   });
 
 test('Should be able to create promote and remove couplings', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
+  const appName2 = t.ctx.appName2;
+  const appName3 = t.ctx.appName3;
   await t
 
     // Dev coupling
@@ -253,7 +272,7 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
     .notOk()
 
     .click('button.development-new-coupling')
-    .typeText('.development-app-search input', 'testcafepipe1-testcafe')
+    .typeText('.development-app-search input', `${appName}-testcafe`)
     .pressKey('enter')
     .expect(Selector('.pipeline-snack').innerText)
     .contains('Coupling Added')
@@ -262,14 +281,14 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
 
     // Duplicates
     .click('button.development-new-coupling')
-    .typeText('.development-app-search input', 'testcafepipe1-testcafe')
+    .typeText('.development-app-search input', `${appName}-testcafe`)
     .pressKey('enter')
     .expect(Selector('.error').innerText)
     .contains('The application already is pipelined.')
     .click('button.ok')
 
     // Check no targets
-    .click('.development-coupling-list .testcafepipe1-testcafe button.promote')
+    .click(`.development-coupling-list .${appName}-testcafe button.promote`)
     .expect(Selector('.development-promote-confirm').innerText)
     .contains('Are you sure you want to promote?')
     .click('.development-promote-confirm .ok')
@@ -280,7 +299,7 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
     // Staging coupling
     .click('.staging-tab')
     .click('button.staging-new-coupling')
-    .typeText('.staging-app-search input', 'testcafepipe2-testcafe')
+    .typeText('.staging-app-search input', `${appName2}-testcafe`)
     .pressKey('enter')
     .expect(Selector('.pipeline-snack').innerText)
     .contains('Coupling Added')
@@ -290,27 +309,27 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
     // Prod coupling
     .click('.prod-tab')
     .click('button.production-new-coupling')
-    .typeText('.production-app-search input', 'testcafepipe3-testcafe')
+    .typeText('.production-app-search input', `${appName3}-testcafe`)
     .pressKey('enter')
     .expect(Selector('.pipeline-snack').innerText)
     .contains('Coupling Added')
     .expect(Selector('.production-coupling-list tbody').childElementCount)
     .gt(0)
-    .expect(Selector('.production-coupling-list .testcafepipe3-testcafe button.promote').exists)
+    .expect(Selector(`.production-coupling-list .${appName3}-testcafe button.promote`).exists)
     .notOk()
 
     // Promote to staging
     .click('.dev-tab')
-    .click('.development-coupling-list .testcafepipe1-testcafe button.promote')
+    .click(`.development-coupling-list .${appName}-testcafe button.promote`)
     .expect(Selector('.development-promote-confirm').innerText)
     .contains('Are you sure you want to promote?')
     .click('.development-promote-confirm .ok')
     .expect(Selector('.pipeline-snack').innerText)
-    .contains('Promoted: testcafepipe1-testcafe to staging')
+    .contains(`Promoted: ${appName}-testcafe to staging`)
 
     // Promote to prod
     .click('.staging-tab')
-    .click('.staging-coupling-list .testcafepipe2-testcafe button.promote')
+    .click(`.staging-coupling-list .${appName2}-testcafe button.promote`)
     .expect(Selector('.staging-promote-confirm').innerText)
     .contains('Are you sure you want to promote?')
     .click('.staging-promote-confirm .ok')
@@ -318,17 +337,17 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
     .contains('Safe promotion was specified and this promotion has been deemed unsafe.')
     .click('button.ok')
     // Force Promote
-    .click('.staging-coupling-list .testcafepipe2-testcafe button.promote')
+    .click(`.staging-coupling-list .${appName2}-testcafe button.promote`)
     .expect(Selector('.staging-promote-confirm').innerText)
     .contains('Are you sure you want to promote?')
     .click('.staging-promote-confirm .force-check')
     .click('.staging-promote-confirm .ok')
 
     .expect(Selector('.pipeline-snack').innerText)
-    .contains('Promoted: testcafepipe2-testcafe to prod')
+    .contains(`Promoted: ${appName2}-testcafe to prod`)
 
     // Remove
-    .click('.staging-coupling-list .testcafepipe2-testcafe button.remove')
+    .click(`.staging-coupling-list .${appName2}-testcafe button.remove`)
     .expect(Selector('.staging-remove-confirm').innerText)
     .contains('Are you sure you want to delete this coupling?')
     .click('.staging-remove-confirm .ok')

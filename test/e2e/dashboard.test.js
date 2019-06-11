@@ -1,5 +1,7 @@
 import { Selector } from 'testcafe';
 
+const utils = require('../utils');
+
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
@@ -18,16 +20,18 @@ fixture('Dashboard Page') // eslint-disable-line no-undef
 test('Should show tabs', async (t) => { // eslint-disable-line no-undef
   await t
     .click('.favorites-tab')
-    .expect(Selector('.favorites-list tbody').childElementCount)
-    .eql(0)
+    .expect(Selector('.favorites-list tbody').exists)
+    .ok()
     .click('.recents-tab')
-    .expect(Selector('.recents-list tbody').childElementCount)
-    .eql(0);
+    .expect(Selector('.recents-list tbody').exists)
+    .ok();
 });
 
 fixture('Favorites Tab') // eslint-disable-line no-undef
   .page(`${baseUrl}/dashboard`)
   .beforeEach(async (t) => {
+    const appName = utils.randomString();
+    t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     await t
 
       // login
@@ -40,7 +44,7 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
       .click('.new-app')
 
       // create app
-      .typeText('.app-name input', 'testcafe')
+      .typeText('.app-name input', appName)
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
@@ -52,13 +56,14 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/apps`)
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .ok()
       .navigateTo(`${baseUrl}/dashboard`);
   })
   .afterEach(async (t) => {
+    const appName = t.ctx.appName;
     await t
-      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.info-tab')
 
     // delete the app
@@ -67,28 +72,31 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .notOk();
   });
 
 test('Should allow favorite of app and addition or removal to dashboard', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
   await t
     .expect(Selector('.favorites-list tbody').childElementCount)
     .gt(0)
-    .expect(Selector('.favorites-list .testcafe-testcafe').innerText)
-    .contains('testcafe-testcafe', 'App was not automatically added as favorite on creation')
+    .expect(Selector(`.favorites-list .${appName}-testcafe`).innerText)
+    .contains(`${appName}-testcafe`, 'App was not automatically added as favorite on creation')
 
-    .click('.favorites-list .testcafe-testcafe')
+    .click(`.favorites-list .${appName}-testcafe`)
     .click('button.favorite-app')
 
     .navigateTo(`${baseUrl}/dashboard`)
-    .expect(Selector('.favorites-list tbody').childElementCount)
-    .eql(0, 'App was not successfully removed as a favorite');
+    .expect(Selector(`.favorites-list .${appName}-testcafe`).exists)
+    .notOk('App was not successfully removed as a favorite');
 });
 
 fixture('Recents Tab') // eslint-disable-line no-undef
   .page(`${baseUrl}/dashboard`)
   .beforeEach(async (t) => {
+    const appName = utils.randomString();
+    t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     await t
 
       // login
@@ -101,7 +109,7 @@ fixture('Recents Tab') // eslint-disable-line no-undef
       .click('.new-app')
 
       // create app
-      .typeText('.app-name input', 'testcafe')
+      .typeText('.app-name input', appName)
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
@@ -113,14 +121,15 @@ fixture('Recents Tab') // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/apps`)
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .ok()
       .navigateTo(`${baseUrl}/dashboard`)
       .click('.recents-tab');
   })
   .afterEach(async (t) => {
+    const appName = t.ctx.appName;
     await t
-      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.info-tab')
 
     // delete the app
@@ -129,16 +138,14 @@ fixture('Recents Tab') // eslint-disable-line no-undef
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .notOk();
   });
 
 test('Should allow view of recent activity and quick access to those items', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
   await t
-    .expect(Selector('.recents-list tbody').childElementCount)
-    .eql(0)
-
-    .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
+    .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
     .click('.info-tab')
     .click('.dynos-tab')
     .click('.releases-tab')
@@ -153,10 +160,10 @@ test('Should allow view of recent activity and quick access to those items', asy
     .expect(Selector('.recents-list tbody').childElementCount)
     .gt(0)
 
-    .expect(Selector('.recents-list .testcafe-testcafe').innerText)
-    .contains('testcafe-testcafe')
+    .expect(Selector(`.recents-list .${appName}-testcafe`).innerText)
+    .contains(`${appName}-testcafe`)
 
-    .click('.recents-list .testcafe-testcafe')
+    .click(`.recents-list .${appName}-testcafe`)
     .click('.info-tab')
     .click('.dynos-tab')
     .click('.releases-tab')

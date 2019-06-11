@@ -1,11 +1,16 @@
 import { Selector } from 'testcafe';
 
+const utils = require('../utils');
+
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
 
 fixture('Apps Page') // eslint-disable-line no-undef
   .page(`${baseUrl}/apps`)
+  .before(async (ctx) => {
+    ctx.createdApps = [];
+  })
   .beforeEach(async (t) => {
     await t
       .expect(Selector('button.login').innerText).eql('Login')
@@ -13,6 +18,11 @@ fixture('Apps Page') // eslint-disable-line no-undef
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
       .click('button.login');
+  })
+  .after(async (ctx) => {
+    ctx.createdApps.forEach(() => {
+      // TODO: MAKE SURE ALL CREATED APPS ARE DELETED HERE (double check)
+    });
   });
 
 test('Should show list of apps based on filter', async (t) => { // eslint-disable-line no-undef
@@ -70,6 +80,9 @@ test('Should show apps as first group in global search', async (t) => { // eslin
 });
 
 test('Should be able to create and delete an app', async (t) => { // eslint-disable-line no-undef
+  const appName = utils.randomString();
+  t.fixtureCtx.createdApps.push(appName);
+
   await t
   // navigate to new app page
     .click('.new-app')
@@ -78,12 +91,12 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .contains('App required')
 
   // create app
-    .typeText('.app-name input', 'testcafe')
+    .typeText('.app-name input', appName)
     .click('button.next')
 
     // Check step 1 caption
     .expect(Selector('.step-0-label .step-label-caption').innerText)
-    .contains('testcafe')
+    .contains(appName)
 
     .typeText('div.select-textfield', 'testcafe')
     .pressKey('enter')
@@ -101,14 +114,14 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .expect(Selector('.step-2-label .step-label-caption').innerText)
     .contains('testcafe')
     .expect(Selector('.new-app-summary').innerText)
-    .contains('The app testcafe-testcafe will be created in the testcafe org.')
+    .contains(`The app ${appName}-testcafe will be created in the testcafe org.`)
     .click('button.next')
 
     // Verify that app exists
     .navigateTo(`${baseUrl}/apps`)
     .typeText(Selector('.filter-select-input input'), 'testcafe')
     .click('.filter-select-results .testcafe')
-    .expect(Selector('.app-list .testcafe-testcafe').exists)
+    .expect(Selector(`.app-list .${appName}-testcafe`).exists)
     .ok()
 
   // navigate to new app page
@@ -118,7 +131,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .contains('App required')
 
   // test duplicate
-    .typeText('.app-name input', 'testcafe')
+    .typeText('.app-name input', appName)
     .click('button.next')
     .typeText('div.select-textfield', 'testcafe')
     .pressKey('enter')
@@ -136,9 +149,9 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
   // check if app was created
     .typeText(Selector('.filter-select-input input'), 'testcafe')
     .click('.filter-select-results .testcafe')
-    .click('.app-list .testcafe-testcafe')
+    .click(`.app-list .${appName}-testcafe`)
     .expect(Selector('.card .header').innerText)
-    .contains('testcafe-testcafe')
+    .contains(`${appName}-testcafe`)
 
     // delete the app
     .click('button.app-menu-button')
@@ -148,14 +161,15 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
 
     // confirm delete and make sure app no longer exists
     .click('.delete-confirm .ok')
-    .expect(Selector('.app-list .testcafe-testcafe').exists)
+    .expect(Selector(`.app-list .${appName}-testcafe`).exists)
     .notOk();
 });
-
 
 fixture('AppInfo Page') // eslint-disable-line no-undef
   .page(`${baseUrl}/apps`)
   .beforeEach(async (t) => {
+    const appName = utils.randomString();
+    t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     await t
 
       // login
@@ -167,7 +181,7 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .click('.new-app')
 
       // create app
-      .typeText('.app-name input', 'testcafe')
+      .typeText('.app-name input', appName)
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
@@ -179,12 +193,13 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/apps`)
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .ok();
   })
   .afterEach(async (t) => {
+    const appName = t.ctx.appName;
     await t
-      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.info-tab')
 
     // delete the app
@@ -193,13 +208,14 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .notOk();
   });
 
 test('Should follow search to app and see all info', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
   await t
-    .click('.app-list .testcafe-testcafe')
+    .click(`.app-list .${appName}-testcafe`)
     .click('.info-tab')
     .click('.dynos-tab')
     .click('.releases-tab')
@@ -211,8 +227,9 @@ test('Should follow search to app and see all info', async (t) => { // eslint-di
 });
 
 test('Should be able to toggle into maintenance mode', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
   await t
-    .click('.app-list .testcafe-testcafe')
+    .click(`.app-list .${appName}-testcafe`)
 
     // In order to put an app in maintenance mode, you have to have a dyno running something
 
@@ -256,8 +273,9 @@ test('Should be able to toggle into maintenance mode', async (t) => { // eslint-
 });
 
 test('Should be able to create edit and delete formations', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
   await t
-    .click('.app-list .testcafe-testcafe')
+    .click(`.app-list .${appName}-testcafe`)
     .click('.dynos-tab')
 
     // Check new component shows
@@ -380,8 +398,10 @@ test('Should be able to create edit and delete formations', async (t) => { // es
 });
 
 test('Should be able to create view and release builds', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
+
   await t
-    .click('.app-list .testcafe-testcafe')
+    .click(`.app-list .${appName}-testcafe`)
     .click('.releases-tab')
     .expect(Selector('.release-list tbody').innerText)
     .contains('No Releases')
@@ -424,6 +444,10 @@ test('Should be able to create view and release builds', async (t) => { // eslin
 
 test // eslint-disable-line no-undef
   .before(async (t) => {
+    const appName = utils.randomString();
+    const appName2 = utils.randomString();
+    t.ctx.appName = appName; // eslint-disable-line no-param-reassign
+    t.ctx.appName2 = appName2; // eslint-disable-line no-param-reassign
     await t
 
     // login
@@ -435,7 +459,7 @@ test // eslint-disable-line no-undef
       .click('.new-app')
 
     // create app
-      .typeText('.app-name input', 'testcafe')
+      .typeText('.app-name input', appName)
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
@@ -447,14 +471,14 @@ test // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/apps`)
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .ok()
 
       // navigate to new app page
       .click('.new-app')
 
     // create app
-      .typeText('.app-name input', 'testcafe2')
+      .typeText('.app-name input', appName2)
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
@@ -467,11 +491,14 @@ test // eslint-disable-line no-undef
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
-      .expect(Selector('.app-list .testcafe2-testcafe').exists)
+      .expect(Selector(`.app-list .${appName2}-testcafe`).exists)
       .ok();
   })('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef
+    const appName = t.ctx.appName;
+    const appName2 = t.ctx.appName2;
+
     await t
-      .click('.app-list .testcafe-testcafe')
+      .click(`.app-list .${appName}-testcafe`)
       .click('.addons-tab')
 
     // Check new component shows
@@ -551,14 +578,14 @@ test // eslint-disable-line no-undef
       .click('.addon-cancel')
 
     // Check Config Vars
-      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.config-tab')
       .expect(Selector('.config-list .OCT_VAULT_DB_LIDS_HOSTNAME').exists)
       .ok()
 
     // Create and Attach addon
       .navigateTo(`${baseUrl}/apps`)
-      .navigateTo(`${baseUrl}/apps/testcafe2-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName2}-testcafe`)
       .click('.addons-tab')
       .click('button.new-addon')
       .typeText(Selector('.select-textfield'), 'Akkeris PostgreSQL')
@@ -590,10 +617,10 @@ test // eslint-disable-line no-undef
 
     // Attach Addon from app 2
       .navigateTo(`${baseUrl}/apps`)
-      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.addons-tab')
       .click('button.attach-addon')
-      .typeText('.app-search input', 'testcafe2-testcafe')
+      .typeText('.app-search input', `${appName2}-testcafe`)
       .pressKey('enter')
       .expect(Selector('.step-0-label .step-label-caption').exists)
       .ok()
@@ -617,13 +644,11 @@ test // eslint-disable-line no-undef
       .ok()
       .expect(Selector('.attachment-1').exists)
       .ok()
-      .expect(Selector('.attachment-1 .attachment-owner').innerText)
-      .contains('Owner')
       .click('.ok')
 
     // Test Dupes
       .click('button.attach-addon')
-      .typeText('.app-search input', 'testcafe2-testcafe')
+      .typeText('.app-search input', `${appName2}-testcafe`)
       .pressKey('enter')
       .click('.addon-menu')
       .click('.akkeris-postgresql')
@@ -646,8 +671,11 @@ test // eslint-disable-line no-undef
       .contains('No Addons');
   })
   .after(async (t) => {
+    const appName = t.ctx.appName;
+    const appName2 = t.ctx.appName2;
+
     await t
-      .navigateTo(`${baseUrl}/apps/testcafe-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.info-tab')
 
     // delete the app
@@ -656,10 +684,10 @@ test // eslint-disable-line no-undef
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm .ok')
-      .expect(Selector('.app-list .testcafe-testcafe').exists)
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .notOk()
 
-      .navigateTo(`${baseUrl}/apps/testcafe2-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName2}-testcafe`)
       .click('.info-tab')
 
     // delete the app
@@ -668,13 +696,14 @@ test // eslint-disable-line no-undef
 
     // confirm delete and make sure app no longer exists
       .click('.delete-confirm button.ok')
-      .expect(Selector('.app-list .testcafe2-testcafe').exists)
+      .expect(Selector(`.app-list .${appName2}-testcafe`).exists)
       .notOk();
   });
 
 test('Should be able to create edit and remove webhooks', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
   await t
-    .click('.app-list .testcafe-testcafe')
+    .click(`.app-list .${appName}-testcafe`)
     .click('.webhooks-tab')
 
     // Check new component shows
@@ -1139,8 +1168,9 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
 
 
 test('Should be able to create edit and remove config vars', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
   await t
-    .click('.app-list .testcafe-testcafe')
+    .click(`.app-list .${appName}-testcafe`)
     .click('.config-tab')
 
     // Check new component shows

@@ -1,5 +1,7 @@
 import { Selector } from 'testcafe';
 
+const utils = require('../utils');
+
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
@@ -51,6 +53,8 @@ const url = `${baseUrl}/app-setups?blueprint=${encodeURIComponent(JSON.stringify
 fixture('App Setups Page') // eslint-disable-line no-undef
   .page(`${baseUrl}`)
   .beforeEach(async (t) => {
+    const appName = utils.randomString();
+    t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     await t
       .expect(Selector('button.login').innerText).eql('Login')
       .typeText('#username', botUsername)
@@ -58,8 +62,9 @@ fixture('App Setups Page') // eslint-disable-line no-undef
       .click('button.login');
   })
   .afterEach(async (t) => {
+    const appName = t.ctx.appName;
     await t
-      .navigateTo(`${baseUrl}/apps/akkeristest1-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .wait(10000)
       .click('button.app-menu-button')
       .expect(Selector('.delete-app').exists)
@@ -71,6 +76,7 @@ fixture('App Setups Page') // eslint-disable-line no-undef
   });
 
 test('ensure the app setup works', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
   await t
     .navigateTo(url)
     .expect(Selector('.name_logo').exists)
@@ -81,7 +87,7 @@ test('ensure the app setup works', async (t) => { // eslint-disable-line no-unde
     .contains('foo2')
 
     .click('.application_name')
-    .typeText('.application_name', 'akkeristest1')
+    .typeText('.application_name', appName)
     .click('div.space-field')
     .click('.testcafe-space')
     .click('.create')
