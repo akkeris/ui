@@ -82,12 +82,19 @@ export default class Audits extends Component {
   }
 
   componentDidMount() {
+    this._isMounted = true;
     this.getAudits();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   getAudits = async () => {
     const { data: audits } = await api.getAudits(this.props.app.simple_name, this.props.app.space.name, 100);
-    this.setState({ audits, loading: false });
+    if (this._isMounted) {
+      this.setState({ audits, loading: false });
+    }
   }
 
   handleRowSelection = (id) => {

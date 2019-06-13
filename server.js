@@ -18,6 +18,13 @@ const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
 const https = require('https');
 
+const tests = require('./test/runtests');
+
+if (process.env.RUN_TESTCAFE) {
+  tests.runTests();
+  return;
+}
+
 const app = express();
 
 app.use(session({

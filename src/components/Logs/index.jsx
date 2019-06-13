@@ -9,6 +9,16 @@ import Loading from 'react-lazylog/build/Loading';
 import Ansi from 'ansi-to-react';
 import api from '../../services/api';
 
+// https://gist.github.com/tcase360/3d0e370eca06189f025670d7dd40fe30
+const debounce = (fn, time) => {
+  let timeout;
+  return function () {
+    const functionCall = () => fn.apply(this, arguments);
+    clearTimeout(timeout);
+    timeout = setTimeout(functionCall, time);
+  };
+};
+
 const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
     MuiIconButton: {
@@ -80,7 +90,7 @@ const style = {
     overflow: 'hidden',
     top: '0',
     bottom: '0',
-    marginTop: 'auto',
+    marginTop: '75px',
     marginBottom: 'auto',
     height: '90%',
     zIndex: '1000',
@@ -101,8 +111,27 @@ export default class Logs extends Component {
       connected: true,
       reload: false,
       expanded: false,
+      expandedHeight: 0,
     };
     this.loadLogs();
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', debounce(this.resize, 150));
+  }
+
+  componentDidUpdate() {
+    this.resize();
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', debounce(this.resize, 150));
+  }
+
+  resize = () => {
+    if (this.divElement !== undefined && this.state.expandedHeight !== this.divElement.clientHeight - 60) {
+      this.setState({ expandedHeight: this.divElement.clientHeight - 60 });
+    }
   }
 
   loadLogs = async () => {
@@ -119,7 +148,7 @@ export default class Logs extends Component {
   }
 
   render() {
-    const { loading, reading, connected, url, reload, expanded } = this.state;
+    const { loading, reading, connected, url, reload, expanded, expandedHeight } = this.state;
     const { app } = this.props;
     if (loading) {
       return (
@@ -132,7 +161,7 @@ export default class Logs extends Component {
     } else if (reading) {
       return (
         <MuiThemeProvider theme={theme}>
-          <div style={expanded ? style.expanded : undefined}>
+          <div style={expanded ? style.expanded : undefined} ref={(divElement) => { this.divElement = divElement; }}>
             <div style={style.logsHeader.rootContainer}>
               <div style={style.logsHeader.statusContainer}>
                 <span style={{ ...style.logsHeader.statusIcon, color: connected ? 'green' : 'red' }}>&#9679;</span>
@@ -158,7 +187,7 @@ export default class Logs extends Component {
                     url={url}
                     follow={follow}
                     onScroll={onScroll}
-                    height={expanded ? undefined : 500}
+                    height={expanded ? expandedHeight : 500}
                     formatPart={data => highlight(data)}
                     extraLines={1}
                     onError={this.handleLogDisconnect}

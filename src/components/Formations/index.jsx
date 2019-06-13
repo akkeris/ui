@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
+import ReloadIcon from '@material-ui/icons/Refresh';
 import api from '../../services/api';
 import util from '../../services/util';
 import NewFormation from './NewFormation';
@@ -26,7 +27,7 @@ const style = {
       marginLeft: 'auto',
       marginRight: 'auto',
       width: '40px',
-      height: '350px',
+      height: '250px',
       marginTop: '20%',
     },
     indicator: {
@@ -128,14 +129,22 @@ export default class Formations extends Component {
     const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
     const dynos = r2.data;
     if (this._isMounted) {
-      this.setState({
-        formations,
-        dynos,
-        loading: false,
-        new: false,
-        open: true,
-        message,
-      });
+      if (message) {
+        this.setState({
+          formations,
+          dynos,
+          loading: false,
+          new: false,
+          open: true,
+          message,
+        });
+      } else {
+        this.setState({
+          formations,
+          dynos,
+          loading: false,
+        });
+      }
     }
   }
 
@@ -155,13 +164,6 @@ export default class Formations extends Component {
   }
 
   render() {
-    if (this.state.loading) {
-      return (
-        <div style={style.refresh.div}>
-          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-        </div>
-      );
-    }
     return (
       <div>
         <Collapse in={this.state.new} mountOnEnter unmountOnExit>
@@ -179,21 +181,41 @@ export default class Formations extends Component {
               <TableCell>
                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Typography variant="overline">Formation</Typography>
-                  <div style={{ paddingRight: '8px' }}>
-                    {!this.state.new && (
-                      <Tooltip title="New Formation" placement="bottom-end">
-                        <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
-                      </Tooltip>
-                    )}
+                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'space-between' }} >
+                    <div style={{ width: '50px' }}>
+                      {!this.state.new && (
+                        <Tooltip title="Refresh" placement="bottom-end">
+                          <IconButton style={style.iconButton} className="reload-formations" onClick={() => this.reload()}><ReloadIcon /></IconButton>
+                        </Tooltip>
+                      )}
+                    </div>
+                    <div style={{ width: '50px' }}>
+                      {!this.state.new && (
+                        <Tooltip title="New Formation" placement="bottom-end">
+                          <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
+                        </Tooltip>
+                      )}
+                    </div>
                   </div>
                 </div>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {(!this.state.formations || this.state.formations.length === 0) ? (
-              <TableRow><TableCell><span className="no-results">No Dynos</span></TableCell></TableRow>
-            ) : this.renderFormations()}
+            {this.state.loading && (
+              <TableRow>
+                <TableCell>
+                  <div style={style.refresh.div}>
+                    <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+            {!this.state.loading && (
+              (!this.state.formations || this.state.formations.length === 0) ? (
+                <TableRow><TableCell><span className="no-results">No Dynos</span></TableCell></TableRow>
+              ) : this.renderFormations()
+            )}
           </TableBody>
         </Table>
         <ConfirmationModal
