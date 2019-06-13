@@ -7,9 +7,9 @@ import {
 import GitIcon from './Icons/GitIcon';
 
 /* Documentation Links */
-const wikiLink = 'https://docs.octanner.io/';
-const gettingStartedLink = 'https://docs.octanner.io/Overview/01.-Installing-and-Getting-Started/';
-const apiLink = 'https://docs.octanner.io/Apps%20API/API-Reference/';
+const wikiLink = '';
+const gettingStartedLink = '';
+const apiLink = '';
 const releasesLink = '';
 const akkerisSupportLink = '';
 const kubernetesSupportLink = 'https://kubernetes.io/';
