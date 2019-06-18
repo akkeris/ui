@@ -103,9 +103,6 @@ const GlobalTheme = createMuiTheme({
           paddingRight: '24px',
         },
       },
-      head: {
-        color: 'rgba(0, 0, 0, 0.87)',
-      },
     },
   },
 });

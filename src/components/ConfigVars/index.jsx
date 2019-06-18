@@ -81,6 +81,7 @@ const style = {
   tableCell: {
     paddingTop: '4px',
     paddingBottom: '4px',
+    color: 'rgba(0, 0, 0, 0.87)',
   },
 };
 

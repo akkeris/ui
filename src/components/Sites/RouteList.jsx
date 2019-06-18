@@ -28,6 +28,7 @@ const style = {
   headerCell: {
     paddingTop: '6px',
     paddingBottom: '6px',
+    color: 'rgba(0, 0, 0, 0.87)',
   },
   headerEmpty: {
     width: '58px',
@@ -44,6 +45,14 @@ const style = {
     },
     icon: {
       width: '58px',
+    },
+  },
+  newRoute: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      display: 'flex', alignItems: 'center', padding: '6px 34px 0px 24px',
     },
   },
 };
@@ -178,8 +187,8 @@ export default class RouteList extends Component {
     return (
       <div>
         <Collapse in={this.state.new} mountOnEnter unmountOnExit>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', padding: '6px 34px 0px' }}>
+          <div style={style.newRoute.container}>
+            <div style={style.newRoute.header}>
               <Typography style={{ flex: 1 }} variant="overline">New Route</Typography>
               <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewRouteCancel}><RemoveIcon /></IconButton>
             </div>

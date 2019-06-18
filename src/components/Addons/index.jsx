@@ -95,6 +95,7 @@ const style = {
   headerCell: {
     paddingTop: '6px',
     paddingBottom: '6px',
+    color: 'rgba(0, 0, 0, 0.87)',
   },
 };
 
