@@ -430,7 +430,7 @@ export default class Releases extends Component {
                 <div style={style.release.actions.inner}>
                   {release.source_blob.version &&
                   <Tooltip title="Commit" placement="top-end">
-                    <IconButton style={style.iconButton} className="git" href={release.source_blob.version} ><GitCommitIcon /></IconButton>
+                    <IconButton style={style.iconButton} className="git" href={release.source_blob.version} target="_blank"><GitCommitIcon /></IconButton>
                   </Tooltip>
                   }
                 </div>

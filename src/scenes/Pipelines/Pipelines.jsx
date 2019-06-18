@@ -116,7 +116,14 @@ class Pipelines extends Component {
     this.setState({ loading: true });
     const { data: pipelines } = await api.getPipelines();
     this.setState({
-      pipelines, message, loading: false, new: false, open: true, page: 0, rowsPerPage: 15,
+      pipelines,
+      sortedPipelines: pipelines,
+      message,
+      loading: false,
+      new: false,
+      open: true,
+      page: 0,
+      rowsPerPage: 15,
     });
   }
 
