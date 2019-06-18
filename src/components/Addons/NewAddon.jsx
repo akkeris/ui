@@ -194,7 +194,7 @@ export default class NewAddon extends Component {
                 placeholder="Search for an Addon"
               />
             </div>
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Select the akkeris addon you would like to attach to your app.'}
             </Typography>
           </div>
@@ -223,7 +223,7 @@ export default class NewAddon extends Component {
                 </span>
               </div>
             )}
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Select the plan for your addon (please only use larger plans for prod)'}
             </Typography>
           </div>

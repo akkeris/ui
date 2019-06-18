@@ -48,7 +48,7 @@ const style = {
     padding: '0px',
   },
   listItem: {
-    padding: '12px 0px',
+    padding: '8px 0px',
   },
   tableCell: {
     main: {
@@ -213,7 +213,7 @@ class AppOverview extends Component {
         <Divider />
         <GridList style={style.gridList} cellHeight={'auto'}>
           <GridListTile style={{ padding: '0px' }}>
-            <List>
+            <List disablePadding>
               <ListItem style={style.listItem}>
                 <ListItemText primary="Organization" secondary={this.props.app.organization.name} />
               </ListItem>
@@ -223,7 +223,7 @@ class AppOverview extends Component {
             </List>
           </GridListTile>
           <GridListTile style={{ padding: '0px' }}>
-            <List>
+            <List disablePadding>
               <ListItem style={style.listItem}>
                 <ListItemText
                   primary="URL"
@@ -244,7 +244,7 @@ class AppOverview extends Component {
         {this.state.autoBuild ? (
           <GridList style={style.gridList} cellHeight={'auto'}>
             <GridListTile style={{ padding: '0px' }}>
-              <List>
+              <List disablePadding>
                 <ListItem style={style.listItem}>
                   <ListItemText
                     primary="Git Repo"
@@ -264,7 +264,7 @@ class AppOverview extends Component {
               </List>
             </GridListTile>
             <GridListTile style={{ padding: '0px' }}>
-              <List>
+              <List disablePadding>
                 <ListItem style={style.listItem}>
                   <ListItemText
                     primary="User"
@@ -283,7 +283,7 @@ class AppOverview extends Component {
         ) : (
           <GridList style={style.gridList} cellHeight={'auto'}>
             <GridListTile style={{ padding: '0px' }}>
-              <List>
+              <List disablePadding>
                 <ListItemText primary="Git Repo" secondary={'Not Configured'} />
               </List>
             </GridListTile>

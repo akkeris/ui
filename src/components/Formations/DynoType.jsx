@@ -54,11 +54,11 @@ const style = {
   },
   info: {
     container: {
-      display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0px',
+      display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '0px 0px 24px 0px',
     },
     details: {
       container: {
-        display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '24px', width: '65%',
+        display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '65%',
       },
       size: {
         width: '200px',
@@ -80,7 +80,7 @@ const style = {
     },
     healthcheck: {
       container: {
-        display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px',
+        display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
       },
       input: {
         width: '74%',
@@ -337,9 +337,9 @@ export default class DynoType extends Component {
   renderFormationHealth() {
     let alert = null;
     if (this.props.dynos.filter(dyno => dyno.state.toLowerCase() === 'start-failure' || dyno.state.toLowerCase() === 'app-crashed').length > 0) {
-      alert = <WarningIcon className="status-critical" nativeColor={red[700]} />;
+      alert = <WarningIcon className="status-critical" htmlColor={red[700]} />;
     } else if (this.props.dynos.filter(dyno => dyno.state.toLowerCase() === 'waiting' || dyno.state.toLowerCase() === 'probe-failure' || dyno.state.toLowerCase() === 'pending' || dyno.state.toLowerCase() === 'stopping').length > 0) {
-      alert = <WarningIcon className="status-warning" nativeColor={amber[700]} />;
+      alert = <WarningIcon className="status-warning" htmlColor={amber[700]} />;
     }
     return (
       alert
@@ -349,7 +349,7 @@ export default class DynoType extends Component {
   renderHealthcheckStatus() {
     const { healthy, checkingHealth, displayStatus } = this.state;
 
-    const healthIcon = healthy ? <HealthyIcon nativeColor="#27ae60" /> : <UnhealthyIcon nativeColor="#e74c3c" />;
+    const healthIcon = healthy ? <HealthyIcon htmlColor="#27ae60" /> : <UnhealthyIcon htmlColor="#e74c3c" />;
 
     const loadingIcon = <CircularProgress size={20} />;
 
@@ -376,7 +376,7 @@ export default class DynoType extends Component {
 
     return (
       <div
-        style={{ display: 'flex', flexDirection: 'column', backgroundColor: this.state.edit ? 'rgba(0,0,0,0.05)' : undefined }}
+        style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', backgroundColor: this.state.edit ? 'rgba(0,0,0,0.05)' : undefined }}
         className={`${this.props.formation.type}-info`}
       >
         <div style={{ ...style.info.container }}>
@@ -525,7 +525,7 @@ export default class DynoType extends Component {
         key={this.props.formation.id}
         style={{ ...style.tableRow, borderBottom: '1px solid rgb(224, 224, 224)' }}
       >
-        <TableCell style={{ padding: '4px 24px' }}>
+        <TableCell style={{ padding: '4px 38px 4px 24px' }}>
           <ExpansionPanel
             style={{ boxShadow: 'none' }}
             onChange={(event, expanded) => this.reset(expanded)}

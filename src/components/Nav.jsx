@@ -26,6 +26,12 @@ const theme = parentTheme => deepmerge(parentTheme, {
         fontFamily: 'ProximaNova',
       },
     },
+    MuiListItem: {
+      root: {
+        paddingTop: '10px',
+        paddingBottom: '10px',
+      },
+    },
     MuiListItemText: {
       primary: {
         fontFamily: 'ProximaNova',

@@ -10,7 +10,7 @@ import api from '../../services/api';
 
 const style = {
   tableRow: {
-    height: '58px',
+    height: '36px',
     cursor: 'pointer',
   },
   tableRowColumn: {
@@ -91,7 +91,8 @@ export default class Audits extends Component {
   }
 
   getAudits = async () => {
-    const { data: audits } = await api.getAudits(this.props.app.simple_name, this.props.app.space.name, 100);
+    const { app } = this.props;
+    const { data: audits } = await api.getAudits(app.simple_name, app.space.name, 100);
     if (this._isMounted) {
       this.setState({ audits, loading: false });
     }
@@ -133,7 +134,7 @@ export default class Audits extends Component {
       );
     }
 
-    return audits.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((audit) => {
+    return audits.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((audit) => { // eslint-disable-line
       const id = SHA256(JSON.stringify(audit)).toString().substring(0, 7);
       return (
         <TableRow
@@ -181,7 +182,12 @@ export default class Audits extends Component {
     }
     return (
       <div>
-        <Table className="audit-list" >
+        <Table className="audit-list">
+          <colgroup>
+            <col style={{ width: '33%' }} />
+            <col style={{ width: '33%' }} />
+            <col style={{ width: '33%' }} />
+          </colgroup>
           <TableHead>
             <TableRow>
               <TableCell>

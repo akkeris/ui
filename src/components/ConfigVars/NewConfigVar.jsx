@@ -126,7 +126,7 @@ export default class NewConfigVar extends Component {
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Config Var Key'}
             </Typography>
           </div>
@@ -146,7 +146,7 @@ export default class NewConfigVar extends Component {
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Config Var Value'}
             </Typography>
           </div>

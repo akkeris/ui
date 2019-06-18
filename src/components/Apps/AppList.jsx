@@ -9,7 +9,6 @@ import History from '../../config/History';
 
 const style = {
   tableRow: {
-    height: '58px',
     cursor: 'pointer',
   },
   tableRowColumn: {

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, Snackbar, IconButton, TableCell, Tooltip, Typography, Collapse,
-  Table, TableBody, TableHead, TableRow,
+  Table, TableBody, TableRow,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -33,6 +33,21 @@ const style = {
     indicator: {
       display: 'inline-block',
       position: 'relative',
+    },
+  },
+  header: {
+    container: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '6px 24px',
+      borderBottom: '1px solid rgb(224, 224, 224)',
+    },
+    icons: {
+      container: {
+        display: 'flex', flexDirection: 'row', alignItems: 'space-between',
+      },
     },
   },
 };
@@ -175,32 +190,26 @@ export default class Formations extends Component {
             <NewFormation app={this.props.app} onComplete={this.reload} />
           </div>
         </Collapse>
+        <div style={style.header.container}>
+          <Typography variant="overline">Formation</Typography>
+          <div style={style.header.icons.container} >
+            <div style={{ width: '50px' }}>
+              {!this.state.new && (
+                <Tooltip title="Refresh" placement="bottom-end">
+                  <IconButton style={style.iconButton} className="reload-formations" onClick={() => this.reload()}><ReloadIcon /></IconButton>
+                </Tooltip>
+              )}
+            </div>
+            <div style={{ width: '50px' }}>
+              {!this.state.new && (
+                <Tooltip title="New Formation" placement="bottom-end">
+                  <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
+                </Tooltip>
+              )}
+            </div>
+          </div>
+        </div>
         <Table className="formation-list">
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Typography variant="overline">Formation</Typography>
-                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'space-between' }} >
-                    <div style={{ width: '50px' }}>
-                      {!this.state.new && (
-                        <Tooltip title="Refresh" placement="bottom-end">
-                          <IconButton style={style.iconButton} className="reload-formations" onClick={() => this.reload()}><ReloadIcon /></IconButton>
-                        </Tooltip>
-                      )}
-                    </div>
-                    <div style={{ width: '50px' }}>
-                      {!this.state.new && (
-                        <Tooltip title="New Formation" placement="bottom-end">
-                          <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
-                        </Tooltip>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableHead>
           <TableBody>
             {this.state.loading && (
               <TableRow>

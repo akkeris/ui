@@ -5,7 +5,7 @@ import History from '../../config/History';
 
 const style = {
   tableRow: {
-    height: '58px',
+    height: '36px',
     cursor: 'pointer',
   },
   tableRowColumn: {
@@ -72,26 +72,24 @@ export default class FavoritesList extends Component {
   render() {
     const { rowsPerPage, page } = this.state;
     return (
-      <div style={{ marginBottom: '12px' }}>
-        <Table className="favorites-list">
-          <TableBody>
-            {this.getApps(page, rowsPerPage)}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TablePagination
-                rowsPerPageOptions={[15, 25, 50]}
-                colSpan={3}
-                count={this.props.favorites.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onChangePage={this.handleChangePage}
-                onChangeRowsPerPage={this.handleChangeRowsPerPage}
-              />
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </div>
+      <Table className="favorites-list">
+        <TableBody>
+          {this.getApps(page, rowsPerPage)}
+        </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TablePagination
+              rowsPerPageOptions={[15, 25, 50]}
+              colSpan={3}
+              count={this.props.favorites.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={this.handleChangePage}
+              onChangeRowsPerPage={this.handleChangeRowsPerPage}
+            />
+          </TableRow>
+        </TableFooter>
+      </Table>
     );
   }
 }

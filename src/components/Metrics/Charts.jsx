@@ -128,4 +128,4 @@ Charts.propTypes = {
   theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
-export default withTheme()(Charts);
+export default withTheme(Charts);

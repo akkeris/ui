@@ -86,20 +86,20 @@ const Footer = () => (
         <Table style={style.table.body}>
           <TableHead>
             <TableRow>
-              <TableCell style={style.table.headerCell} padding="none">
+              <TableCell style={style.table.headerCell}>
                 Documentation
               </TableCell >
-              <TableCell style={style.table.headerCell} padding="none">
+              <TableCell style={style.table.headerCell}>
                 Contribution
               </TableCell>
-              <TableCell style={style.table.headerCell} padding="none">
+              <TableCell style={style.table.headerCell}>
                 Support
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
-              <TableCell style={style.table.cell} padding="none">
+              <TableCell style={style.table.cell}>
                 {wikiLink !== '' ? (
                   <div><a href={wikiLink} style={style.link}>Wiki</a></div>
                 ) : (
@@ -111,7 +111,7 @@ const Footer = () => (
                   <div style={style.link}>Getting Started</div>
                 )}
               </TableCell>
-              <TableCell style={style.table.cell} padding="none">
+              <TableCell style={style.table.cell}>
                 {apiLink !== '' ? (
                   <div><a href={apiLink} style={style.link}>API</a></div>
                 ) : (
@@ -123,7 +123,7 @@ const Footer = () => (
                   <div style={style.link}>Releases</div>
                 )}
               </TableCell>
-              <TableCell style={style.table.cell} padding="none">
+              <TableCell style={style.table.cell}>
                 {akkerisSupportLink !== '' ? (
                   <div><a href={akkerisSupportLink} style={style.link}>Akkeris</a></div>
                 ) : (
@@ -142,7 +142,7 @@ const Footer = () => (
           Akkeris is built with a little bit of love, and a lot of anger. <br />
           Brought to you by COBRA and our open source community.
         </Typography>
-        <IconButton href="https://github.com/akkeris" ><GitIcon nativeColor="rgba(255,255,255,0.8)" /></IconButton>
+        <IconButton href="https://github.com/akkeris" ><GitIcon htmlColor="rgba(255,255,255,0.8)" /></IconButton>
       </div>
     </Paper>
   </MuiThemeProvider>

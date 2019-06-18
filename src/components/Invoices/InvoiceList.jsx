@@ -6,6 +6,9 @@ import { BarChart, Bar, XAxis } from 'recharts';
 import History from '../../config/History';
 
 const style = {
+  card: {
+    marginTop: '0px',
+  },
   tableRow: {
     height: '58px',
     cursor: 'pointer',
@@ -126,7 +129,7 @@ class InvoiceList extends Component {
     const { theme } = this.props;
     return (
       <div style={{ overflow: 'auto' }}>
-        <Card>
+        <Card style={style.card}>
           <CardHeader title="Billing Information" subheader={`Current Usage: ${formatMoney(this.getInvoiceTotal())}`} />
         </Card>
         <BarChart
@@ -156,4 +159,4 @@ InvoiceList.propTypes = {
   theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
-export default withTheme()(InvoiceList);
+export default withTheme(InvoiceList);

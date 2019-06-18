@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
   CircularProgress, Table, TableBody, TableRow, TableCell, IconButton, Tooltip,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Snackbar, Divider, Button, TextField, Collapse, Typography, TableHead,
+  Snackbar, Button, TextField, Collapse, Typography, TableHead,
 } from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
@@ -64,7 +64,7 @@ const style = {
     },
     header: {
       container: {
-        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+        display: 'flex', alignItems: 'center', padding: '6px 24px 0px',
       },
       title: {
         flex: 1,
@@ -77,6 +77,10 @@ const style = {
         display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
       },
     },
+  },
+  tableCell: {
+    paddingTop: '4px',
+    paddingBottom: '4px',
   },
 };
 
@@ -224,22 +228,22 @@ export default class ConfigVar extends Component {
   renderConfigVars() {
     return Object.keys(this.state.config).sort().map(key => (
       <TableRow hover className={key} key={key} style={style.tableRow}>
-        <TableCell style={style.configVar}>
+        <TableCell style={{ ...style.configVar, ...style.tableCell }}>
           <div style={style.configVar.key}>{key}</div>
         </TableCell>
-        <TableCell style={style.configVar}>
+        <TableCell style={{ ...style.configVar, ...style.tableCell }}>
           <div style={style.configVar.value}>{this.state.config[key]}</div>
         </TableCell>
-        <TableCell>
+        <TableCell style={style.tableCell}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Tooltip title="Edit" placement="top-start">
               <IconButton className="edit" onClick={() => this.handleEdit(key)}>
-                <EditIcon nativeColor="black" />
+                <EditIcon htmlColor="black" />
               </IconButton>
             </Tooltip>
             <Tooltip title="Remove" placement="top-start">
               <IconButton className="remove" onClick={() => this.handleConfirmation(key)}>
-                <RemoveIcon nativeColor="black" />
+                <RemoveIcon htmlColor="black" />
               </IconButton>
             </Tooltip>
           </div>
@@ -263,7 +267,7 @@ export default class ConfigVar extends Component {
           <div style={style.collapse.container}>
             <div style={style.collapse.header.container}>
               <Typography style={style.collapse.header.title} variant="overline">New Config</Typography>
-              <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon nativeColor="black" /></IconButton>
+              <IconButton className="config-cancel" onClick={this.handleNewConfigCancel}><RemoveIcon htmlColor="black" /></IconButton>
             </div>
             <div>
               <NewConfigVar
@@ -274,7 +278,6 @@ export default class ConfigVar extends Component {
             </div>
           </div>
         </Collapse>
-        <Divider />
         <Table className="config-list">
           <colgroup>
             <col style={{ width: '40%' }} />
@@ -282,14 +285,18 @@ export default class ConfigVar extends Component {
             <col style={{ width: '15%' }} />
           </colgroup>
           <TableHead>
-            <TableRow>
-              <TableCell><Typography variant="overline">Key</Typography></TableCell>
-              <TableCell><Typography variant="overline">Value</Typography></TableCell>
-              <TableCell>
+            <TableRow style={style.tableRow}>
+              <TableCell style={style.tableCell}>
+                <Typography variant="overline">Key</Typography>
+              </TableCell>
+              <TableCell style={style.tableCell}>
+                <Typography variant="overline">Value</Typography>
+              </TableCell>
+              <TableCell style={style.tableCell}>
                 <div style={style.header.actions.container}>
                   {!this.state.new && (
                     <Tooltip title="New Config" placement="bottom-start">
-                      <IconButton className="new-config" onClick={this.handleNewConfig}><AddIcon nativeColor="black" /></IconButton>
+                      <IconButton className="new-config" onClick={this.handleNewConfig}><AddIcon htmlColor="black" /></IconButton>
                     </Tooltip>
                   )}
                 </div>

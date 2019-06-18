@@ -28,7 +28,6 @@ const styles = theme => ({
     marginRight: '32px',
     minWidth: '300px',
     maxWidth: '800px',
-    height: '42px',
     borderRadius: theme.shape.borderRadius,
     transition: 'all 0.2s ease',
     '&:hover': {
@@ -45,6 +44,7 @@ const styles = theme => ({
     display: 'flex',
     padding: 0,
     color: 'white',
+    height: 'unset',
   },
   valueContainer: {
     display: 'flex',
@@ -55,7 +55,7 @@ const styles = theme => ({
     overflow: 'hidden',
   },
   chip: {
-    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 2}px`,
+    margin: `${theme.spacing(0.5)}px ${theme.spacing(0.5)}px`,
   },
   chipFocused: {
     backgroundColor: emphasize(
@@ -64,7 +64,7 @@ const styles = theme => ({
     ),
   },
   noOptionsMessage: {
-    padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+    padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
   },
   singleValue: {
     fontSize: 16,
@@ -85,7 +85,7 @@ const styles = theme => ({
     margin: '6px auto 0px',
   },
   divider: {
-    height: theme.spacing.unit * 2,
+    height: theme.spacing(2),
   },
   headingContainer: {
     marginLeft: '12px',
@@ -126,7 +126,7 @@ const Control = props => (
       },
       startAdornment: (
         <InputAdornment position="start">
-          <FilterIcon className={props.selectProps.classes.searchIcon} nativeColor="white" />
+          <FilterIcon className={props.selectProps.classes.searchIcon} htmlColor="white" />
         </InputAdornment>
       ),
     }}

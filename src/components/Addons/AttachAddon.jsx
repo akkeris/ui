@@ -176,7 +176,7 @@ export default class AttachAddon extends Component {
               errorText={this.state.errorText}
               color="black"
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Select the application that has an addon that you want to attach (e.g. test-dev).'}
             </Typography>
           </div>
@@ -187,7 +187,7 @@ export default class AttachAddon extends Component {
             <Select className="addon-menu" value={this.state.addon} onChange={this.handleAddonChange}>
               {this.renderAddons()}
             </Select>
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Select the addon you want to attach.'}
             </Typography>
           </div>

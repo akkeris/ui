@@ -29,7 +29,7 @@ const styles = theme => ({
     listStyleType: 'none',
   },
   divider: {
-    height: theme.spacing.unit * 2,
+    height: theme.spacing(2),
   },
 });
 

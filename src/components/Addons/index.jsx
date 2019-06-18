@@ -77,7 +77,7 @@ const style = {
     },
     header: {
       container: {
-        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+        display: 'flex', alignItems: 'center', padding: '6px 24px 0px',
       },
       title: {
         flex: 1,
@@ -91,6 +91,10 @@ const style = {
     button: {
       width: '50px',
     },
+  },
+  headerCell: {
+    paddingTop: '6px',
+    paddingBottom: '6px',
   },
 };
 
@@ -431,13 +435,6 @@ class Addons extends Component {
   }
 
   render() {
-    if (this.state.loading) {
-      return (
-        <div style={style.refresh.div}>
-          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-        </div>
-      );
-    }
     return (
       <div style={{ overflow: 'visible' }}>
         <Collapse unmountOnExit mountOnEnter in={this.state.attach || this.state.new}>
@@ -466,10 +463,10 @@ class Addons extends Component {
           </colgroup>
           <TableHead>
             <TableRow>
-              <TableCell><Typography variant="overline">Addon</Typography></TableCell>
-              <TableCell><Typography variant="overline">Plan</Typography></TableCell>
-              <TableCell>{this.state.addonAttachments.length !== 0 && <Typography variant="overline">Attached From</Typography>}</TableCell>
-              <TableCell>
+              <TableCell style={style.headerCell}><Typography variant="overline">Addon</Typography></TableCell>
+              <TableCell style={style.headerCell}><Typography variant="overline">Plan</Typography></TableCell>
+              <TableCell style={style.headerCell}>{this.state.addonAttachments.length !== 0 && <Typography variant="overline">Attached From</Typography>}</TableCell>
+              <TableCell style={style.headerCell}>
                 <div style={style.headerActions.container}>
                   <div style={style.headerActions.button}>
                     {!this.state.attach && !this.state.new && (
@@ -501,13 +498,25 @@ class Addons extends Component {
               </TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            {this.state.addons.length === 0 && this.state.addonAttachments.length === 0 && (
-              <TableRow><TableCell colspan={4}><span className="no-results">No Addons</span></TableCell></TableRow>
-            )}
-            {this.state.addons.length > 0 && this.renderAddons()}
-            {this.state.addonAttachments.length > 0 && this.renderAddonAttachments()}
-          </TableBody>
+          {this.state.loading ? (
+            <TableBody>
+              <TableRow>
+                <TableCell colspan={4}>
+                  <div style={style.refresh.div}>
+                    <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          ) : (
+            <TableBody>
+              {this.state.addons.length === 0 && this.state.addonAttachments.length === 0 && (
+                <TableRow><TableCell colspan={4}><span className="no-results">No Addons</span></TableCell></TableRow>
+              )}
+              {this.state.addons.length > 0 && this.renderAddons()}
+              {this.state.addonAttachments.length > 0 && this.renderAddonAttachments()}
+            </TableBody>
+          )}
         </Table>
         <Dialog
           className="attached-apps-dialog"
@@ -588,4 +597,4 @@ Addons.propTypes = {
 };
 /* eslint-enable react/forbid-prop-types */
 
-export default withTheme()(Addons);
+export default withTheme(Addons);

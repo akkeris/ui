@@ -170,12 +170,12 @@ export default class Logs extends Component {
               {connected ? (
                 <Loading style={style.logsHeader.loading} />
               ) : (
-                <IconButton onClick={this.reset}><Refresh nativeColor="white" /></IconButton>
+                <IconButton onClick={this.reset}><Refresh htmlColor="white" /></IconButton>
               )}
               {expanded ? (
-                <IconButton onClick={() => this.setState({ expanded: false })} style={{ marginLeft: 'auto' }}><FullscreenExit nativeColor="white" /></IconButton>
+                <IconButton onClick={() => this.setState({ expanded: false })} style={{ marginLeft: 'auto' }}><FullscreenExit htmlColor="white" /></IconButton>
               ) : (
-                <IconButton onClick={() => this.setState({ expanded: true })} style={{ marginLeft: 'auto' }}><Fullscreen nativeColor="white" /></IconButton>
+                <IconButton onClick={() => this.setState({ expanded: true })} style={{ marginLeft: 'auto' }}><Fullscreen htmlColor="white" /></IconButton>
               )}
             </div>
             {!reload && (

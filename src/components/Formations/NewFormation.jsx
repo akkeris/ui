@@ -203,7 +203,7 @@ export default class NewFormation extends Component {
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Enter a name for your new dyno.'}
             </Typography>
           </div>
@@ -214,7 +214,7 @@ export default class NewFormation extends Component {
             <Select className="new-dropdown" value={quantity} onChange={this.handleChange('quantity')}>
               {this.renderQuantity()}
             </Select>
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Select the number of dyno instances to be created.'}
             </Typography>
           </div>
@@ -253,7 +253,7 @@ export default class NewFormation extends Component {
                 onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
                 autoFocus
               />
-              <Typography variant="body1" style={style.stepDescription}>
+              <Typography variant="body2" style={style.stepDescription}>
                 {`
                   Specify the port that your app will run on.
                   If your app listens to $PORT, then leave default.
@@ -274,7 +274,7 @@ export default class NewFormation extends Component {
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {`
                 The command to run when the build image spins up,
                 this if left off will default to the RUN command in the docker image.

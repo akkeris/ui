@@ -35,7 +35,6 @@ const style = {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    maxHeight: 'unset !important',
   },
   link: {
     textDecoration: 'none',
