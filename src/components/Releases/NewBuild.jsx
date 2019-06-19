@@ -121,7 +121,7 @@ export default class NewBuild extends Component {
               autoFocus
               fullWidth
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {`
                 The URI to fetch the image or sources for this build.
                 If an image is provided no build will occur, but the image will be fetched.
@@ -142,7 +142,7 @@ export default class NewBuild extends Component {
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Branch of commit that caused the build (shown in logs and build info).'}
             </Typography>
           </div>
@@ -158,7 +158,7 @@ export default class NewBuild extends Component {
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'An optional version to specify that will show in the logs.'}
             </Typography>
           </div>

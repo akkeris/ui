@@ -33,6 +33,7 @@ const styles = theme => ({
     display: 'flex',
     padding: 0,
     color: 'white',
+    height: 'unset',
   },
   valueContainer: {
     display: 'flex',
@@ -43,7 +44,7 @@ const styles = theme => ({
     overflow: 'hidden',
   },
   noOptionsMessage: {
-    padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+    padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
   },
   singleValue: {
     fontSize: 16,
@@ -64,7 +65,7 @@ const styles = theme => ({
     margin: '6px auto 0px',
   },
   divider: {
-    height: theme.spacing.unit * 2,
+    height: theme.spacing(2),
   },
   headingContainer: {
     marginLeft: '12px',
@@ -107,7 +108,7 @@ const Control = props => (
       },
       startAdornment: (
         <InputAdornment position="start">
-          <SearchIcon className={props.selectProps.classes.searchIcon} nativeColor="white" />
+          <SearchIcon className={props.selectProps.classes.searchIcon} htmlColor="white" />
         </InputAdornment>
       ),
     }}

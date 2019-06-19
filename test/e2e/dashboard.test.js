@@ -6,6 +6,10 @@ const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
 
+if (!global.createdApps) {
+  global.createdApps = [];
+}
+
 fixture('Dashboard Page') // eslint-disable-line no-undef
   .page(`${baseUrl}/dashboard`)
   .beforeEach(async (t) => {
@@ -32,6 +36,7 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
   .beforeEach(async (t) => {
     const appName = utils.randomString();
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
+    global.createdApps.push(appName);
     await t
 
       // login
@@ -97,6 +102,7 @@ fixture('Recents Tab') // eslint-disable-line no-undef
   .beforeEach(async (t) => {
     const appName = utils.randomString();
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
+    global.createdApps.push(appName);
     await t
 
       // login

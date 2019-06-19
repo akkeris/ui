@@ -66,6 +66,13 @@ const style = {
       },
     },
   },
+  menuItem: {
+    paddingRight: '10px',
+    minWidth: '215px',
+    paddingTop: '0px',
+    paddingBottom: '0px',
+    boxSizing: 'unset',
+  },
 };
 
 function addRestrictedTooltip(title, children) {
@@ -316,11 +323,15 @@ export default class AppInfo extends Component {
     const menuOpen = Boolean(anchorEl);
 
     let deleteButton = (
-      <MenuItem onClick={this.handleConfirmation} disabled={(restrictedSpace && !isElevated)} >
+      <MenuItem
+        style={style.menuItem}
+        onClick={this.handleConfirmation}
+        disabled={(restrictedSpace && !isElevated)}
+      >
         <ListItemIcon
           className="delete-app"
         >
-          <RemoveIcon color="secondary" nativeColor={isElevated ? 'white' : undefined} />
+          <RemoveIcon color="secondary" htmlColor={isElevated ? 'white' : undefined} />
         </ListItemIcon>
         <ListItemText primary="Delete App" />
       </MenuItem>
@@ -353,7 +364,7 @@ export default class AppInfo extends Component {
           onClose={this.handleMenuClose}
           className="app-menu"
         >
-          <MenuItem onClick={() => window.open(this.state.app.web_url, '_blank')}>
+          <MenuItem style={style.menuItem} onClick={() => window.open(this.state.app.web_url, '_blank')}>
             <ListItemIcon
               className="live-app"
             >
@@ -361,7 +372,7 @@ export default class AppInfo extends Component {
             </ListItemIcon>
             <ListItemText primary="Live App" />
           </MenuItem>
-          <MenuItem style={{ minWidth: '200px' }}>
+          <MenuItem style={style.menuItem}>
             <ListItemIcon>
               <ReleaseIcon />
             </ListItemIcon>
@@ -375,7 +386,7 @@ export default class AppInfo extends Component {
             </ListItemSecondaryAction>
           </MenuItem>
           {this.state.app.git_url && (
-            <MenuItem onClick={() => window.open(this.state.app.git_url, '_blank')} >
+            <MenuItem style={style.menuItem} onClick={() => window.open(this.state.app.git_url, '_blank')} >
               <ListItemIcon
                 className="github"
               >
@@ -385,7 +396,7 @@ export default class AppInfo extends Component {
             </MenuItem>
           )}
           {this.state.app.git_url ? (
-            <MenuItem onClick={this.handleRepoConfirmation}>
+            <MenuItem style={style.menuItem} onClick={this.handleRepoConfirmation}>
               <ListItemIcon
                 className="remove-repo"
               >
@@ -394,7 +405,7 @@ export default class AppInfo extends Component {
               <ListItemText primary="Detach Repo" />
             </MenuItem>
           ) : (
-            <MenuItem onClick={this.handleConfigureAutoBuild}>
+            <MenuItem style={style.menuItem} onClick={this.handleConfigureAutoBuild}>
               <ListItemIcon
                 className="configure-repo"
               >

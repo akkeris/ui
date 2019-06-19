@@ -5,7 +5,7 @@ import History from '../config/History';
 
 const style = {
   tableRow: {
-    height: '58px',
+    height: '36px',
     cursor: 'pointer',
   },
   tableRowColumn: {
@@ -67,26 +67,24 @@ export default class RecentsList extends Component {
   render() {
     const { rowsPerPage, page } = this.state;
     return (
-      <div style={{ marginBottom: '12px' }}>
-        <Table className="recents-list">
-          <TableBody>
-            {this.getRecents(page, rowsPerPage)}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TablePagination
-                rowsPerPageOptions={[15, 25, 50]}
-                colSpan={3}
-                count={this.props.recents ? this.props.recents.length : 0}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onChangePage={this.handleChangePage}
-                onChangeRowsPerPage={this.handleChangeRowsPerPage}
-              />
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </div>
+      <Table className="recents-list">
+        <TableBody>
+          {this.getRecents(page, rowsPerPage)}
+        </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TablePagination
+              rowsPerPageOptions={[15, 25, 50]}
+              colSpan={3}
+              count={this.props.recents ? this.props.recents.length : 0}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={this.handleChangePage}
+              onChangeRowsPerPage={this.handleChangeRowsPerPage}
+            />
+          </TableRow>
+        </TableFooter>
+      </Table>
     );
   }
 }

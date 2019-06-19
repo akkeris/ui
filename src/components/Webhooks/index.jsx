@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, IconButton, Snackbar, Typography, Collapse,
-  Table, TableHead, TableBody, TableRow, TableCell, Tooltip,
+  Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -35,7 +35,7 @@ const style = {
     },
     header: {
       container: {
-        display: 'flex', alignItems: 'center', padding: '6px 26px 0px',
+        display: 'flex', alignItems: 'center', padding: '6px 24px 0px',
       },
       title: {
         flex: 1,
@@ -43,18 +43,12 @@ const style = {
     },
   },
   header: {
-    tableCell: {
-      padding: '0 26px 0 36px',
-    },
     container: {
       display: 'flex', alignItems: 'center',
     },
-    title: {
-      flex: 2,
-    },
-    action: {
-      minWidth: '48px',
-    },
+  },
+  noResults: {
+    padding: '18px 24px',
   },
 };
 
@@ -129,9 +123,10 @@ export default class Webhooks extends Component {
   }
 
   renderWebhooks() {
-    return this.state.webhooks.map((webhook, rowindex) => (
-      <TableRow key="webhook.id">
-        <TableCell style={{ padding: 0 }}>
+    return this.state.webhooks
+      .sort((a, b) => b.active - a.active)
+      .map((webhook, rowindex) => (
+        <div style={{ borderBottom: '1px solid rgba(224,224,224,1)' }} key={webhook.id}>
           <Webhook
             webhook={webhook}
             rowindex={rowindex}
@@ -140,20 +135,11 @@ export default class Webhooks extends Component {
             onError={this.handleError}
             key={webhook.id}
           />
-        </TableCell>
-      </TableRow>
-    ));
+        </div>
+      ));
   }
 
   render() {
-    if (this.state.loading) {
-      return (
-        <div style={style.refresh.div}>
-          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-        </div>
-      );
-    }
-
     return (
       <div>
         <Collapse unmountOnExit mountOnEnter in={this.state.new}>
@@ -165,34 +151,40 @@ export default class Webhooks extends Component {
             <NewWebhook app={this.props.app} onComplete={this.reload} />
           </div>
         </Collapse>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell style={style.header.tableCell}>
-                <div style={style.header.container}>
-                  <Typography style={style.header.title} variant="overline">Webhook</Typography>
-                  <Typography style={style.header.title} variant="overline">Events</Typography>
-                  <div style={style.header.action}>
-                    {!this.state.new && (
-                      <Tooltip placement="bottom-end" title="New Webhook">
-                        <IconButton className="new-webhook" onClick={this.handleNewWebhook}>
-                          <AddIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </div>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody className="webhook-list">
-            {(this.state.webhooks && this.state.webhooks.length) > 0 ? (
-              this.renderWebhooks()
-            ) : (
-              <TableRow><TableCell><span className="no-results" style={{ paddingLeft: '12px' }}>No Webhooks</span></TableCell></TableRow>
+        <div style={{ height: '52px', display: 'flex', padding: '4px 24px', borderBottom: '1px solid rgba(224, 224, 224, 1)', alignItems: 'center', color: 'rgba(0, 0, 0, 0.87)' }}>
+          <div style={{ display: 'flex', flexGrow: '1' }}>
+            <div style={{ flex: 17 }}>
+              <Typography variant="overline">Webhook</Typography>
+            </div>
+            <div style={{ flex: 19 }}>
+              <Typography variant="overline">Events</Typography>
+            </div>
+          </div>
+          <div style={{ width: '50px' }}>
+            {!this.state.new && (
+              <Tooltip placement="bottom-end" title="New Webhook">
+                <IconButton className="new-webhook" onClick={this.handleNewWebhook}>
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
             )}
-          </TableBody>
-        </Table>
+          </div>
+        </div>
+        <div>
+          {this.state.loading ? (
+            <div style={style.refresh.div}>
+              <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
+            </div>
+          ) : (
+            <div>
+              {(this.state.webhooks && this.state.webhooks.length) > 0 ? (
+                <div className="webhook-list">{this.renderWebhooks()}</div>
+              ) : (
+                <Typography variant="body2" className="no-results" style={style.noResults}>No Webhooks</Typography>
+              )}
+            </div>
+          )}
+        </div>
         <ConfirmationModal
           open={this.state.submitFail}
           onOk={this.handleDialogClose}

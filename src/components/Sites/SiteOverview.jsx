@@ -121,7 +121,7 @@ export default class SiteOverview extends Component {
               onClick={this.handleConfirmation}
               color="secondary"
             >
-              <RemoveIcon nativeColor="white" style={style.removeIcon} />
+              <RemoveIcon htmlColor="white" style={style.removeIcon} />
               <span style={style.deleteButtonLabel}>Delete Site</span>
             </Button>
           </ListItem>

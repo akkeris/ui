@@ -116,7 +116,14 @@ class Pipelines extends Component {
     this.setState({ loading: true });
     const { data: pipelines } = await api.getPipelines();
     this.setState({
-      pipelines, message, loading: false, new: false, open: true, page: 0, rowsPerPage: 15,
+      pipelines,
+      sortedPipelines: pipelines,
+      message,
+      loading: false,
+      new: false,
+      open: true,
+      page: 0,
+      rowsPerPage: 15,
     });
   }
 
@@ -206,7 +213,7 @@ class Pipelines extends Component {
           <Collapse in={this.state.new}>
             <div>
               <IconButton className="cancel" onClick={this.handleNewPipelineCancel} style={style.cancelIcon}>
-                <RemoveIcon nativeColor="black" />
+                <RemoveIcon htmlColor="black" />
               </IconButton>
               <NewPipeline onComplete={this.reload} />
               <Divider style={{ marginTop: '15px' }} />

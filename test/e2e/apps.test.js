@@ -6,11 +6,12 @@ const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
 
+if (!global.createdApps) {
+  global.createdApps = [];
+}
+
 fixture('Apps Page') // eslint-disable-line no-undef
   .page(`${baseUrl}/apps`)
-  .before(async (ctx) => {
-    ctx.createdApps = [];
-  })
   .beforeEach(async (t) => {
     await t
       .expect(Selector('button.login').innerText).eql('Login')
@@ -18,11 +19,6 @@ fixture('Apps Page') // eslint-disable-line no-undef
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
       .click('button.login');
-  })
-  .after(async (ctx) => {
-    ctx.createdApps.forEach(() => {
-      // TODO: MAKE SURE ALL CREATED APPS ARE DELETED HERE (double check)
-    });
   });
 
 test('Should show list of apps based on filter', async (t) => { // eslint-disable-line no-undef
@@ -49,7 +45,9 @@ test('Should show list of apps based on filter', async (t) => { // eslint-disabl
     .typeText(Selector('.filter-select-input input'), 'test')
     .click('.filter-select-results .test')
     .expect(Selector('.app-list tbody').childElementCount)
-    .eql(0);
+    .eql(1)
+    .expect(Selector('.app-list tbody td').innerText)
+    .contains('No Results');
 });
 
 test('Should throw error on non-existent app', async (t) => { // eslint-disable-line no-undef
@@ -81,7 +79,7 @@ test('Should show apps as first group in global search', async (t) => { // eslin
 
 test('Should be able to create and delete an app', async (t) => { // eslint-disable-line no-undef
   const appName = utils.randomString();
-  t.fixtureCtx.createdApps.push(appName);
+  global.createdApps.push(appName);
 
   await t
   // navigate to new app page
@@ -170,6 +168,7 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
   .beforeEach(async (t) => {
     const appName = utils.randomString();
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
+    global.createdApps.push(appName);
     await t
 
       // login
@@ -437,7 +436,7 @@ test('Should be able to create view and release builds', async (t) => { // eslin
     .click('.addons-tab')
     .click('.releases-tab')
     .click('.release-list .r0 button.logs')
-    .expect(Selector('.logs h2').innerText)
+    .expect(Selector('.logs h6').innerText)
     .contains('Logs for')
     .click('.logs button');
 });
@@ -448,6 +447,7 @@ test // eslint-disable-line no-undef
     const appName2 = utils.randomString();
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     t.ctx.appName2 = appName2; // eslint-disable-line no-param-reassign
+    global.createdApps.push(appName, appName2);
     await t
 
     // login
@@ -924,6 +924,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .notOk()
 
     // Display multiple webhooks
+    .wait(2000)
     .click('button.new-webhook')
     .typeText('.webhook-url input', 'http://example.com/hook1')
     .click('button.next')

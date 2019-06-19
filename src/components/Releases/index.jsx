@@ -15,7 +15,6 @@ import RevertIcon from '@material-ui/icons/Replay';
 import PendingIcon from '@material-ui/icons/Lens';
 import ErrorIcon from '@material-ui/icons/Cancel';
 import SuccessIcon from '@material-ui/icons/CheckCircle';
-import RefreshIcon from '@material-ui/icons/Refresh';
 
 import Logs from './Logs';
 import api from '../../services/api';
@@ -40,6 +39,9 @@ const releaseLimit = 20;
 const style = {
   iconButton: {
     color: 'black',
+  },
+  table: {
+    overflow: 'visible',
   },
   tableRow: {
     height: '58px',
@@ -122,6 +124,38 @@ const style = {
         width: '174px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       },
       button: {
+        width: '50px',
+      },
+    },
+  },
+  logContent: {
+    padding: '0px', margin: '0px',
+  },
+  release: {
+    root: {
+      display: 'flex', padding: '12px 24px', minHeight: '64px', alignItems: 'center',
+    },
+    icon: {
+      root: {
+        width: '25px', paddingRight: '24px',
+      },
+      inner: {
+        position: 'relative', height: '100%',
+      },
+      releaseIcon: {
+        position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
+      },
+    },
+    info: {
+      root: {
+        fontSize: '0.8125rem', lineHeight: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+      },
+    },
+    actions: {
+      root: {
+        width: '112px', display: 'flex', justifyContent: 'space-between',
+      },
+      inner: {
         width: '50px',
       },
     },
@@ -372,21 +406,18 @@ export default class Releases extends Component {
         }, style.status);
         return (
           <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current }}>
-            <TableCell style={{ display: 'flex', padding: '12px 24px', minHeight: '64px', alignItems: 'center' }}>
-              <div style={{ width: '25px', paddingRight: '24px' }}>
-                <div style={{ position: 'relative', height: '100%' }}>
+            <TableCell style={style.release.root}>
+              <div style={style.release.icon.root}>
+                <div style={style.release.icon.inner}>
                   {!release.release ? (
                     <BuildIcon style={style.mainIcon} />
                   ) : (
-                    <ReleaseIcon style={{
-                      position: 'absolute', opacity: 0.5, top: '50%', marginTop: '-12px',
-                    }}
-                    />
+                    <ReleaseIcon style={style.release.icon.releaseIcon} />
                   )}
                   <StatusIcon style={statusIconStyle} />
                 </div>
               </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={style.release.info.root}>
                 {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `}
                 {info1.join(' ')}
                 <br />
@@ -395,15 +426,15 @@ export default class Releases extends Component {
                   {getDateDiff(new Date(release.created_at))}
                 </div>
               </div>
-              <div style={{ width: '112px', display: 'flex', justifyContent: 'space-between' }}>
-                <div style={{ width: '50px' }}>
+              <div style={style.release.actions.root}>
+                <div style={style.release.actions.inner}>
                   {release.source_blob.version &&
                   <Tooltip title="Commit" placement="top-end">
-                    <IconButton style={style.iconButton} className="git" href={release.source_blob.version} ><GitCommitIcon /></IconButton>
+                    <IconButton style={style.iconButton} className="git" href={release.source_blob.version} target="_blank"><GitCommitIcon /></IconButton>
                   </Tooltip>
                   }
                 </div>
-                <div style={{ width: '50px' }}>
+                <div style={style.release.actions.inner}>
                   {!release.release &&
                   <Tooltip title="Build Logs" placement="top-end">
                     <IconButton style={style.iconButton} className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
@@ -421,6 +452,7 @@ export default class Releases extends Component {
         );
       });
   }
+
   renderLogs() {
     const { logsOpen, release, title } = this.state;
     return (
@@ -432,7 +464,7 @@ export default class Releases extends Component {
         fullWidth
       >
         <DialogTitle>{title}</DialogTitle>
-        <DialogContent style={{ padding: '0px', margin: '0px' }}>
+        <DialogContent style={style.logContent}>
           <Logs
             build={release.slug.id}
             app={this.props.app.name}
@@ -543,7 +575,7 @@ export default class Releases extends Component {
             <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
           </div>
         ) : (
-          <Table className="release-list" style={{ overflow: 'visible' }}>
+          <Table className="release-list" style={style.table}>
             <TableBody>
               {(!this.state.releases || this.state.releases.length === 0) ? (
                 <TableRow><TableCell><span className="no-results">No Releases</span></TableCell></TableRow>

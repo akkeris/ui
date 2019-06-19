@@ -224,7 +224,7 @@ class InvoiceInfo extends Component {
       <List
         key={`list_org_${org}`}
         subheader={
-          <ListSubheader component="div" disableGutters>
+          <ListSubheader component="div" disableGutters disableSticky>
             <div style={this.style.header.container}>
               <div style={this.style.header.row}>
                 <span style={this.style.header.title}>{org}</span>
@@ -299,4 +299,4 @@ InvoiceInfo.propTypes = {
   theme: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
-export default withTheme()(InvoiceInfo);
+export default withTheme(InvoiceInfo);

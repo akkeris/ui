@@ -9,8 +9,6 @@ import {
   ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails,
 } from '@material-ui/core';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import ActiveIcon from '@material-ui/icons/Notifications';
-import InactiveIcon from '@material-ui/icons/NotificationsPaused';
 import HistoryIcon from '@material-ui/icons/History';
 import HelpIcon from '@material-ui/icons/Help';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -122,7 +120,6 @@ const style = {
     flexWrap: 'wrap',
     alignItems: 'center',
     flex: 19,
-    paddingLeft: '2px',
   },
   webhookUrl: {
     fontSize: '16px',
@@ -145,7 +142,7 @@ const style = {
       display: 'flex', flexDirection: 'row',
     },
     eventsContainer: {
-      display: 'flex', flexDirection: 'column',
+      display: 'flex', flexDirection: 'column', flex: 17,
     },
     textContainer: {
       display: 'flex', flex: 4, flexDirection: 'row', justifyContent: 'space-between',
@@ -170,7 +167,7 @@ const style = {
         height: '18px', width: '18px',
       },
       grid: {
-        width: '500px', marginLeft: '2px',
+        width: '545px', marginLeft: '2px',
       },
       checkbox: {
         padding: '6px', marginRight: '6px',
@@ -190,11 +187,11 @@ const style = {
   },
   webhookTitle: {
     container: {
-      flex: 1, display: 'flex', alignItems: 'center', marginRight: '48px',
+      flex: 1, display: 'flex', alignItems: 'center',
     },
     info: {
       container: {
-        flex: 20, display: 'flex', alignItems: 'center',
+        flex: 17, display: 'flex', alignItems: 'center',
       },
     },
   },
@@ -444,11 +441,6 @@ export default class Webhook extends Component {
     return (
       <div style={style.webhookTitle.container}>
         <div style={style.webhookTitle.info.container}>
-          {this.props.webhook.active ? (
-            <ActiveIcon color="primary" style={style.statusIcon} />
-          ) : (
-            <InactiveIcon style={{ ...style.statusIcon, color: 'rgba(0, 0, 0, 0.3)' }} />
-          )}
           <div>
             <div className={`webhook-title-url-${this.props.rowindex}`} style={style.webhookUrl}>
               {this.props.webhook.url}
@@ -459,7 +451,7 @@ export default class Webhook extends Component {
           </div>
         </div>
         <div style={style.eventsContainer}>
-          {this.renderEvents(this.props.webhook)}
+          {this.props.webhook.events.join(', ')}
         </div>
       </div>
     );
@@ -586,7 +578,7 @@ export default class Webhook extends Component {
                 </Tooltip>
               ) : eventsHelperButton()}
             </div>
-            <Grid container spacing={8} style={style.webhookDetail.events.grid} className="events">
+            <Grid container spacing={1} style={style.webhookDetail.events.grid} className="events">
               {this.renderEventCheckboxes(this.props.webhook)}
               <Grid
                 item
@@ -698,11 +690,13 @@ export default class Webhook extends Component {
   }
 
   render() {
+    const { active } = this.props.webhook;
+    const { edit } = this.state;
     return (
       <MuiThemeProvider theme={theme}>
         <ExpansionPanel style={style.expansionPanel} className={`webhook-item-${this.props.rowindex}`}>
           <ExpansionPanelSummary
-            style={{ marginRight: '18px' }}
+            style={{ paddingRight: '38px', paddingLeft: '24px', opacity: (!active && !edit) ? 0.35 : undefined }}
             expandIcon={<ExpandMoreIcon />}
             className={'webhook-title'}
           >

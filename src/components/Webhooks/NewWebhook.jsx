@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, Checkbox, Grid, TextField, IconButton, Typography,
-  Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, FormControlLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, FormControlLabel, CircularProgress,
 } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import api from '../../services/api';
@@ -31,7 +31,7 @@ const style = {
     paddingTop: '5px',
   },
   gridContainer: {
-    width: '350px',
+    width: '400px',
   },
   stepper: {
     width: '100%',
@@ -171,6 +171,7 @@ export default class NewWebhook extends Component {
 
   submitWebHook = async () => {
     try {
+      this.setState({ stepIndex: 4 });
       await api.createWebHook(this.props.app, this.state.url, this.state.events, this.state.secret ? this.state.secret : ' ');
       this.props.onComplete('Webhook Created');
     } catch (error) {
@@ -204,7 +205,7 @@ export default class NewWebhook extends Component {
               autoFocus
               fullWidth
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Enter a URL for the new webhook (defaults to http).'}
             </Typography>
           </div>
@@ -226,7 +227,7 @@ export default class NewWebhook extends Component {
             </div>
             {this.renderEventsInfoDialog()}
             <div className="events" style={{ padding: '6px' }}>
-              <Grid container spacing={8} style={style.gridContainer}>
+              <Grid container spacing={1} style={style.gridContainer}>
                 {this.renderEventCheckboxes(this.webhook)}
                 <Grid item xs={12} style={style.checkAllContainer}>
                   <FormControlLabel
@@ -266,7 +267,7 @@ export default class NewWebhook extends Component {
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
             />
-            <Typography variant="body1" style={style.stepDescription}>
+            <Typography variant="body2" style={style.stepDescription}>
               {'Define a secret for calculation of SHA (optional).'}
             </Typography>
           </div>
@@ -285,7 +286,11 @@ export default class NewWebhook extends Component {
         );
         // Have to have this otherwise it displays "Error- Captain Hook not found" on submit
       case 4:
-        return '';
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CircularProgress />
+          </div>
+        );
       default:
         return 'Error- Captain Hook not found';
     }
@@ -334,34 +339,43 @@ export default class NewWebhook extends Component {
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
+    const { stepIndex } = this.state;
     const contentStyle = { margin: '0 32px', overflow: 'visible' };
-    if (finished) {
-      this.submitWebHook();
-    } else {
-      return (
-        <div style={contentStyle}>
-          <div>{this.renderStepContent(stepIndex)}</div>
-          <div style={style.buttons.div}>
-            {stepIndex > 0 && (
-              <Button
-                className="back"
-                disabled={stepIndex === 0}
-                onClick={this.handlePrev}
-                style={style.buttons.back}
-              >Back</Button>
-            )}
+    return (
+      <div style={contentStyle}>
+        <div>{this.renderStepContent(stepIndex)}</div>
+        <div style={style.buttons.div}>
+          {stepIndex > 0 && (
+            <Button
+              className="back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={style.buttons.back}
+            >Back</Button>
+          )}
+          {stepIndex < 3 && (
             <Button
               variant="contained"
               className="next"
               color="primary"
               onClick={this.handleNext}
-            >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
-          </div>
+            >
+              Next
+            </Button>
+          )}
+          {stepIndex >= 3 && (
+            <Button
+              variant="contained"
+              className="next"
+              color="primary"
+              onClick={this.submitWebHook}
+            >
+              Finish
+            </Button>
+          )}
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   }
 
   render() {

@@ -13,6 +13,7 @@ const styles = theme => ({
   input: {
     display: 'flex',
     padding: 0,
+    height: 'unset',
   },
   valueContainer: {
     display: 'flex',
@@ -22,7 +23,7 @@ const styles = theme => ({
     overflow: 'hidden',
   },
   noOptionsMessage: {
-    padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+    padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
   },
   singleValue: {
     fontSize: 16,
@@ -39,7 +40,7 @@ const styles = theme => ({
     right: 0,
   },
   divider: {
-    height: theme.spacing.unit * 2,
+    height: theme.spacing(2),
   },
   groupHeading: {
     marginBottom: '6px',

@@ -56,7 +56,7 @@ const GlobalTheme = createMuiTheme({
     MuiToolbar: { // Used in the main Scenes for their toolbar above the table (apps, orgs, etc)
       root: {
         minHeight: '48px !important',
-        maxHeight: '48px !important',
+        // maxHeight: '48px !important',
       },
     },
     /* Used for Info pages - i.e. AppInfo, PipelineInfo, and so on */
@@ -92,6 +92,16 @@ const GlobalTheme = createMuiTheme({
       subheader: {
         fontSize: '14px',
         fontWeight: '500',
+      },
+    },
+    MuiTableCell: {
+      root: {
+        '&:first-child': {
+          paddingLeft: '24px',
+        },
+        '&:last-child': {
+          paddingRight: '24px',
+        },
       },
     },
   },

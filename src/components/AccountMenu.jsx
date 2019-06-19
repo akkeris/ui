@@ -78,7 +78,7 @@ export default class AccountMenu extends Component {
           <ArrowDropDown
             className="dropdown"
             onClick={this.handleTouchTap}
-            nativeColor="rgba(255,255,255,0.5)"
+            htmlColor="rgba(255,255,255,0.5)"
             style={style.arrowDropDown}
           />
         </div>

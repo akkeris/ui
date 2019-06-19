@@ -9,7 +9,6 @@ import History from '../../config/History';
 
 const style = {
   tableRow: {
-    height: '58px',
     cursor: 'pointer',
   },
   tableRowColumn: {
@@ -69,6 +68,15 @@ export default class AppList extends Component {
   }
 
   renderApps(page, rowsPerPage) {
+    if (this.props.apps.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colspan={4}>
+            No Results
+          </TableCell>
+        </TableRow>
+      );
+    }
     return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => ( // eslint-disable-line
       <TableRow
         className={app.name}

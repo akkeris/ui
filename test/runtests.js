@@ -1,5 +1,6 @@
 const createTestCafe = require('testcafe');
 const s3 = require('@auth0/s3');
+const utils = require('./utils');
 
 /* eslint-disable no-console */
 
@@ -53,12 +54,17 @@ function getS3Creds() {
   return creds;
 }
 
+function finish(testcafe, testResult) {
+  testcafe.close();
+  utils.verifyAppDeletion(global.createdApps);
+  process.exit(testResult);
+}
+
 async function uploadScreenshots(testcafe, testResult) {
   const creds = getS3Creds();
   if (!creds) {
     console.log('Error uploading screenshots - ensure all required environment variables are present.');
-    testcafe.close();
-    process.exit(testResult);
+    finish(testcafe, testResult);
   }
 
   const client = s3.createClient({ s3Options: {
@@ -79,14 +85,12 @@ async function uploadScreenshots(testcafe, testResult) {
 
   uploader.on('error', (err) => {
     console.error('Unable to upload screenshots:', err.stack);
-    testcafe.close();
-    process.exit(testResult);
+    finish(testcafe, testResult);
   });
 
   uploader.on('end', () => {
     console.log('Done uploading screenshots!');
-    testcafe.close();
-    process.exit(testResult);
+    finish(testcafe, testResult);
   });
 }
 
@@ -113,6 +117,8 @@ async function runTests() {
     browsers = 'chrome';
   }
 
+  global.createdApps = [];
+
   try {
     const testcafe = await createTestCafe();
 
@@ -135,8 +141,7 @@ async function runTests() {
 
     if (testResult === 0) {
       console.log('\nAll tests passed!');
-      testcafe.close();
-      process.exit(testResult);
+      finish(testcafe, testResult);
     } else {
       console.error(`\n${testResult} TESTS FAILED`);
       // upload failed screenshots
@@ -144,12 +149,12 @@ async function runTests() {
         console.log('Uploading error screenshots...');
         uploadScreenshots(testcafe, testResult);
       } else {
-        testcafe.close();
-        process.exit(testResult);
+        finish(testcafe, testResult);
       }
     }
   } catch (err) {
     console.error(err);
+    utils.verifyAppDeletion(global.createdApps);
     process.exit(-1);
   }
 }

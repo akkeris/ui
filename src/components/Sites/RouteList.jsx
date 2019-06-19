@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
   Table, TableHead, TableBody, TableRow, TableCell, Paper, TablePagination,
-  CircularProgress, Snackbar, IconButton, Tooltip, TableFooter,
+  CircularProgress, Snackbar, IconButton, Tooltip, TableFooter, Collapse, Typography,
 } from '@material-ui/core';
 import ArrowIcon from '@material-ui/icons/ArrowForward';
 import AddIcon from '@material-ui/icons/Add';
@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import api from '../../services/api';
 import NewRoute from './NewRoute';
 import ConfirmationModal from '../ConfirmationModal';
+import History from '../../config/History';
 
 const style = {
   refresh: {
@@ -25,8 +26,15 @@ const style = {
       position: 'relative',
     },
   },
-  tableRow: {
-    height: '58px',
+  headerCell: {
+    paddingTop: '6px',
+    paddingBottom: '6px',
+    color: 'rgba(0, 0, 0, 0.87)',
+  },
+  headerEmpty: {
+    width: '58px',
+    paddingTop: '6px',
+    paddingBottom: '6px',
   },
   tableRowColumn: {
     title: {
@@ -39,6 +47,17 @@ const style = {
     icon: {
       width: '58px',
     },
+  },
+  newRoute: {
+    container: {
+      display: 'flex', flexDirection: 'column',
+    },
+    header: {
+      display: 'flex', alignItems: 'center', padding: '6px 34px 0px 24px',
+    },
+  },
+  appLink: {
+    cursor: 'pointer',
   },
 };
 
@@ -143,7 +162,7 @@ export default class RouteList extends Component {
           <TableCell style={style.tableRowColumn.icon}>
             <ArrowIcon />
           </TableCell>
-          <TableCell>
+          <TableCell onClick={() => History.get().push(`/apps/${route.app.name || route.app}`)} style={style.appLink}>
             <div style={style.tableRowColumn.title}>{route.target_path}</div>
             <div style={style.tableRowColumn.sub}>{route.app.name || route.app}</div>
           </TableCell>
@@ -171,26 +190,34 @@ export default class RouteList extends Component {
     }
     return (
       <div>
-        {!this.state.new && (
-          <Paper elevation={0}>
-            <Tooltip title="New Route" placement="bottom-start">
-              <IconButton onClick={this.handleNewRoute}><AddIcon /></IconButton>
-            </Tooltip>
-          </Paper>
-        )}
-        {this.state.new && (
-          <div>
-            <IconButton onClick={this.handleNewRouteCancel}><RemoveIcon /></IconButton>
+        <Collapse in={this.state.new} mountOnEnter unmountOnExit>
+          <div style={style.newRoute.container}>
+            <div style={style.newRoute.header}>
+              <Typography style={{ flex: 1 }} variant="overline">New Route</Typography>
+              <IconButton style={style.iconButton} className="cancel" onClick={this.handleNewRouteCancel}><RemoveIcon /></IconButton>
+            </div>
             <NewRoute site={this.props.site} onComplete={this.reload} />
           </div>
-        )}
+        </Collapse>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Source</TableCell>
-              <TableCell style={style.tableRowColumn.icon} />
-              <TableCell>Target</TableCell>
-              <TableCell style={style.tableRowColumn.icon} />
+              <TableCell style={style.headerCell}>
+                <Typography variant="overline">Source</Typography>
+              </TableCell>
+              <TableCell style={style.headerEmpty} />
+              <TableCell style={style.headerCell}>
+                <Typography variant="overline">Target</Typography>
+              </TableCell>
+              <TableCell style={style.headerEmpty}>
+                {!this.state.new && (
+                  <Paper elevation={0}>
+                    <Tooltip title="New Route" placement="bottom-start">
+                      <IconButton onClick={this.handleNewRoute}><AddIcon /></IconButton>
+                    </Tooltip>
+                  </Paper>
+                )}
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
