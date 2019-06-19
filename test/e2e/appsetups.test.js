@@ -48,6 +48,10 @@ const blueprint = {
   'pipeline-couplings': [],
 };
 
+if (!global.createdApps) {
+  global.createdApps = [];
+}
+
 const url = `${baseUrl}/app-setups?blueprint=${encodeURIComponent(JSON.stringify(blueprint))}`;
 
 fixture('App Setups Page') // eslint-disable-line no-undef
@@ -55,6 +59,8 @@ fixture('App Setups Page') // eslint-disable-line no-undef
   .beforeEach(async (t) => {
     const appName = utils.randomString();
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
+    global.createdApps.push(appName);
+
     await t
       .expect(Selector('button.login').innerText).eql('Login')
       .typeText('#username', botUsername)

@@ -8,6 +8,7 @@
   "private": true,
   "dependencies": {
     "@auth0/s3": "^1.0.0",
+    "axios": "^0.19.0",
     "testcafe": "1.2.0",
     "testcafe-browser-provider-selenium": "^0.4.0",
     "testcafe-react-selectors": "0.0.8-alpha3"

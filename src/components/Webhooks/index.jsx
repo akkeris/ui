@@ -47,6 +47,9 @@ const style = {
       display: 'flex', alignItems: 'center',
     },
   },
+  noResults: {
+    padding: '18px 24px',
+  },
 };
 
 export default class Webhooks extends Component {
@@ -175,9 +178,9 @@ export default class Webhooks extends Component {
           ) : (
             <div>
               {(this.state.webhooks && this.state.webhooks.length) > 0 ? (
-                this.renderWebhooks()
+                <div className="webhook-list">{this.renderWebhooks()}</div>
               ) : (
-                <span className="no-results" style={{ paddingLeft: '12px' }}>No Webhooks</span>
+                <Typography variant="body2" className="no-results" style={style.noResults}>No Webhooks</Typography>
               )}
             </div>
           )}

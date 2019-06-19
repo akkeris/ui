@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import api from '../../services/api';
 import NewRoute from './NewRoute';
 import ConfirmationModal from '../ConfirmationModal';
+import History from '../../config/History';
 
 const style = {
   refresh: {
@@ -54,6 +55,9 @@ const style = {
     header: {
       display: 'flex', alignItems: 'center', padding: '6px 34px 0px 24px',
     },
+  },
+  appLink: {
+    cursor: 'pointer',
   },
 };
 
@@ -158,7 +162,7 @@ export default class RouteList extends Component {
           <TableCell style={style.tableRowColumn.icon}>
             <ArrowIcon />
           </TableCell>
-          <TableCell>
+          <TableCell onClick={() => History.get().push(`/apps/${route.app.name || route.app}`)} style={style.appLink}>
             <div style={style.tableRowColumn.title}>{route.target_path}</div>
             <div style={style.tableRowColumn.sub}>{route.app.name || route.app}</div>
           </TableCell>

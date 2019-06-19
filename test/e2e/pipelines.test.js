@@ -6,6 +6,10 @@ const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
 
+if (!global.createdApps) {
+  global.createdApps = [];
+}
+
 fixture('Pipelines Page') // eslint-disable-line no-undef
   .page(baseUrl)
   .beforeEach(async (t) => {
@@ -101,6 +105,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
     t.ctx.appName2 = appName2; // eslint-disable-line no-param-reassign
     t.ctx.appName3 = appName3; // eslint-disable-line no-param-reassign
     t.ctx.pipelineName = pipelineName; // eslint-disable-line no-param-reassign
+    global.createdApps.push(appName, appName2, appName3);
     await t
 
       // login
