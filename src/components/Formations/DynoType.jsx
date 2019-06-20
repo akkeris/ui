@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import RemoveIcon from '@material-ui/icons/Clear';
-import RestartIcon from '@material-ui/icons/Replay';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import BackIcon from '@material-ui/icons/ArrowBack';
@@ -18,10 +17,16 @@ import UnhealthyIcon from '@material-ui/icons/Cancel';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
+import RestartIcon from '../Icons/RestartIcon';
 
 const style = {
   iconButton: {
     color: 'black',
+  },
+  restartIcon: {
+    color: 'black',
+    width: '48px',
+    height: '48px',
   },
   tableRow: {
     height: '58px',
@@ -464,7 +469,7 @@ export default class DynoType extends Component {
           <div style={style.info.actions.container}>
             <div style={style.info.actions.item}>
               <Tooltip title="Restart" placement="top-start">
-                <IconButton style={style.iconButton} className="restart" onClick={this.handleRestart}><RestartIcon /></IconButton>
+                <IconButton style={style.restartIcon} className="restart" onClick={this.handleRestart}><RestartIcon style={{ fontSize: '2rem' }} /></IconButton>
               </Tooltip>
             </div>
             <div style={style.info.actions.item}>
