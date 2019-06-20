@@ -27,6 +27,9 @@ const style = {
     color: 'black',
     width: '48px',
     height: '48px',
+    size: {
+      fontSize: '2rem',
+    },
   },
   tableRow: {
     height: '58px',
@@ -469,7 +472,7 @@ export default class DynoType extends Component {
           <div style={style.info.actions.container}>
             <div style={style.info.actions.item}>
               <Tooltip title="Restart" placement="top-start">
-                <IconButton style={style.restartIcon} className="restart" onClick={this.handleRestart}><RestartIcon style={{ fontSize: '2rem' }} /></IconButton>
+                <IconButton style={style.restartIcon} className="restart" onClick={this.handleRestart}><RestartIcon style={style.restartIcon.size} /></IconButton>
               </Tooltip>
             </div>
             <div style={style.info.actions.item}>
