@@ -88,6 +88,10 @@ test('Should be able to create and delete site', async (t) => { // eslint-disabl
     .contains(`The external site ${siteName} will be created in the region us-seattle.`)
     .click('button.next')
 
+    // Make sure the site will actually show up on the page
+    .click('.rows-per-page-input')
+    .click(Selector('.rows-per-page-menu li').withText('50'))
+
     // check if site was created
     .click(`.site-list .${siteName}`)
     .expect(Selector('.card .header').innerText)

@@ -157,6 +157,10 @@ export default class SitesList extends Component {
                   page={page}
                   onChangePage={this.handleChangePage}
                   onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  SelectProps={{
+                    inputProps: { className: 'rows-per-page-input' },
+                    MenuProps: { MenuListProps: { className: 'rows-per-page-menu' } },
+                  }}
                 />
               </TableRow>
             </TableFooter>
