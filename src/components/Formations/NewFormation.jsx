@@ -94,7 +94,7 @@ export default class NewFormation extends Component {
       this.setState({ errorText: 'Alphanumeric characters only' });
     } else if (stepIndex === 0 && !this.state.type) {
       this.setState({ errorText: 'Field required' });
-    } else if ((stepIndex === 3 && this.state.command === '' && this.state.type === 'worker') || (stepIndex === 3 && this.state.port === null && this.state.type === 'web')) {
+    } else if ((stepIndex === 3 && this.state.command === '' && this.state.type !== 'web') || (stepIndex === 3 && this.state.port === null && this.state.type === 'web')) {
       this.setState({ errorText: 'Field required' });
     } else if (!this.state.loading) {
       if (stepIndex === 4) {
@@ -276,8 +276,7 @@ export default class NewFormation extends Component {
             />
             <Typography variant="body2" style={style.stepDescription}>
               {`
-                The command to run when the build image spins up,
-                this if left off will default to the RUN command in the docker image.
+                The command to run when the build image spins up.
               `}
             </Typography>
           </div>
