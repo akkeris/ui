@@ -19,6 +19,7 @@ const theme = parentTheme => deepmerge(parentTheme, {
     MuiTableCell: {
       root: {
         fontFamily: 'ProximaNova',
+        padding: '14px 0px 14px 0px',
       },
     },
     MuiTypography: {
@@ -67,13 +68,11 @@ const style = {
     },
     cell: {
       textAlign: 'center',
-      width: '33%',
       borderBottom: 'none',
     },
     headerCell: {
       textAlign: 'center',
       color: 'rgb(158, 158, 158)',
-      width: '33%',
       borderBottom: '1px solid rgba(224, 224, 224, 1)',
     },
   },
@@ -84,6 +83,11 @@ const Footer = () => (
     <Paper style={style.footer}>
       <div style={style.div}>
         <Table style={style.table.body}>
+          <colgroup>
+            <col style={{ width: 'calc(100%  /3)' }} />
+            <col style={{ width: 'calc(100%  /3)' }} />
+            <col style={{ width: 'calc(100%  /3)' }} />
+          </colgroup>
           <TableHead>
             <TableRow>
               <TableCell style={style.table.headerCell}>
