@@ -34,7 +34,7 @@ const blueprint = {
   formation: {
     web: {
       quantity: 1,
-      size: 'scout',
+      size: 'gp1',
       command: null,
       port: 5000,
     },
