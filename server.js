@@ -20,6 +20,20 @@ const https = require('https');
 
 const tests = require('./test/runtests');
 
+const allowed = ['/oauth/callback', '/logout', '.css', '.js', '.map', '.png', '.ico', '.svg'];
+function isUnprotected(requestPath) {
+  return allowed.some(resource => requestPath.endsWith(resource));
+}
+
+function redirectOAuth(req, res) {
+  req.session.redirect = req.originalUrl;
+  if (process.env.OAUTH_SCOPES) {
+    res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}&scope=${encodeURIComponent(process.env.OAUTH_SCOPES)}`);
+  } else {
+    res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
+  }
+}
+
 if (process.env.RUN_TESTCAFE) {
   tests.runTests();
   return;
@@ -95,15 +109,10 @@ app.get('/log-plex/:id', (req, res) => {
 });
 
 app.use((req, res, next) => {
-  if (req.session.token || req.path === '/oauth/callback' || req.path === '/logout' || req.path === '/main.css') {
+  if (req.session.token || isUnprotected(req.path)) {
     next();
   } else {
-    req.session.redirect = req.originalUrl;
-    if (process.env.OAUTH_SCOPES) {
-      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}&scope=${encodeURIComponent(process.env.OAUTH_SCOPES)}`);
-    } else {
-      res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
-    }
+    redirectOAuth(req, res);
   }
 });
 
@@ -115,7 +124,7 @@ app.get('/oauth/callback', (req, res) => {
     code: req.query.code,
     grant_type: 'authorization_code',
   };
-  request.post(reqopts, (err, response, body) => {
+  request.post(reqopts, (err, response, body) => { // eslint-disable-line
     if (err) {
       console.error('Error retrieving access token from auth code:');
       console.error(err);
@@ -132,7 +141,7 @@ app.get('/oauth/callback', (req, res) => {
 
 app.use('/api', proxy(`${akkerisApi}`, {
   proxyReqOptDecorator(reqOpts, srcReq) {
-    reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`;
+    reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`; // eslint-disable-line no-param-reassign
     return reqOpts;
   },
 }));
@@ -156,7 +165,7 @@ app.get('/logout', (req, res) => {
     maxRedirects: 0,
   };
   req.session.destroy();
-  request.delete(reqopts, (error, response, body) => {
+  request.delete(reqopts, (error, response, body) => { // eslint-disable-line
     if (error) {
       return console.error('delete failed:', error);
     }
@@ -186,19 +195,20 @@ if (process.env.NODE_ENV === 'dev') {
   app.use(middleware);
   app.use(webpackHotMiddleware(compiler));
   app.use(express.static('public'));
-  // Required for <BrowserRouter> - fallback to index.html on 404
-  app.get('/*', (req, res) => {
-    res.sendFile(path.resolve('public', 'index.html'));
-  });
 } else {
   console.log(`${process.env.NODE_ENV} ENVIRONMENT`);
   // Production needs physical files! (built via separate process)
   app.use(express.static('build'));
-  // Required for <BrowserRouter> - fallback to index.html on 404
-  app.get('/*', (req, res) => {
-    res.sendFile(path.resolve('build', 'index.html'));
-  });
 }
+
+// Required for <BrowserRouter> - fallback to index.html on 404
+app.get('/*', (req, res) => {
+  if (!req.session.token) {
+    redirectOAuth(req, res);
+  } else {
+    res.sendFile(path.resolve(process.env.NODE_ENV === 'dev' ? 'public' : 'build', 'index.html'));
+  }
+});
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) {
