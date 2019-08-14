@@ -149,7 +149,9 @@ app.use('/api', proxy(`${akkerisApi}`, {
 app.get('/healthcheck', (req, res) => {
   const url = decodeURIComponent(req.query.uri);
   if (url) {
-    request({ url }).on('error', e => res.end(e.message || JSON.stringify(e))).pipe(res);
+    request({ url }).on('error', (e) => {
+      res.status(400).send(e.message || JSON.stringify(e));
+    }).pipe(res);
   } else {
     res.sendStatus(400);
   }
