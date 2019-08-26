@@ -1,33 +1,16 @@
 import React from 'react';
+import api from '../api';
 
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/no-unescaped-entities */
 
 // TODO: remove this, there's no structured way to dynamically fetch this
 // yet
-const postgresqlPlans = [
-  { name: 'alamo-postgresql:micro', price: 0, size: (4 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:small', price: 60, size: (20 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:medium', price: 135, size: (50 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:large', price: 360, size: (100 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:hobby', price: 0, size: (4 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:standard-0', price: 5, size: (4 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:standard-1', price: 15, size: (16 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:standard-2', price: 45, size: (32 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:premium-0', price: 60, size: (20 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:premium-1', price: 135, size: (50 * 1024 * 1024 * 1024) },
-  { name: 'alamo-postgresql:premium-2', price: 720, size: (100 * 1024 * 1024 * 1024) },
-];
-const redisPlans = [
-  { name: 'alamo-redis:small', price: 15, size: (600 * 1024 * 1024) },
-  { name: 'alamo-redis:medium', price: 50, size: (3.2 * 1024 * 1024 * 1024) },
-  { name: 'alamo-redis:large', price: 135, size: (6 * 1024 * 1024 * 1024) },
-];
-const memcachedPlans = [
-  { name: 'alamo-memcached:small', price: 15, size: (600 * 1024 * 1024) },
-  { name: 'alamo-memcached:medium', price: 50, size: (3.2 * 1024 * 1024 * 1024) },
-  { name: 'alamo-memcached:large', price: 135, size: (6 * 1024 * 1024 * 1024) },
-];
+
+let postgresqlPlans = [];
+let redisPlans = [];
+let memcachedPlans = [];
+
 
 function mean(obj) {
   return Object.values(obj).map(x => parseFloat(x, 10))
@@ -48,7 +31,7 @@ function derivative(obj) {
   });
 }
 
-function examinSavings(metrics, formations, addons, sizes) {
+function examineSavings(metrics, formations, addons, sizes) {
   const savings = [];
   metrics = metrics || {}; // eslint-disable-line no-param-reassign
 
@@ -268,10 +251,32 @@ function examineErrors(metrics) {
   return errors;
 }
 
-function execute(metrics, formations, addons, sizes) {
+async function execute(metrics, formations, addons, sizes) {
+  const filterPlans = x => x.state !== 'deprecated';
+  const convertToBytes = (x) => {
+    const i = parseInt(x.slice(0, x.length - 2), 10);
+    if (x.endsWith('KB')) {
+      return i * 1024;
+    } else if (x.endsWith('MB')) {
+      return i * 1024 * 1024;
+    } else if (x.endsWith('GB')) {
+      return i * 1024 * 1024 * 1024;
+    }
+    return i;
+  };
+  const mapPlans = (x, type) => ({
+    name: x.name,
+    price: x.price.cents / 100,
+    size: convertToBytes(type === 'psql' ? x.attributes.storage_capacity : x.attributes.ram),
+  });
+
+  postgresqlPlans = (await api.getAddonServicePlans('akkeris-postgresql')).data.filter(filterPlans).map(x => mapPlans(x, 'psql'));
+  memcachedPlans = (await api.getAddonServicePlans('akkeris-memcached')).data.filter(filterPlans).map(x => mapPlans(x, 'memcached'));
+  redisPlans = (await api.getAddonServicePlans('akkeris-redis')).data.filter(filterPlans).map(x => mapPlans(x, 'redis'));
+
   return examineErrors(metrics)
     .concat(examineWarnings(metrics))
-    .concat(examinSavings(metrics, formations, addons, sizes));
+    .concat(examineSavings(metrics, formations, addons, sizes));
 }
 
 module.exports = {
