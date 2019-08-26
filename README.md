@@ -109,7 +109,7 @@ Given that the applicable environment variables have been saved to `config.env`.
 
 1. `cd test`
 2. `docker build -t akkeris-ui-tests .`
-3. `docker run --env-file config.env -n akkeris-ui-tests --rm akkeris-ui-tests`
+3. `docker run --env-file config.env --name akkeris-ui-tests --rm akkeris-ui-tests`
 
 Note - the docker image does not use the `RUN_TESTCAFE` environment variable because it does not contain the full UI.
 

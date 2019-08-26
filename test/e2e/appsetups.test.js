@@ -100,7 +100,7 @@ test('ensure the app setup works', async (t) => { // eslint-disable-line no-unde
 
     .expect(Selector('.config-environment').exists)
     .ok()
-    .wait(65000)
+    .wait(85000)
 
     .expect(Selector('.config_app').exists)
     .ok();

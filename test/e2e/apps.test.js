@@ -432,7 +432,7 @@ test('Should be able to create view and release builds', async (t) => { // eslin
     .expect(Selector('.release-list tbody').childElementCount)
     .gt(0)
 
-    .wait(5000)
+    .wait(20000)
     .click('.addons-tab')
     .click('.releases-tab')
     .click('.release-list .r0 button.logs')
