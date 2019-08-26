@@ -71,7 +71,7 @@ export default class AppList extends Component {
     if (this.props.apps.length === 0) {
       return (
         <TableRow>
-          <TableCell colspan={4}>
+          <TableCell colSpan={4}>
             No Results
           </TableCell>
         </TableRow>

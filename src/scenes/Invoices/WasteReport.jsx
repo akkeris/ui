@@ -59,6 +59,17 @@ const style = {
     padding: '1em',
     borderTop: '1px solid rgba(0,0,0,0.2)',
   },
+  loading: {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '0 40px 20px',
+    },
+    label: {
+      color: 'rgba(0,0,0,0.8)',
+      paddingBottom: '10px',
+    },
+  },
 };
 
 export default class WasteReport extends Component {
@@ -69,6 +80,8 @@ export default class WasteReport extends Component {
       apps: [],
       loading: true,
       analyzing: false,
+      loadingRecommendations: true,
+      appNotes: [],
       progress: 0,
     };
   }
@@ -150,15 +163,43 @@ export default class WasteReport extends Component {
     next();
   }
 
-  renderAppRecommendations() {
-    const results = [];
-    this.state.apps.forEach((app) => {
-      const notes = recommendations.execute(
+  getAppRecommendations = async () => {
+    const appNotes = [];
+
+    async function asyncForEach(array, callback) {
+      for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array); // eslint-disable-line
+      }
+    }
+
+    await asyncForEach(this.state.apps, async (app) => {
+      const notes = await recommendations.execute(
         app.metrics,
         app.formations,
         app.addons,
         this.state.sizes,
       );
+      appNotes.push({ name: app.name, notes });
+    });
+
+    this.setState({ appNotes, loadingRecommendations: false });
+  }
+
+  renderAppRecommendations() {
+    const results = [];
+    this.getAppRecommendations();
+    if (this.state.loadingRecommendations) {
+      return (
+        <div style={style.loading.container}>
+          <span style={style.loading.label}>Loading recommendations...</span>
+          <LinearProgress variant="indeterminate" />
+        </div>
+      );
+    }
+
+    this.state.apps.forEach((app) => {
+      const notes = this.state.appNotes.find(note => note.name === app.name);
+
       if (notes.length > 0) {
         results.push(
           <div key={`recommend_${app.name}`} className="recommendations" style={style.recommendations}>
@@ -170,6 +211,7 @@ export default class WasteReport extends Component {
         );
       }
     });
+
     if (results.length === 0) {
       results.push(
         <div key={'reccomend_empty'} style={style.recommendations}>

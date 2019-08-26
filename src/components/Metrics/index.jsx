@@ -104,9 +104,7 @@ export default class Metrics extends Component {
       loading: true,
       reading: false,
       metrics: {},
-      formations: {},
-      addons: {},
-      sizes: {},
+      notes: null,
     };
     this.loadMetrics();
   }
@@ -123,14 +121,13 @@ export default class Metrics extends Component {
     const { data: formations } = await api.getFormations(this.props.app);
     const { data: metrics } = await api.getMetrics(this.props.app);
     const { data: addons } = await api.getAppAddons(this.props.app);
+    const notes = await recommendations.execute(metrics, formations, addons, sizes);
     if (this._isMounted) {
       this.setState({
-        sizes,
-        formations,
         metrics,
-        addons,
         loading: false,
         reading: true,
+        notes,
       });
     }
   }
@@ -196,21 +193,21 @@ export default class Metrics extends Component {
           }
         });
       });
-      const notes = recommendations.execute(this.state.metrics, this.state.formations, this.state.addons, this.state.sizes);
+
       let notesDom = null;
-      if (notes.length > 0) {
+      if (this.state.notes && this.state.notes.length > 0) {
         notesDom = (
           <div className="recommendations">
             <h3>Recommendations &amp; Warnings</h3>
             <ul>
-              {notes}
+              {this.state.notes}
             </ul>
           </div>
         );
       }
       return (
         <div>
-          {notesDom}
+          {this.state.notes && notesDom}
           {charts}
         </div>
       );
