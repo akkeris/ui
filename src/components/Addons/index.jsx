@@ -502,7 +502,7 @@ class Addons extends Component {
           {this.state.loading ? (
             <TableBody>
               <TableRow>
-                <TableCell colspan={4}>
+                <TableCell colSpan={4}>
                   <div style={style.refresh.div}>
                     <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
                   </div>
@@ -512,7 +512,7 @@ class Addons extends Component {
           ) : (
             <TableBody>
               {this.state.addons.length === 0 && this.state.addonAttachments.length === 0 && (
-                <TableRow><TableCell colspan={4}><span className="no-results">No Addons</span></TableCell></TableRow>
+                <TableRow><TableCell colSpan={4}><span className="no-results">No Addons</span></TableCell></TableRow>
               )}
               {this.state.addons.length > 0 && this.renderAddons()}
               {this.state.addonAttachments.length > 0 && this.renderAddonAttachments()}
