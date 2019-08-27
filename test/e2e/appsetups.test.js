@@ -41,8 +41,7 @@ const blueprint = {
   },
   addons: {},
   source_blob: {
-    checksum: 'sha256:93f16649a03d37aef081dfec3c2fecfa41bb22dd45de2b79f32dcda83bd69bcf',
-    url: 'docker://docker.io/akkeris/test-lifecycle:latest',
+    url: 'docker://docker.io/nginx:alpine',
     version: 'v1.0',
   },
   'pipeline-couplings': [],
@@ -100,9 +99,8 @@ test('ensure the app setup works', async (t) => { // eslint-disable-line no-unde
 
     .expect(Selector('.config-environment').exists)
     .ok()
-    .wait(85000)
 
     .expect(Selector('.config_app').exists)
-    .ok();
+    .ok('Error waiting for app to be configured', { timeout: 30000 });
 });
 
