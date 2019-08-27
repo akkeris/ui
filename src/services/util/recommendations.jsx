@@ -68,6 +68,9 @@ function examineSavings(metrics, formations, addons, sizes) {
   // postgresql
   addons.filter(addon => addon.addon_service.name === 'akkeris-postgresql').forEach((addon) => {
     const currentPlanIndex = postgresqlPlans.findIndex(x => x.name === addon.plan.name);
+    if (currentPlanIndex < 0) {
+      return;
+    }
     const lowerPlanIndex = currentPlanIndex - 1;
     let found = false;
     Object.values(metrics).forEach((dyno, index) => {
@@ -105,6 +108,9 @@ function examineSavings(metrics, formations, addons, sizes) {
   // memcached
   addons.filter(addon => addon.addon_service.name === 'alamo-memcached').forEach((addon) => {
     const currentPlanIndex = memcachedPlans.findIndex(x => x.name === addon.plan.name);
+    if (currentPlanIndex < 0) {
+      return;
+    }
     const lowerPlanIndex = currentPlanIndex - 1;
     let found = false;
     Object.values(metrics).forEach((dyno, index) => {
@@ -142,6 +148,9 @@ function examineSavings(metrics, formations, addons, sizes) {
   // redis
   addons.filter(addon => addon.addon_service.name === 'alamo-redis').forEach((addon) => {
     const currentPlanIndex = redisPlans.findIndex(x => x.name === addon.plan.name);
+    if (currentPlanIndex < 0) {
+      return;
+    }
     const lowerPlanIndex = currentPlanIndex - 1;
     let found = false;
     Object.values(metrics).forEach((dyno, index) => {
@@ -235,24 +244,23 @@ function examineErrors(metrics) {
   }
   if (internalErrors > 0) {
     errors.push((
-      <li key="internalErrors" className="error">There has been {internalErrors} (500) critical errors on this application in the last 24 hours.</li>
+      <li key="internalErrors" className="error">There have been {internalErrors} (500) critical errors on this application in the last 24 hours.</li>
     ));
   }
   if (upstreamErrors > 0) {
     errors.push((
-      <li key="upstreamErrors" className="error">One of your upstream resources or services you rely on may not be working correctly. There have been ${upstreamErrors} upstream (502) errors on this application in the last 24 hours.</li>
+      <li key="upstreamErrors" className="error">One of your upstream resources or services you rely on may not be working correctly. There have been {upstreamErrors} upstream (502) errors on this application in the last 24 hours.</li>
     ));
   }
   if (overloadedErrors > 0) {
     errors.push((
-      <li key="overloadedErrors" className="error">You may want to consider getting a larger dyno. This application has timed out (503 and 504 http status codes) ${overloadedErrors} in the last 24 hours.  Consider inspecting where the delay may be, including long running SQL queries or lagging attached (or upstream) resources.</li>
+      <li key="overloadedErrors" className="error">You may want to consider getting a larger dyno. This application has timed out (503 and 504 http status codes) {overloadedErrors} in the last 24 hours.  Consider inspecting where the delay may be, including long running SQL queries or lagging attached (or upstream) resources.</li>
     ));
   }
   return errors;
 }
 
 async function execute(metrics, formations, addons, sizes) {
-  const filterPlans = x => x.state !== 'deprecated';
   const convertToBytes = (x) => {
     const i = parseInt(x.slice(0, x.length - 2), 10);
     if (x.endsWith('KB')) {
@@ -270,9 +278,9 @@ async function execute(metrics, formations, addons, sizes) {
     size: convertToBytes(type === 'psql' ? x.attributes.storage_capacity : x.attributes.ram),
   });
 
-  postgresqlPlans = (await api.getAddonServicePlans('akkeris-postgresql')).data.filter(filterPlans).map(x => mapPlans(x, 'psql'));
-  memcachedPlans = (await api.getAddonServicePlans('akkeris-memcached')).data.filter(filterPlans).map(x => mapPlans(x, 'memcached'));
-  redisPlans = (await api.getAddonServicePlans('akkeris-redis')).data.filter(filterPlans).map(x => mapPlans(x, 'redis'));
+  postgresqlPlans = (await api.getAddonServicePlans('akkeris-postgresql')).data.map(x => mapPlans(x, 'psql'));
+  memcachedPlans = (await api.getAddonServicePlans('akkeris-memcached')).data.map(x => mapPlans(x, 'memcached'));
+  redisPlans = (await api.getAddonServicePlans('akkeris-redis')).data.map(x => mapPlans(x, 'redis'));
 
   return examineErrors(metrics)
     .concat(examineWarnings(metrics))
