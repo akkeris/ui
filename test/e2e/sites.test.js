@@ -23,6 +23,9 @@ test('Should show list of sites', async (t) => { // eslint-disable-line no-undef
   await t
     .expect(Selector('.site-list tbody').childElementCount)
     .gt(0)
+    // Make sure the site will actually show up on the page
+    .click('.rows-per-page-input')
+    .click(Selector('.rows-per-page-menu li').withText('50'))
     .expect(Selector('.site-list .testsite').innerText)
     .contains('testsite');
 });
