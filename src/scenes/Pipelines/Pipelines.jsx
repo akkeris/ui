@@ -96,8 +96,8 @@ class Pipelines extends Component {
     this.setState({ pipelines, sortedPipelines: pipelines, loading: false });
   }
 
-  handleRowSelection = (id) => {
-    History.get().push(`/pipelines/${id}/review`);
+  handleRowSelection = (name) => {
+    History.get().push(`/pipelines/${name}/review`);
   }
 
   handleNewPipeline = () => {
@@ -173,7 +173,7 @@ class Pipelines extends Component {
           key={pipeline.id}
           style={style.tableRow}
           hover
-          onClick={() => this.handleRowSelection(pipeline.id)}
+          onClick={() => this.handleRowSelection(pipeline.name)}
         >
           <TableCell>
             <div style={style.tableRowColumn.title}>{pipeline.name}</div>
