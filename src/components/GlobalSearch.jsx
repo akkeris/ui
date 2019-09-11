@@ -239,7 +239,7 @@ class GlobalSearch extends Component {
         },
         {
           label: 'Pipelines',
-          options: pipelines.map(pipe => ({ value: pipe.id, label: pipe.name, uri: `/pipelines/${pipe.id}/review` })),
+          options: pipelines.map(pipe => ({ value: pipe.id, label: pipe.name, uri: `/pipelines/${pipe.name}/review` })),
         },
         {
           label: 'Sites',
