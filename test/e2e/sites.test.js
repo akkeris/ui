@@ -6,6 +6,10 @@ const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
 
+if (!global.createdSites) {
+  global.createdSites = [];
+}
+
 fixture('Sites Page') // eslint-disable-line no-undef
   .page(baseUrl)
   .beforeEach(async (t) => {
@@ -59,6 +63,7 @@ test('Should show sites as first group in global search', async (t) => { // esli
 
 test('Should be able to create and delete site', async (t) => { // eslint-disable-line no-undef
   const siteName = utils.randomString();
+  global.createdSites.push(siteName);
   await t
     // navigate to new app page
     .click('.new-site')

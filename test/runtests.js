@@ -56,7 +56,7 @@ function getS3Creds() {
 
 function finish(testcafe, testResult) {
   testcafe.close();
-  utils.verifyAppDeletion(global.createdApps);
+  utils.verifyResourceDeletion(global.createdApps, global.createdPipelines, global.createdSites);
   process.exit(testResult);
 }
 
@@ -118,6 +118,8 @@ async function runTests() {
   }
 
   global.createdApps = [];
+  global.createdPipelines = [];
+  global.createdSites = [];
 
   try {
     const testcafe = await createTestCafe();
@@ -141,17 +143,15 @@ async function runTests() {
 
     if (testResult === 0) {
       console.log('\nAll tests passed!');
-      finish(testcafe, testResult);
     } else {
       console.error(`\n${testResult} TESTS FAILED`);
       // upload failed screenshots
       if (process.env.TAAS_ARTIFACT_BUCKET || process.env.TESTCAFE_SCREENSHOTS) {
         console.log('Uploading error screenshots...');
         uploadScreenshots(testcafe, testResult);
-      } else {
-        finish(testcafe, testResult);
       }
     }
+    finish(testcafe, testResult);
   } catch (err) {
     console.error(err);
     utils.verifyAppDeletion(global.createdApps);

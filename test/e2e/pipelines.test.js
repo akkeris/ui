@@ -10,6 +10,10 @@ if (!global.createdApps) {
   global.createdApps = [];
 }
 
+if (!global.createdPipelines) {
+  global.createdPipelines = [];
+}
+
 fixture('Pipelines Page') // eslint-disable-line no-undef
   .page(baseUrl)
   .beforeEach(async (t) => {
@@ -65,6 +69,7 @@ test('Should show pipelines as first group in global search', async (t) => { // 
 
 test('Should be able to create and delete pipeline', async (t) => { // eslint-disable-line no-undef
   const pipelineName = utils.randomString();
+  global.createdPipelines.push(pipelineName);
   await t
     // navigate to new app page
     .click('.new-pipeline')
@@ -106,6 +111,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
     t.ctx.appName3 = appName3; // eslint-disable-line no-param-reassign
     t.ctx.pipelineName = pipelineName; // eslint-disable-line no-param-reassign
     global.createdApps.push(appName, appName2, appName3);
+    global.createdPipelines.push(pipelineName);
     await t
 
       // login

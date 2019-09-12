@@ -944,10 +944,14 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('Webhook Created')
     .expect(Selector('.webhook-list').exists)
     .ok()
-    .expect(Selector('.webhook-title-url-0').innerText)
-    .contains('http://example.com/hook1')
-    .expect(Selector('.webhook-title-url-1').innerText)
-    .contains('http://example.com/hook2')
+    .expect(Selector('.webhook-title-url-0').exists)
+    .ok()
+    .expect(Selector('.webhook-title-url-1').exists)
+    .ok()
+    .expect(Selector('.webhook-list').withText('http://example.com/hook1').exists)
+    .ok()
+    .expect(Selector('.webhook-list').withText('http://example.com/hook2').exists)
+    .ok()
 
     // Remove one of the webhooks
     .click('.webhook-item-1 .webhook-title') // Open edit dropdown
