@@ -21,34 +21,83 @@ fixture('Apps Page') // eslint-disable-line no-undef
       .click('button.login');
   });
 
-test('Should show list of apps based on filter', async (t) => { // eslint-disable-line no-undef
-  await t
-    .expect(Selector('.app-list tbody').childElementCount)
-    .gt(0)
-    .expect(Selector('.app-list .api-default').innerText)
-    .contains('api-default')
+test // eslint-disable-line
+  .before(async (t) => {
+    const appName = utils.randomString();
+    t.ctx.appName = appName; // eslint-disable-line no-param-reassign
+    global.createdApps.push(appName);
+    await t
+    // login
+      .typeText('#username', botUsername)
+      .typeText('#password', botPassword)
+      .click('button.login')
 
-    .click('.filter-select-input')
-    .expect(Selector('.filter-select-results .us-seattle').exists)
-    .ok()
-    .click('.filter-select-results .us-seattle')
+    // navigate to new app page
+      .click('.new-app')
 
-    .click('.filter-select-input')
-    .expect(Selector('.filter-select-results .default').exists)
-    .ok()
-    .click('.filter-select-results .default')
+    // create app
+      .typeText('.app-name input', appName)
+      .click('button.next')
+      .typeText('div.select-textfield', 'testcafe')
+      .pressKey('enter')
+      .click('button.next')
+      .typeText('div.select-textfield', 'testcafe')
+      .pressKey('enter')
+      .click('button.next')
+      .click('button.next')
+      .navigateTo(`${baseUrl}/apps`)
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
+      .click('.filter-select-results .testcafe')
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
+      .ok()
+      .click('.filter-select-clear');
+  })('Should show list of apps based on filter', async (t) => { // eslint-disable-line no-undef
+    const appName = t.ctx.appName;
 
-    .expect(Selector('.app-list .api-default').innerText)
-    .contains('default')
+    await t
+      .expect(Selector('.app-list tbody').childElementCount)
+      .gt(0)
 
-    .click('.filter-select-clear')
-    .typeText(Selector('.filter-select-input input'), 'test')
-    .click('.filter-select-results .test')
-    .expect(Selector('.app-list tbody').childElementCount)
-    .eql(1)
-    .expect(Selector('.app-list tbody td').innerText)
-    .contains('No Results');
-});
+      .click('.filter-select-input')
+      .expect(Selector('.filter-select-results .us-seattle').exists)
+      .ok()
+      .click('.filter-select-results .us-seattle')
+
+      .click('.filter-select-input')
+      .typeText(Selector('.filter-select-input input'), 'test')
+      .expect(Selector('.filter-select-results .testcafe').exists)
+      .ok()
+      .click('.filter-select-results .testcafe')
+
+      .expect(Selector(`.app-list .${appName}-testcafe`).innerText)
+      .contains(`${appName}-testcafe`)
+
+      // This test is problematic. It requires the "test" space to have no apps in it.
+      // TODO: Need to fix or remove this test
+      .click('.filter-select-clear')
+      .typeText(Selector('.filter-select-input input'), 'test')
+      .click('.filter-select-results .test')
+      .expect(Selector('.app-list tbody').childElementCount)
+      .eql(1)
+      .expect(Selector('.app-list tbody td').innerText)
+      .contains('No Results');
+  })
+  .after(async (t) => {
+    const appName = t.ctx.appName;
+
+    await t
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
+      .click('.info-tab')
+
+    // delete the app
+      .click('button.app-menu-button')
+      .click('.delete-app')
+
+    // confirm delete and make sure app no longer exists
+      .click('.delete-confirm .ok')
+      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
+      .notOk();
+  });
 
 test('Should throw error on non-existent app', async (t) => { // eslint-disable-line no-undef
   await t
@@ -59,14 +108,6 @@ test('Should throw error on non-existent app', async (t) => { // eslint-disable-
     .navigateTo(`${baseUrl}/apps/merp/info`)
     .expect(Selector('.not-found-error').innerText)
     .contains('The specified application merp does not exist');
-});
-
-test('Should follow search to app and see all info', async (t) => { // eslint-disable-line no-undef
-  await t
-    .typeText('.global-search input', 'api-default')
-    .wait(2000).pressKey('enter')
-    .expect(Selector('.card .header').innerText)
-    .contains('api-default');
 });
 
 test('Should show apps as first group in global search', async (t) => { // eslint-disable-line no-undef
@@ -214,7 +255,10 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
 test('Should follow search to app and see all info', async (t) => { // eslint-disable-line no-undef
   const appName = t.ctx.appName;
   await t
-    .click(`.app-list .${appName}-testcafe`)
+    .typeText('.global-search input', `${appName}-testcafe`)
+    .wait(2000).pressKey('enter')
+    .expect(Selector('.card .header').innerText)
+    .contains(`${appName}-testcafe`)
     .click('.info-tab')
     .click('.dynos-tab')
     .click('.releases-tab')
@@ -434,9 +478,10 @@ test('Should be able to create view and release builds', async (t) => { // eslin
 
     .wait(5000)
     .click('.release-list .r0 button.logs')
-    .expect(Selector('.logs h2').innerText)
+    .wait(5000)
+    .expect(Selector('.logs-dialog .logs-dialog-title').innerText)
     .contains('Logs for')
-    .click('.logs button');
+    .click('.logs-dialog .logs-dialog-close');
 });
 
 test // eslint-disable-line no-undef
@@ -977,7 +1022,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 .webhook-back')
     .click('.webhook-item-0 .webhook-edit')
     .expect(Selector('.webhook-item-0 .edit-url input').value)
-    .contains('http://example.com/hook1')
+    .contains('http://example.com/hook')
 
     // Test save new url
     .click('.webhook-item-0 .edit-url input')
