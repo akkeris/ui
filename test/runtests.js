@@ -54,9 +54,9 @@ function getS3Creds() {
   return creds;
 }
 
-function finish(testcafe, testResult) {
+async function finish(testcafe, testResult) {
   testcafe.close();
-  utils.verifyResourceDeletion(global.createdApps, global.createdPipelines, global.createdSites);
+  await utils.verifyResourceDeletion(global.createdApps, global.createdPipelines, global.createdSites); // eslint-disable-line
   process.exit(testResult);
 }
 
@@ -148,7 +148,7 @@ async function runTests() {
       // upload failed screenshots
       if (process.env.TAAS_ARTIFACT_BUCKET || process.env.TESTCAFE_SCREENSHOTS) {
         console.log('Uploading error screenshots...');
-        uploadScreenshots(testcafe, testResult);
+        await uploadScreenshots(testcafe, testResult);
       }
     }
     finish(testcafe, testResult);

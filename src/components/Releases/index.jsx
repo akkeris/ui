@@ -457,13 +457,13 @@ export default class Releases extends Component {
     const { logsOpen, release, title } = this.state;
     return (
       <Dialog
-        className="logs"
+        className="logs-dialog"
         open={logsOpen}
         onClose={() => { this.handleClose(); }}
         maxWidth="xl"
         fullWidth
       >
-        <DialogTitle>{title}</DialogTitle>
+        <DialogTitle className="logs-dialog-title">{title}</DialogTitle>
         <DialogContent style={style.logContent}>
           <Logs
             build={release.slug.id}
@@ -472,7 +472,7 @@ export default class Releases extends Component {
           />
         </DialogContent>
         <DialogActions>
-          <IconButton style={style.iconButton} onClick={() => { this.handleClose(); }}>
+          <IconButton className="logs-dialog-close" style={style.iconButton} onClick={() => { this.handleClose(); }}>
             <RemoveIcon />
           </IconButton>
         </DialogActions>
