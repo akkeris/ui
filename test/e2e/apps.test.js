@@ -327,7 +327,9 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .contains('Type')
 
     // Make sure we can cancel
+    .wait(2000)
     .click('button.cancel')
+    .wait(2000)
     .expect(Selector('.new-type').exists)
     .notOk()
 
@@ -972,6 +974,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .typeText('.webhook-url input', 'http://example.com/hook1')
     .click('button.next')
     .click('.checkbox-config_change')
+    .click('.checkbox-release')
     .click('button.next')
     .click('button.next') // Also tests for empty secret
     .click('button.next')
@@ -980,6 +983,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('button.new-webhook')
     .typeText('.webhook-url input', 'http://example.com/hook2')
     .click('button.next')
+    .click('.checkbox-config_change')
     .click('.checkbox-release')
     .click('button.next')
     .typeText('.webhook-secret input', 'secret')
@@ -1038,8 +1042,6 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('http://new-url.com/')
 
     // Test at least one event in edit
-    .expect(Selector('.webhook-item-0 .checkbox-config_change input').checked)
-    .ok()
     .click('.checkbox-check-all')
     .click('.checkbox-check-all')
     .click('.webhook-item-0 .webhook-save')
