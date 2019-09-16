@@ -143,15 +143,17 @@ async function runTests() {
 
     if (testResult === 0) {
       console.log('\nAll tests passed!');
+      finish(testcafe, testResult);
     } else {
       console.error(`\n${testResult} TESTS FAILED`);
       // upload failed screenshots
       if (process.env.TAAS_ARTIFACT_BUCKET || process.env.TESTCAFE_SCREENSHOTS) {
         console.log('Uploading error screenshots...');
-        await uploadScreenshots(testcafe, testResult);
+        await uploadScreenshots(testcafe, testResult); // this calls finish
+      } else {
+        finish(testcafe, testResult);
       }
     }
-    finish(testcafe, testResult);
   } catch (err) {
     console.error(err);
     utils.verifyAppDeletion(global.createdApps);
