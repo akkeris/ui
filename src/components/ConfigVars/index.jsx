@@ -140,8 +140,11 @@ export default class ConfigVar extends Component {
 
   handleRemoveConfig = async () => {
     this.setState({ loading: true });
+
+    let removeConfig = {};
+    removeConfig[this.state.key] = null
     try {
-      await api.patchConfig(this.props.app, this.state.key.trim(), null);
+      await api.patchConfig(this.props.app, removeConfig);
       this.reload('Updated Config Vars');
     } catch (error) {
       this.setState({
@@ -188,8 +191,10 @@ export default class ConfigVar extends Component {
 
   handleEditSubmit = async () => {
     this.setState({ loading: true });
+    let editConfig = {};
+    editConfig[this.state.key] = this.state.newValue;
     try {
-      await api.patchConfig(this.props.app, this.state.key.trim(), this.state.newValue.trim());
+      await api.patchConfig(this.props.app, editConfig);
       this.reload('Updated Config Vars');
     } catch (error) {
       this.setState({

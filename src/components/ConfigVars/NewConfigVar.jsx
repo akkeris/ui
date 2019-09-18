@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, Button, TextField, Collapse,
-  Typography,
+  Step, Stepper, StepLabel, Button, Collapse,
+  Typography, List, ListItemText, ListItem, Divider,
 } from '@material-ui/core';
 import ConfirmationModal from '../ConfirmationModal';
+import KeyValue from './KeyValue';
 
 import api from '../../services/api';
 
 const style = {
+  container: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
   stepper: {
     width: '100%',
     maxWidth: 700,
@@ -44,9 +49,27 @@ export default class NewConfigVar extends Component {
       submitFail: false,
       submitMessage: '',
       errorText: null,
-      key: '',
-      value: '',
+      values: [],
     };
+  }
+
+  getConfig() {
+    const { values } = this.state;
+    console.log(values);
+    return (
+      values.map((val, idx) => (
+        <div key={idx}>
+          {val.key && (
+            <div>
+              <ListItem key={idx} className={values[idx].key}>
+                <ListItemText primary={values[idx].key} secondary={values[idx].value} />
+              </ListItem>
+              <Divider />
+            </div>
+          )}
+        </div>
+      ))
+    );
   }
 
   handleClose = () => {
@@ -55,15 +78,18 @@ export default class NewConfigVar extends Component {
     });
   }
 
-  handleNext = () => {
+  handleNext = (values, event) => {
     const { stepIndex } = this.state;
-    if ((stepIndex === 1 && this.state.value === '') || (stepIndex === 0 && this.state.key === '')) {
-      this.setState({ errorText: 'field required' });
-    } else if (!this.state.loading) {
+    if (values.every(a => a.key === '')) {
+      this.setState({ errorText: 'Must enter at least one valid keypair' });
+      return;
+    }
+    if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 2,
-        loading: stepIndex >= 2,
+        finished: stepIndex >= 1,
+        loading: stepIndex >= 1,
+        values,
         errorText: null,
       });
     }
@@ -93,8 +119,15 @@ export default class NewConfigVar extends Component {
   }
 
   submitConfig = async () => {
+    // remap
+    const config = await this.state.values.reduce((aggr, item) => {
+      if (item.key && item.value) {
+        aggr[item.key] = item.value.trim();
+      }
+      return aggr;
+    }, {});
     try {
-      await api.patchConfig(this.props.app, this.state.key.trim(), this.state.value.trim());
+      await api.patchConfig(this.props.app, config);
       this.props.onComplete('Added Config Var');
     } catch (error) {
       this.setState({
@@ -104,68 +137,33 @@ export default class NewConfigVar extends Component {
         stepIndex: 0,
         loading: false,
         errorText: null,
-        key: '',
-        value: '',
+        values: [],
       });
     }
   }
 
   renderStepContent(stepIndex) {
-    const { key, errorText, value } = this.state;
     switch (stepIndex) {
       case 0:
         return (
           <div>
-            <TextField
-              className="config-key"
-              label="Key"
-              value={key}
-              onChange={this.handleKeyTextChange}
-              error={!!errorText}
-              helperText={errorText || ''}
-              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
-              autoFocus
-            />
-            <Typography variant="body2" style={style.stepDescription}>
-              {'Config Var Key'}
-            </Typography>
+            <KeyValue onSubmit={this.handleNext} values={this.state.values} errorText={this.state.errorText} />
           </div>
         );
       case 1:
         return (
-          <div>
-            <TextField
-              className="config-value"
-              label="Value"
-              multiline
-              fullWidth
-              value={value}
-              onChange={this.handleValueChange}
-              error={!!errorText}
-              helperText={errorText || ''}
-              onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
-              autoFocus
-            />
-            <Typography variant="body2" style={style.stepDescription}>
-              {'Config Var Value'}
-            </Typography>
-          </div>
-        );
-      case 2:
-        return (
           <div className="new-config-summary">
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
-              {'The environment variable '}
-              <span style={style.bold}>{key}</span>
-              {' = '}
-              <span style={style.bold}>{value}</span>
-              {' will be added to this app.'}
+              {'The following environment variables will be added to the app: '}
             </Typography>
+            <List className="config-summary-list">
+              {this.getConfig()}
+            </List>
           </div>
         );
         // need this otherwise "You're a long way ..." shows up when you hit finish
-      case 3:
+      case 2:
         return '';
       default:
         return 'You\'re a long way from home sonny jim!';
@@ -185,18 +183,16 @@ export default class NewConfigVar extends Component {
       <div style={style.stepper}>
         <Stepper activeStep={stepIndex}>
           <Step>
-            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(key)}>
-                Key Name
+            <StepLabel className="step-0-label" >
+              Add Variables
             </StepLabel>
           </Step>
           <Step>
-            <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(value)}>
-                Key Value
+            <StepLabel className="step-1-label" >
+              Summary
             </StepLabel>
           </Step>
-          <Step>
-            <StepLabel>Confirm</StepLabel>
-          </Step>
+
         </Stepper>
         <Collapse in={!loading}>
           <div style={contentStyle}>
@@ -210,12 +206,14 @@ export default class NewConfigVar extends Component {
                   style={style.buttons.back}
                 >Back</Button>
               )}
-              <Button
-                variant="contained"
-                className="next"
-                color="primary"
-                onClick={this.handleNext}
-              >{stepIndex === 2 ? 'Finish' : 'Next'}</Button>
+              {stepIndex > 0 && (
+                <Button
+                  variant="contained"
+                  className="next"
+                  color="primary"
+                  onClick={this.handleNext.bind(this, this.state.values)}
+                >{stepIndex === 1 ? 'Finish' : 'Next'}</Button>
+              )}
             </div>
           </div>
         </Collapse>

@@ -251,10 +251,8 @@ function getConfig(app) {
   return axios.get(`/api/apps/${app}/config-vars`);
 }
 
-function patchConfig(app, key, value) {
-  const body = {};
-  body[key] = value;
-  return axios.patch(`/api/apps/${app}/config-vars`, body);
+function patchConfig(app, values) {
+  return axios.patch(`/api/apps/${app}/config-vars`, values);
 }
 
 function getLogs(app) {
