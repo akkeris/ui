@@ -122,7 +122,7 @@ export default class NewConfigVar extends Component {
     // remap
     const config = await this.state.values.reduce((aggr, item) => {
       if (item.key && item.value) {
-        aggr[item.key] = item.value;
+        aggr[item.key] = item.value.trim();
       }
       return aggr;
     }, {});
