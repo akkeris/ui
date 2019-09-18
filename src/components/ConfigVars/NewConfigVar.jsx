@@ -80,6 +80,10 @@ export default class NewConfigVar extends Component {
 
   handleNext = (values, event) => {
     const { stepIndex } = this.state;
+    if (values.every(a => a.key === '')) {
+      this.setState({ errorText: 'ERMAGERD' });
+      return;
+    }
     if (!this.state.loading) {
       this.setState({
         stepIndex: stepIndex + 1,
@@ -143,7 +147,7 @@ export default class NewConfigVar extends Component {
       case 0:
         return (
           <div>
-            <KeyValue onSubmit={this.handleNext} values={this.state.values} />
+            <KeyValue onSubmit={this.handleNext} values={this.state.values} errorText={this.state.errorText} />
           </div>
         );
       case 1:
@@ -179,18 +183,16 @@ export default class NewConfigVar extends Component {
       <div style={style.stepper}>
         <Stepper activeStep={stepIndex}>
           <Step>
-            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(key)}>
-                Key Name
+            <StepLabel className="step-0-label" >
+              Add Variables
             </StepLabel>
           </Step>
           <Step>
-            <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(value)}>
-                Key Value
+            <StepLabel className="step-1-label" >
+              Summary
             </StepLabel>
           </Step>
-          <Step>
-            <StepLabel>Confirm</StepLabel>
-          </Step>
+
         </Stepper>
         <Collapse in={!loading}>
           <div style={contentStyle}>

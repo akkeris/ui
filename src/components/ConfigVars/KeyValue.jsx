@@ -67,7 +67,7 @@ export default class KeyValue extends Component {
   }
 
   removeConfig = (idx, event) => {
-    let values = [...this.state.values];
+    const values = [...this.state.values];
     values.splice(idx, 1);
     this.setState({ values });
   }
@@ -95,12 +95,12 @@ export default class KeyValue extends Component {
                   className={keyId}
                   label="Key"
                   onChange={this.handleChange}
-                  error={!!errorText}
-                  helperText={errorText || ''}
+                  error={!!this.props.errorText && idx === 0}
+                  helperText={idx === 0 && this.props.errorText || ''}
                   autoFocus
                   data-id={idx}
                   value={values[idx].key}
-                  variant="filled"
+                  variant="outlined"
                 />
                 <TextField
                   style={style.textField}
@@ -109,14 +109,13 @@ export default class KeyValue extends Component {
                   multiline
                   fullWidth
                   onChange={this.handleChange}
-                  error={!!errorText}
-                  helperText={errorText || ''}
+                  error={idx === 0 && !!this.props.errorText}
                   value={values[idx].value}
                   autoFocus
                   data-id={idx}
                   id={valueId}
                   name={valueId}
-                  variant="filled"
+                  variant="outlined"
                 />
                 {idx > 0 && (
                   <IconButton
@@ -150,5 +149,10 @@ export default class KeyValue extends Component {
 
 KeyValue.propTypes = {
   onSubmit: PropTypes.func.isRequired,
-  values: PropTypes.array.isRequired
+  values: PropTypes.array.isRequired,
+  errorText: PropTypes.string,
+};
+
+KeyValue.defaultProps = {
+  errorText: null,
 };
