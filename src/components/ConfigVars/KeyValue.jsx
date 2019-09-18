@@ -92,7 +92,7 @@ export default class KeyValue extends Component {
                   style={style.textField}
                   name={keyId}
                   id={keyId}
-                  className="key"
+                  className={keyId}
                   label="Key"
                   onChange={this.handleChange}
                   error={!!errorText}
@@ -104,7 +104,7 @@ export default class KeyValue extends Component {
                 />
                 <TextField
                   style={style.textField}
-                  className="value"
+                  className={valueId}
                   label="Value"
                   multiline
                   fullWidth

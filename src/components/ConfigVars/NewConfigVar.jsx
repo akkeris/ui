@@ -61,7 +61,7 @@ export default class NewConfigVar extends Component {
         <div key={idx}>
           {val.key && (
             <div>
-              <ListItem key={idx}>
+              <ListItem key={idx} className={values[idx].key}>
                 <ListItemText primary={values[idx].key} secondary={values[idx].value} />
               </ListItem>
               <Divider />
@@ -153,7 +153,7 @@ export default class NewConfigVar extends Component {
             <Typography variant="subtitle1">
               {'The following environment variables will be added to the app: '}
             </Typography>
-            <List>
+            <List className="config-summary-list">
               {this.getConfig()}
             </List>
           </div>

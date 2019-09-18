@@ -1133,9 +1133,8 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     // Create config item to fire a webhook
     .click('.config-tab')
     .click('button.new-config')
-    .typeText('.config-key input', 'test')
-    .click('.next')
-    .typeText(Selector('.config-value textarea').withAttribute('style'), 'test')
+    .typeText('.key-0 input', 'test')
+    .typeText(Selector('.value-0 textarea').withAttribute('style'), 'test')
     .click('.next')
     .click('.next')
     .expect(Selector('.config-snack').innerText)
@@ -1174,44 +1173,40 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
 
     // Check new component shows
     .click('button.new-config')
-    .expect(Selector('.config-key').exists)
+    .expect(Selector('#key-0').exists)
     .ok()
 
     // Make sure we can cancel
     .click('button.config-cancel')
-    .expect(Selector('.config-key').exists)
+    .expect(Selector('.key-0').exists)
     .notOk()
 
     // Create new config var
     .click('button.new-config')
-    .click('button.next')
-    .expect(Selector('.config-key p').innerText)
-    .contains('field required')
-    .typeText('.config-key input', 'MERP')
-    .click('button.next')
+    .typeText('.key-0 input', 'MERP')
+    .typeText(Selector('.value-0 textarea').withAttribute('style'), 'DERP')
+    .click('button.add-config')
+    .typeText('.key-1 input', 'FOO')
+    .typeText(Selector('.value-1 textarea').withAttribute('style'), 'BAR')
+    
 
-    // Check step 1 caption
-    .expect(Selector('.step-0-label .step-label-caption').innerText)
-    .contains('MERP')
-    .click('button.next')
-
-    // Field validation
-    .expect(Selector('.config-value p').innerText)
-    .contains('field required')
-    .typeText(Selector('.config-value textarea').withAttribute('style'), 'DERP')
     .click('button.next')
 
     // Check step 2 caption, stepper summary
-    .expect(Selector('.step-1-label .step-label-caption').innerText)
-    .contains('DERP')
     .expect(Selector('.new-config-summary').innerText)
-    .contains('The environment variable MERP = DERP will be added to this app.')
+    .contains('The following environment variables will be added to the app:')
+    .expect(Selector('.new-config-summary .MERP').exists)
+    .ok()
+    .expect(Selector('.new-config-summary .FOO').exists)
+    .ok()
     .click('button.next')
 
     .expect(Selector('.config-snack').innerText)
     .contains('Added Config Var')
     .expect(Selector('.config-list .MERP').innerText)
     .contains('DERP')
+    .expect(Selector('.config-list .FOO').innerText)
+    .contains('BAR')
 
     // Edit config var
     .click('.config-list .MERP button.edit')
