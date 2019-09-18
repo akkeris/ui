@@ -1173,7 +1173,7 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
 
     // Check new component shows
     .click('button.new-config')
-    .expect(Selector('#key-0').exists)
+    .expect(Selector('.key-0').exists)
     .ok()
 
     // Make sure we can cancel
