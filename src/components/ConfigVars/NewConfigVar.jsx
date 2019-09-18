@@ -81,7 +81,7 @@ export default class NewConfigVar extends Component {
   handleNext = (values, event) => {
     const { stepIndex } = this.state;
     if (values.every(a => a.key === '')) {
-      this.setState({ errorText: 'ERMAGERD' });
+      this.setState({ errorText: 'Must enter at least one valid keypair' });
       return;
     }
     if (!this.state.loading) {
