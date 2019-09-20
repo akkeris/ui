@@ -10,6 +10,7 @@ import AppIcon from '@material-ui/icons/DeveloperBoard';
 import PipelinesIcon from '@material-ui/icons/DeviceHub';
 import RouterIcon from '@material-ui/icons/Router';
 import GroupsIcon from '@material-ui/icons/Business';
+import SpacesIcon from '@material-ui/icons/GroupWork';
 import InvoiceIcon from '@material-ui/icons/CreditCard';
 import GlobalSearch from './GlobalSearch';
 
@@ -150,8 +151,10 @@ export default class Nav extends Component {
         return 'Sites';
       case 'app-setups':
         return 'App Setups';
-      case 'collections':
-        return 'Collections';
+      case 'spaces':
+        return 'Spaces';
+      case 'orgs':
+        return 'Organizations';
       default:
         return 'Page Not Found';
     }
@@ -229,11 +232,20 @@ export default class Nav extends Component {
                   </ListItem>
                 </Tooltip>
               </Link>
-              <Link to="/collections" style={style.link} onClick={this.handleClose}>
-                <Tooltip placement="right" title="Collections">
-                  <ListItem button className="linktocollections">
+              <Link to="/spaces" style={style.link} onClick={this.handleClose}>
+                <Tooltip placement="right" title="Spaces">
+                  <ListItem button className="linktospaces">
                     <ListItemIcon>
-                      <GroupsIcon style={route === 'collections' ? style.listIconActive : style.listIcon} />
+                      <SpacesIcon style={route === 'spaces' ? style.listIconActive : style.listIcon} />
+                    </ListItemIcon>
+                  </ListItem>
+                </Tooltip>
+              </Link>
+              <Link to="/orgs" style={style.link} onClick={this.handleClose}>
+                <Tooltip placement="right" title="Organizations">
+                  <ListItem button className="linktoorgs">
+                    <ListItemIcon>
+                      <GroupsIcon style={route === 'orgs' ? style.listIconActive : style.listIcon} />
                     </ListItemIcon>
                   </ListItem>
                 </Tooltip>

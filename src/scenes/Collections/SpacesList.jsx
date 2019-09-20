@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 import {
   Table, TableBody, TableHead, TableRow, TableCell, CircularProgress, Paper,
-  TableFooter, TablePagination, TableSortLabel, Tooltip,
+  TableFooter, TablePagination, TableSortLabel, Tooltip, Toolbar, IconButton,
 } from '@material-ui/core';
 /* eslint-disable jsx-a11y/anchor-is-valid */
+import AddIcon from '@material-ui/icons/Add'
+
 import api from '../../services/api';
+import History from '../../config/History';
+
 
 const style = {
   refresh: {
@@ -26,6 +30,7 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
+    marginTop: '12px',
   },
   link: {
     textDecoration: 'none',
@@ -35,6 +40,8 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
+    marginTop: '12px',
+    marginBottom: '12px',
   },
   tableRow: {
     height: '58px',
@@ -78,6 +85,10 @@ export default class SpacesList extends Component {
     const { data: spaces } = await api.getSpaces();
     this.setState({ spaces, sortedSpaces: spaces, loading: false });
   }
+
+  handleNew = () => {
+    History.get().push('/spaces/new-space');
+  };
 
   handleChangePage = (event, page) => {
     this.setState({ page });
@@ -156,6 +167,15 @@ export default class SpacesList extends Component {
     }
     return (
       <div>
+        <Toolbar style={style.toolbar} disableGutters>
+          <IconButton
+            onClick={this.handleNew}
+            className="new-space"
+            style={{ marginLeft: 'auto', padding: '6px', marginBottom: '-6px' }}
+          >
+            <AddIcon style={{ color: 'white' }} className={'new-space'} />
+          </IconButton>
+        </Toolbar>
         <Paper style={style.paper}>
           <Table className="space-list" >
             <TableHead>

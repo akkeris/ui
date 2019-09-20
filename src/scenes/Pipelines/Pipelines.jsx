@@ -37,7 +37,6 @@ const style = {
     maxWidth: '1024px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: '12px',
     marginBottom: '12px',
     overflow: 'auto',
   },
