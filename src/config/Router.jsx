@@ -69,24 +69,33 @@ const PipelineRoutes = () => (
   </Switch>
 );
 
-const Collections = Loadable({
-  loader: () => import('../scenes/Collections/Collections'),
-  loading: Loading,
-});
-const NewOrg = Loadable({
-  loader: () => import('../scenes/Collections/NewOrg'),
+const Spaces = Loadable({
+  loader: () => import('../scenes/Collections/SpacesList'),
   loading: Loading,
 });
 const NewSpace = Loadable({
   loader: () => import('../scenes/Collections/NewSpace'),
   loading: Loading,
 });
-
-const CollectionsRoutes = () => (
+const SpacesRoutes = () => (
   <Switch>
-    <Route exact path="/collections/new-space" component={NewSpace} />
-    <Route exact path="/collections/new-org" component={NewOrg} />
-    <Route exact path="/collections" component={Collections} />
+    <Route exact path="/spaces/new-space" component={NewSpace} />
+    <Route exact path="/spaces" component={Spaces} />
+  </Switch>
+);
+
+const Orgs = Loadable({
+  loader: () => import('../scenes/Collections/OrgsList'),
+  loading: Loading,
+});
+const NewOrg = Loadable({
+  loader: () => import('../scenes/Collections/NewOrg'),
+  loading: Loading,
+});
+const OrgsRoutes = () => (
+  <Switch>
+    <Route exact path="/orgs/new-org" component={NewOrg} />
+    <Route exact path="/orgs" component={Orgs} />
   </Switch>
 );
 
@@ -163,7 +172,8 @@ const Router = () => (
                 <Route path="/pipelines" component={PipelineRoutes} />
                 <Route path="/invoices" component={InvoiceRoutes} />
                 <Route path="/sites" component={SitesRoutes} />
-                <Route path="/collections" component={CollectionsRoutes} />
+                <Route path="/spaces" component={SpacesRoutes} />
+                <Route path="/orgs" component={OrgsRoutes} />
                 <Route component={PageNotFound} />
               </Switch>
             </div>

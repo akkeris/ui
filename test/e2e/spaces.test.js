@@ -4,7 +4,7 @@ const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const botPassword = process.env.BOT_PASS;
 const botUsername = process.env.BOT_USER;
 
-fixture('Collections Page') // eslint-disable-line no-undef
+fixture('Spaces Page') // eslint-disable-line no-undef
   .page(baseUrl)
   .beforeEach(async (t) => {
     await t
@@ -14,12 +14,11 @@ fixture('Collections Page') // eslint-disable-line no-undef
       .typeText('#password', botPassword)
 
       .click('button.login')
-      .navigateTo(`${baseUrl}/collections`);
+      .navigateTo(`${baseUrl}/spaces`);
   });
 
 test('Should show list of spaces', async (t) => { // eslint-disable-line no-undef
   await t
-    .click(Selector('button.spaces-tab'))
     .expect(Selector('.space-list tbody').childElementCount)
     .gt(0)
     .expect(Selector('.space-list .default').innerText)
@@ -29,7 +28,6 @@ test('Should show list of spaces', async (t) => { // eslint-disable-line no-unde
 test("Shouldn't be able to create duplicate space", async (t) => { // eslint-disable-line no-undef
   await t
     // navigate to new space page
-    .click(Selector('button.spaces-tab'))
     .click('.new-space')
 
     // field validation
@@ -71,50 +69,5 @@ test("Shouldn't be able to create duplicate space", async (t) => { // eslint-dis
 
     .expect(Selector('.error').innerText)
     .contains('The specified space already exists.')
-    .click('.ok');
-});
-
-test('Should show list of orgs', async (t) => { // eslint-disable-line no-undef
-  await t
-    .click(Selector('button.orgs-tab'))
-    .expect(Selector('.org-list tbody').childElementCount)
-    .gt(0)
-    .expect(Selector('.org-list .test').innerText)
-    .contains('test');
-});
-
-test("Shouldn't be able to create duplicate org", async (t) => { // eslint-disable-line no-undef
-  await t
-    // navigate to new app page
-    .click(Selector('button.orgs-tab'))
-    .click('.new-org')
-
-    // field validation
-    .click('button.next')
-    .expect(Selector('.org-name').innerText)
-    .contains('field required')
-
-    .typeText('.org-name input', 'testcafe')
-    .click('button.next')
-
-    // Check step caption
-    .expect(Selector('.step-0-label .step-label-caption').innerText)
-    .contains('testcafe')
-
-    // field validation
-    .click('button.next')
-    .expect(Selector('.org-description').innerText)
-    .contains('field required')
-
-    .typeText('.org-description input', 'testcafe')
-    .click('button.next')
-
-    // Check stepper summary
-    .expect(Selector('.new-org-summary').innerText)
-    .contains('The new org testcafe will be created.')
-    .click('button.next')
-
-    .expect(Selector('.error').innerText)
-    .contains('The specified organization already exists.')
     .click('.ok');
 });

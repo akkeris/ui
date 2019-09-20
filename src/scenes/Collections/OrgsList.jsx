@@ -1,8 +1,12 @@
 import React, { Component } from 'react';
 import {
-  Table, TableBody, TableRow, TableCell, TableFooter, TablePagination, CircularProgress,
+  Table, TableBody, TableRow, TableCell, TableFooter, TablePagination, Toolbar, IconButton, CircularProgress, Paper,
 } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add' 
+
 import api from '../../services/api';
+import History from '../../config/History';
+
 
 const style = {
   refresh: {
@@ -19,16 +23,40 @@ const style = {
       position: 'relative',
     },
   },
+  toolbar: {
+    backgroundColor: 'rgba(0,0,0,0)',
+    maxWidth: '1024px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginTop: '12px',
+  },
+  link: {
+    textDecoration: 'none',
+    marginLeft: 'auto',
+  },
+  paper: {
+    maxWidth: '1024px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginTop: '12px',
+    marginBottom: '12px',
+  },
   tableRow: {
     height: '58px',
   },
-  tableRowColumn: {
+  tableCell: {
     title: {
       fontSize: '16px',
     },
     sub: {
       fontSize: '11px',
       textTransform: 'uppercase',
+    },
+    end: {
+      float: 'right',
+    },
+    icon: {
+      width: '58px',
     },
   },
 };
@@ -61,6 +89,10 @@ export default class OrgList extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
+  handleNew = () => {
+    History.get().push('/orgs/new-org');
+  };
+
   renderOrgs(page, rowsPerPage) {
     return this.state.orgs
       .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
@@ -68,8 +100,8 @@ export default class OrgList extends Component {
       .map(org => (
         <TableRow className={org.name} key={org.id} style={style.tableRow} hover>
           <TableCell>
-            <div style={style.tableRowColumn.title}>{org.name}</div>
-            <div style={style.tableRowColumn.sub}>{org.role}</div>
+            <div style={style.tableCell.title}>{org.name}</div>
+            <div style={style.tableCell.sub}>{org.role}</div>
           </TableCell>
         </TableRow>
       ));
@@ -86,26 +118,37 @@ export default class OrgList extends Component {
     }
     return (
       <div>
-        <Table className="org-list">
-          <TableBody>
-            {this.renderOrgs(page, rowsPerPage)}
-          </TableBody>
-          {orgs.length !== 0 && (
-            <TableFooter>
-              <TableRow>
-                <TablePagination
-                  rowsPerPageOptions={[15, 25, 50]}
-                  colSpan={3}
-                  count={orgs.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onChangePage={this.handleChangePage}
-                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                />
-              </TableRow>
-            </TableFooter>
-          )}
-        </Table>
+        <Toolbar style={style.toolbar} disableGutters>
+          <IconButton
+            onClick={this.handleNew}
+            className="new-org"
+            style={{ marginLeft: 'auto', padding: '6px', marginBottom: '-6px' }}
+          >
+            <AddIcon style={{ color: 'white' }} className={'new-org'} />
+          </IconButton>
+        </Toolbar>
+        <Paper style={style.paper}>
+          <Table className="org-list">
+            <TableBody>
+              {this.renderOrgs(page, rowsPerPage)}
+            </TableBody>
+            {orgs.length !== 0 && (
+              <TableFooter>
+                <TableRow>
+                  <TablePagination
+                    rowsPerPageOptions={[15, 25, 50]}
+                    colSpan={3}
+                    count={orgs.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
+                </TableRow>
+              </TableFooter>
+            )}
+          </Table>
+        </Paper>
       </div>
     );
   }
