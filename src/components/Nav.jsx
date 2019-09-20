@@ -10,7 +10,7 @@ import AppIcon from '@material-ui/icons/DeveloperBoard';
 import PipelinesIcon from '@material-ui/icons/DeviceHub';
 import RouterIcon from '@material-ui/icons/Router';
 import GroupsIcon from '@material-ui/icons/Business';
-import SpacesIcon from '@material-ui/icons/GroupWork';
+import SpacesIcon from '@material-ui/icons/DonutLarge';
 import InvoiceIcon from '@material-ui/icons/CreditCard';
 import GlobalSearch from './GlobalSearch';
 
