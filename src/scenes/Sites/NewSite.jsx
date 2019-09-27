@@ -5,6 +5,7 @@ import {
   Typography,
   FormControl, FormControlLabel, RadioGroup, Radio,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 
 import api from '../../services/api';
 import History from '../../config/History';
@@ -136,6 +137,10 @@ export default class NewSite extends Component {
   submitSite = async () => {
     try {
       await api.createSite(this.state.domain, this.state.region, this.state.internal);
+      ReactGA.event({
+        category: 'SITES',
+        action: 'Created new site',
+      });
       History.get().push('/sites');
     } catch (error) {
       this.setState({

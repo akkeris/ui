@@ -3,6 +3,7 @@ import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Typography, CircularProgress,
 } from '@material-ui/core';
 import Search from '../../components/Search';
+import ReactGA from 'react-ga';
 
 import api from '../../services/api';
 import History from '../../config/History';
@@ -140,6 +141,10 @@ export default class NewApp extends Component {
     try {
       await api.createApp(this.state.app, this.state.org.value, this.state.space.value);
       await api.createFavorite(`${this.state.app}-${this.state.space.value}`);
+      ReactGA.event({
+        category: 'Apps',
+        action: 'Created new app',
+      });
       History.get().push(`/apps/${this.state.app}-${this.state.space.value}`);
     } catch (error) {
       this.setState({

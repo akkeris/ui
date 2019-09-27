@@ -3,6 +3,7 @@ import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper,
   Typography,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 
 import api from '../../services/api';
 import History from '../../config/History';
@@ -113,6 +114,10 @@ export default class NewOrg extends Component {
   submitOrg = async () => {
     try {
       await api.createOrg(this.state.org, this.state.description);
+      ReactGA.event({
+        category: 'ORGS',
+        action: 'Created new org',
+      });
       History.get().push('/collections');
     } catch (error) {
       this.setState({

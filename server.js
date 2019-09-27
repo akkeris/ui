@@ -146,6 +146,14 @@ app.use('/api', proxy(`${akkerisApi}`, {
   },
 }));
 
+app.get('/analytics', (req, res) => {
+  if (process.env.GA_TOKEN) {
+    res.status(200).send({ga_token: process.env.GA_TOKEN});
+  } else {
+    res.sendStatus(404);
+  }
+});
+
 app.get('/healthcheck', (req, res) => {
   const url = decodeURIComponent(req.query.uri);
   if (url) {

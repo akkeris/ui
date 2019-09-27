@@ -9,6 +9,7 @@ import RemoveIcon from '@material-ui/icons/Clear';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import History from '../../config/History';
+import ReactGA from 'react-ga';
 
 const style = {
   refresh: {
@@ -80,6 +81,10 @@ export default class SiteOverview extends Component {
   handleRemoveSite = async () => {
     try {
       await api.deleteSite(this.props.site.domain);
+      ReactGA.event({
+        category: 'SITES',
+        action: 'Removed site',
+      });
       History.get().push('/sites');
     } catch (error) {
       this.setState({

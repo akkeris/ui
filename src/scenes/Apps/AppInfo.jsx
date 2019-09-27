@@ -17,8 +17,9 @@ import AppIcon from '@material-ui/icons/Launch';
 import ReleaseIcon from '@material-ui/icons/Cloud';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import RemoveIcon from '@material-ui/icons/Clear';
-import AutoBuildIcon from '../../components/Icons/CircuitBoard';
+import ReactGA from 'react-ga';
 
+import AutoBuildIcon from '../../components/Icons/CircuitBoard';
 import GitIcon from '../../components/Icons/GitIcon';
 import WebhookIcon from '../../components/Icons/WebhookIcon';
 import Formations from '../../components/Formations';
@@ -180,6 +181,10 @@ export default class AppInfo extends Component {
   handleRemoveApp = async () => {
     try {
       await api.deleteApp(this.state.app.name);
+      ReactGA.event({
+        category: 'APPS',
+        action: 'Deleted app',
+      });
       History.get().push('/apps');
     } catch (error) {
       this.setState({
@@ -233,6 +238,10 @@ export default class AppInfo extends Component {
     try {
       await api.patchApp(this.state.app.name, this.state.isMaintenance);
       this.reload('Maintenance Mode Updated');
+      ReactGA.event({
+        category: 'APPS',
+        action: 'Maintenance mode toggled',
+      });
       this.setState({ mOpen: false, loading: false });
     } catch (error) {
       this.setState({
@@ -250,6 +259,10 @@ export default class AppInfo extends Component {
       const appResponse = await api.getApp(this.props.match.params.app);
       this.setState({ rOpen: false, loading: false, app: appResponse.data });
       this.reload('Repo Detached');
+      ReactGA.event({
+        category: 'APPS',
+        action: 'Detached repo from app',
+      });
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,
@@ -271,9 +284,17 @@ export default class AppInfo extends Component {
   handleFavorite = () => {
     if (this.state.isFavorite) {
       api.deleteFavorite(this.state.app.name);
+      ReactGA.event({
+        category: 'APPS',
+        action: 'Removed favorite',
+      });
       this.setState({ isFavorite: false });
     } else {
       api.createFavorite(this.state.app.name);
+      ReactGA.event({
+        category: 'APPS',
+        action: 'Added favorite',
+      });
       this.setState({ isFavorite: true });
     }
   }

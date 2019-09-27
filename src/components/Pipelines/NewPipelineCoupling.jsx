@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Collapse, Typography,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 
 import api from '../../services/api';
 import AutoSuggest from '../AutoSuggest';
@@ -71,6 +72,10 @@ export default class NewPipelineCoupling extends Component {
     try {
       await api.createPipelineCoupling(this.props.pipeline, this.state.app, this.props.stage);
       this.props.onComplete('Coupling Added');
+      ReactGA.event({
+        category: 'PIPELINES',
+        action: 'Created new coupling',
+      });
     } catch (error) {
       this.setState({
         finished: false,

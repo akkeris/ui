@@ -7,6 +7,7 @@ import {
 import RemoveIcon from '@material-ui/icons/Clear';
 import PromoteIcon from '@material-ui/icons/CloudUpload';
 import AddIcon from '@material-ui/icons/Add';
+import ReactGA from 'react-ga';
 
 import api from '../../services/api';
 import util from '../../services/util';
@@ -145,6 +146,10 @@ export default class Stage extends Component {
     try {
       await api.deletePipelineCoupling(this.state.coupling.id);
       this.reload('Removed Coupling');
+      ReactGA.event({
+        category: 'PIPELINES',
+        action: 'Removed pipeline coupling',
+      });
     } catch (error) {
       this.props.onError(error.response.data);
     }
@@ -173,6 +178,10 @@ export default class Stage extends Component {
           this.state.safePromote,
         );
         this.reload(`Promoted: ${this.state.coupling.app.name} to ${targets[0].stage}`);
+        ReactGA.event({
+          category: 'PIPELINE,',
+          action: 'Application Promoted',
+        });
       } catch (error) {
         this.setState({ promoteOpen: false, loading: false });
         this.props.onError(error.response.data);
