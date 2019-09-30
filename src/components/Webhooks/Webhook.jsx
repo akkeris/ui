@@ -12,7 +12,7 @@ import ReactGA from 'react-ga';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import HistoryIcon from '@material-ui/icons/History';
 import HelpIcon from '@material-ui/icons/Help';
-import RemoveIcon from '@material-ui/icons/Clear';
+import RemoveIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import BackIcon from '@material-ui/icons/ArrowBack';
@@ -561,6 +561,7 @@ export default class Webhook extends Component {
                     <IconButton
                       className="webhook-remove"
                       onClick={() => this.handleConfirmation(this.props.webhook)}
+                      color="secondary"
                     >
                       <RemoveIcon />
                     </IconButton>

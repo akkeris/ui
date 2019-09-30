@@ -9,6 +9,7 @@ import ReactGA from 'react-ga';
 import { withTheme } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
+import DeleteIcon from '@material-ui/icons/Delete';
 import api from '../../services/api';
 import NewAddon from './NewAddon';
 import AttachAddon from './AttachAddon';
@@ -328,11 +329,11 @@ class Addons extends Component {
       let deleteButton = (
         <IconButton
           disabled={(restrictedSpace && !isElevated) || addon.state === 'provisioning'}
-          style={style.iconButton}
+          color="secondary"
           className="addon-remove"
           onClick={() => this.handleAddonConfirmation(addon)}
         >
-          <RemoveIcon color={((restrictedSpace && !isElevated) || addon.state === 'provisioning') ? 'disabled' : 'inherit'} />
+          <DeleteIcon color={((restrictedSpace && !isElevated) || addon.state === 'provisioning') ? 'disabled' : 'inherit'} />
         </IconButton>
       );
 
@@ -377,7 +378,7 @@ class Addons extends Component {
       let deleteButton = (
         <IconButton
           disabled={(restrictedSpace && !isElevated) || attachment.state === 'provisioning'}
-          style={style.iconButton}
+          color="secondary"
           className="attachment-remove"
           onClick={() => this.handleAddonAttachmentConfirmation(attachment)}
         >

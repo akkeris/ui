@@ -16,10 +16,12 @@ import PendingIcon from '@material-ui/icons/Lens';
 import ErrorIcon from '@material-ui/icons/Cancel';
 import SuccessIcon from '@material-ui/icons/CheckCircle';
 
+import RebuildIcon from '../Icons/RebuildIcon';
 import Logs from './Logs';
 import api from '../../services/api';
 import NewBuild from './NewBuild';
 import GitCommitIcon from '../Icons/GitCommitIcon';
+import ConfirmationModal from '../ConfirmationModal';
 
 function addRestrictedTooltip(title, placement, children) {
   return (
@@ -39,6 +41,13 @@ const releaseLimit = 20;
 const style = {
   iconButton: {
     color: 'black',
+  },
+  rebuildIcon: {
+    width: '48px',
+    height: '48px',
+    size: {
+      fontSize: '2rem',
+    },
   },
   table: {
     overflow: 'visible',
@@ -121,7 +130,7 @@ const style = {
     },
     actions: {
       container: {
-        width: '174px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       },
       button: {
         width: '50px',
@@ -214,6 +223,7 @@ export default class Releases extends Component {
       page: 0,
       isElevated: false,
       restrictedSpace: false,
+      confirmRebuildOpen: false,
     };
     this.getReleases();
   }
@@ -277,6 +287,20 @@ export default class Releases extends Component {
         loading: false,
       });
     }
+  }
+
+  handleConfirmRebuild = () => {
+    this.setState({ confirmRebuildOpen: true });
+  }
+
+  handleCancelRebuild = () => {
+    this.setState({ confirmRebuildOpen: false });
+  }
+
+  handleRebuild = async () => {
+    this.setState({ confirmRebuildOpen: false });
+    await api.rebuildLatest(this.props.app.name);
+    this.reload('Rebuilding latest image...');
   }
 
   handleRevertOpen(release) {
@@ -437,12 +461,12 @@ export default class Releases extends Component {
                 <div style={style.release.actions.inner}>
                   {!release.release &&
                   <Tooltip title="Build Logs" placement="top-end">
-                    <IconButton style={style.iconButton} className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
+                    <IconButton color="primary" className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
                   </Tooltip>
                   }
                   {!release.current && release.release &&
                   <Tooltip title="Rollback" placement="top-end">
-                    <IconButton style={style.iconButton} className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
+                    <IconButton color="secondary" className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
                   </Tooltip>
                   }
                 </div>
@@ -565,9 +589,24 @@ export default class Releases extends Component {
         </Collapse>
         <div style={style.header.container}>
           <Typography style={style.header.title} variant="overline">Release</Typography>
-          <div style={style.header.actions.button}>
-            {(!this.state.new) && newReleaseButton}
-          </div>
+          {!this.state.new && (
+            <div style={style.header.actions.container}>
+              <div style={style.header.actions.button}>
+                <Tooltip title="Rebuild" placement="bottom-end">
+                  <IconButton
+                    disabled={this.state.releases.length < 1}
+                    onClick={this.handleConfirmRebuild}
+                    style={style.rebuildIcon}
+                    color="secondary"
+                    className="rebuild"
+                  ><RebuildIcon style={style.rebuildIcon.size} /></IconButton>
+                </Tooltip>
+              </div>
+              <div style={style.header.actions.button}>
+                {newReleaseButton}
+              </div>
+            </div>
+          )}
         </div>
         <Divider />
         {this.state.loading ? (
@@ -598,6 +637,13 @@ export default class Releases extends Component {
             )}
           </Table>
         )}
+        <ConfirmationModal
+          className="rebuild-confirm"
+          open={this.state.confirmRebuildOpen}
+          onOk={this.handleRebuild}
+          onCancel={this.handleCancelRebuild}
+          message="Are you sure you want to rebuild the latest release?"
+        />
         <Snackbar
           className="release-snack"
           open={this.state.snackOpen}

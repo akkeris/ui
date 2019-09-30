@@ -236,6 +236,11 @@ function createRelease(app, slug, release, description) {
   });
 }
 
+async function rebuildLatest(app) {
+  const { data: releases } = await axios.get(`/api/apps/${app}/releases`);
+  return axios.put(`/api/apps/${app}/builds/${releases[releases.length - 1].slug.id}`);
+}
+
 function getOrgs() {
   return axios.get('/api/organizations');
 }
@@ -504,4 +509,5 @@ export default {
   createFavorite,
   getHealthcheck,
   notify,
+  rebuildLatest,
 };

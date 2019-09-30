@@ -486,6 +486,52 @@ test('Should be able to create view and release builds', async (t) => { // eslin
     .click('.logs-dialog .logs-dialog-close');
 });
 
+test('Should be able to rebuild a release', async (t) => { // eslint-disable-line no-undef
+  const appName = t.ctx.appName;
+
+  await t
+    .navigateTo(`${baseUrl}/apps/${appName}-testcafe/releases`)
+    .click('.releases-tab')
+    .expect(Selector('.release-list tbody').innerText)
+    .contains('No Releases')
+
+    // Create the new build
+    .click('button.new-build')
+    .typeText('.url input', 'docker://registry.hub.docker.com/library/alpine:latest')
+    .click('button.next')
+    .click('button.next') // branch
+    .click('button.next') // version
+    .click('button.next') // summary
+
+    .expect(Selector('.release-snack').innerText)
+    .contains('New Deployment Requested')
+    .expect(Selector('.release-list tbody').childElementCount)
+    .gt(0)
+    .wait(20000);
+
+  await t
+    .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
+    .click('.releases-tab')
+    .expect(Selector('button.rebuild').exists)
+    .ok('Rebuild button did not appear')
+    .click('button.rebuild')
+    .expect(Selector('.rebuild-confirm').exists)
+    .ok('Rebuild confirmation did not appear')
+    .expect(Selector('.rebuild-confirm').innerText)
+    .contains('Are you sure you want to rebuild the latest release?', 'Rebuild confirmation did not have the correct message')
+    .click('.rebuild-confirm button.ok')
+    .expect(Selector('.release-snack').exists)
+    .ok('Rebuild message did not appear')
+    .expect(Selector('.release-snack').innerText)
+    .contains('Rebuilding latest image...', 'Rebuild message did not have the correct text')
+    .wait(5000)
+    .click('.release-list .r0 button.logs')
+    .wait(5000)
+    .expect(Selector('.logs-dialog .logs-dialog-title').innerText)
+    .contains('Logs for', 'Did not show logs for the release rebuild')
+    .click('.logs-dialog .logs-dialog-close');
+});
+
 test // eslint-disable-line no-undef
   .before(async (t) => {
     const appName = utils.randomString();
@@ -1239,7 +1285,7 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
     .click('button.add-config')
     .typeText('.key-1 input', 'FOO')
     .typeText(Selector('.value-1 textarea').withAttribute('style'), 'BAR')
-    
+
 
     .click('button.next')
 
