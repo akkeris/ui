@@ -5,6 +5,7 @@ import {
 } from '@material-ui/core';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
+import ReactGA from 'react-ga';
 
 const style = {
   stepper: {
@@ -88,6 +89,10 @@ export default class NewBuild extends Component {
         this.props.app, this.props.org, null, this.state.url,
         null, null, this.state.branch, this.state.version,
       );
+      ReactGA.event({
+        category: 'RELEASES',
+        action: 'Created new release',
+      });
       this.props.onComplete('New Deployment Requested');
     } catch (error) {
       this.setState({

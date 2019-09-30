@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core';
 import gh from 'parse-github-url';
 import ConfirmationModal from '../ConfirmationModal';
+import ReactGA from 'react-ga';
 
 import api from '../../services/api';
 
@@ -120,6 +121,10 @@ export default class NewAutoBuild extends Component {
         this.state.token,
       );
       this.props.onComplete('Auto Build Connected');
+      ReactGA.event({
+        category: 'Apps',
+        action: 'App attached to repo',
+      });
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,
