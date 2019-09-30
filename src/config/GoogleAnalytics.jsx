@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ReactGA from 'react-ga';
 import { Route } from 'react-router-dom';
-import api from '../services/api';
 
 class GoogleAnalytics extends Component {
   async componentDidMount() {
