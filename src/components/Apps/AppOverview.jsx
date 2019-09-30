@@ -301,7 +301,7 @@ class AppOverview extends Component {
               {'Last Release and Most Recent Changes'}
             </div>
             <div style={style.tableCell.sub}>
-              {new Date(this.props.app.released_at).toString()}
+              {this.props.app.released_at ? new Date(this.props.app.released_at).toString() : 'No Releases'}
             </div>
           </div>
         </div>
