@@ -3,6 +3,7 @@ import {
   IconButton, Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, Tooltip,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
+import ReactGA from 'react-ga';
 
 import LaptopIcon from '@material-ui/icons/Computer';
 import GlobeIcon from '@material-ui/icons/Public';
@@ -96,6 +97,10 @@ export default class PipelineInfo extends Component {
   handleRemovePipeline = async () => {
     try {
       await api.deletePipeline(this.props.match.params.pipeline);
+      ReactGA.event({
+        category: 'PIPELINES',
+        action: 'Deleted pipeline',
+      });
       History.get().push('/pipelines');
     } catch (error) {
       this.handleError(error.response.data);

@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
+
 import ConfirmationModal from '../ConfirmationModal';
 import api from '../../services/api';
+
 
 const style = {
   stepper: {
@@ -76,6 +79,10 @@ export default class NewPipeline extends Component {
     try {
       await api.createPipeline(this.state.pipeline);
       this.props.onComplete('Pipeline Added');
+      ReactGA.event({
+        category: 'PIPELINES',
+        action: 'Created new pipeline',
+      });
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,

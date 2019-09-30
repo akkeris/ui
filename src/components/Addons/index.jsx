@@ -5,6 +5,7 @@ import {
   Tooltip, Table, TableHead, TableBody, TableRow, TableCell,
   DialogTitle, DialogContent, DialogActions, Collapse,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 import { withTheme } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -248,6 +249,10 @@ class Addons extends Component {
     this.setState({ loading: true });
     try {
       await api.deleteAddonAttachment(this.props.app.name, this.state.attachment.id);
+      ReactGA.event({
+        category: 'ADDONS',
+        action: 'Deleted addon',
+      });
       this.reload('Attachment Deleted');
     } catch (error) {
       this.setState({

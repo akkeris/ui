@@ -14,6 +14,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 import { pink, teal, amber, red } from '@material-ui/core/colors';
 import HealthyIcon from '@material-ui/icons/CheckCircle';
 import UnhealthyIcon from '@material-ui/icons/Cancel';
+import ReactGA from 'react-ga';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
@@ -200,6 +201,10 @@ export default class DynoType extends Component {
   handleRemoveFormation = async () => {
     try {
       await api.deleteFormation(this.props.app.name, this.props.formation.type);
+      ReactGA.event({
+        category: 'DYNOS',
+        action: 'Deleted Formation',
+      });
       this.props.onComplete('Removed Formation');
     } catch (error) {
       this.reset();
@@ -210,6 +215,10 @@ export default class DynoType extends Component {
   handleRestart = async () => {
     try {
       await api.restartFormation(this.props.app.name, this.props.formation.type);
+      ReactGA.event({
+        category: 'DYNOS',
+        action: 'Restarted formation',
+      });
       this.props.onAlert('Formation Restarted');
     } catch (error) {
       this.reset();
@@ -236,6 +245,10 @@ export default class DynoType extends Component {
         this.props.formation.type === 'web' ?
           (this.state.healthcheck === null || this.state.healthcheck === '') : undefined,
       );
+      ReactGA.event({
+        category: 'DYNOS',
+        action: 'Updated formation',
+      });
       this.props.onComplete('Updated Formation');
     } catch (error) {
       this.reset();

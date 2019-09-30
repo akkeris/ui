@@ -4,6 +4,7 @@ import {
   Step, Stepper, StepLabel, Button, Checkbox, Grid, TextField, IconButton, Typography,
   Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, FormControlLabel, CircularProgress,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 import HelpIcon from '@material-ui/icons/Help';
 import api from '../../services/api';
 import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
@@ -173,6 +174,10 @@ export default class NewWebhook extends Component {
     try {
       this.setState({ stepIndex: 4 });
       await api.createWebHook(this.props.app, this.state.url, this.state.events, this.state.secret ? this.state.secret : ' ');
+      ReactGA.event({
+        category: 'WEBHOOK',
+        action: 'Created new webhook',
+      });
       this.props.onComplete('Webhook Created');
     } catch (error) {
       this.setState({

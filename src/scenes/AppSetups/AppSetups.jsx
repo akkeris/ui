@@ -7,6 +7,7 @@ import DoneBox from '@material-ui/icons/Done';
 import OpenInNewBox from '@material-ui/icons/OpenInNew';
 import jsonminify from 'jsonminify';
 import Ansi from 'ansi-to-react';
+import ReactGA from 'react-ga';
 import ConfigVar from '../../components/ConfigVar';
 import api from '../../services/api';
 import History from '../../config/History';
@@ -230,6 +231,10 @@ export default class AppSetups extends Component {
 
     try {
       const { data: status } = await api.appSetup(this.state.blueprint);
+      ReactGA.event({
+        category: 'APP_SETUP',
+        action: 'Submitted blueprint app',
+      });
       this.setState({ status, panel: 'running', progress: 0 });
     } catch (error) {
       printError(error);

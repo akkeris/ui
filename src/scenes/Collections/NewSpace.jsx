@@ -3,6 +3,7 @@ import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Checkbox, Paper,
   MenuItem, Select, FormControl, InputLabel, FormControlLabel, Typography,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 import api from '../../services/api';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
@@ -151,6 +152,10 @@ export default class NewApp extends Component {
         this.state.compliance,
         this.state.stack,
       );
+      ReactGA.event({
+        category: 'SPACES',
+        action: 'Created new space',
+      });
       History.get().push('/collections');
     } catch (error) {
       this.setState({

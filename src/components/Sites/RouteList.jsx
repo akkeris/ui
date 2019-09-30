@@ -8,6 +8,7 @@ import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
 import DeleteIcon from '@material-ui/icons/Delete';
 import PropTypes from 'prop-types';
+import ReactGA from 'react-ga';
 
 import api from '../../services/api';
 import NewRoute from './NewRoute';
@@ -99,6 +100,10 @@ export default class RouteList extends Component {
     this.setState({ loading: true });
     try {
       await api.deleteRoute(this.state.route.id);
+      ReactGA.event({
+        category: 'SITES',
+        action: 'Deleted route',
+      });
       this.reload('Route Deleted');
     } catch (error) {
       this.setState({

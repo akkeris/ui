@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Button, Step, Stepper, StepLabel, Select, MenuItem, Typography, CircularProgress,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 import ConfirmationModal from '../ConfirmationModal';
 import AutoSuggest from '../AutoSuggest';
 import api from '../../services/api';
@@ -136,6 +137,10 @@ export default class AttachAddon extends Component {
   submitAddonAttachment = async () => {
     try {
       await api.attachAddon(this.props.app, this.state.addon.id);
+      ReactGA.event({
+        category: 'ADDONS',
+        action: 'Attached new addon',
+      });
       this.props.onComplete('Addon Attached');
     } catch (error) {
       this.setState({

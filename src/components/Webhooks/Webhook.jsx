@@ -8,6 +8,7 @@ import {
   Table, TableBody, TableRow, TableCell,
   ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import HistoryIcon from '@material-ui/icons/History';
 import HelpIcon from '@material-ui/icons/Help';
@@ -264,6 +265,10 @@ export default class Webhook extends Component {
   handleRemoveWebhook = async () => {
     try {
       await api.deleteWebhook(this.props.app, this.props.webhook.id);
+      ReactGA.event({
+        category: 'WEBHOOK',
+        action: 'Deleted webhook',
+      });
       this.props.onComplete('Webhook Deleted');
     } catch (error) {
       this.setState({
@@ -316,6 +321,10 @@ export default class Webhook extends Component {
         this.state.secret === '' ? null : this.state.secret,
         this.state.active,
       );
+      ReactGA.event({
+        category: 'WEBHOOK',
+        action: 'Updated webhook',
+      });
       this.props.onComplete('Updated Webhook');
     } catch (error) {
       this.reset(this.props.webhook.events);

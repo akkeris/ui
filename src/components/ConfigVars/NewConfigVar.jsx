@@ -4,6 +4,8 @@ import {
   Step, Stepper, StepLabel, Button, Collapse,
   Typography, List, ListItemText, ListItem, Divider,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
+
 import ConfirmationModal from '../ConfirmationModal';
 import KeyValue from './KeyValue';
 
@@ -128,6 +130,10 @@ export default class NewConfigVar extends Component {
     }, {});
     try {
       await api.patchConfig(this.props.app, config);
+      ReactGA.event({
+        category: 'APPS',
+        action: 'Added new config var(s)',
+      });
       this.props.onComplete('Added Config Var');
     } catch (error) {
       this.setState({

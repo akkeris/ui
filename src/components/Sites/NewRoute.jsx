@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, TextField, Collapse, Button, Typography,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 import ConfirmationModal from '../ConfirmationModal';
 import Search from '../Search';
 import api from '../../services/api';
@@ -119,6 +120,10 @@ export default class NewRoute extends Component {
         this.state.source,
         this.state.target,
       );
+      ReactGA.event({
+        category: 'SITES',
+        action: 'Created new route',
+      });
       this.props.onComplete('Route Created');
     } catch (error) {
       this.setState({

@@ -5,6 +5,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Snackbar, Button, TextField, Collapse, Typography, TableHead,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
@@ -146,6 +147,10 @@ export default class ConfigVar extends Component {
     removeConfig[this.state.key] = null;
     try {
       await api.patchConfig(this.props.app, removeConfig);
+      ReactGA.event({
+        category: 'APPS',
+        action: 'Removed config var',
+      });
       this.reload('Updated Config Vars');
     } catch (error) {
       this.setState({
@@ -196,6 +201,10 @@ export default class ConfigVar extends Component {
     editConfig[this.state.key] = this.state.newValue;
     try {
       await api.patchConfig(this.props.app, editConfig);
+      ReactGA.event({
+        category: 'APPS',
+        action: 'Updated a config var',
+      });
       this.reload('Updated Config Vars');
     } catch (error) {
       this.setState({

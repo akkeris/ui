@@ -7,6 +7,7 @@ import {
 } from '@material-ui/core';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
+import ReactGA from 'react-ga';
 
 const style = {
   radio: {
@@ -148,6 +149,11 @@ export default class NewFormation extends Component {
         this.state.type === 'web' ? this.state.port : null,
         this.state.command === '' ? null : this.state.command,
       );
+
+      ReactGA.event({
+        category: 'DYNOS',
+        action: 'Created new formation',
+      });
       this.props.onComplete('New Formation Added');
     } catch (error) {
       this.setState({

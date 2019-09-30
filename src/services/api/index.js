@@ -428,7 +428,12 @@ function getHealthcheck(uri) {
   return axios.get(`/healthcheck?uri=${encodeURIComponent(uri)}`);
 }
 
+function getGAToken() {
+  return axios.get('/analytics');
+}
+
 export default {
+  getGAToken,
   appSetup,
   getAppSetup,
   getApps,

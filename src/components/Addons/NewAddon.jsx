@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, CircularProgress, LinearProgress, Button, Typography,
 } from '@material-ui/core';
+import ReactGA from 'react-ga';
 import Search from '../Search';
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
@@ -155,6 +156,10 @@ export default class NewAddon extends Component {
           throw new Error('It seems this addon is taking too long to complete its task. When the provisioning finishes your application will automatically be restarted with the new addon.');
         }
         if (addon.state !== 'provisioning') {
+          ReactGA.event({
+            category: 'ADDONS',
+            action: 'Created new addon',
+          });
           this.props.onComplete('Addon Created');
           this.setState({ provisioning: false, provisionStatus: 0, provisionMessage: '', loading: false });
           return;
