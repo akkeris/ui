@@ -4,7 +4,7 @@ import {
   Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
   List, ListItem, ListItemText, Button, CircularProgress,
 } from '@material-ui/core';
-import RemoveIcon from '@material-ui/icons/Clear';
+import RemoveIcon from '@material-ui/icons/Delete';
 
 import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';

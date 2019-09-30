@@ -6,7 +6,7 @@ import {
   Table, TableHead, TableBody, TableRow, TableCell, Input, InputAdornment,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import RemoveIcon from '@material-ui/icons/Clear';
+import RemoveIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
 import BackIcon from '@material-ui/icons/ArrowBack';
@@ -490,7 +490,7 @@ export default class DynoType extends Component {
               {this.props.formation.type !== 'web' && !this.state.edit && (
                 <div style={style.tableRowColumn.end}>
                   <Tooltip title="Remove" placement="top-start">
-                    <IconButton style={style.iconButton} className="remove" onClick={this.handleConfirmation}><RemoveIcon /></IconButton>
+                    <IconButton color="secondary" className="remove" onClick={this.handleConfirmation}><RemoveIcon /></IconButton>
                   </Tooltip>
                   <ConfirmationModal className="delete-formation" open={this.state.open} onOk={this.handleRemoveFormation} onCancel={this.handleCancelConfirmation} message="Are you sure you want to delete this formation?" />
                 </div>

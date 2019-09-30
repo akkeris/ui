@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import {
-  IconButton, Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
+  IconButton, Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader, Tooltip,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 
 import LaptopIcon from '@material-ui/icons/Computer';
 import GlobeIcon from '@material-ui/icons/Public';
 import Forward from '@material-ui/icons/ArrowForward';
-import RemoveIcon from '@material-ui/icons/Clear';
+import RemoveIcon from '@material-ui/icons/Delete';
 
 import api from '../../services/api';
 import util from '../../services/util';
@@ -17,7 +17,6 @@ import History from '../../config/History';
 
 const style = {
   iconButton: {
-    color: 'black',
     float: 'right',
   },
   refresh: {
@@ -219,9 +218,11 @@ export default class PipelineInfo extends Component {
             title={this.state.pipeline.name}
             subheader={this.state.pipeline.id}
             action={
-              <IconButton className="delete-pipeline" style={style.iconButton} onClick={this.handleConfirmation}>
-                <RemoveIcon />
-              </IconButton>
+              <Tooltip title="Delete Pipeline" placement="left">
+                <IconButton className="delete-pipeline" color="secondary" style={style.iconButton} onClick={this.handleConfirmation}>
+                  <RemoveIcon />
+                </IconButton>
+              </Tooltip>
             }
           />
           <Tabs

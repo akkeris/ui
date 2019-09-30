@@ -17,6 +17,7 @@ import AppIcon from '@material-ui/icons/Launch';
 import ReleaseIcon from '@material-ui/icons/Cloud';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import RemoveIcon from '@material-ui/icons/Clear';
+import DeleteIcon from '@material-ui/icons/Delete';
 import AutoBuildIcon from '../../components/Icons/CircuitBoard';
 
 import GitIcon from '../../components/Icons/GitIcon';
@@ -331,7 +332,7 @@ export default class AppInfo extends Component {
         <ListItemIcon
           className="delete-app"
         >
-          <RemoveIcon color="secondary" htmlColor={isElevated ? 'white' : undefined} />
+          <DeleteIcon color="secondary" htmlColor={isElevated ? 'white' : undefined} />
         </ListItemIcon>
         <ListItemText primary="Delete App" />
       </MenuItem>

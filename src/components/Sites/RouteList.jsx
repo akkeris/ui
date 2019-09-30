@@ -6,6 +6,7 @@ import {
 import ArrowIcon from '@material-ui/icons/ArrowForward';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
+import DeleteIcon from '@material-ui/icons/Delete';
 import PropTypes from 'prop-types';
 
 import api from '../../services/api';
@@ -170,8 +171,9 @@ export default class RouteList extends Component {
             <div style={style.tableRowColumn.end}>
               <IconButton
                 onClick={() => this.handleConfirmation(route)}
+                color="secondary"
               >
-                <RemoveIcon />
+                <DeleteIcon />
               </IconButton>
             </div>
           </TableCell>

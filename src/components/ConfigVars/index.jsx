@@ -8,6 +8,7 @@ import {
 
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
+import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 
 import api from '../../services/api';
@@ -141,8 +142,8 @@ export default class ConfigVar extends Component {
   handleRemoveConfig = async () => {
     this.setState({ loading: true });
 
-    let removeConfig = {};
-    removeConfig[this.state.key] = null
+    const removeConfig = {};
+    removeConfig[this.state.key] = null;
     try {
       await api.patchConfig(this.props.app, removeConfig);
       this.reload('Updated Config Vars');
@@ -191,7 +192,7 @@ export default class ConfigVar extends Component {
 
   handleEditSubmit = async () => {
     this.setState({ loading: true });
-    let editConfig = {};
+    const editConfig = {};
     editConfig[this.state.key] = this.state.newValue;
     try {
       await api.patchConfig(this.props.app, editConfig);
@@ -248,8 +249,8 @@ export default class ConfigVar extends Component {
               </IconButton>
             </Tooltip>
             <Tooltip title="Remove" placement="top-start">
-              <IconButton className="remove" onClick={() => this.handleConfirmation(key)}>
-                <RemoveIcon htmlColor="black" />
+              <IconButton color="secondary" className="remove" onClick={() => this.handleConfirmation(key)}>
+                <DeleteIcon />
               </IconButton>
             </Tooltip>
           </div>
