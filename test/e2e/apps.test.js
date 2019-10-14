@@ -289,6 +289,24 @@ test('Should be able to create and edit app description', async (t) => { // esli
     .click('.edit-description')
     .expect(Selector('.edit-description-dialog #edit-description-textfield').withAttribute('value', 'My new description').exists)
     .ok('Edit description dialog did not contain new description after successful edit')
+
+    .click('.edit-description-dialog #edit-description-textfield')
+    .selectText('.edit-description-dialog #edit-description-textfield')
+    .pressKey('delete')
+    .click('button.save')
+
+  // Check for popup
+    .expect(Selector('.app-snack').innerText)
+    .contains('Description updated!', 'Description updated snackbar did not appear')
+
+  // Make sure the description was deleted
+    .expect(Selector('.card .app-description').innerText)
+    .contains('No description provided', 'Description still present on AppInfo page after it was removed')
+    .click('button.app-menu-button')
+    .click('.edit-description')
+    .expect(Selector('.edit-description-dialog #edit-description-textfield').withAttribute('value', '').exists)
+    .ok('Edit description dialog was not empty after description was removed')
+
     .click('button.cancel');
 }).after(async (t) => {
   const appName = t.ctx.appName;

@@ -108,7 +108,7 @@ const style = {
       minHeight: '36px', margin: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     },
     missing: {
-      fontStyle: 'italic', opacity: '0.6',
+      fontStyle: 'italic',
     },
   },
 };
@@ -220,9 +220,9 @@ class AppOverview extends Component {
       <div>
         <div className="app-description" style={style.appDescription.container}>
           {this.props.app.description === '' ? (
-            <Typography variant="body1" style={style.appDescription.missing}>No description provided</Typography>
+            <ListItemText style={style.appDescription.missing} secondary={'No description provided'} />
           ) : (
-            <Typography variant="body1">{this.props.app.description}</Typography>
+            <ListItemText secondary={this.props.app.description} />
           )}
         </div>
         <Divider variant="middle" />
