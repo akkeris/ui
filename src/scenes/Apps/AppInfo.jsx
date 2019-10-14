@@ -449,7 +449,9 @@ export default class AppInfo extends Component {
               this.setState({ editDescriptionOpen: true, menuOpen: false, anchorEl: null });
             }}
           >
-            <ListItemIcon>
+            <ListItemIcon
+              className="edit-description"
+            >
               <EditIcon />
             </ListItemIcon>
             <ListItemText primary="Edit Description" />
@@ -494,6 +496,7 @@ export default class AppInfo extends Component {
     const { app, editDescriptionOpen } = this.state;
     return (
       <Dialog
+        className="edit-description-dialog"
         open={editDescriptionOpen}
         onClose={() => { this.setState({ editDescriptionOpen: false }); }}
       >
@@ -515,8 +518,8 @@ export default class AppInfo extends Component {
           />
         </DialogContent>
         <DialogActions>
-          <Button color="secondary" onClick={this.handleCloseNewDescription}>Cancel</Button>
-          <Button color="primary" onClick={this.handleSubmitNewDescription}>Save</Button>
+          <Button className="cancel" color="secondary" onClick={this.handleCloseNewDescription}>Cancel</Button>
+          <Button className="save" color="primary" onClick={this.handleSubmitNewDescription}>Save</Button>
         </DialogActions>
       </Dialog>
     );

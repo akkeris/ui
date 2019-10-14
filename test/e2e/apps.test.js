@@ -45,6 +45,7 @@ test // eslint-disable-line
       .pressKey('enter')
       .click('button.next')
       .click('button.next')
+      .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
@@ -149,6 +150,9 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .pressKey('enter')
     .click('button.next')
 
+    // Description will be tested later
+    .click('button.next')
+
     // Check step 3 caption, stepper summary
     .expect(Selector('.step-2-label .step-label-caption').innerText)
     .contains('testcafe')
@@ -179,6 +183,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .pressKey('enter')
     .click('button.next')
     .click('button.next')
+    .click('button.next')
     .expect(Selector('.new-app-error').innerText)
     .contains('The requested application already exists.')
     .click('.ok')
@@ -197,6 +202,104 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .click('.delete-app')
     .expect(Selector('.delete-confirm').innerText)
     .contains('Are you sure you want to delete this app?')
+
+    // confirm delete and make sure app no longer exists
+    .click('.delete-confirm .ok')
+    .expect(Selector(`.app-list .${appName}-testcafe`).exists)
+    .notOk();
+});
+
+test('Should be able to create and edit app description', async (t) => { // eslint-disable-line no-undef
+  const appName = utils.randomString();
+  global.createdApps.push(appName);
+  t.ctx.appName = appName; // eslint-disable-line no-param-reassign
+
+  await t
+    // Get to description creation
+    .click('.new-app')
+    .typeText('.app-name input', appName)
+    .click('button.next')
+    .typeText('div.select-textfield', 'testcafe')
+    .pressKey('enter')
+    .click('button.next')
+    .typeText('div.select-textfield', 'testcafe')
+    .pressKey('enter')
+    .click('button.next')
+
+    // Description should be optional
+    .click('button.next')
+    .expect(Selector('.new-app-summary').innerText)
+    .contains(`The app ${appName}-testcafe will be created in the testcafe org.`, 'Summary did not show which indicates description was required')
+    .click('button.back-button')
+
+    // Test simple description
+    .typeText('.app-description input', 'My Description')
+    .click('button.next')
+    .expect(Selector('.new-app-summary').innerText)
+    .contains(`The app ${appName}-testcafe will be created in the testcafe org with the description "My Description".`, 'Summary did not match expected for description')
+    .expect(Selector('.step-3-label .step-label-caption').innerText)
+    .contains('My Description', 'Stepper caption for description did not match expected value')
+
+    // Test description longer than 20 characters
+    .click('button.back-button')
+    .typeText('.app-description input', 'My slightly longer description', { replace: true })
+    .click('button.next')
+    .expect(Selector('.new-app-summary').innerText)
+    .contains(`The app ${appName}-testcafe will be created in the testcafe org with the description "My slightly longer description".`, 'Summary did not match expected for longer description')
+    .expect(Selector('.step-3-label .step-label-caption').innerText)
+    .contains('My slightly longer d...', 'Stepper caption for longer description did not match expected value')
+
+    // Create app, wait for the app page to load
+    .click('button.next')
+    .wait(2000)
+
+    // Make sure the description is there
+    .expect(Selector('.card .app-description').innerText)
+    .contains('My slightly longer description', 'App description did not match expected value')
+
+    // Make sure we can edit the description
+    .click('button.app-menu-button')
+    .click('.edit-description')
+
+    .expect(Selector('.edit-description-dialog').exists)
+    .ok('Edit description dialog did not appear')
+
+    .expect(Selector('.edit-description-dialog #edit-description-textfield').withAttribute('value', 'My slightly longer description').exists)
+    .ok('Edit description dialog did not contain current description')
+
+    // Test cancelling edits
+    .typeText('.edit-description-dialog #edit-description-textfield', 'I started to type a descri', { replace: true })
+    .click('button.cancel')
+    .click('button.app-menu-button')
+    .click('.edit-description')
+    .expect(Selector('.edit-description-dialog #edit-description-textfield').withAttribute('value', 'My slightly longer description').exists)
+    .ok('Edit description dialog did not contain current description after cancelling dialog')
+
+    .typeText('.edit-description-dialog #edit-description-textfield', 'My new description', { replace: true })
+    .click('button.save')
+
+    // Check for popup
+    .expect(Selector('.app-snack').innerText)
+    .contains('Description updated!', 'Description updated snackbar did not appear')
+
+    // Make sure the new description is there
+    .expect(Selector('.card .app-description').innerText)
+    .contains('My new description', 'Updated app description did not match expected value')
+    .click('button.app-menu-button')
+    .click('.edit-description')
+    .expect(Selector('.edit-description-dialog #edit-description-textfield').withAttribute('value', 'My new description').exists)
+    .ok('Edit description dialog did not contain new description after successful edit')
+    .click('button.cancel');
+}).after(async (t) => {
+  const appName = t.ctx.appName;
+
+  await t
+    .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
+    .click('.info-tab')
+
+    // delete the app
+    .click('button.app-menu-button')
+    .click('.delete-app')
 
     // confirm delete and make sure app no longer exists
     .click('.delete-confirm .ok')
@@ -228,6 +331,7 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
+      .click('button.next')
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
@@ -559,6 +663,7 @@ test // eslint-disable-line no-undef
       .pressKey('enter')
       .click('button.next')
       .click('button.next')
+      .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
@@ -576,6 +681,7 @@ test // eslint-disable-line no-undef
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
       .pressKey('enter')
+      .click('button.next')
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
