@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
   CircularProgress, List, ListItem, ListItemText,
   GridList, GridListTile, Snackbar,
-  Divider,
+  Divider, Typography,
 } from '@material-ui/core';
 
 import api from '../../services/api';
@@ -101,6 +101,14 @@ const style = {
       button: {
         width: '50px',
       },
+    },
+  },
+  appDescription: {
+    container: {
+      minHeight: '36px', margin: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    },
+    missing: {
+      fontStyle: 'italic', opacity: '0.6',
     },
   },
 };
@@ -210,7 +218,14 @@ class AppOverview extends Component {
 
     return (
       <div>
-        <Divider />
+        <div className="app-description" style={style.appDescription.container}>
+          {this.props.app.description === '' ? (
+            <Typography variant="body1" style={style.appDescription.missing}>No description provided</Typography>
+          ) : (
+            <Typography variant="body1">{this.props.app.description}</Typography>
+          )}
+        </div>
+        <Divider variant="middle" />
         <GridList style={style.gridList} cellHeight={'auto'}>
           <GridListTile style={{ padding: '0px' }}>
             <List disablePadding>

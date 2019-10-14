@@ -27,9 +27,9 @@ function deleteApp(app) {
   return axios.delete(`/api/apps/${app}`);
 }
 
-function createApp(name, org, space) {
+function createApp(name, org, space, description) {
   notify.send('app create');
-  return axios.post('/api/apps', { org, name, space });
+  return axios.post('/api/apps', { org, name, space, description });
 }
 
 function appSetup(blueprint) {
@@ -43,6 +43,12 @@ function getAppSetup(id) {
 function patchApp(app, isMaintenance) {
   return axios.patch(`/api/apps/${app}`, {
     maintenance: isMaintenance,
+  });
+}
+
+function patchAppDescription(app, description) {
+  return axios.patch(`/api/apps/${app}`, {
+    description: !description || description === '' ? '' : description,
   });
 }
 
@@ -510,4 +516,5 @@ export default {
   getHealthcheck,
   notify,
   rebuildLatest,
+  patchAppDescription,
 };
