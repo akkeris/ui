@@ -7,7 +7,6 @@ import {
   Chip,
 } from '@material-ui/core';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
-import FilterIcon from '@material-ui/icons/FilterList';
 import CancelIcon from '@material-ui/icons/Cancel';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -38,12 +37,12 @@ const styles = theme => ({
     flexGrow: 1,
   },
   Input: {
-    color: 'white',
+    // color: 'black',
   },
   input: {
     display: 'flex',
     padding: 0,
-    color: 'white',
+    // color: 'black',
     height: 'unset',
   },
   valueContainer: {
@@ -51,7 +50,7 @@ const styles = theme => ({
     flexWrap: 'wrap',
     flex: 1,
     alignItems: 'center',
-    color: 'white',
+    // color: 'black',
     overflow: 'hidden',
   },
   chip: {
@@ -68,11 +67,11 @@ const styles = theme => ({
   },
   singleValue: {
     fontSize: 16,
-    color: 'white',
+    // color: 'black',
   },
   placeholder: {
     position: 'absolute',
-    left: 40,
+    // left: 40,
     fontSize: 16,
     color: '#DDDDDD',
   },
@@ -98,7 +97,7 @@ const styles = theme => ({
     marginLeft: '6px',
   },
   loadingIndicator: {
-    color: 'white',
+    // color: 'white',
     marginRight: '12px',
   },
 });
@@ -124,11 +123,6 @@ const Control = props => (
         children: props.children,
         ...props.innerProps,
       },
-      startAdornment: (
-        <InputAdornment position="start">
-          <FilterIcon className={props.selectProps.classes.searchIcon} htmlColor="white" />
-        </InputAdornment>
-      ),
     }}
     {...props.selectProps.textFieldProps}
   />
@@ -142,7 +136,7 @@ const Menu = props => (
 
 const NoOptionsMessage = props => (
   <Typography
-    color="textSecondary"
+    // color="textSecondary"
     className={props.selectProps.classes.noOptionsMessage}
     {...props.innerProps}
   >
@@ -166,7 +160,7 @@ const Option = props => (
 const GroupHeading = props => (
   <div className={`${props.selectProps.classes.headingContainer} group-heading`}>
     <Typography
-      color="textSecondary"
+      // color="textSecondary"
       className={props.selectProps.classes.groupHeading}
       {...props.innerProps}
     >
@@ -178,7 +172,7 @@ const GroupHeading = props => (
 
 const Placeholder = props => (
   <Typography
-    color="textSecondary"
+    // color="textSecondary"
     className={props.selectProps.classes.placeholder}
     {...props.innerProps}
   >
@@ -254,7 +248,7 @@ class FilterSelect extends PureComponent {
     const selectStyles = {
       input: base => ({
         ...base,
-        color: 'white',
+        color: 'black',
         '& input': {
           font: 'inherit',
         },
@@ -263,14 +257,14 @@ class FilterSelect extends PureComponent {
         ...base,
         color: '#DDDDDD',
         '&:hover': {
-          color: 'white',
+          color: 'black',
         },
       }),
       dropdownIndicator: base => ({
         ...base,
         color: '#DDDDDD',
         '&:hover': {
-          color: 'white',
+          color: 'black',
         },
       }),
       indicatorSeparator: base => ({

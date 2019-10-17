@@ -7,6 +7,7 @@ import {
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import History from '../../config/History';
 
+
 const style = {
   tableRow: {
     cursor: 'pointer',
@@ -46,6 +47,7 @@ export default class AppList extends Component {
     rowsPerPage: 15,
     sortBy: 'apps',
     sortDirection: 'asc',
+    isFilter: false,
   }
 
   handleChangePage = (event, page) => {
@@ -97,7 +99,7 @@ export default class AppList extends Component {
         </TableCell>
         <TableCell style={style.tableRow}>
           <div style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-            {app.isFavorite && <FavoriteIcon />}
+            {app.isFavorite && <FavoriteIcon color={'primary'} />}
           </div>
         </TableCell>
       </TableRow>
@@ -128,7 +130,7 @@ export default class AppList extends Component {
                     direction={sortDirection}
                     onClick={this.handleSortChange('apps')}
                   >
-                    App
+                    Name
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
