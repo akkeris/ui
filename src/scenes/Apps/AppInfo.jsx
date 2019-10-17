@@ -370,7 +370,7 @@ export default class AppInfo extends Component {
             className="favorite-app"
             onClick={this.handleFavorite}
           >
-            {this.state.isFavorite ? <IsFavoriteIcon /> : <FavoriteIcon />}
+            {this.state.isFavorite ? <IsFavoriteIcon color={'primary'} /> : <FavoriteIcon color={'primary'} />}
           </IconButton>
         </Tooltip>
         <IconButton
