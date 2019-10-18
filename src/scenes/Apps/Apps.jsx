@@ -3,10 +3,10 @@ import {
   Toolbar, IconButton, CircularProgress, Paper, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import FilterListIcon from '@material-ui/icons/FilterList';
 import api from '../../services/api';
 import AppList from '../../components/Apps/AppList';
 import History from '../../config/History';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import FilterSelect from '../../components/FilterSelect';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
@@ -197,7 +197,7 @@ export default class Apps extends Component {
   }
 
   handleFilter = () => {
-    if(this.state.filters.length > 0) {
+    if (this.state.filters.length > 0) {
       this.setState({ isFilter: true });
     } else {
       this.setState({ isFilter: !this.state.isFilter });
@@ -224,7 +224,7 @@ export default class Apps extends Component {
           </IconButton>
         </Toolbar>
         <Paper style={style.paper}>
-          <Toolbar>
+          <Toolbar >
             <div style={style.title}>
               <Tooltip title="Filter">
                 <IconButton aria-label="filter" onClick={this.handleFilter} >
