@@ -4,10 +4,12 @@ import {
   TableFooter, TablePagination, TableSortLabel, Tooltip, Toolbar, IconButton,
 } from '@material-ui/core';
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import AddIcon from '@material-ui/icons/Add'
+import AddIcon from '@material-ui/icons/Add';
+import FilterListIcon from '@material-ui/icons/FilterList';
 
 import api from '../../services/api';
 import History from '../../config/History';
+import FilterSelect from '../../components/FilterSelect';
 
 
 const style = {
@@ -74,16 +76,39 @@ export default class SpacesList extends Component {
       sortBy: 'space',
       sortDirection: 'asc',
       sortedSpaces: [],
+      options: [],
+      filters: [],
     };
   }
 
   componentDidMount() {
-    this.getSpaces();
+    this.getData();
   }
 
-  getSpaces = async () => {
+  getData = async () => {
     const { data: spaces } = await api.getSpaces();
-    this.setState({ spaces, sortedSpaces: spaces, loading: false });
+
+    const options = [
+      {
+        label: 'Spaces',
+        options: spaces.map(space => ({ label: space.name, value: space.name, type: 'space' })),
+      },
+    ];
+
+    this.setState({
+      spaces,
+      sortedSpaces: spaces,
+      loading: false,
+      options,
+    }, () => {
+      let values;
+      try {
+        values = JSON.parse(localStorage.getItem('akkeris_space_filters'));
+      } catch (e) {
+        values = [];
+      }
+      this.handleFilterChange(values);
+    });
   }
 
   handleNew = () => {
@@ -97,6 +122,40 @@ export default class SpacesList extends Component {
   handleChangeRowsPerPage = (event) => {
     this.setState({ rowsPerPage: event.target.value });
   };
+
+  handleFilterChange = (values) => {
+    if (!values || values.length === 0) {
+      this.setState({ sortedSpaces: this.state.spaces, filters: [] }, this.handleSort);
+      localStorage.setItem('akkeris_space_filters', JSON.stringify(values));
+      return;
+    }
+
+    const spaceFilters = values.filter(({ type }) => type === 'space');
+
+    const filterLabel = (space, type) => ({ label }) => (
+      space.name.toLowerCase().includes(label.toLowerCase())
+    );
+
+    const sortedSpaces = this.state.spaces.filter((space) => {
+      if (spaceFilters.length > 0 && !spaceFilters.some(filterLabel(space, 'space'))) {
+        return false;
+      }
+      console.log('merp')
+      return true;
+    });
+
+    this.setState({ sortedSpaces, filters: values }, this.handleSort);
+
+    localStorage.setItem('akkeris_space_filters', JSON.stringify(values));
+  }
+
+  handleFilter = () => {
+    if (this.state.filters.length > 0) {
+      this.setState({ isFilter: true });
+    } else {
+      this.setState({ isFilter: !this.state.isFilter });
+    }
+  }
 
   handleSortChange = column => () => {
     const sb = column;
@@ -135,7 +194,7 @@ export default class SpacesList extends Component {
   }
 
   renderSpaces(page, rowsPerPage) {
-    return this.state.spaces
+    return this.state.sortedSpaces
       .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
       .map(space => (
         <TableRow hover className={space.name} key={space.id} style={style.tableRow}>
@@ -177,6 +236,23 @@ export default class SpacesList extends Component {
           </IconButton>
         </Toolbar>
         <Paper style={style.paper}>
+          <Toolbar >
+            <div style={style.title}>
+              <Tooltip title="Filter">
+                <IconButton aria-label="filter" onClick={this.handleFilter} >
+                  <FilterListIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
+            {(this.state.isFilter || this.state.filters.length > 0) && (
+              <FilterSelect
+                options={this.state.options}
+                onSelect={this.handleFilterChange}
+                filters={this.state.filters}
+                placeholder="Filter by Region"
+              />
+            )}
+          </Toolbar>
           <Table className="space-list" >
             <TableHead>
               <TableRow>

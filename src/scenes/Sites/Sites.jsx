@@ -74,6 +74,7 @@ class Sites extends Component {
       filters: [],
       sort: 'site-asc',
       isFilter: false,
+      options: [],
     };
   }
 
@@ -84,7 +85,6 @@ class Sites extends Component {
   getData = async () => {
     const { data: sites } = await api.getSites();
     const { data: regions } = await api.getRegions();
-    console.log(sites)
 
     const options = [
       {
