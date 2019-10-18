@@ -115,7 +115,7 @@ const Control = props => (
     fullWidth
     InputProps={{
       disableUnderline: true,
-      inputComponent, 
+      inputComponent,
       className: `${props.selectProps.classes.Input}`,
       inputProps: {
         className: `${props.selectProps.classes.input} filter-select-input`,

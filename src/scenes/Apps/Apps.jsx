@@ -218,7 +218,6 @@ export default class Apps extends Component {
     return (
       <div>
         <Toolbar style={style.toolbar} disableGutters>
-
           <IconButton style={{ marginLeft: 'auto', padding: '6px' }} onClick={() => History.get().push('/apps/new')} className="new-app">
             <AddIcon style={{ color: 'white' }} />
           </IconButton>
