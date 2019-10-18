@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import AsyncSelect from 'react-select/lib/Async';
 import { ClearIndicator } from 'react-select/lib/components/indicators';
 import {
-  NoSsr, Typography, TextField, MenuItem, Paper, Divider, InputAdornment, CircularProgress,
+  NoSsr, Typography, TextField, MenuItem, Paper, Divider, CircularProgress,
   Chip,
 } from '@material-ui/core';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
@@ -115,7 +115,7 @@ const Control = props => (
     fullWidth
     InputProps={{
       disableUnderline: true,
-      inputComponent,
+      inputComponent, 
       className: `${props.selectProps.classes.Input}`,
       inputProps: {
         className: `${props.selectProps.classes.input} filter-select-input`,

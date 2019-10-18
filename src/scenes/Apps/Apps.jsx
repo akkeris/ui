@@ -197,7 +197,11 @@ export default class Apps extends Component {
   }
 
   handleFilter = () => {
-    this.setState({ isFilter: !this.state.isFilter });
+    if(this.state.filters.length > 0) {
+      this.setState({ isFilter: true });
+    } else {
+      this.setState({ isFilter: !this.state.isFilter });
+    }
   }
 
   handleSortChange = (column, direction) => this.setState({ sort: `${column}-${direction}` }, this.handleSort);
@@ -228,7 +232,7 @@ export default class Apps extends Component {
                 </IconButton>
               </Tooltip>
             </div>
-            {this.state.isFilter && (
+            {(this.state.isFilter || this.state.filters.length > 0) && (
               <FilterSelect
                 options={this.state.options}
                 onSelect={this.handleFilterChange}
