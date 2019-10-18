@@ -218,7 +218,7 @@ class Sites extends Component {
                 options={this.state.options}
                 onSelect={this.handleFilterChange}
                 filters={this.state.filters}
-                placeholder="Filter by Region"
+                placeholder="Filter by Region or Name"
               />
             )}
           </Toolbar>
