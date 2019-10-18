@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
   Tooltip, IconButton, Menu, MenuItem, Divider, ListItemIcon, ListItemText,
-  Switch, ListItemSecondaryAction, Collapse, Typography,
+  Switch, ListItemSecondaryAction, Collapse, Typography, Dialog, TextField,
+  DialogTitle, DialogContent, Button, DialogActions,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
@@ -18,6 +19,7 @@ import ReleaseIcon from '@material-ui/icons/Cloud';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import RemoveIcon from '@material-ui/icons/Clear';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import ReactGA from 'react-ga';
 
 import AutoBuildIcon from '../../components/Icons/CircuitBoard';
@@ -108,6 +110,8 @@ export default class AppInfo extends Component {
       restrictedSpace: false,
       message: '',
       basePath: `/apps/${this.props.match.params.app}`,
+      editDescriptionOpen: false,
+      newDescription: '',
     };
   }
 
@@ -118,6 +122,27 @@ export default class AppInfo extends Component {
       History.get().replace(`${this.state.basePath}/info`);
     }
 
+    await this.loadApp();
+
+    util.updateHistory('apps', this.props.match.params.app, this.props.match.params.app);
+  }
+
+  componentDidUpdate(prevProps) {
+    const currentTab = this.props.match.params.tab;
+    const prevTab = prevProps.match.params.tab;
+    // Handle bad tab navigation (not provided or not valid)
+    if (prevTab !== currentTab) {
+      if (!currentTab || !tabs.includes(currentTab)) {
+        History.get().replace(`${this.state.basePath}/info`);
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async loadApp() {
     try {
       const appResponse = await api.getApp(this.props.match.params.app);
       const favoriteResponse = await api.getFavorites();
@@ -149,22 +174,24 @@ export default class AppInfo extends Component {
         submitFail: true,
       });
     }
-    util.updateHistory('apps', this.props.match.params.app, this.props.match.params.app);
   }
 
-  componentDidUpdate(prevProps) {
-    const currentTab = this.props.match.params.tab;
-    const prevTab = prevProps.match.params.tab;
-    // Handle bad tab navigation (not provided or not valid)
-    if (prevTab !== currentTab) {
-      if (!currentTab || !tabs.includes(currentTab)) {
-        History.get().replace(`${this.state.basePath}/info`);
-      }
+  async reloadApp(message) {
+    this.setState({
+      loading: true,
+      app: {},
+      accountInfo: {},
+      isFavorite: false,
+      restrictedSpace: false,
+      isElevated: false,
+      isMaintenance: false,
+      editDescriptionOpen: false,
+      newDescription: '',
+    });
+    await this.loadApp();
+    if (message) {
+      this.setState({ message, open: true });
     }
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
   }
 
   handleClose = () => {
@@ -308,6 +335,15 @@ export default class AppInfo extends Component {
     this.setState({ open: false });
   }
 
+  handleSubmitNewDescription = async () => {
+    await api.patchAppDescription(this.state.app.name, this.state.newDescription);
+    this.reloadApp('Description updated!');
+  }
+
+  handleCloseNewDescription = () => {
+    this.setState({ editDescriptionOpen: false, newDescription: '' });
+  }
+
   reload = (message) => {
     this.setState({
       open: true,
@@ -412,6 +448,19 @@ export default class AppInfo extends Component {
               />
             </ListItemSecondaryAction>
           </MenuItem>
+          <MenuItem
+            style={style.menuItem}
+            onClick={() => {
+              this.setState({ editDescriptionOpen: true, menuOpen: false, anchorEl: null });
+            }}
+          >
+            <ListItemIcon
+              className="edit-description"
+            >
+              <EditIcon />
+            </ListItemIcon>
+            <ListItemText primary="Edit Description" />
+          </MenuItem>
           {this.state.app.git_url && (
             <MenuItem style={style.menuItem} onClick={() => window.open(this.state.app.git_url, '_blank')} >
               <ListItemIcon
@@ -448,8 +497,41 @@ export default class AppInfo extends Component {
     );
   }
 
+  renderEditDescription = () => {
+    const { app, editDescriptionOpen } = this.state;
+    return (
+      <Dialog
+        className="edit-description-dialog"
+        open={editDescriptionOpen}
+        onClose={() => { this.setState({ editDescriptionOpen: false }); }}
+      >
+        <DialogTitle>Edit Description</DialogTitle>
+        <DialogContent
+          style={{ minWidth: '500px' }}
+        >
+          <TextField
+            autoFocus
+            id="edit-description-textfield"
+            label="Description"
+            fullWidth
+            variant="outlined"
+            defaultValue={app.description}
+            onChange={(event) => {
+              this.setState({ newDescription: event.target.value });
+            }}
+            style={{ margin: '12px 0px' }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button className="cancel" color="secondary" onClick={this.handleCloseNewDescription}>Cancel</Button>
+          <Button className="save" color="primary" onClick={this.handleSubmitNewDescription}>Save</Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+
   render() {
-    const { loading, submitMessage, submitFail } = this.state;
+    const { loading, submitMessage, submitFail, editDescriptionOpen } = this.state;
     const currentTab = this.props.match.params.tab;
     if (loading) {
       let notFoundMessage;
@@ -646,6 +728,7 @@ export default class AppInfo extends Component {
             />
           )}
         </Card>
+        {editDescriptionOpen && this.renderEditDescription()}
         <ConfirmationModal
           className="delete-confirm"
           open={this.state.dOpen}

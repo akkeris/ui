@@ -41,6 +41,15 @@ export default class FavoritesList extends Component {
   }
 
   getApps(page, rowsPerPage) {
+    if (!this.props.favorites || this.props.favorites.length === 0) {
+      return (
+        <TableRow>
+          <TableCell>
+            No Results
+          </TableCell>
+        </TableRow>
+      );
+    }
     return this.props.favorites.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
       <TableRow
         className={app.name}
