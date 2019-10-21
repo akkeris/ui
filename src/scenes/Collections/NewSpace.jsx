@@ -350,7 +350,7 @@ export default class NewApp extends Component {
         <div style={style.div}>
           <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(space)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(space.length > 12 ? `${space.slice(0,12)}...` : space)}>
                   Create space name
               </StepLabel>
             </Step>

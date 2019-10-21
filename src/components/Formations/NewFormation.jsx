@@ -365,7 +365,7 @@ export default class NewFormation extends Component {
       <div style={style.stepper}>
         <Stepper activeStep={stepIndex}>
           <Step>
-            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type)}>
+            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type.length > 12 ? `${type.slice(0,12)}...` : type)}>
               Select Type
             </StepLabel>
           </Step>
