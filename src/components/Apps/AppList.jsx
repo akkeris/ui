@@ -10,14 +10,17 @@ import History from '../../config/History';
 const style = {
   tableRow: {
     cursor: 'pointer',
+    textDecoration: 'none',
   },
   tableRowColumn: {
     main: {
       fontSize: '16px',
+      textDecoration: 'none',
     },
     sub: {
       fontSize: '11px',
       textTransform: 'uppercase',
+      textDecoration: 'none',
     },
   },
   preview: {
@@ -43,10 +46,6 @@ export default class AppList extends Component {
     rowsPerPage: 15,
     sortBy: 'apps',
     sortDirection: 'asc',
-  }
-
-  handleRowSelection = (app) => {
-    History.get().push(`/apps/${app.name}/info`);
   }
 
   handleChangePage = (event, page) => {
@@ -79,11 +78,12 @@ export default class AppList extends Component {
     }
     return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => ( // eslint-disable-line
       <TableRow
+        component="a"
+        href={'/apps/' + app.name + '/info'}
         className={app.name}
         key={app.id}
         style={style.tableRow}
         hover
-        onClick={() => this.handleRowSelection(app)}
       >
         <TableCell style={style.tableRow}>
           <div style={style.tableRowColumn.main}>{app.name} {app.preview ? AppList.previewAnnotation(app.preview) : ''}</div>

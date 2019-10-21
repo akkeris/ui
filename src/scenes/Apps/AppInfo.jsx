@@ -368,14 +368,19 @@ export default class AppInfo extends Component {
       });
     }
   }
-
   changeActiveTab = (event, newTab) => {
     const currentTab = this.props.match.params.tab;
     if (currentTab !== newTab) {
       History.get().push(`${this.state.basePath}/${newTab}`);
     }
   }
-
+  cancelHref = (event) => {
+    if(event.preventDefault)
+      event.preventDefault();
+    if(event.stopPropagation)
+      event.stopPropagation();
+    return false;
+  }
   renderHeaderActions() {
     const { anchorEl, restrictedSpace, isElevated } = this.state;
     const menuOpen = Boolean(anchorEl);
@@ -576,6 +581,9 @@ export default class AppInfo extends Component {
             indicatorColor="primary"
           >
             <Tab
+              component="a"
+              href={"/apps/" + this.state.app.name + "/info"}
+              onClick={this.cancelHref}
               disableRipple
               className="info-tab"
               icon={<InfoIcon />}
@@ -583,6 +591,9 @@ export default class AppInfo extends Component {
               value="info"
             />
             <Tab
+              component="a"
+              href={"/apps/" + this.state.app.name + "/dynos"}
+              onClick={this.cancelHref}
               disableRipple
               className="dynos-tab"
               icon={<CPUIcon />}
@@ -590,6 +601,9 @@ export default class AppInfo extends Component {
               value="dynos"
             />
             <Tab
+              component="a"
+              href={"/apps/" + this.state.app.name + "/releases"}
+              onClick={this.cancelHref}
               disableRipple
               className="releases-tab"
               icon={<ReleaseIcon />}
@@ -597,6 +611,9 @@ export default class AppInfo extends Component {
               value="releases"
             />
             <Tab
+              component="a"
+              href={"/apps/" + this.state.app.name + "/addons"}
+              onClick={this.cancelHref}
               disableRipple
               className="addons-tab"
               icon={<AddonIcon />}
@@ -604,6 +621,9 @@ export default class AppInfo extends Component {
               value="addons"
             />
             <Tab
+              component="a"
+              href={"/apps/" + this.state.app.name + "/webhooks"}
+              onClick={this.cancelHref}
               disableRipple
               className="webhooks-tab"
               icon={<WebhookIcon />}
@@ -611,6 +631,9 @@ export default class AppInfo extends Component {
               value="webhooks"
             />
             <Tab
+              component="a"
+              href={"/apps/" + this.state.app.name + "/config"}
+              onClick={this.cancelHref}
               disableRipple
               className="config-tab"
               icon={<ConfigIcon />}
@@ -618,6 +641,9 @@ export default class AppInfo extends Component {
               value="config"
             />
             <Tab
+              component="a"
+              href={"/apps/" + this.state.app.name + "/metrics"}
+              onClick={this.cancelHref}
               disableRipple
               className="metrics-tab"
               icon={<MetricIcon />}
@@ -625,6 +651,9 @@ export default class AppInfo extends Component {
               value="metrics"
             />
             <Tab
+              component="a"
+              href={"/apps/" + this.state.app.name + "/logs"}
+              onClick={this.cancelHref}
               disableRipple
               className="logs-tab"
               icon={<LogIcon />}
