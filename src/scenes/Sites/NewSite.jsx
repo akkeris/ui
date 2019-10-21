@@ -289,7 +289,7 @@ export default class NewSite extends Component {
         <div style={style.div}>
           <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain.length > 12 ? `${domain.slice(0,12)}...` : domain)}>
                   Create domain
               </StepLabel>
             </Step>

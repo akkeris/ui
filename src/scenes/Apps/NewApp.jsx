@@ -297,8 +297,8 @@ export default class NewApp extends Component {
         <div style={style.div}>
           <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
-                  Create App Name
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app.length > 12 ? `${app.slice(0,12)}...` : app)}>
+                  Create app name
               </StepLabel>
             </Step>
             <Step>
