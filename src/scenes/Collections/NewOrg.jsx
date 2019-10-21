@@ -232,7 +232,7 @@ export default class NewOrg extends Component {
         <div style={style.div}>
           <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org.length > 12 ? `${org.slice(0,12)}...` : org)}>
                   Create org name
               </StepLabel>
             </Step>
