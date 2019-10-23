@@ -63,6 +63,10 @@ const style = {
       width: '58px',
     },
   },
+  title: {
+    flex: '0 0 auto',
+    marginLeft: '-12px',
+  },
 };
 
 export default class SpacesList extends Component {
@@ -131,16 +135,20 @@ export default class SpacesList extends Component {
     }
 
     const spaceFilters = values.filter(({ type }) => type === 'space');
+    const partialFilters = values.filter(({ type }) => type === 'partial');
 
-    const filterLabel = (space, type) => ({ label }) => (
+    const filterLabel = space => ({ label }) => (
       space.name.toLowerCase().includes(label.toLowerCase())
     );
+
+    const filterPartial = space => ({ label }) => space.name.search(new RegExp(`.*${label}.*`, 'i')) !== -1;
 
     const sortedSpaces = this.state.spaces.filter((space) => {
       if (spaceFilters.length > 0 && !spaceFilters.some(filterLabel(space, 'space'))) {
         return false;
+      } else if (partialFilters.length > 0 && !partialFilters.some(filterPartial(space))) {
+        return false;
       }
-      console.log('merp')
       return true;
     });
 
@@ -236,7 +244,7 @@ export default class SpacesList extends Component {
           </IconButton>
         </Toolbar>
         <Paper style={style.paper}>
-          <Toolbar >
+          <Toolbar style={{ paddingTop: '6px' }}>
             <div style={style.title}>
               <Tooltip title="Filter">
                 <IconButton aria-label="filter" onClick={this.handleFilter} >
@@ -249,7 +257,8 @@ export default class SpacesList extends Component {
                 options={this.state.options}
                 onSelect={this.handleFilterChange}
                 filters={this.state.filters}
-                placeholder="Filter by Name"
+                placeholder="Type to filter..."
+                textFieldProps={{ variant: 'outlined' }}
               />
             )}
           </Toolbar>

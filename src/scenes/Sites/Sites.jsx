@@ -123,15 +123,20 @@ class Sites extends Component {
 
     const regionFilters = values.filter(({ type }) => type === 'region');
     const siteFilters = values.filter(({ type }) => type === 'site');
+    const partialFilters = values.filter(({ type }) => type === 'partial');
 
     const filterLabel = (site, type) => ({ label }) => (
       type === 'site' ? site.domain.toLowerCase().includes(label.toLowerCase()) : label.toLowerCase().localeCompare(site.region.name.toLowerCase()) === 0
     );
 
+    const filterPartial = site => ({ label }) => site.domain.search(new RegExp(`.*${label}.*`, 'i')) !== -1;
+
     const filteredSites = this.state.sites.filter((site) => {
       if (regionFilters.length > 0 && !regionFilters.some(filterLabel(site, 'region'))) {
         return false;
       } else if (siteFilters.length > 0 && !siteFilters.some(filterLabel(site, 'site'))) {
+        return false;
+      } else if (partialFilters.length > 0 && !partialFilters.some(filterPartial(site))) {
         return false;
       }
       return true;
@@ -205,7 +210,7 @@ class Sites extends Component {
           </Link>
         </Toolbar>
         <Paper style={style.paper}>
-          <Toolbar >
+          <Toolbar style={{ paddingTop: '6px' }}>
             <div style={style.title}>
               <Tooltip title="Filter">
                 <IconButton aria-label="filter" onClick={this.handleFilter} >
@@ -218,7 +223,8 @@ class Sites extends Component {
                 options={this.state.options}
                 onSelect={this.handleFilterChange}
                 filters={this.state.filters}
-                placeholder="Filter by Region or Name"
+                placeholder="Type to filter..."
+                textFieldProps={{ variant: 'outlined' }}
               />
             )}
           </Toolbar>

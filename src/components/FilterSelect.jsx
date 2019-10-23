@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import Group from 'react-select/lib/components/Group';
 import AsyncSelect from 'react-select/lib/Async';
 import { ClearIndicator } from 'react-select/lib/components/indicators';
 import {
@@ -41,7 +42,8 @@ const styles = theme => ({
   },
   input: {
     display: 'flex',
-    padding: 0,
+    // padding: 0,
+    padding: '0 0 0 8px',
     // color: 'black',
     height: 'unset',
   },
@@ -71,6 +73,7 @@ const styles = theme => ({
   },
   placeholder: {
     position: 'absolute',
+    left: 10,
     // left: 40,
     fontSize: 16,
     color: '#DDDDDD',
@@ -114,7 +117,7 @@ const Control = props => (
     className="filter-select"
     fullWidth
     InputProps={{
-      disableUnderline: true,
+      // disableUnderline: true,
       inputComponent,
       className: `${props.selectProps.classes.Input}`,
       inputProps: {
@@ -150,7 +153,8 @@ const Option = props => (
     selected={props.isFocused}
     component="div"
     className={props.children}
-    style={{ fontWeight: props.isSelected ? 500 : 400 }}
+    style={{ fontWeight: props.isSelected ? 500 : 400,
+      fontStyle: (props.data && props.data.type && props.data.type === 'partial') ? 'italic' : undefined }}
     {...props.innerProps}
   >
     {props.children}
@@ -207,6 +211,7 @@ const LoadingIndicator = props => <CircularProgress size={20} className={props.s
 
 const CustomClearIndicator = props => <div className="filter-select-clear"><ClearIndicator {...props} /></div>;
 
+const CustomGroup = props => (props.label ? <Group {...props} /> : props.children);
 
 const components = {
   Control,
@@ -220,6 +225,7 @@ const components = {
   GroupHeading,
   LoadingIndicator,
   ClearIndicator: CustomClearIndicator,
+  Group: CustomGroup,
 };
 
 let timer = null;
@@ -232,14 +238,28 @@ class FilterSelect extends PureComponent {
   search = (input, cb) => {
     clearTimeout(timer);
     const { options, maxResults } = this.props;
-    if (!options || options.length === 0) {
-      cb([]);
-    } else {
-      timer = setTimeout(() => cb(options.map(item => ({
+
+    let results = [];
+
+    // Add input as an option for "partial" search
+    if (input && input.length > 0) {
+      results.push({
+        options: [{
+          label: input,
+          type: 'partial',
+          value: input,
+        }],
+      });
+    }
+
+    if (options && options.length !== 0) {
+      results = results.concat(options.map(item => ({
         label: item.label,
         options: item.options.filter(this.filter(input)).slice(0, maxResults),
-      }))), 300);
+      })));
     }
+
+    timer = setTimeout(() => cb(results), 300);
   }
 
   render() {
@@ -291,6 +311,7 @@ class FilterSelect extends PureComponent {
               Cle
               noOptionsMessage={({ inputValue }) => (inputValue.length > 0 ? 'No results' : 'Start typing...')}
               isMulti
+              textFieldProps={this.props.textFieldProps}
             />
           </div>
         </NoSsr>
@@ -317,12 +338,14 @@ FilterSelect.propTypes = {
   placeholder: PropTypes.string,
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
+  textFieldProps: PropTypes.object,
 };
 /* eslint-enable */
 
 FilterSelect.defaultProps = {
   maxResults: 10,
   placeholder: 'Filter',
+  textFieldProps: {},
 };
 
 export default withStyles(styles, { withTheme: true })(FilterSelect);

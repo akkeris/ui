@@ -126,13 +126,18 @@ class Pipelines extends Component {
     }
 
     const pipelineFilters = values.filter(({ type }) => type === 'pipeline');
+    const partialFilters = values.filter(({ type }) => type === 'partial');
 
-    const filterLabel = (pipeline, type) => ({ label }) => (
+    const filterPartial = pipeline => ({ label }) => pipeline.name.search(new RegExp(`.*${label}.*`, 'i')) !== -1;
+
+    const filterLabel = pipeline => ({ label }) => (
       pipeline.name.toLowerCase().includes(label.toLowerCase())
     );
 
     const sortedPipelines = this.state.pipelines.filter((pipeline) => {
       if (pipelineFilters.length > 0 && !pipelineFilters.some(filterLabel(pipeline, 'pipeline'))) {
+        return false;
+      } else if (partialFilters.length > 0 && !partialFilters.some(filterPartial(pipeline))) {
         return false;
       }
       return true;
@@ -265,7 +270,7 @@ class Pipelines extends Component {
           )}
         </Toolbar>
         <Paper style={style.paper}>
-          <Toolbar >
+          <Toolbar style={{ paddingTop: '6px' }}>
             <div style={style.title}>
               <Tooltip title="Filter">
                 <IconButton aria-label="filter" onClick={this.handleFilter} >
@@ -278,7 +283,8 @@ class Pipelines extends Component {
                 options={this.state.options}
                 onSelect={this.handleFilterChange}
                 filters={this.state.filters}
-                placeholder="Filter by Name"
+                placeholder="Type to filter..."
+                textFieldProps={{ variant: 'outlined' }}
               />
             )}
           </Toolbar>
