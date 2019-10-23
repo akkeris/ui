@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
 import {
-  Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress,
+  Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress, Menu, withStyles,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
+
+const StyledDialog = withStyles({
+  paper: {
+    overflow: "visible"
+  }
+})(Dialog);
 
 /* eslint-disable react/prefer-stateless-function */
 export default class ConfirmationModal extends Component {
@@ -27,10 +33,10 @@ export default class ConfirmationModal extends Component {
   render() {
     const { loading } = this.state;
     return (
-      <Dialog
+      <StyledDialog
         className={this.props.className}
         open={this.props.open}
-        maxWidth="sm"
+        maxWidth={this.props.style ? this.props.style.maxWidth : 'sm'}
         fullWidth
       >
         <DialogTitle>{this.props.title}</DialogTitle>
@@ -66,7 +72,7 @@ export default class ConfirmationModal extends Component {
             </Button>
           )}
         </DialogActions>
-      </Dialog>
+      </StyledDialog>
     );
   }
 }

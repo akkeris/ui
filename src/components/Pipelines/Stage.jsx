@@ -11,6 +11,7 @@ import ReactGA from 'react-ga';
 
 import api from '../../services/api';
 import util from '../../services/util';
+import Search from '../Search';
 import ConfirmationModal from '../ConfirmationModal';
 import { NewPipelineCoupling } from '../../components/Pipelines';
 import History from '../../config/History';
@@ -79,6 +80,8 @@ export default class Stage extends Component {
       coupling: null,
       stageCouplings: [],
       safePromote: true,
+      releases: [],
+      release: null,
     };
   }
 
@@ -126,10 +129,15 @@ export default class Stage extends Component {
     this.setState({ new: false });
   }
 
-  handlePromoteConfirmation = (coupling) => {
+  handlePromoteConfirmation = async (coupling) => {
+    let { data: releases } = await api.getRawReleases(coupling.app.id);
+    if (releases) {
+      releases = releases.map(x => ({ label: x.id, value: x.id }));
+    }
     this.setState({
       promoteOpen: true,
       coupling,
+      releases,
     });
   }
 
@@ -138,6 +146,7 @@ export default class Stage extends Component {
       promoteOpen: false,
       coupling: null,
       safePromote: true,
+      release: null,
     });
   }
 
@@ -165,17 +174,20 @@ export default class Stage extends Component {
 
   handlePromote = async () => {
     const targets = this.getTargets(this.state.coupling.stage);
+
     if (targets.length === 0) {
       this.setState({ promoteOpen: false });
       this.props.onError('No Promotion Targets', 404);
     } else {
       this.setState({ loading: true });
+      const release = this.state.release ? this.state.release.value : null;
       try {
         await api.promotePipeline(
           this.props.pipeline.id,
           this.state.coupling.app.id,
           targets,
           this.state.safePromote,
+          release,
         );
         this.reload(`Promoted: ${this.state.coupling.app.name} to ${targets[0].stage}`);
         ReactGA.event({
@@ -191,6 +203,11 @@ export default class Stage extends Component {
 
   handleGoToApp = (app) => {
     History.get().push(`/apps/${app}/info`);
+  }
+
+  handleReleaseChange = (event) => {
+    const release = this.state.releases.find(a => a.value === event.value);
+    this.setState({ release });
   }
 
   handleNewCouplingCancel = () => {
@@ -311,19 +328,27 @@ export default class Stage extends Component {
           message="Are you sure you want to promote?"
           title="Promote"
           loading={this.state.loading}
-          actions={
+          style={{ maxWidth: 'md' }}
+          actions={[
+            <div style={{ width: '100%', marginRight: '12px', marginLeft: '12px' }}>
+              <Search
+                options={this.state.releases}
+                value={this.state.release}
+                onChange={this.handleReleaseChange}
+                placeholder="Specify Release (Latest)"
+              />
+            </div>,
             <FormControlLabel
               control={
                 <Checkbox
                   className="force-check"
                   checked={!this.state.safePromote}
                   onChange={this.handleSafePromoteCheck}
-                  style={{ maxWidth: '120', textAlign: 'left', marginLeft: '12' }}
-                  iconStyle={{ textAlign: 'left' }}
+                  style={{ textAlign: 'left', marginLeft: '12' }}
                 />}
               label="Force"
-            />
-          }
+            />,
+          ]}
         />
         <ConfirmationModal
           className={`${this.props.stage}-remove-confirm`}
