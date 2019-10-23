@@ -6,9 +6,9 @@ import {
 } from '@material-ui/core';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import LightbulbIcon from '@material-ui/docs/svgIcons/LightbulbOutline';
 import PropTypes from 'prop-types';
 import { ResponsiveContainer, Line, LineChart, XAxis, YAxis } from 'recharts';
+import LightbulbIcon from '../../components/Icons/LightbulbOutline';
 import api from '../../services/api';
 
 /* eslint-disable react/no-array-index-key */
