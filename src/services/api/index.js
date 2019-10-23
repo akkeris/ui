@@ -234,6 +234,10 @@ async function getReleases(app) {
     .map(async release => Object.assign(release, { slug: (await axios.get(`/api/slugs/${release.slug.id}`)).data })));
 }
 
+async function getRawReleases(app) {
+  return axios.get(`/api/apps/${app}/releases`);
+}
+
 function createRelease(app, slug, release, description) {
   return axios.post(`/api/apps/${app}/releases`, {
     slug,
@@ -305,7 +309,7 @@ function createPipelineCoupling(pipeline, app, stage) {
 }
 
 // targets must be array with objects with targets[i].app.id
-function promotePipeline(pipeline, source, targets, safe) {
+function promotePipeline(pipeline, source, targets, safe, release) {
   return axios.post('/api/pipeline-promotions', {
     pipeline: {
       id: pipeline,
@@ -313,6 +317,9 @@ function promotePipeline(pipeline, source, targets, safe) {
     source: {
       app: {
         id: source,
+        release: {
+          id: release,
+        },
       },
     },
     targets,
@@ -340,6 +347,7 @@ function getAccount() {
 function getLogSession(app) {
   return axios.post(`/api/apps/${app}/log-sessions`, { lines: 10, tail: true });
 }
+
 function getLogPlex(url, cb) {
   return axios({
     method: 'post',
@@ -517,4 +525,5 @@ export default {
   notify,
   rebuildLatest,
   patchAppDescription,
+  getRawReleases,
 };
