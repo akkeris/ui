@@ -147,19 +147,25 @@ const NoOptionsMessage = props => (
   </Typography>
 );
 
-const Option = props => (
-  <MenuItem
-    buttonRef={props.innerRef}
-    selected={props.isFocused}
-    component="div"
-    className={props.children}
-    style={{ fontWeight: props.isSelected ? 500 : 400,
-      fontStyle: (props.data && props.data.type && props.data.type === 'partial') ? 'italic' : undefined }}
-    {...props.innerProps}
-  >
-    {props.children}
-  </MenuItem>
-);
+const Option = (props) => {
+  const isPartial = props.data && props.data.type && props.data.type === 'partial';
+  return (
+    <MenuItem
+      buttonRef={props.innerRef}
+      selected={props.isFocused}
+      component="div"
+      className={props.children}
+      style={{
+        fontWeight: props.isSelected ? 500 : 400,
+        fontStyle: isPartial ? 'italic' : undefined,
+        marginTop: isPartial ? '-4px' : undefined,
+      }}
+      {...props.innerProps}
+    >
+      {props.children}
+    </MenuItem>
+  );
+};
 
 const GroupHeading = props => (
   <div className={`${props.selectProps.classes.headingContainer} group-heading`}>
