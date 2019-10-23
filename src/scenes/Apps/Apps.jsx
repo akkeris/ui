@@ -141,10 +141,13 @@ export default class Apps extends Component {
     const regionFilters = values.filter(({ type }) => type === 'region');
     const spaceFilters = values.filter(({ type }) => type === 'space');
     const appFilters = values.filter(({ type }) => type === 'app');
+    const partialFilters = values.filter(({ type }) => type === 'partial');
 
     const filterLabel = (app, type) => ({ label }) => (
       type === 'app' ? app.name.toLowerCase().includes(label.toLowerCase()) : label.toLowerCase().localeCompare(app[type === 'region' ? 'region' : 'space'].name.toLowerCase()) === 0
     );
+
+    const filterPartial = app => ({ label }) => app.name.search(new RegExp(`.*${label}.*`, 'i')) !== -1;
 
     const filteredApps = this.state.apps.filter((app) => {
       if (regionFilters.length > 0 && !regionFilters.some(filterLabel(app, 'region'))) {
@@ -152,6 +155,8 @@ export default class Apps extends Component {
       } else if (spaceFilters.length > 0 && !spaceFilters.some(filterLabel(app, 'space'))) {
         return false;
       } else if (appFilters.length > 0 && !appFilters.some(filterLabel(app, 'app'))) {
+        return false;
+      } else if (partialFilters.length > 0 && !partialFilters.some(filterPartial(app))) {
         return false;
       }
       return true;
@@ -223,7 +228,7 @@ export default class Apps extends Component {
           </IconButton>
         </Toolbar>
         <Paper style={style.paper}>
-          <Toolbar >
+          <Toolbar style={{ paddingTop: '6px' }}>
             <div style={style.title}>
               <Tooltip title="Filter">
                 <IconButton aria-label="filter" onClick={this.handleFilter} >
@@ -236,7 +241,8 @@ export default class Apps extends Component {
                 options={this.state.options}
                 onSelect={this.handleFilterChange}
                 filters={this.state.filters}
-                placeholder="Filter by Region or Space"
+                placeholder="Type to filter..."
+                textFieldProps={{ variant: 'outlined' }}
               />
             )}
           </Toolbar>
