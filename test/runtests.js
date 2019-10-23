@@ -1,6 +1,7 @@
 const createTestCafe = require('testcafe');
 const s3 = require('@auth0/s3');
 const utils = require('./utils');
+const fs = require('fs');
 
 /* eslint-disable no-console */
 
@@ -132,12 +133,16 @@ async function runTests() {
       tests = `${__dirname}/**/e2e/*`;
     }
 
+    if (!fs.existsSync(`${process.cwd()}/screenshots`)) {
+      fs.mkdirSync(`${process.cwd()}/screenshots`);
+    }
+
     const testResult = await testcafe
       .createRunner()
       .src(tests)
       .browsers(browsers)
       .reporter('spec')
-      .screenshots('screenshots', true, '${DATE}_${TIME}/${FIXTURE}/${TEST}/${BROWSER}/${FILE_INDEX}.png') // eslint-disable-line
+      .screenshots(`${process.cwd()}/screenshots`, true, '${DATE}_${TIME}/${FIXTURE}/${TEST}/${BROWSER}/${FILE_INDEX}.png') // eslint-disable-line
       .concurrency(process.env.TESTCAFE_CONCURRENCY ? Number(process.env.TESTCAFE_CONCURRENCY) : 1)
       .run();
 
