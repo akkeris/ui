@@ -50,6 +50,10 @@ export default class AppList extends Component {
     isFilter: false,
   }
 
+  handleRowSelection = (app) => {
+    History.get().push(`/apps/${app.name}/info`);
+  }
+
   handleChangePage = (event, page) => {
     this.setState({ page });
   };
