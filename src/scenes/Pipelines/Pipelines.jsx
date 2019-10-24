@@ -273,7 +273,7 @@ class Pipelines extends Component {
           <Toolbar style={{ paddingTop: '6px' }}>
             <div style={style.title}>
               <Tooltip title="Filter">
-                <IconButton aria-label="filter" onClick={this.handleFilter} >
+                <IconButton aria-label="filter" onClick={this.handleFilter} className="addFilter">
                   <FilterListIcon />
                 </IconButton>
               </Tooltip>
