@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import {
-  Toolbar, IconButton, CircularProgress, Paper, MenuItem,
+  Toolbar, IconButton, CircularProgress, Paper, MenuItem, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import FilterListIcon from '@material-ui/icons/FilterList';
 import { Link } from 'react-router-dom';
 import SitesList from '../../components/Sites';
 import FilterSelect from '../../components/FilterSelect';
@@ -55,6 +56,10 @@ const style = {
   regionContainer: {
     minWidth: '145px',
   },
+  title: {
+    flex: '0 0 auto',
+    marginLeft: '-12px',
+  },
 };
 
 class Sites extends Component {
@@ -68,6 +73,8 @@ class Sites extends Component {
       loading: true,
       filters: [],
       sort: 'site-asc',
+      isFilter: false,
+      options: [],
     };
   }
 
@@ -83,6 +90,10 @@ class Sites extends Component {
       {
         label: 'Regions',
         options: regions.map(region => ({ label: region.name, value: region.name, type: 'region' })),
+      },
+      {
+        label: 'Sites',
+        options: sites.map(site => ({ label: site.domain, value: site.domain, type: 'site' })),
       },
     ];
 
@@ -110,13 +121,26 @@ class Sites extends Component {
       return;
     }
 
-    const filterLabel = site => ({ label }) => (
-      label.toLowerCase().localeCompare(site.region.name.toLowerCase()) === 0
+    const regionFilters = values.filter(({ type }) => type === 'region');
+    const siteFilters = values.filter(({ type }) => type === 'site');
+    const partialFilters = values.filter(({ type }) => type === 'partial');
+
+    const filterLabel = (site, type) => ({ label }) => (
+      type === 'site' ? site.domain.toLowerCase().includes(label.toLowerCase()) : label.toLowerCase().localeCompare(site.region.name.toLowerCase()) === 0
     );
 
-    const filteredSites = this.state.sites.filter(site => (
-      !(values.length > 0 && !values.some(filterLabel(site)))),
-    );
+    const filterPartial = site => ({ label }) => site.domain.search(new RegExp(`.*${label}.*`, 'i')) !== -1;
+
+    const filteredSites = this.state.sites.filter((site) => {
+      if (regionFilters.length > 0 && !regionFilters.some(filterLabel(site, 'region'))) {
+        return false;
+      } else if (siteFilters.length > 0 && !siteFilters.some(filterLabel(site, 'site'))) {
+        return false;
+      } else if (partialFilters.length > 0 && !partialFilters.some(filterPartial(site))) {
+        return false;
+      }
+      return true;
+    });
 
     this.setState({ filteredSites, filters: values }, this.handleSort);
 
@@ -152,6 +176,14 @@ class Sites extends Component {
     this.setState({ filteredSites: sortedSites });
   }
 
+  handleFilter = () => {
+    if (this.state.filters.length > 0) {
+      this.setState({ isFilter: true });
+    } else {
+      this.setState({ isFilter: !this.state.isFilter });
+    }
+  }
+
   handleSortChange = (column, direction) => this.setState({ sort: `${column}-${direction}` }, this.handleSort);
 
   renderRegions() {
@@ -171,12 +203,6 @@ class Sites extends Component {
     return (
       <div>
         <Toolbar style={style.toolbar} disableGutters>
-          <FilterSelect
-            options={this.state.options}
-            onSelect={this.handleFilterChange}
-            filters={this.state.filters}
-            placeholder="Filter by Region"
-          />
           <Link to="/sites/new" style={style.link}>
             <IconButton className="new-site" style={{ padding: '6px' }}>
               <AddIcon style={{ color: 'white' }} />
@@ -184,6 +210,24 @@ class Sites extends Component {
           </Link>
         </Toolbar>
         <Paper style={style.paper}>
+          <Toolbar style={{ paddingTop: '6px' }}>
+            <div style={style.title}>
+              <Tooltip title="Filter">
+                <IconButton aria-label="filter" onClick={this.handleFilter} className="addFilter">
+                  <FilterListIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
+            {(this.state.isFilter || this.state.filters.length > 0) && (
+              <FilterSelect
+                options={this.state.options}
+                onSelect={this.handleFilterChange}
+                filters={this.state.filters}
+                placeholder="Type to filter..."
+                textFieldProps={{ variant: 'outlined' }}
+              />
+            )}
+          </Toolbar>
           <SitesList
             sites={this.state.filteredSites}
             onSortChange={this.handleSortChange}

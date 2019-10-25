@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import {
-  Toolbar, IconButton, CircularProgress, Paper,
+  Toolbar, IconButton, CircularProgress, Paper, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import FilterListIcon from '@material-ui/icons/FilterList';
 import api from '../../services/api';
 import AppList from '../../components/Apps/AppList';
 import History from '../../config/History';
@@ -53,6 +54,13 @@ const style = {
   regionContainer: {
     minWidth: '145px',
   },
+  spacer: {
+    flex: '1 1 10%',
+  },
+  title: {
+    flex: '0 0 auto',
+    marginLeft: '-12px',
+  },
 };
 
 export default class Apps extends Component {
@@ -71,6 +79,7 @@ export default class Apps extends Component {
       options: [],
       filters: [],
       sort: 'apps-asc',
+      isFilter: false,
     };
   }
 
@@ -96,6 +105,10 @@ export default class Apps extends Component {
       {
         label: 'Regions',
         options: regions.map(region => ({ label: region.name, value: region.name, type: 'region' })),
+      },
+      {
+        label: 'Apps',
+        options: apps.map(app => ({ label: app.name, value: app.name, type: 'app' })),
       },
     ];
 
@@ -127,15 +140,23 @@ export default class Apps extends Component {
 
     const regionFilters = values.filter(({ type }) => type === 'region');
     const spaceFilters = values.filter(({ type }) => type === 'space');
+    const appFilters = values.filter(({ type }) => type === 'app');
+    const partialFilters = values.filter(({ type }) => type === 'partial');
 
     const filterLabel = (app, type) => ({ label }) => (
-      label.toLowerCase().localeCompare(app[type === 'region' ? 'region' : 'space'].name.toLowerCase()) === 0
+      type === 'app' ? app.name.toLowerCase().includes(label.toLowerCase()) : label.toLowerCase().localeCompare(app[type === 'region' ? 'region' : 'space'].name.toLowerCase()) === 0
     );
+
+    const filterPartial = app => ({ label }) => app.name.search(new RegExp(`.*${label}.*`, 'i')) !== -1;
 
     const filteredApps = this.state.apps.filter((app) => {
       if (regionFilters.length > 0 && !regionFilters.some(filterLabel(app, 'region'))) {
         return false;
       } else if (spaceFilters.length > 0 && !spaceFilters.some(filterLabel(app, 'space'))) {
+        return false;
+      } else if (appFilters.length > 0 && !appFilters.some(filterLabel(app, 'app'))) {
+        return false;
+      } else if (partialFilters.length > 0 && !partialFilters.some(filterPartial(app))) {
         return false;
       }
       return true;
@@ -180,6 +201,14 @@ export default class Apps extends Component {
     this.setState({ filteredApps: sortedApps });
   }
 
+  handleFilter = () => {
+    if (this.state.filters.length > 0) {
+      this.setState({ isFilter: true });
+    } else {
+      this.setState({ isFilter: !this.state.isFilter });
+    }
+  }
+
   handleSortChange = (column, direction) => this.setState({ sort: `${column}-${direction}` }, this.handleSort);
 
   render() {
@@ -194,17 +223,29 @@ export default class Apps extends Component {
     return (
       <div>
         <Toolbar style={style.toolbar} disableGutters>
-          <FilterSelect
-            options={this.state.options}
-            onSelect={this.handleFilterChange}
-            filters={this.state.filters}
-            placeholder="Filter by Region or Space"
-          />
           <IconButton style={{ marginLeft: 'auto', padding: '6px' }} onClick={() => History.get().push('/apps/new')} className="new-app">
             <AddIcon style={{ color: 'white' }} />
           </IconButton>
         </Toolbar>
         <Paper style={style.paper}>
+          <Toolbar style={{ paddingTop: '6px' }}>
+            <div style={style.title}>
+              <Tooltip title="Filter">
+                <IconButton aria-label="filter" onClick={this.handleFilter} className="addFilter" >
+                  <FilterListIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
+            {(this.state.isFilter || this.state.filters.length > 0) && (
+              <FilterSelect
+                options={this.state.options}
+                onSelect={this.handleFilterChange}
+                filters={this.state.filters}
+                placeholder="Type to filter..."
+                textFieldProps={{ variant: 'outlined' }}
+              />
+            )}
+          </Toolbar>
           <AppList
             className="apps"
             apps={this.state.filteredApps}

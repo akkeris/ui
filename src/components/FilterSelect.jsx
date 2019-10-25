@@ -1,13 +1,13 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import Group from 'react-select/lib/components/Group';
 import AsyncSelect from 'react-select/lib/Async';
 import { ClearIndicator } from 'react-select/lib/components/indicators';
 import {
-  NoSsr, Typography, TextField, MenuItem, Paper, Divider, InputAdornment, CircularProgress,
+  NoSsr, Typography, TextField, MenuItem, Paper, Divider, CircularProgress,
   Chip,
 } from '@material-ui/core';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
-import FilterIcon from '@material-ui/icons/FilterList';
 import CancelIcon from '@material-ui/icons/Cancel';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -38,12 +38,13 @@ const styles = theme => ({
     flexGrow: 1,
   },
   Input: {
-    color: 'white',
+    // color: 'black',
   },
   input: {
     display: 'flex',
-    padding: 0,
-    color: 'white',
+    // padding: 0,
+    padding: '0 0 0 8px',
+    // color: 'black',
     height: 'unset',
   },
   valueContainer: {
@@ -51,7 +52,7 @@ const styles = theme => ({
     flexWrap: 'wrap',
     flex: 1,
     alignItems: 'center',
-    color: 'white',
+    // color: 'black',
     overflow: 'hidden',
   },
   chip: {
@@ -68,11 +69,12 @@ const styles = theme => ({
   },
   singleValue: {
     fontSize: 16,
-    color: 'white',
+    // color: 'black',
   },
   placeholder: {
     position: 'absolute',
-    left: 40,
+    left: 10,
+    // left: 40,
     fontSize: 16,
     color: '#DDDDDD',
   },
@@ -98,7 +100,7 @@ const styles = theme => ({
     marginLeft: '6px',
   },
   loadingIndicator: {
-    color: 'white',
+    // color: 'white',
     marginRight: '12px',
   },
 });
@@ -115,7 +117,7 @@ const Control = props => (
     className="filter-select"
     fullWidth
     InputProps={{
-      disableUnderline: true,
+      // disableUnderline: true,
       inputComponent,
       className: `${props.selectProps.classes.Input}`,
       inputProps: {
@@ -124,11 +126,6 @@ const Control = props => (
         children: props.children,
         ...props.innerProps,
       },
-      startAdornment: (
-        <InputAdornment position="start">
-          <FilterIcon className={props.selectProps.classes.searchIcon} htmlColor="white" />
-        </InputAdornment>
-      ),
     }}
     {...props.selectProps.textFieldProps}
   />
@@ -142,7 +139,7 @@ const Menu = props => (
 
 const NoOptionsMessage = props => (
   <Typography
-    color="textSecondary"
+    // color="textSecondary"
     className={props.selectProps.classes.noOptionsMessage}
     {...props.innerProps}
   >
@@ -150,23 +147,30 @@ const NoOptionsMessage = props => (
   </Typography>
 );
 
-const Option = props => (
-  <MenuItem
-    buttonRef={props.innerRef}
-    selected={props.isFocused}
-    component="div"
-    className={props.children}
-    style={{ fontWeight: props.isSelected ? 500 : 400 }}
-    {...props.innerProps}
-  >
-    {props.children}
-  </MenuItem>
-);
+const Option = (props) => {
+  const isPartial = props.data && props.data.type && props.data.type === 'partial';
+  return (
+    <MenuItem
+      buttonRef={props.innerRef}
+      selected={props.isFocused}
+      component="div"
+      className={props.children}
+      style={{
+        fontWeight: props.isSelected ? 500 : 400,
+        fontStyle: isPartial ? 'italic' : undefined,
+        marginTop: isPartial ? '-4px' : undefined,
+      }}
+      {...props.innerProps}
+    >
+      {props.children}
+    </MenuItem>
+  );
+};
 
 const GroupHeading = props => (
   <div className={`${props.selectProps.classes.headingContainer} group-heading`}>
     <Typography
-      color="textSecondary"
+      // color="textSecondary"
       className={props.selectProps.classes.groupHeading}
       {...props.innerProps}
     >
@@ -178,7 +182,7 @@ const GroupHeading = props => (
 
 const Placeholder = props => (
   <Typography
-    color="textSecondary"
+    // color="textSecondary"
     className={props.selectProps.classes.placeholder}
     {...props.innerProps}
   >
@@ -213,6 +217,7 @@ const LoadingIndicator = props => <CircularProgress size={20} className={props.s
 
 const CustomClearIndicator = props => <div className="filter-select-clear"><ClearIndicator {...props} /></div>;
 
+const CustomGroup = props => (props.label ? <Group {...props} /> : props.children);
 
 const components = {
   Control,
@@ -226,6 +231,7 @@ const components = {
   GroupHeading,
   LoadingIndicator,
   ClearIndicator: CustomClearIndicator,
+  Group: CustomGroup,
 };
 
 let timer = null;
@@ -238,14 +244,28 @@ class FilterSelect extends PureComponent {
   search = (input, cb) => {
     clearTimeout(timer);
     const { options, maxResults } = this.props;
-    if (!options || options.length === 0) {
-      cb([]);
-    } else {
-      timer = setTimeout(() => cb(options.map(item => ({
+
+    let results = [];
+
+    // Add input as an option for "partial" search
+    if (input && input.length > 0) {
+      results.push({
+        options: [{
+          label: input,
+          type: 'partial',
+          value: input,
+        }],
+      });
+    }
+
+    if (options && options.length !== 0) {
+      results = results.concat(options.map(item => ({
         label: item.label,
         options: item.options.filter(this.filter(input)).slice(0, maxResults),
-      }))), 300);
+      })));
     }
+
+    timer = setTimeout(() => cb(results), 300);
   }
 
   render() {
@@ -254,7 +274,7 @@ class FilterSelect extends PureComponent {
     const selectStyles = {
       input: base => ({
         ...base,
-        color: 'white',
+        color: 'black',
         '& input': {
           font: 'inherit',
         },
@@ -263,14 +283,14 @@ class FilterSelect extends PureComponent {
         ...base,
         color: '#DDDDDD',
         '&:hover': {
-          color: 'white',
+          color: 'black',
         },
       }),
       dropdownIndicator: base => ({
         ...base,
         color: '#DDDDDD',
         '&:hover': {
-          color: 'white',
+          color: 'black',
         },
       }),
       indicatorSeparator: base => ({
@@ -297,6 +317,7 @@ class FilterSelect extends PureComponent {
               Cle
               noOptionsMessage={({ inputValue }) => (inputValue.length > 0 ? 'No results' : 'Start typing...')}
               isMulti
+              textFieldProps={this.props.textFieldProps}
             />
           </div>
         </NoSsr>
@@ -323,12 +344,14 @@ FilterSelect.propTypes = {
   placeholder: PropTypes.string,
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
+  textFieldProps: PropTypes.object,
 };
 /* eslint-enable */
 
 FilterSelect.defaultProps = {
   maxResults: 10,
   placeholder: 'Filter',
+  textFieldProps: {},
 };
 
 export default withStyles(styles, { withTheme: true })(FilterSelect);

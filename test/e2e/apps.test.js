@@ -47,6 +47,7 @@ test // eslint-disable-line
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
+      .click('button.addFilter')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
       .expect(Selector(`.app-list .${appName}-testcafe`).exists)
@@ -65,23 +66,13 @@ test // eslint-disable-line
       .click('.filter-select-results .us-seattle')
 
       .click('.filter-select-input')
-      .typeText(Selector('.filter-select-input input'), 'test')
+      .typeText(Selector('.filter-select-input input'), 'testcafe')
       .expect(Selector('.filter-select-results .testcafe').exists)
       .ok()
       .click('.filter-select-results .testcafe')
 
       .expect(Selector(`.app-list .${appName}-testcafe`).innerText)
-      .contains(`${appName}-testcafe`)
-
-      // This test is problematic. It requires the "test" space to have no apps in it.
-      // TODO: Need to fix or remove this test
-      .click('.filter-select-clear')
-      .typeText(Selector('.filter-select-input input'), 'test')
-      .click('.filter-select-results .test')
-      .expect(Selector('.app-list tbody').childElementCount)
-      .eql(1)
-      .expect(Selector('.app-list tbody td').innerText)
-      .contains('No Results');
+      .contains(`${appName}-testcafe`);
   })
   .after(async (t) => {
     const appName = t.ctx.appName;
@@ -162,6 +153,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
 
     // Verify that app exists
     .navigateTo(`${baseUrl}/apps`)
+    .click('button.addFilter')
     .typeText(Selector('.filter-select-input input'), 'testcafe')
     .click('.filter-select-results .testcafe')
     .expect(Selector(`.app-list .${appName}-testcafe`).exists)
@@ -188,6 +180,7 @@ test('Should be able to create and delete an app', async (t) => { // eslint-disa
     .contains('The requested application already exists.')
     .click('.ok')
     .navigateTo(`${baseUrl}/apps`)
+    .click('button.addFilter')
     .click('.filter-select-clear')
 
   // check if app was created
@@ -353,6 +346,7 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
+      .click('button.addFilter')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
       .expect(Selector(`.app-list .${appName}-testcafe`).exists)
@@ -683,6 +677,7 @@ test // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
+      .click('button.addFilter')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
       .expect(Selector(`.app-list .${appName}-testcafe`).exists)
@@ -703,6 +698,7 @@ test // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/apps`)
+      .click('button.addFilter')
       .click('.filter-select-clear')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')

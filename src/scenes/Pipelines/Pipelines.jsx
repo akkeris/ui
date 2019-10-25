@@ -5,10 +5,12 @@ import {
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
+import FilterListIcon from '@material-ui/icons/FilterList';
 
 import { NewPipeline } from '../../components/Pipelines';
 import api from '../../services/api';
 import History from '../../config/History';
+import FilterSelect from '../../components/FilterSelect';
 
 const style = {
   refresh: {
@@ -67,6 +69,10 @@ const style = {
   cancelIcon: {
     margin: '5px',
   },
+  title: {
+    flex: '0 0 auto',
+    marginLeft: '-12px',
+  },
 };
 
 class Pipelines extends Component {
@@ -83,16 +89,71 @@ class Pipelines extends Component {
       rowsPerPage: 15,
       sortBy: 'name',
       sortDirection: 'asc',
+      options: [],
+      filters: [],
+      isFilter: false,
     };
   }
 
   componentDidMount() {
-    this.getPipelines();
+    this.getData();
   }
 
-  getPipelines = async () => {
+  getData = async () => {
     const { data: pipelines } = await api.getPipelines();
-    this.setState({ pipelines, sortedPipelines: pipelines, loading: false });
+    const options = [
+      {
+        label: 'Pipeline',
+        options: pipelines.map(pipeline => ({ label: pipeline.name, value: pipeline.name, type: 'pipeline' })),
+      },
+    ];
+    this.setState({ pipelines, sortedPipelines: pipelines, loading: false, options }, () => {
+      let values;
+      try {
+        values = JSON.parse(localStorage.getItem('akkeris_pipeline_filters'));
+      } catch (e) {
+        values = [];
+      }
+      this.handleFilterChange(values);
+    });
+  }
+
+  handleFilterChange = (values) => {
+    if (!values || values.length === 0) {
+      this.setState({ sortedPipelines: this.state.pipelines, filters: [] }, this.handleSort);
+      localStorage.setItem('akkeris_pipeline_filters', JSON.stringify(values));
+      return;
+    }
+
+    const pipelineFilters = values.filter(({ type }) => type === 'pipeline');
+    const partialFilters = values.filter(({ type }) => type === 'partial');
+
+    const filterPartial = pipeline => ({ label }) => pipeline.name.search(new RegExp(`.*${label}.*`, 'i')) !== -1;
+
+    const filterLabel = pipeline => ({ label }) => (
+      pipeline.name.toLowerCase().includes(label.toLowerCase())
+    );
+
+    const sortedPipelines = this.state.pipelines.filter((pipeline) => {
+      if (pipelineFilters.length > 0 && !pipelineFilters.some(filterLabel(pipeline, 'pipeline'))) {
+        return false;
+      } else if (partialFilters.length > 0 && !partialFilters.some(filterPartial(pipeline))) {
+        return false;
+      }
+      return true;
+    });
+
+    this.setState({ sortedPipelines, filters: values }, this.handleSort);
+
+    localStorage.setItem('akkeris_pipeline_filters', JSON.stringify(values));
+  }
+
+  handleFilter = () => {
+    if (this.state.filters.length > 0) {
+      this.setState({ isFilter: true });
+    } else {
+      this.setState({ isFilter: !this.state.isFilter });
+    }
   }
 
   handleRowSelection = (name) => {
@@ -209,6 +270,24 @@ class Pipelines extends Component {
           )}
         </Toolbar>
         <Paper style={style.paper}>
+          <Toolbar style={{ paddingTop: '6px' }}>
+            <div style={style.title}>
+              <Tooltip title="Filter">
+                <IconButton aria-label="filter" onClick={this.handleFilter} className="addFilter">
+                  <FilterListIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
+            {(this.state.isFilter || this.state.filters.length > 0) && (
+              <FilterSelect
+                options={this.state.options}
+                onSelect={this.handleFilterChange}
+                filters={this.state.filters}
+                placeholder="Type to filter..."
+                textFieldProps={{ variant: 'outlined' }}
+              />
+            )}
+          </Toolbar>
           <Collapse in={this.state.new}>
             <div>
               <IconButton className="cancel" onClick={this.handleNewPipelineCancel} style={style.cancelIcon}>
