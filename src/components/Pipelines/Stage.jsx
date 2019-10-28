@@ -132,9 +132,8 @@ export default class Stage extends Component {
   handlePromoteConfirmation = async (coupling) => {
     let { data: releases } = await api.getRawReleases(coupling.app.id);
     if (releases) {
-      releases = releases.map(x => ({ label: `version-${x.version} : ${x.id} `, value: x.id })).sort((a, b) => {
-        console.log(a.label.substring(8, 10));
-        return b.label.substring(8, 10) - a.label.substring(8, 10);
+      releases = releases.map(x => ({ label: `version-${x.version} : ${x.id} `, value: x.id, version: x.version })).sort((a, b) => {
+        return b.version - a.version;
       });
     }
     this.setState({
