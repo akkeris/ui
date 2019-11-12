@@ -142,7 +142,11 @@ async function runTests() {
       .src(tests)
       .browsers(browsers)
       .reporter('spec')
-      .screenshots(`${process.cwd()}/screenshots`, true, '${DATE}_${TIME}/${FIXTURE}-${TEST}/${BROWSER}-${FILE_INDEX}.png') // eslint-disable-line
+      .screenshots({
+        path: `${process.cwd()}/screenshots`,
+        takeOnFails: true,
+        pathPattern: '${DATE}_${TIME}/${FIXTURE}-${TEST}/${BROWSER}-${FILE_INDEX}-${QUARANTINE_ATTEMPT}.png' // eslint-disable-line
+      })
       .concurrency(process.env.TESTCAFE_CONCURRENCY ? Number(process.env.TESTCAFE_CONCURRENCY) : 1)
       .run({
         skipJsErrors: !!process.env.TESTCAFE_SKIP_JS_ERRORS,
