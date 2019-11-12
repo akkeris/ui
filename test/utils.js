@@ -48,7 +48,7 @@ async function verifyResourceDeletion(appNames, pipelineNames, siteNames) {
 
   await asyncForEach(appNames, async (appName) => {
     try {
-      await axios.delete(`${process.env.AKKERIS_API}/apps/${appName}`, config);
+      await axios.delete(`${process.env.AKKERIS_API}/apps/${appName}-testcafe`, config);
     } catch (err) {
       if (err.response.status !== 404) {
         console.error(`\tError deleting ${appName}: `);

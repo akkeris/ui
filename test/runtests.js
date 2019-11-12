@@ -142,22 +142,24 @@ async function runTests() {
       .src(tests)
       .browsers(browsers)
       .reporter('spec')
-      .screenshots(`${process.cwd()}/screenshots`, true, '${DATE}_${TIME}/${FIXTURE}/${TEST}/${BROWSER}/${FILE_INDEX}.png') // eslint-disable-line
+      .screenshots(`${process.cwd()}/screenshots`, true, '${DATE}_${TIME}/${FIXTURE}-${TEST}/${BROWSER}-${FILE_INDEX}-${QUARANTINE_ATTEMPT}.png') // eslint-disable-line
       .concurrency(process.env.TESTCAFE_CONCURRENCY ? Number(process.env.TESTCAFE_CONCURRENCY) : 1)
-      .run();
+      .run({
+        skipJsErrors: !!process.env.TESTCAFE_SKIP_JS_ERRORS,
+        quarantineMode: !!process.env.TESTCAFE_QUARANTINE_MODE,
+      });
 
     if (testResult === 0) {
       console.log('\nAll tests passed!');
-      finish(testcafe, testResult);
     } else {
       console.error(`\n${testResult} TESTS FAILED`);
-      // upload failed screenshots
-      if (process.env.TAAS_ARTIFACT_BUCKET || process.env.TESTCAFE_SCREENSHOTS) {
-        console.log('Uploading error screenshots...');
-        await uploadScreenshots(testcafe, testResult); // this calls finish
-      } else {
-        finish(testcafe, testResult);
-      }
+    }
+
+    if (process.env.TAAS_ARTIFACT_BUCKET || process.env.TESTCAFE_SCREENSHOTS) {
+      console.log('Uploading screenshots (if any)...');
+      await uploadScreenshots(testcafe, testResult); // this calls finish
+    } else {
+      finish(testcafe, testResult);
     }
   } catch (err) {
     console.error(err);
