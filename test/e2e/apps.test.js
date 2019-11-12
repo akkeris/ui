@@ -795,7 +795,6 @@ test // eslint-disable-line no-undef
       .ok()
 
     // Create and Attach addon
-      .navigateTo(`${baseUrl}/apps`)
       .navigateTo(`${baseUrl}/apps/${appName2}-testcafe`)
       .click('.addons-tab')
       .click('button.new-addon')
@@ -827,7 +826,6 @@ test // eslint-disable-line no-undef
       .click('.ok')
 
     // Attach Addon from app 2
-      .navigateTo(`${baseUrl}/apps`)
       .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.addons-tab')
       .click('button.attach-addon')

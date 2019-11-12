@@ -142,9 +142,12 @@ async function runTests() {
       .src(tests)
       .browsers(browsers)
       .reporter('spec')
-      .screenshots(`${process.cwd()}/screenshots`, true, '${DATE}_${TIME}/${FIXTURE}/${TEST}/${BROWSER}/${FILE_INDEX}.png') // eslint-disable-line
+      .screenshots(`${process.cwd()}/screenshots`, true, '${DATE}_${TIME}/${FIXTURE}-${TEST}/${BROWSER}-${FILE_INDEX}.png') // eslint-disable-line
       .concurrency(process.env.TESTCAFE_CONCURRENCY ? Number(process.env.TESTCAFE_CONCURRENCY) : 1)
-      .run();
+      .run({
+        skipJsErrors: !!process.env.SKIP_JS_ERRORS,
+        quarantineMode: !!process.env.QUARANTINE_MODE,
+      });
 
     if (testResult === 0) {
       console.log('\nAll tests passed!');
