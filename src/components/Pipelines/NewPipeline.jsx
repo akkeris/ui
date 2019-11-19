@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography
+  Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
 
