@@ -228,14 +228,19 @@ function redoBuild(app, build) {
 }
 
 async function getReleases(app) {
-  return Promise.all((await axios.get(`/api/apps/${app}/releases`))
-    .data
-    .slice(-10)
-    .map(async release => Object.assign(release, { slug: (await axios.get(`/api/slugs/${release.slug.id}`)).data })));
+  return axios.get(`/api/apps/${app}/releases`)
 }
 
-async function getRawReleases(app) {
-  return axios.get(`/api/apps/${app}/releases`);
+async function getSlug(slug) {
+  return axios.get(`/api/slugs/${slug}`)
+}
+
+async function getRelease(app, release) {
+  return axios.get(`/api/apps/${app}/releases/${release}`)
+}
+
+async function getReleaseStatuses(app, release) {
+  return axios.get(`/api/apps/${app}/releases/${release}/statuses`)
 }
 
 function createRelease(app, slug, release, description) {
@@ -246,9 +251,8 @@ function createRelease(app, slug, release, description) {
   });
 }
 
-async function rebuildLatest(app) {
-  const { data: releases } = await axios.get(`/api/apps/${app}/releases`);
-  return axios.put(`/api/apps/${app}/builds/${releases[releases.length - 1].slug.id}`);
+async function rebuild(app, release) {
+  return axios.put(`/api/apps/${app}/builds/${release.slug.id}`);
 }
 
 function getOrgs() {
@@ -285,12 +289,20 @@ function getPipelines() {
   return axios.get('/api/pipelines');
 }
 
+function getPipelineStages() {
+  return axios.get(`/api/pipeline-stages`);
+}
+
 function getPipeline(pipeline) {
   return axios.get(`/api/pipelines/${pipeline}`);
 }
 
 function getPipelineCouplings(pipeline) {
   return axios.get(`/api/pipelines/${pipeline}/pipeline-couplings`);
+}
+
+function getAvailablePipelineStatuses(pipeline) {
+  return axios.get(`/api/pipelines/${pipeline}/statuses`);
 }
 
 function createPipeline(pipeline) {
@@ -300,11 +312,22 @@ function createPipeline(pipeline) {
   });
 }
 
-function createPipelineCoupling(pipeline, app, stage) {
+function createPipelineCoupling(pipeline, app, stage, statuses) {
   return axios.post('/api/pipeline-couplings', {
     pipeline,
     app,
     stage,
+    required_status_checks:{
+      contexts:statuses,
+    }
+  });
+}
+
+function updatePipelineCoupling(pipeline, coupling, statuses) {
+  return axios.patch(`/api/pipeline-couplings/${coupling}`, {
+    required_status_checks:{
+      contexts:statuses,
+    }
   });
 }
 
@@ -471,6 +494,8 @@ export default {
   getMetrics,
   getBuildResult,
   getReleases,
+  getRelease,
+  getReleaseStatuses,
   getOrgs,
   createOrg,
   createApp,
@@ -494,17 +519,21 @@ export default {
   patchApp,
   restartFormation,
   getPipelines,
+  getPipelineStages,
   getPipelineCouplings,
   getPipeline,
   createPipeline,
+  getAvailablePipelineStatuses,
   deletePipeline,
   createPipelineCoupling,
+  updatePipelineCoupling,
   deletePipelineCoupling,
   promotePipeline,
   getLogSession,
   getLogPlex,
   getSites,
   getSite,
+  getSlug,
   getRoutes,
   deleteSite,
   deleteRoute,
@@ -523,7 +552,6 @@ export default {
   createFavorite,
   getHealthcheck,
   notify,
-  rebuildLatest,
-  patchAppDescription,
-  getRawReleases,
+  rebuild,
+  patchAppDescription
 };

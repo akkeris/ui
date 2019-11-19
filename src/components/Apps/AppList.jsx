@@ -75,8 +75,8 @@ export default class AppList extends Component {
   renderApps(page, rowsPerPage) {
     if (this.props.apps.length === 0) {
       return (
-        <TableRow>
-          <TableCell colSpan={4}>
+        <TableRow component="div">
+          <TableCell component="div" colSpan={4}>
             No Results
           </TableCell>
         </TableRow>
@@ -91,17 +91,17 @@ export default class AppList extends Component {
         style={style.tableRow}
         hover
       >
-        <TableCell style={style.tableRow}>
+        <TableCell component="div" style={style.tableRow}>
           <div style={style.tableRowColumn.main}>{app.name} {app.preview ? AppList.previewAnnotation(app.preview) : ''}</div>
           <div style={style.tableRowColumn.sub}>{app.organization.name.replace(/-/g, ' ')}</div>
         </TableCell>
-        <TableCell style={style.tableRow}>
+        <TableCell component="div" style={style.tableRow}>
           <div style={style.tableRowColumn.main}>{app.space.name}</div>
         </TableCell>
-        <TableCell style={style.tableRow}>
+        <TableCell component="div" style={style.tableRow}>
           <div style={style.tableRowColumn.main}>{app.region.name}</div>
         </TableCell>
-        <TableCell style={style.tableRow}>
+        <TableCell component="div" style={style.tableRow}>
           <div style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center' }}>
             {app.isFavorite && <FavoriteIcon color={'primary'} />}
           </div>
@@ -115,15 +115,9 @@ export default class AppList extends Component {
     return (
       <div style={{ marginBottom: '12px', overflow: 'auto' }}>
         <Table className="app-list">
-          <colgroup>
-            <col style={{ width: '40%' }} />
-            <col style={{ width: '30%' }} />
-            <col style={{ width: '20%' }} />
-            <col style={{ width: '10%' }} />
-          </colgroup>
-          <TableHead>
-            <TableRow>
-              <TableCell>
+          <TableHead component="div">
+            <TableRow component="div">
+              <TableCell component="div">
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -138,7 +132,7 @@ export default class AppList extends Component {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell>
+              <TableCell component="div">
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -153,7 +147,7 @@ export default class AppList extends Component {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell>
+              <TableCell component="div">
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -168,7 +162,7 @@ export default class AppList extends Component {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell>
+              <TableCell component="div">
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -185,7 +179,7 @@ export default class AppList extends Component {
               </TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
+          <TableBody component="div">
             {this.renderApps(page, rowsPerPage)}
           </TableBody>
           <TableFooter>

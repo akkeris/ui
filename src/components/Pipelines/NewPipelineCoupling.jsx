@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Step, Stepper, StepLabel, Collapse, Typography,
-} from '@material-ui/core';
+import { Step, Stepper, StepLabel, Collapse, Typography, Paper } from '@material-ui/core';
 import ReactGA from 'react-ga';
+import GlobalStyles from '../../config/GlobalStyles.jsx';
 
 import api from '../../services/api';
 import AutoSuggest from '../AutoSuggest';
 import util from '../../services/util';
+
+const innerPanelStyle = {...GlobalStyles.InnerPanel, ...GlobalStyles.PaddedInnerPanel};
 
 const style = {
   stepper: {
@@ -84,7 +85,8 @@ export default class NewPipelineCoupling extends Component {
         app: '',
         loading: false,
       });
-      this.props.onError(error.response.data);
+      console.error(error);
+      this.props.onError(JSON.stringify(error));
     }
   };
 
@@ -123,18 +125,22 @@ export default class NewPipelineCoupling extends Component {
     const contentStyle = { margin: '0 0 48px 32px' };
 
     return (
-      <div style={style.stepper}>
-        <Stepper activeStep={stepIndex}>
-          <Step>
-            <StepLabel>Select App</StepLabel>
-          </Step>
-        </Stepper>
-        <Collapse in={!loading}>
-          <div style={contentStyle}>
-            <div>{this.renderStepContent(stepIndex)}</div>
+      <Paper style={GlobalStyles.MainPanel}>
+        <div style={innerPanelStyle}>
+          <div style={style.stepper}>
+            <Stepper activeStep={stepIndex}>
+              <Step>
+                <StepLabel>Select App</StepLabel>
+              </Step>
+            </Stepper>
+            <Collapse in={!loading}>
+              <div style={contentStyle}>
+                <div>{this.renderStepContent(stepIndex)}</div>
+              </div>
+            </Collapse>
           </div>
-        </Collapse>
-      </div>
+        </div>
+      </Paper>
     );
   }
 }
