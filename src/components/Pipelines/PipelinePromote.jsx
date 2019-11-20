@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import GlobalStyles from '../../config/GlobalStyles.jsx';
 import api from '../../services/api';
 import util from '../../services/util';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, LinearProgress, Link, Paper, Typography, Select, MenuItem, FormControlLabel } from '@material-ui/core';
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, LinearProgress, Link, Paper, Typography, Select, MenuItem, FormControlLabel } from '@material-ui/core';
 import AutoSuggest from '../AutoSuggest';
-import { ArrowDownward, Delete, DeveloperBoard, Edit, Error, CheckCircle, Cancel, Lens } from '@material-ui/icons/';
+import { ArrowDownward, CheckBoxOutlineBlank, CheckBox, Delete, DeveloperBoard, Edit, Error, CheckCircle, Cancel, Lens } from '@material-ui/icons/';
 import { grey, yellow } from '@material-ui/core/colors';
 
 const originalState = {
@@ -80,9 +80,13 @@ export default class PipelinePromote extends Component {
       const { data: fullCouplings } = await api.getPipelineCouplings(this.props.pipeline.name);
       let targets = util.filterCouplings(fullCouplings, this.props.stages[this.props.stage]);
       targets = await Promise.all(targets.map(async (target) => {
-        const { data: slug } = await api.getSlug(target.release.build.id);
-        const { data: releases } = await api.getReleases(target.app.id);
-        return {...target, slug, releases};
+        try {
+          const { data: slug } = await api.getSlug(target.release.build.id);
+          const { data: releases } = await api.getReleases(target.app.id);
+          return {...target, slug, releases};
+        } catch (e) {
+          return {...target, slug:{source_blob:{}}, releases:[]}
+        }
       }));
       let release = sourceReleases[sourceReleases.length - 1];
       const { data: statuses } = await api.getReleaseStatuses(this.props.source.app.id, release.id);
@@ -90,6 +94,7 @@ export default class PipelinePromote extends Component {
       this.setState({loading:false, sourceApp, sourceReleases, targets, release})
     } catch (e) {
       console.error(e);
+      this.props.onError(e);
     }
   }
 
@@ -110,6 +115,10 @@ export default class PipelinePromote extends Component {
     const { data: statuses } = await api.getReleaseStatuses(this.props.source.app.id, release.id);
     release.statuses = statuses;
     this.setState({editRelease:false, release})
+  }
+
+  handleSafePromoteChange(event) {
+    this.setState({safe:!event.target.checked})
   }
 
   requiredStatuses() {
@@ -299,6 +308,7 @@ export default class PipelinePromote extends Component {
     let promoteButtonVariant = !this.state.loading && statusChecksFailed && this.props.isElevated ? 'outlined' : 'text';
     return (
       <Dialog
+          className="promote-confirm"
           open={this.props.open}
           onClose={this.props.onCancel}
           fullWidth
@@ -310,8 +320,22 @@ export default class PipelinePromote extends Component {
           </DialogTitle>
           {this.state.loading ? this.renderLoading() : this.renderForm()}
           <DialogActions>
+            {!(statusChecksFailed && this.props.isElevated) ? (
+              <FormControlLabel className="force-check" style={{flexGrow:'1', marginLeft:'0.5rem', ...GlobalStyles.Subtle, ...GlobalStyles.Text}}
+                control={
+                  <Checkbox
+                    style={GlobalStyles.Subtle}
+                    checked={!this.state.safe} 
+                    onChange={(event) => { this.handleSafePromoteChange(event) }}
+                    icon={<CheckBoxOutlineBlank fontSize="small" />}
+                    checkedIcon={<CheckBox fontSize="small" />}
+                  />
+                }
+                label={<span style={GlobalStyles.Text}>Override safety checks</span>}
+              />
+            ) : ''}
             <Button onClick={this.props.onCancel} color="secondary">Cancel</Button>
-            <Button onClick={this.handleOk} variant={promoteButtonVariant} style={promoteButtonStyle} disabled={this.state.loading || (statusChecksFailed && !this.props.isElevated)} color="primary">
+            <Button className="ok" onClick={() => this.handleOk()} variant={promoteButtonVariant} style={promoteButtonStyle} disabled={this.state.loading || (statusChecksFailed && !this.props.isElevated)} color="primary">
               Promote
             </Button>
           </DialogActions>

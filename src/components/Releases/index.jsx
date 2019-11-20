@@ -564,7 +564,7 @@ export default class Releases extends Component {
           open={this.state.confirmRebuildOpen}
           onOk={this.handleRebuild}
           onCancel={this.handleCancelRebuild}
-          message="Are you sure you want to rebuild this commit?"
+          message="Are you sure you want to rebuild this?"
         />
         <Snackbar
           className="release-snack"

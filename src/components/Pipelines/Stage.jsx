@@ -63,6 +63,9 @@ export default class Stage extends Component {
     if(coupling.stage === "production") {
       return false;
     }
+    if(util.filterCouplings(this.state.fullCouplings, this.props.stages[this.props.stage]).length === 0) {
+      return false;
+    }
     return true;
   }
 
@@ -87,10 +90,7 @@ export default class Stage extends Component {
   handleUpdatePipelineCoupling = async (pipeline, coupling, stage, app, statuses) => {
     try {
       await api.updatePipelineCoupling(pipeline.id, coupling.id, statuses);
-      ReactGA.event({
-        category: 'PIPELINES',
-        action: 'Updated coupling',
-      });
+      ReactGA.event({ category: 'PIPELINES', action: 'Updated coupling'});
       this.refreshStage();
     } catch (err) {
       this.props.onError(err);
@@ -101,8 +101,9 @@ export default class Stage extends Component {
     try {
       ReactGA.event({ category: 'PIPELINES', action: 'Application Promoted'});
       await api.promotePipeline(pipeline.id, source.app.id, targets.map((x) => { return {app:{id:x.app.id}} }), safe, release.id);
-      this.refreshStage();
+      this.props.refresh();
     } catch (err) {
+      console.error(err);
       this.props.onError(err);
     }
   }
@@ -183,7 +184,7 @@ export default class Stage extends Component {
     let description = `${coupling.release.build.commit.message || coupling.statuses.release.description} ${coupling.release.build.author}`;
     let commitUrl = coupling.slug.source_blob.url || coupling.slug.source_blob.version;
     return (
-      <Paper key={coupling.id} style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
+      <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
         <div style={couplingCardStyle}>
           <DeveloperBoard style={{marginRight:'0.25rem', ...GlobalStyles.FairlySubtle}} fontSize="small"/>
           <Link style={{...GlobalStyles.Subtle}} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
@@ -193,7 +194,7 @@ export default class Stage extends Component {
               <Edit fontSize="inherit" />
             </IconButton>
           ) : ''}
-          <IconButton style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({deleteCoupling:coupling})}} size="small">
+          <IconButton className="remove" style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({deleteCoupling:coupling})}} size="small">
             <Delete fontSize="inherit" />
           </IconButton>
         </div>
@@ -214,6 +215,7 @@ export default class Stage extends Component {
             style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle, marginTop:'0'}} 
             size="small"
             variant="outlined" 
+            className="promote"
             fullWidth 
             onClick={() => this.setState({promoteCoupling: coupling})}>
             Promote
@@ -225,7 +227,7 @@ export default class Stage extends Component {
 
   renderCouplingWithNoRelease(coupling) {
     return (
-      <Paper key={coupling.id} style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
+      <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
         <div style={couplingCardStyle}>
           <DeveloperBoard style={{marginRight:'0.25rem', ...GlobalStyles.FairlySubtle}} fontSize="small"/>
           <Link style={{...GlobalStyles.Subtle}} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
@@ -233,7 +235,7 @@ export default class Stage extends Component {
           <IconButton style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({editCoupling:coupling})}} size="small">
             <Edit fontSize="inherit" />
           </IconButton>
-          <IconButton style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({deleteCoupling:coupling})}} size="small">
+          <IconButton className="remove" style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({deleteCoupling:coupling})}} size="small">
             <Delete fontSize="inherit" />
           </IconButton>
         </div>
@@ -264,5 +266,6 @@ Stage.propTypes = {
   stage: PropTypes.string.isRequired,
   stages: PropTypes.object.isRequired,
   isElevated: PropTypes.bool.isRequired,
-  onError: PropTypes.func.isRequired
+  onError: PropTypes.func.isRequired,
+  refresh: PropTypes.func.isRequired,
 };

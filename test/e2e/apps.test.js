@@ -57,7 +57,7 @@ test // eslint-disable-line
     const appName = t.ctx.appName;
 
     await t
-      .expect(Selector('.app-list tbody').childElementCount)
+      .expect(Selector('.app-list .MuiTableBody-root').childElementCount)
       .gt(0)
 
       .click('.filter-select-input')
@@ -613,7 +613,7 @@ test('Should be able to rebuild a release', async (t) => { // eslint-disable-lin
 
     // Create the new build
     .click('button.new-build')
-    .typeText('.url input', 'docker://registry.hub.docker.com/library/alpine:latest')
+    .typeText('.url input', 'docker://registry.hub.docker.com/library/alpine:non-existant') // purposely use a nonexistant image to force a rebuild icon.
     .click('button.next')
     .click('button.next') // branch
     .click('button.next') // version
@@ -634,12 +634,12 @@ test('Should be able to rebuild a release', async (t) => { // eslint-disable-lin
     .expect(Selector('.rebuild-confirm').exists)
     .ok('Rebuild confirmation did not appear')
     .expect(Selector('.rebuild-confirm').innerText)
-    .contains('Are you sure you want to rebuild the latest release?', 'Rebuild confirmation did not have the correct message')
+    .contains('Are you sure you want to rebuild this', 'Rebuild confirmation did not have the correct message')
     .click('.rebuild-confirm button.ok')
     .expect(Selector('.release-snack').exists)
     .ok('Rebuild message did not appear')
     .expect(Selector('.release-snack').innerText)
-    .contains('Rebuilding latest image...', 'Rebuild message did not have the correct text')
+    .contains('Rebuilding image...', 'Rebuild message did not have the correct text')
     .wait(5000)
     .click('.release-list .r0 button.logs')
     .wait(5000)

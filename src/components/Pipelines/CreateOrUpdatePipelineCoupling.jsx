@@ -190,8 +190,8 @@ export default class CreatePipelineCoupling extends Component {
             {this.state.loading ? this.renderLoading() : this.renderForm()}
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.props.onCancel} color="secondary">Cancel</Button>
-            <Button onClick={this.handleOk} color="primary">Ok</Button>
+            <Button className={`${this.props.stage}-cancel`} onClick={this.props.onCancel} color="secondary">Cancel</Button>
+            <Button className={`${this.props.stage}-ok`} onClick={this.handleOk} autoFocus color="primary">Ok</Button>
           </DialogActions>
         </Dialog>
       )

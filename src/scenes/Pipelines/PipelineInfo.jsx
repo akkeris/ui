@@ -65,10 +65,7 @@ export default class PipelineInfo extends Component {
   handleCreatePipelineCoupling = async (pipeline, coupling, stage, app, statuses) => {
      try {
       await api.createPipelineCoupling(pipeline.id, app, stage, statuses);
-      ReactGA.event({
-        category: 'PIPELINES',
-        action: 'Created new coupling',
-      });
+      ReactGA.event({ category: 'PIPELINES', action: 'Created new coupling'});
       this.refreshPipeline();
     } catch (err) {
       this.handleError(err);
@@ -80,7 +77,7 @@ export default class PipelineInfo extends Component {
       return (
         <ConfirmationModal
           key={`delete-confirmation-${this.props.match.params.pipeline}`}
-          className={`${this.props.match.params.pipeline}-remove-confirm`}
+          className={`${this.props.match.params.pipeline}-remove-confirm confirm`}
           open={this.state.delete}
           onOk={this.handleDeletePipeline}
           onCancel={() => this.setState({delete:false})}
@@ -92,18 +89,18 @@ export default class PipelineInfo extends Component {
 
   renderStage(name) {
     return (
-      <Grid key={name} item xs={3}>
+      <Grid className={`${name}-coupling-list ${name}-stage`} key={name} item xs={3}>
         <Typography style={GlobalStyles.VerticalAlign}>
           <label style={{...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle, textTransform:'uppercase'}}>{name}</label>
-          <Link href="#" onClick={() => this.setState({"new":name})} style={{...GlobalStyles.VerticalAlign, ...GlobalStyles.HeaderSmall}}>
-            <IconButton color="primary" size="small"><AddIcon fontSize="inherit" /></IconButton>
+          <Link href="#"  onClick={() => this.setState({"new":name})} style={{...GlobalStyles.VerticalAlign, ...GlobalStyles.HeaderSmall}}>
+            <IconButton className={`${name}-new-coupling`} color="primary" size="small"><AddIcon fontSize="inherit" /></IconButton>
           </Link>
           <span style={{flexGrow:'1'}}></span>
           {name !== "production" ? (
             <ForwardIcon style={{...GlobalStyles.HeaderSmall, ...GlobalStyles.VerySubtle}} fontSize="inherit" />
           ) : ""}
         </Typography>
-        <Stage isElevated={this.state.isElevated} pipeline={this.state.pipeline} stages={this.state.stages} stage={name} onError={this.handleError}></Stage>
+        <Stage isElevated={this.state.isElevated} pipeline={this.state.pipeline} stages={this.state.stages} stage={name} onError={(err) => { this.handleError(err) }} refresh={() => this.refreshPipeline()}></Stage>
       </Grid>
     );
   }
@@ -144,7 +141,7 @@ export default class PipelineInfo extends Component {
       return this.renderError();
     } else {
       return (
-        <Paper style={{...GlobalStyles.MainPanel, ...GlobalStyles.PaperSubtleContainerStyle}}>
+        <Paper className="pipeline-info" style={{...GlobalStyles.MainPanel, ...GlobalStyles.PaperSubtleContainerStyle}}>
           <Typography variant="h3" style={{...GlobalStyles.TopOfPaperHeaderLarge, ...GlobalStyles.LargePadding}}>
             {this.state.pipeline.name}
             <IconButton size="small" onClick={() => this.setState({delete:true})} className="delete-pipeline" style={{float:'right'}}><RemoveIcon /></IconButton>

@@ -13,6 +13,7 @@ const clientURI = process.env.CLIENT_URI || 'http://localhost:3000';
 const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
 const https = require('https');
+const httpsAgent = new https.Agent({"keepAlive":true, "keepAliveMsecs":30000})
 
 const tests = require('./test/runtests');
 
@@ -138,6 +139,8 @@ app.get('/oauth/callback', (req, res) => {
 app.use('/api', proxy(`${akkerisApi}`, {
   proxyReqOptDecorator(reqOpts, srcReq) {
     reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`; // eslint-disable-line no-param-reassign
+    reqOpts.agent = httpsAgent;
+    reqOpts.headers.connection = `keep-alive`;
     return reqOpts;
   },
 }));
