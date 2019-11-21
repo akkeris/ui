@@ -19,7 +19,7 @@ const originalState = {
 const formSubHeaderStyle = {...GlobalStyles.StandardLabelMargin, ...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle};
 const formTextStyle = {'display':'block', ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.FairlySubtle, ...GlobalStyles.Text};
 
-export default class CreatePipelineCoupling extends Component {
+export default class CreateOrUpdatePipelineCoupling extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = util.deepCopy(originalState);
@@ -199,7 +199,7 @@ export default class CreatePipelineCoupling extends Component {
 }
 
 
-CreatePipelineCoupling.propTypes = {
+CreateOrUpdatePipelineCoupling.propTypes = {
   open: PropTypes.bool.isRequired,
   pipeline: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   coupling: PropTypes.object,

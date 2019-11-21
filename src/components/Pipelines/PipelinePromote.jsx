@@ -152,7 +152,7 @@ export default class PipelinePromote extends Component {
       <Paper style={{marginBottom:'0.5rem', ...GlobalStyles.StandardPadding}}>
         <div style={couplingCardStyle}>
           <DeveloperBoard style={{marginRight:'0.25rem', ...GlobalStyles.FairlySubtle}}/>
-          <Link style={{...GlobalStyles.Subtle}} style={{fontSize:'16px'}} href={`/apps/${this.state.sourceApp.name}/info`}>{this.state.sourceApp.name}</Link>
+          <Link style={{...GlobalStyles.Subtle}} style={{fontSize:'16px'}} target="_blank" href={`/apps/${this.state.sourceApp.name}/info`}>{this.state.sourceApp.name}</Link>
           <span style={{flexGrow:'1'}}></span>
           {!this.state.editRelease ? (
             <IconButton style={GlobalStyles.FairlySubtle} onClick={() => this.handleEditRelease()} size="small">
@@ -163,7 +163,7 @@ export default class PipelinePromote extends Component {
         {!this.state.editRelease ? (
           <div style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText}}>
             { commitUrl ? (
-              <a style={GlobalStyles.CommitLink} href="#">
+              <a style={GlobalStyles.CommitLink} target="_blank" href={commitUrl}>
                 <pre style={GlobalStyles.CommitLinkPre}><code>#{commitSha}</code></pre>
               </a>
             ) : '' }
@@ -201,7 +201,7 @@ export default class PipelinePromote extends Component {
         <Paper key={`target-${coupling.id}`} style={{marginBottom:'0.5rem', ...GlobalStyles.StandardPadding}}>
           <div style={couplingCardStyle}>
             <DeveloperBoard style={{marginRight:'0.25rem', ...GlobalStyles.FairlySubtle}}/>
-            <Link style={{...GlobalStyles.Subtle}} style={{fontSize:'16px'}} href={`/apps/${coupling.app.name}/info`}>{coupling.app.name}</Link>
+            <Link style={{...GlobalStyles.Subtle}} style={{fontSize:'16px'}} target="_blank" href={`/apps/${coupling.app.name}/info`}>{coupling.app.name}</Link>
             <span style={{flexGrow:'1'}}></span>
             {this.state.targets.length > 1 ? (
               <IconButton style={GlobalStyles.FairlySubtle} onClick={this.handleRemoveTarget.bind(this, coupling.id)} size="small">
@@ -211,7 +211,7 @@ export default class PipelinePromote extends Component {
           </div>
           <div style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText}}>
             { coupling.release.build.commit && coupling.release.build.commit.sha ? (
-              <a style={GlobalStyles.CommitLink} href={commitUrl}>
+              <a style={GlobalStyles.CommitLink} target="_blank" href={commitUrl}>
                 <pre style={GlobalStyles.CommitLinkPre}><code>#{coupling.release.build.commit.sha.substring(0, 7)}</code></pre>
               </a>
             ) : '' }
@@ -257,7 +257,7 @@ export default class PipelinePromote extends Component {
                 <Typography variant="body1" style={{...formTextEmphasizedStyle, display:'flex', alignItems:'center'}}>
                   <StatusIcon style={{color:statusIconColor(status.state), fillColor:statusIconColor(status.state), marginTop:'0.1rem', maxHeight:'0.8rem', maxWidth:'0.8rem', marginLeft:'0.25rem', marginRight:'1rem'}} />
                   {status.image_url ? (<img style={stateImage} src={status.image_url} />) : ''}
-                  {status.context} <span style={{...GlobalStyles.Subtle}}>&nbsp;— {status.description}</span>&nbsp;{status.target_url ? (<a style={GlobalStyles.Link} href={status.target_url}>Details</a>) : ''}
+                  {status.context} <span style={{...GlobalStyles.Subtle}}>&nbsp;— {status.description}</span>&nbsp;{status.target_url ? (<a target="_blank" style={GlobalStyles.Link} href={status.target_url}>Details</a>) : ''}
                 </Typography>
               </DialogContent>
             )
