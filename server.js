@@ -5,10 +5,6 @@ const request = require('request');
 const proxy = require('express-http-proxy');
 const bodyParser = require('body-parser');
 const Redis = require('connect-redis')(session);
-const webpack = require('webpack');
-const webpackMiddleware = require('webpack-dev-middleware');
-const webpackHotMiddleware = require('webpack-hot-middleware');
-const config = require('./webpack-dev-server.config.js');
 
 const port = process.env.PORT || 3000;
 const clientID = process.env.CLIENT_ID;
@@ -17,6 +13,7 @@ const clientURI = process.env.CLIENT_URI || 'http://localhost:3000';
 const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
 const https = require('https');
+const httpsAgent = new https.Agent({"keepAlive":true, "keepAliveMsecs":30000})
 
 const tests = require('./test/runtests');
 
@@ -142,6 +139,8 @@ app.get('/oauth/callback', (req, res) => {
 app.use('/api', proxy(`${akkerisApi}`, {
   proxyReqOptDecorator(reqOpts, srcReq) {
     reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`; // eslint-disable-line no-param-reassign
+    reqOpts.agent = httpsAgent;
+    reqOpts.headers.connection = `keep-alive`;
     return reqOpts;
   },
 }));
@@ -192,6 +191,10 @@ app.get('/user', (req, res) => {
 });
 
 if (process.env.NODE_ENV === 'dev') {
+  const webpack = require('webpack');
+  const config = require('./webpack-dev-server.config.js');
+  const webpackMiddleware = require('webpack-dev-middleware');
+  const webpackHotMiddleware = require('webpack-hot-middleware');
   const compiler = webpack(config);
   const middleware = webpackMiddleware(compiler, {
     publicPath: config.output.publicPath,

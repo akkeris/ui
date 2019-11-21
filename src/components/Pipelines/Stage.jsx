@@ -1,373 +1,271 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  CircularProgress, IconButton, Button, Paper, Divider, FormControlLabel,
-  Table, TableBody, TableRow, TableCell, Tooltip, Checkbox,
-} from '@material-ui/core';
-import RemoveIcon from '@material-ui/icons/Clear';
-import PromoteIcon from '@material-ui/icons/CloudUpload';
-import AddIcon from '@material-ui/icons/Add';
-import ReactGA from 'react-ga';
-
+import GlobalStyles from '../../config/GlobalStyles.jsx';
+import { DeveloperBoard, Delete, Edit } from '@material-ui/icons/';
+import { Paper, CircularProgress, Button, Link, IconButton, FormControlLabel, Checkbox } from '@material-ui/core'
+import ReleaseStatus from '../Releases/ReleaseStatus.jsx';
 import api from '../../services/api';
 import util from '../../services/util';
-import Search from '../Search';
+import ReactGA from 'react-ga';
 import ConfirmationModal from '../ConfirmationModal';
-import { NewPipelineCoupling } from '../../components/Pipelines';
-import History from '../../config/History';
+import CreateOrUpdatePipelineCoupling from './CreateOrUpdatePipelineCoupling';
+import PipelinePromote from './PipelinePromote';
 
 const style = {
-  tableRow: {
-    height: '100px',
+  AppPaperPanel: {
+    marginTop: '1rem',
   },
-  tableCell: {
-    title: {
-      fontSize: '16px',
-      paddingTop: '1em',
-    },
-    last: {
-      paddingBottom: '1em',
-    },
-    sub: {
-      fontSize: '11px',
-      textTransform: 'uppercase',
-    },
-    end: {
-      float: 'right',
-    },
-    icon: {
-      width: '58px',
-    },
-    button: {
-      width: '140px',
-    },
-  },
-  refresh: {
-    div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '200px',
-      display: 'flex',
-      alignItems: 'center',
-    },
-    indicator: {
-      display: 'inline-block',
-      position: 'relative',
-    },
-  },
-  link: {
-    textDecoration: 'none',
-  },
-};
+  NoAppsFoundPanel: {
+    marginTop: '0.5rem',
+    paddingLeft: '0'
+  }
+} 
 
-const stages = [
-  'review',
-  'development',
-  'staging',
-  'production',
-];
+const couplingCardStyle = {...GlobalStyles.Subtle, ...GlobalStyles.HeaderSmall, ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText, ...GlobalStyles.VerticalAlign};
+const originalState = {
+  loading:true,
+  couplings:[],
+  releases:[],
+  editCoupling:null,
+  deleteCoupling:null,
+  promoteCoupling:null,
+  fullCouplings:null,
+};
 
 export default class Stage extends Component {
   constructor(props, context) {
     super(props, context);
-    this.state = {
-      loading: true,
-      new: false,
-      open: false,
-      promoteOpen: false,
-      couplings: [],
-      coupling: null,
-      stageCouplings: [],
-      safePromote: true,
-      releases: [],
-      release: null,
-    };
+    this.state = util.deepCopy(originalState);
   }
 
-  componentDidMount() {
-    if (this.props.active) {
-      this.loadPipelineCouplings();
+  componentDidMount = () => this.refreshStage();
+
+  refreshStage = async(loading = true) => {
+    try {
+      this.setState({loading, ...util.deepCopy(originalState)});
+      const { data: fullCouplings } = await api.getPipelineCouplings(this.props.pipeline.name);
+      let couplings = await Promise.all(util.filterCouplings(fullCouplings, this.props.stage).map(async (coupling) => {
+        try {
+          let { data: statuses } = await api.getReleaseStatuses(coupling.app.id, coupling.release.id);
+          let { data: slug } = await api.getSlug(statuses.release.slug.id);
+          return {...coupling, slug, statuses}
+        } catch (e) {
+          return {...coupling, slug:{source_blob:{}}, statuses:{release:coupling.release, required_status_checks:{contexts:[]}}}
+        }
+      }));
+      this.setState({loading:false, couplings, fullCouplings});
+    } catch (err) {
+      this.props.onError(err);
     }
   }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.stage !== this.props.stage) {
-      this.loadPipelineCouplings();
+  
+  canPromote(coupling) {
+    if(coupling.stage === "production") {
+      return false;
     }
+    if(util.filterCouplings(this.state.fullCouplings, this.props.stages[this.props.stage]).length === 0) {
+      return false;
+    }
+    return true;
   }
 
   getTargets(stage) {
     if (stage !== 'production') {
-      return util.filterCouplings(this.state.couplings, stages[stages.indexOf(stage) + 1]);
+      return util.filterCouplings(this.state.couplings, this.props.stages[stage]);
     }
     return null;
-  }
-
-  loadPipelineCouplings = async () => {
-    const { data: couplings } = await api.getPipelineCouplings(this.props.pipeline.name);
-    const stageCouplings = util.filterCouplings(couplings, this.props.stage);
-    this.setState({ couplings, stageCouplings, loading: false });
-  }
-
-  handleConfirmation = (coupling) => {
-    this.setState({
-      open: true,
-      coupling,
-    });
-  }
-
-  handleCancelConfirmation = () => {
-    this.setState({
-      open: false,
-      coupling: null,
-    });
-  }
-
-  handleError = (message) => {
-    this.props.onError(message);
-    this.setState({ new: false });
-  }
-
-  handlePromoteConfirmation = async (coupling) => {
-    let { data: releases } = await api.getRawReleases(coupling.app.id);
-    if (releases) {
-      releases = releases.map(x => ({ label: `version-${x.version} : ${x.id} `, value: x.id, version: x.version })).sort((a, b) => {
-        return b.version - a.version;
-      });
-    }
-    this.setState({
-      promoteOpen: true,
-      coupling,
-      releases,
-    });
-  }
-
-  handlePromoteCancelConfirmation = () => {
-    this.setState({
-      promoteOpen: false,
-      coupling: null,
-      safePromote: true,
-      release: null,
-    });
   }
 
   handleRemoveCoupling = async () => {
     this.setState({ loading: true });
     try {
-      await api.deletePipelineCoupling(this.state.coupling.id);
-      this.reload('Removed Coupling');
-      ReactGA.event({
-        category: 'PIPELINES',
-        action: 'Removed pipeline coupling',
-      });
-    } catch (error) {
-      this.props.onError(error.response.data);
+      await api.deletePipelineCoupling(this.state.deleteCoupling.id);
+      ReactGA.event({ category: 'PIPELINES', action: 'Removed pipeline coupling'});
+      await this.refreshStage();
+    } catch (err) {
+      this.props.onError(err);
     }
   }
 
-  handleNewCoupling = () => {
-    this.setState({ new: true });
-  }
-
-  handleSafePromoteCheck = (event, isInputChecked) => {
-    this.setState({ safePromote: !isInputChecked });
-  }
-
-  handlePromote = async () => {
-    const targets = this.getTargets(this.state.coupling.stage);
-
-    if (targets.length === 0) {
-      this.setState({ promoteOpen: false });
-      this.props.onError('No Promotion Targets', 404);
-    } else {
-      this.setState({ loading: true });
-      const release = this.state.release ? this.state.release.value : null;
-      try {
-        await api.promotePipeline(
-          this.props.pipeline.id,
-          this.state.coupling.app.id,
-          targets,
-          this.state.safePromote,
-          release,
-        );
-        this.reload(`Promoted: ${this.state.coupling.app.name} to ${targets[0].stage}`);
-        ReactGA.event({
-          category: 'PIPELINE,',
-          action: 'Application Promoted',
-        });
-      } catch (error) {
-        this.setState({ promoteOpen: false, loading: false });
-        this.props.onError(error.response.data);
-      }
+  handleUpdatePipelineCoupling = async (pipeline, coupling, stage, app, statuses) => {
+    try {
+      await api.updatePipelineCoupling(pipeline.id, coupling.id, statuses);
+      ReactGA.event({ category: 'PIPELINES', action: 'Updated coupling'});
+      this.refreshStage();
+    } catch (err) {
+      this.props.onError(err);
     }
   }
 
-  handleGoToApp = (app) => {
-    History.get().push(`/apps/${app}/info`);
+  handlePromote = async (pipeline, source, targets, release, safe) => {
+    try {
+      ReactGA.event({ category: 'PIPELINES', action: 'Application Promoted'});
+      await api.promotePipeline(pipeline.id, source.app.id, targets.map((x) => { return {app:{id:x.app.id}} }), safe, release.id);
+      this.props.refresh();
+    } catch (err) {
+      console.error(err);
+      this.props.onError(err);
+    }
   }
 
-  handleReleaseChange = (event) => {
-    const release = this.state.releases.find(a => a.value === event.value);
-    this.setState({ release });
+  renderPipelinePromote() {
+    if(this.state.promoteCoupling === null) {
+      return;
+    }
+    return (
+      <PipelinePromote 
+        key={`promote-${this.state.promoteCoupling.id}`}
+        open={this.state.promoteCoupling !== null}
+        pipeline={this.props.pipeline}
+        source={this.state.promoteCoupling}
+        couplings={this.state.fullCouplings}
+        stage={this.props.stage}
+        stages={this.props.stages}
+        isElevated={this.props.isElevated}
+        onPromote={this.handlePromote}
+        onCancel={() => this.setState({promoteCoupling:null})}
+        onError={(error) => this.setState({promoteCoupling:null, error})}
+      />
+    );
   }
 
-  handleNewCouplingCancel = () => {
-    this.setState({ new: false });
+  renderEditCoupling() {
+    if(this.state.editCoupling !== null) {
+      return (
+        <CreateOrUpdatePipelineCoupling
+          key={`update-pipeline-coupling-${this.state.editCoupling.id}`}
+          open
+          pipeline={this.props.pipeline}
+          stage={this.props.stage}
+          coupling={this.state.editCoupling}
+          onCreateOrUpdate={this.handleUpdatePipelineCoupling}
+          onCancel={() => this.setState({editCoupling:null})}
+          onError={(error) => this.setState({editCoupling:null, error})}
+        />
+      );
+    }
   }
 
-  reload = async (message) => {
-    const { data: couplings } = await api.getPipelineCouplings(this.props.pipeline.name);
-    const stageCouplings = util.filterCouplings(couplings, this.props.stage);
-    this.setState({
-      couplings,
-      stageCouplings,
-      loading: false,
-      new: false,
-      open: false,
-      promoteOpen: false,
-      safePromote: true,
-    });
-    this.props.onAlert(message);
+  renderDeleteCoupling() {
+    if(this.state.deleteCoupling !== null) {
+      return (
+        <ConfirmationModal
+          key={`delete-confirmation-${this.props.stage}`}
+          className={`${this.props.stage}-remove-confirm`}
+          open={this.state.deleteCoupling !== null}
+          onOk={this.handleRemoveCoupling}
+          onCancel={() => { this.setState({deleteCoupling:null}); }}
+          message={`Are you sure you want to remove ${this.state.deleteCoupling.app.name} from the ${this.props.stage} stage?`}
+        />
+      );
+    }
+  }
+
+  renderLoading(coupling) {
+    const circularStyle = {...GlobalStyles.CenteredCircularProgress};
+    return (
+      <Paper style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
+        <div style={couplingCardStyle}>
+          <CircularProgress style={circularStyle} status="loading" />
+        </div>
+      </Paper>
+    );
+  }
+
+  renderNoCouplingsFound() {
+    return (
+      <div style={{...GlobalStyles.StandardPadding, ...style.NoAppsFoundPanel, ...GlobalStyles.VerySubtle}}>
+        No apps exist at this stage.
+      </div>
+    );
+  }
+
+  renderCouplingWithRelease(coupling) {
+    let description = `${coupling.release.build.commit.message || coupling.statuses.release.description} ${coupling.release.build.author}`;
+    let commitUrl = coupling.slug.source_blob.url || coupling.slug.source_blob.version;
+    return (
+      <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
+        <div style={couplingCardStyle}>
+          <DeveloperBoard style={{marginRight:'0.25rem', ...GlobalStyles.FairlySubtle}} fontSize="small"/>
+          <Link style={{...GlobalStyles.Subtle}} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
+          <span style={{flexGrow:'1'}}></span>
+          {this.props.stage !== 'review' ? (
+            <IconButton style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({editCoupling:coupling})}} size="small">
+              <Edit fontSize="inherit" />
+            </IconButton>
+          ) : ''}
+          <IconButton className="remove" style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({deleteCoupling:coupling})}} size="small">
+            <Delete fontSize="inherit" />
+          </IconButton>
+        </div>
+        <div style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText}}>
+          { coupling.release.build.commit && coupling.release.build.commit.sha ? (
+            <a style={GlobalStyles.CommitLink} href={commitUrl}>
+              <pre style={GlobalStyles.CommitLinkPre}><code>#{coupling.release.build.commit.sha.substring(0, 7)}</code></pre>
+            </a>
+          ) : '' }
+          <span style={GlobalStyles.Subtle}> {description}</span>
+        </div>
+        <div style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle}}>
+          <ReleaseStatus release={{release:true, ...coupling.statuses.release}}></ReleaseStatus> 
+          <label> Deployed <pre style={GlobalStyles.CommitLinkPre}><code>v{coupling.release.version}</code></pre> {util.getDateDiff(coupling.release.updated_at)}</label>
+        </div>
+        {this.canPromote(coupling) ? (
+          <Button 
+            style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle, marginTop:'0'}} 
+            size="small"
+            variant="outlined" 
+            className="promote"
+            fullWidth 
+            onClick={() => this.setState({promoteCoupling: coupling})}>
+            Promote
+          </Button>
+        ) : ''}
+      </Paper>
+    );
+  }
+
+  renderCouplingWithNoRelease(coupling) {
+    return (
+      <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
+        <div style={couplingCardStyle}>
+          <DeveloperBoard style={{marginRight:'0.25rem', ...GlobalStyles.FairlySubtle}} fontSize="small"/>
+          <Link style={{...GlobalStyles.Subtle}} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
+          <span style={{flexGrow:'1'}}></span>
+          <IconButton style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({editCoupling:coupling})}} size="small">
+            <Edit fontSize="inherit" />
+          </IconButton>
+          <IconButton className="remove" style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({deleteCoupling:coupling})}} size="small">
+            <Delete fontSize="inherit" />
+          </IconButton>
+        </div>
+        <div style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle}}>
+         This app does not have any releases.
+        </div>
+      </Paper>
+    );
   }
 
   render() {
     if (this.state.loading) {
-      return (
-        <div style={style.refresh.div}>
-          <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-        </div>
-      );
+      return this.renderLoading();
+    } else if(this.state.couplings.length === 0) {
+      return this.renderNoCouplingsFound();
+    } else {
+      return [this.renderPipelinePromote(), this.renderEditCoupling(), this.renderDeleteCoupling()]
+        .concat(this.state.couplings.map(
+          (coupling) => coupling.release.id ? 
+            this.renderCouplingWithRelease(coupling) : 
+              this.renderCouplingWithNoRelease(coupling)));
     }
-
-    const couplingList = this.state.stageCouplings.map((coupling) => {
-      const releaseDate = new Date(coupling.release.updated_at);
-      const buildDate = new Date(coupling.release.build.updated_at);
-      const commitSha = coupling.release.build.commit.sha ? `Commit: ${coupling.release.build.commit.sha.substring(0, 8)}...` : `Build: ${coupling.release.build.id}`;
-      const commitMessage = coupling.release.build.commit.message ? `, ${coupling.release.build.commit.message.substring(0, 60)}` : null;
-      const commitAuthor = coupling.release.build.commit.author ? `, ${coupling.release.build.commit.author.substring(0, 20)}` : null;
-
-      return (
-        <TableRow hover className={coupling.app.name} key={coupling.id} style={style.tableRow}>
-          <TableCell>
-            <div style={style.tableCell.title}><a style={style.link} href={`/apps/${coupling.app.name}/info`}>{coupling.app.name}</a></div>
-            <div style={style.tableCell.sub}>id: {coupling.id}</div>
-            {coupling.release.updated_at && (
-              <div>
-                Released on: {releaseDate.toLocaleString()},
-                Built on: {buildDate.toLocaleString()}
-              </div>
-            )}
-            {coupling.release.build.commit.sha && (
-              <div>
-                {commitSha} {commitAuthor} {commitMessage}
-              </div>
-            )}
-            {coupling.release.version && (
-              <div style={style.tableCell.last}>Release: {coupling.release.version}</div>
-            )}
-          </TableCell>
-          <TableCell style={style.tableCell.button}>
-            {coupling.stage !== 'production' && (
-              <div>
-                <Button
-                  variant="contained"
-                  style={style.tableCell.button}
-                  className="promote"
-                  onClick={() => this.handlePromoteConfirmation(coupling)}
-                  color="primary"
-                ><PromoteIcon style={{ paddingRight: '10px' }} />Promote</Button>
-              </div>
-            )}
-          </TableCell>
-          <TableCell style={style.tableCell.icon}>
-            <div style={style.tableCell.end}>
-              <IconButton
-                className="remove"
-                onClick={() => this.handleConfirmation(coupling)}
-              >
-                <RemoveIcon />
-              </IconButton>
-            </div>
-          </TableCell>
-        </TableRow>
-      );
-    });
-
-    return (
-      <div>
-        <Table className={`${this.props.stage}-coupling-list`}>
-          <TableBody>
-            {couplingList}
-          </TableBody>
-        </Table>
-        <Divider />
-        {!this.state.new && (
-          <Paper elevation={0}>
-            <Tooltip title="New Coupling" placement="left">
-              <IconButton className={`${this.props.stage}-new-coupling`} onClick={this.handleNewCoupling}>
-                <AddIcon />
-              </IconButton>
-            </Tooltip>
-          </Paper>
-        )}
-        {this.state.new && (
-          <div>
-            <IconButton className={`${this.props.stage}-cancel`} onClick={this.handleNewCouplingCancel}><RemoveIcon /></IconButton>
-            <NewPipelineCoupling
-              onError={this.handleError}
-              pipeline={this.props.pipeline.name}
-              onComplete={this.reload}
-              stage={this.props.stage}
-            />
-          </div>
-        )}
-        <ConfirmationModal
-          className={`${this.props.stage}-promote-confirm`}
-          open={this.state.promoteOpen}
-          onOk={this.handlePromote}
-          onCancel={this.handlePromoteCancelConfirmation}
-          message="Are you sure you want to promote?"
-          title="Promote"
-          loading={this.state.loading}
-          style={{ maxWidth: 'md' }}
-          actions={[
-            <div style={{ width: '100%', marginRight: '12px', marginLeft: '12px' }}>
-              <Search
-                options={this.state.releases}
-                value={this.state.release}
-                onChange={this.handleReleaseChange}
-                placeholder="Specify Release (Latest)"
-              />
-            </div>,
-            <FormControlLabel
-              control={
-                <Checkbox
-                  className="force-check"
-                  checked={!this.state.safePromote}
-                  onChange={this.handleSafePromoteCheck}
-                  style={{ textAlign: 'left', marginLeft: '12' }}
-                />}
-              label="Force"
-            />,
-          ]}
-        />
-        <ConfirmationModal
-          className={`${this.props.stage}-remove-confirm`}
-          open={this.state.open}
-          onOk={this.handleRemoveCoupling}
-          onCancel={this.handleCancelConfirmation}
-          message="Are you sure you want to delete this coupling?"
-        />
-      </div>
-    );
   }
 }
 
 Stage.propTypes = {
   pipeline: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   stage: PropTypes.string.isRequired,
-  onAlert: PropTypes.func.isRequired,
+  stages: PropTypes.object.isRequired,
+  isElevated: PropTypes.bool.isRequired,
   onError: PropTypes.func.isRequired,
-  active: PropTypes.bool.isRequired,
+  refresh: PropTypes.func.isRequired,
 };

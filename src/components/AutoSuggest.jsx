@@ -8,11 +8,13 @@ import PropTypes from 'prop-types';
 
 const styles = theme => ({
   input: {
-    width: '300px',
+    width:'100%',
+    minWidth: '300px',
   },
   container: {
+    width:'100%',
     position: 'relative',
-    width: '300px',
+    minWidth: '300px',
   },
   suggestionsContainerOpen: {
     position: 'absolute',
@@ -167,7 +169,7 @@ class AutoSuggest extends Component {
 
 
   render() {
-    const { classes, errorText, className, placeholder } = this.props;
+    const { classes, errorText, labelText, className, placeholder } = this.props;
     const autoSuggestProps = {
       renderInputComponent: this.renderInputComponent,
       suggestions: this.state.suggestions,
@@ -177,7 +179,6 @@ class AutoSuggest extends Component {
       renderSuggestion: this.renderSuggestion,
       onSuggestionSelected: this.handleSuggestionSelected,
     };
-
     return (
       <div className={className}>
         <Autosuggest
@@ -187,7 +188,7 @@ class AutoSuggest extends Component {
             errorText,
             muiTheme: this.theme,
             placeholder,
-            label: errorText || undefined,
+            label: errorText || labelText || undefined,
             value: this.state.single,
             onChange: this.handleChange('single'),
           }}
@@ -213,6 +214,7 @@ AutoSuggest.propTypes = {
   color: PropTypes.string,
   data: PropTypes.arrayOf(PropTypes.string).isRequired,
   errorText: PropTypes.string,
+  labelText: PropTypes.string,
   handleSearch: PropTypes.func,
   className: PropTypes.string,
   placeholder: PropTypes.string,

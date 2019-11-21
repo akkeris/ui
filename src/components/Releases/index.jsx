@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { grey, teal } from '@material-ui/core/colors';
+import { grey } from '@material-ui/core/colors';
 import {
   Snackbar, CircularProgress, Table, TableBody, TableRow, TableCell,
   IconButton, Dialog, Button, DialogActions, DialogContent, DialogTitle,
@@ -12,16 +12,14 @@ import BuildOutputIcon from '@material-ui/icons/Assignment';
 import BuildIcon from '@material-ui/icons/Build';
 import ReleaseIcon from '@material-ui/icons/Backup';
 import RevertIcon from '@material-ui/icons/Replay';
-import PendingIcon from '@material-ui/icons/Lens';
-import ErrorIcon from '@material-ui/icons/Cancel';
-import SuccessIcon from '@material-ui/icons/CheckCircle';
-
 import RebuildIcon from '../Icons/RebuildIcon';
 import Logs from './Logs';
 import api from '../../services/api';
 import NewBuild from './NewBuild';
-import GitCommitIcon from '../Icons/GitCommitIcon';
 import ConfirmationModal from '../ConfirmationModal';
+import ReleaseStatus from './ReleaseStatus';
+import GlobalStyles from '../../config/GlobalStyles.jsx';
+import util from '../../services/util/index.js';
 
 function addRestrictedTooltip(title, placement, children) {
   return (
@@ -64,6 +62,7 @@ const style = {
       fontSize: '16px',
     },
     sub: {
+      marginTop: '10px',
       fontSize: '11px',
       textTransform: 'uppercase',
     },
@@ -91,16 +90,6 @@ const style = {
       display: 'inline-block',
       position: 'relative',
     },
-  },
-  status: {
-    position: 'absolute',
-    transform: 'scale(0.5)',
-    border: '0px',
-    borderRadius: '12px',
-    backgroundColor: 'white',
-    left: '9px',
-    top: '50%',
-    marginTop: '-6px',
   },
   mainIcon: {
     position: 'absolute',
@@ -130,7 +119,7 @@ const style = {
     },
     actions: {
       container: {
-        width: '112px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', 'flexGrow':0,
       },
       button: {
         width: '50px',
@@ -142,11 +131,11 @@ const style = {
   },
   release: {
     root: {
-      display: 'flex', padding: '12px 24px', minHeight: '64px', alignItems: 'center',
+      display: 'flex', padding: '12px 24px', minHeight: '64px', alignItems: 'center', 'justifyContent':'space-between',
     },
     icon: {
       root: {
-        width: '25px', paddingRight: '24px',
+        width: '25px', paddingRight: '24px', 'flexGrow':'0',
       },
       inner: {
         position: 'relative', height: '100%',
@@ -157,53 +146,29 @@ const style = {
     },
     info: {
       root: {
-        fontSize: '0.8125rem', lineHeight: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        fontSize: '0.8125rem', lineHeight: '10px', 'flexGrow':'1', 
       },
     },
     actions: {
       root: {
-        width: '112px', display: 'flex', justifyContent: 'space-between',
-      },
-      inner: {
-        width: '50px',
+         flexGrow:'0', display: 'flex', justifyContent: 'space-between',
       },
     },
   },
+  textEllipses:{
+    color:'rgb(88, 96, 105)',
+    maxWidth:'700px',
+    overflowY:'hidden',
+    overflowX:'hidden',
+    textOverflow:'ellipsis',
+    whiteSpace:'nowrap',
+    display:'block',
+    verticalAlign:'middle',
+    lineHeight:'1rem',
+    boxSizing: 'border-box',
+    marginTop: '0.5rem'
+  }
 };
-
-function getDateDiff(date /* : Date */) {
-  const seconds = Math.floor((new Date() - date) / 1000);
-  let interval = Math.floor(seconds / 31536000);
-  if (interval > 1) {
-    return `${interval} years ago`;
-  }
-  if (interval === 1) {
-    return `${interval} year ago`;
-  }
-  interval = Math.floor(seconds / 2592000);
-  if (interval > 1) {
-    return `${interval} months ago`;
-  }
-  if (interval === 1) {
-    return `${interval} month ago`;
-  }
-  interval = Math.floor(seconds / 86400);
-  if (interval > 1) {
-    return `${interval} days ago`;
-  }
-  if (interval === 1) {
-    return `${interval} day ago`;
-  }
-  interval = Math.floor(seconds / 3600);
-  if (interval > 1) {
-    return `${interval} hours ago`;
-  }
-  if (interval === 1) {
-    return `${interval} hour ago`;
-  }
-  interval = Math.floor(seconds / 60);
-  return `${interval} minutes ago`;
-}
 
 export default class Releases extends Component {
   constructor(props, context) {
@@ -224,6 +189,7 @@ export default class Releases extends Component {
       isElevated: false,
       restrictedSpace: false,
       confirmRebuildOpen: false,
+      rebuildRelease: null,
     };
     this.getReleases();
   }
@@ -255,52 +221,40 @@ export default class Releases extends Component {
   }
 
   getReleases = async () => {
-    await api.getApp(this.props.app.name);
     let { data: builds } = await api.getBuilds(this.props.app.name);
-    let releases = await api.getReleases(this.props.app.name);
-    releases = releases.sort((a, b) => (
-      new Date(a.created_at).getTime() > new Date(b.created_at).getTime() ? 1 : -1
-    )).map(x => Object.assign(x.slug, {
-      id: x.id,
-      created_at: x.created_at,
-      version: x.version,
-      description: x.description,
-      release: true,
-      current: x.current,
-    }));
-    // fitler out builds with a release
-    // builds = builds.filter((a) => !releases.some((x) => x.slug.id === a.id));
-    builds = builds.map(a => Object.assign({
-      releases: releases.filter(b => b.slug.id === a.id),
-    }, a));
-
-    let releaseAndBuilds = builds.concat(releases).sort((a, b) => (
-      new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1
-    ));
-
-    if (releaseAndBuilds.length > releaseLimit) {
-      releaseAndBuilds = releaseAndBuilds.slice(0, releaseLimit);
-    }
+    let { data: releases } = await api.getReleases(this.props.app.name);
     if (this._isMounted) {
       this.setState({
-        releases: releaseAndBuilds,
-        loading: false,
-      });
+          releases:releases
+            .map((release) => {
+              let build = builds.filter((build) => build.id === release.slug.id);
+              return {release:true, slug:build[0] || {}, source_blob:build[0] ? build[0].source_blob : {}, ...release};
+            })
+            .concat(
+              builds
+                .filter((a) => !releases.some((x) => x.slug.id === a.id))
+                .map(a => Object.assign({
+                  releases: releases.filter(b => b.slug.id === a.id),
+                }, a))
+            )
+            .sort((a, b) => new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1),
+          loading: false,
+        });
     }
   }
 
-  handleConfirmRebuild = () => {
-    this.setState({ confirmRebuildOpen: true });
+  handleConfirmRebuild = (release) => {
+    this.setState({ confirmRebuildOpen: true, rebuildRelease:release });
   }
 
   handleCancelRebuild = () => {
-    this.setState({ confirmRebuildOpen: false });
+    this.setState({ confirmRebuildOpen: false, rebuildRelease:null });
   }
 
   handleRebuild = async () => {
     this.setState({ confirmRebuildOpen: false });
-    await api.rebuildLatest(this.props.app.name);
-    this.reload('Rebuilding latest image...');
+    await api.rebuild(this.props.app.name, this.state.rebuildRelease);
+    this.reload('Rebuilding image...');
   }
 
   handleRevertOpen(release) {
@@ -339,7 +293,7 @@ export default class Releases extends Component {
     this.setState({ new: false });
   }
 
-  handleOpen(release) {
+  handleBuildLogs(release) {
     this.setState({
       logsOpen: true,
       release,
@@ -390,46 +344,18 @@ export default class Releases extends Component {
   renderReleases(page, rowsPerPage) {
     return this.state.releases
       .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
-      .map((release, index) => {
-      // release status indicator
-        let releaseColor = grey[500];
-        let StatusIcon = PendingIcon;
-        switch (release.status) {
-          case 'succeeded':
-            releaseColor = 'limegreen';
-            StatusIcon = SuccessIcon;
-            break;
-          case 'failed':
-            releaseColor = 'red';
-            StatusIcon = ErrorIcon;
-            break;
-          case 'pending':
-            releaseColor = 'orange';
-            break;
-          default:
-            releaseColor = grey[500];
-            break;
-        }
-        let current = null;
-        if (release.current) {
-          current = teal[50];
-        }
-
+      .map((release, index) => {        
+        let rowColor = release.current ? grey[50] : null;
         const info1 = [
           release.description,
           release.source_blob.author,
         ];
         const info2 = [
-          release.source_blob.commit ? `#${release.source_blob.commit.substring(0, 7)}` : '',
           release.source_blob.message ? release.source_blob.message.replace(/\s+/g, ' ') : '',
         ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' '));
 
-        const statusIconStyle = Object.assign({
-          fillColor: releaseColor,
-          color: releaseColor,
-        }, style.status);
         return (
-          <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: current }}>
+          <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: rowColor }}>
             <TableCell style={style.release.root}>
               <div style={style.release.icon.root}>
                 <div style={style.release.icon.inner}>
@@ -438,38 +364,44 @@ export default class Releases extends Component {
                   ) : (
                     <ReleaseIcon style={style.release.icon.releaseIcon} />
                   )}
-                  <StatusIcon style={statusIconStyle} />
                 </div>
               </div>
               <div style={style.release.info.root}>
-                {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `}
-                {info1.join(' ')}
-                <br />
-                {trunc(info2.join(' '), 250)}
-                <div style={style.tableCell.sub}>
-                  {getDateDiff(new Date(release.created_at))}
-                </div>
+                {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `} {info1.join(' ')} 
+                {release.source_blob && release.source_blob.version ? (
+                  <a style={{...GlobalStyles.CommitLink, marginLeft:'0.5em'}} href={release.source_blob.version}>
+                    <pre style={GlobalStyles.CommitLinkPre}><code>#{release.source_blob.commit.substring(0, 7)}</code></pre>
+                  </a>
+                ) : ''} <ReleaseStatus release={release}></ReleaseStatus>
+                <div style={style.textEllipses}>{info2.join('\n')}</div>
+                <div style={style.tableCell.sub}> {util.getDateDiff(new Date(release.created_at))} </div>
               </div>
               <div style={style.release.actions.root}>
-                <div style={style.release.actions.inner}>
-                  {release.source_blob.version &&
-                  <Tooltip title="Commit" placement="top-end">
-                    <IconButton style={style.iconButton} className="git" href={release.source_blob.version} target="_blank"><GitCommitIcon /></IconButton>
-                  </Tooltip>
-                  }
-                </div>
-                <div style={style.release.actions.inner}>
-                  {!release.release &&
-                  <Tooltip title="Build Logs" placement="top-end">
-                    <IconButton color="primary" className="logs" onClick={() => this.handleOpen(release)}><BuildOutputIcon /></IconButton>
-                  </Tooltip>
-                  }
-                  {!release.current && release.release &&
-                  <Tooltip title="Rollback" placement="top-end">
-                    <IconButton color="secondary" className="revert" onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
-                  </Tooltip>
-                  }
-                </div>
+                {!release.current && release.release &&
+                <Tooltip title="Rollback" placement="top-end">
+                  <IconButton 
+                    color="default"
+                    className="revert" 
+                    onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
+                </Tooltip>
+                }
+                {!release.release &&
+                <Tooltip title="Rebuild" placement="top-end">
+                  <IconButton
+                    disabled={release.slug && release.slug.id ? false : true}
+                    onClick={() => this.handleConfirmRebuild(release)}
+                    style={style.rebuildIcon}
+                    color="default"
+                    className="rebuild"
+                  ><RebuildIcon/></IconButton>
+                </Tooltip>
+                }
+                <Tooltip title="Build Logs" placement="top-end">
+                  <IconButton 
+                    color="default"
+                    className="logs" 
+                    onClick={() => this.handleBuildLogs(release)}><BuildOutputIcon /></IconButton>
+                </Tooltip>
               </div>
             </TableCell>
           </TableRow>
@@ -517,7 +449,7 @@ export default class Releases extends Component {
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>
           <div>
-            {getDateDiff(new Date(revert.created_at))} - {[
+            {util.getDateDiff(new Date(revert.created_at))} - {[
               revert.description,
               revert.source_blob.author,
               revert.source_blob.commit ? `#${revert.source_blob.commit.substring(0, 7)}` : '',
@@ -592,17 +524,6 @@ export default class Releases extends Component {
           {!this.state.new && (
             <div style={style.header.actions.container}>
               <div style={style.header.actions.button}>
-                <Tooltip title="Rebuild" placement="bottom-end">
-                  <IconButton
-                    disabled={this.state.releases.length < 1}
-                    onClick={this.handleConfirmRebuild}
-                    style={style.rebuildIcon}
-                    color="secondary"
-                    className="rebuild"
-                  ><RebuildIcon style={style.rebuildIcon.size} /></IconButton>
-                </Tooltip>
-              </div>
-              <div style={style.header.actions.button}>
                 {newReleaseButton}
               </div>
             </div>
@@ -638,11 +559,12 @@ export default class Releases extends Component {
           </Table>
         )}
         <ConfirmationModal
+          title="Rebuild"
           className="rebuild-confirm"
           open={this.state.confirmRebuildOpen}
           onOk={this.handleRebuild}
           onCancel={this.handleCancelRebuild}
-          message="Are you sure you want to rebuild the latest release?"
+          message="Are you sure you want to rebuild this?"
         />
         <Snackbar
           className="release-snack"

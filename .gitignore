@@ -1,6 +1,6 @@
 # Created by https://www.gitignore.io/api/node,macos,visualstudiocode
 env.sh
-
+.env*
 ### macOS ###
 *.DS_Store
 .AppleDouble
