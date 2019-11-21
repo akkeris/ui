@@ -117,7 +117,7 @@ export default class AppList extends Component {
         <Table className="app-list">
           <TableHead component="div">
             <TableRow component="div">
-              <TableCell component="div">
+              <TableCell component="div" style={{width:'40%'}}>
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -132,7 +132,7 @@ export default class AppList extends Component {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell component="div">
+              <TableCell component="div" style={{width:'30%'}}>
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -147,7 +147,7 @@ export default class AppList extends Component {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell component="div">
+              <TableCell component="div" style={{width:'20%'}}>
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -162,7 +162,7 @@ export default class AppList extends Component {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell component="div">
+              <TableCell component="div" style={{width:'10%'}}>
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
