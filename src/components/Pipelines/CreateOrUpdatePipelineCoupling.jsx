@@ -173,7 +173,7 @@ export default class CreatePipelineCoupling extends Component {
           <DialogTitle id="scroll-dialog-title" style={{...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle}}>
             {!this.props.coupling ? 'Add an app to a pipeline' : 'Modify pipeline coupling'}
           </DialogTitle>
-          <DialogContent dividers>
+          <DialogContent style={{overflowY:'visible', minHeight:'340px'}} dividers>
             {!this.props.coupling ? (
               <Typography id="dialog-description" variant="h6" style={formSubHeaderStyle}>
                 Choose an application to add to the <pre style={GlobalStyles.CommitLinkPre}><code>{this.props.stage}</code></pre> stage in the <pre style={GlobalStyles.CommitLinkPre}><code>{this.props.pipeline.name}</code></pre> pipeline.
