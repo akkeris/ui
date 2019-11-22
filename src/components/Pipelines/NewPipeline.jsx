@@ -5,6 +5,7 @@ import {
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
 
+import History from '../../config/History';
 import ConfirmationModal from '../ConfirmationModal';
 import api from '../../services/api';
 
@@ -83,6 +84,7 @@ export default class NewPipeline extends Component {
         category: 'PIPELINES',
         action: 'Created new pipeline',
       });
+      History.get().push(`/pipelines/${this.state.pipeline}/review`);
     } catch (error) {
       this.setState({
         submitMessage: error.response.data,
