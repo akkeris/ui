@@ -200,15 +200,37 @@ export default class ConfigVar extends Component {
     const editConfig = {};
     editConfig[this.state.key] = this.state.newValue;
     try {
-      await api.patchConfig(this.props.app, editConfig);
+      let values = {}
+      let dirty = false;
+      for(let key in editConfig) {
+        if(key === "PORT") {
+          let port = editConfig[key]
+          try {
+            port = parseInt(port, 10);
+            if(port < 1 || port > 65535) {
+              throw new Error('Port out of range');
+            }
+          } catch (e) {
+            throw new Error('The port specified had an invalid value, it must be a number greater than 0 and less than 65535: ' + e.message);
+          }
+          await api.patchFormation(this.props.app, "web", undefined, undefined, undefined, port);
+        } else {
+          values[key] = editConfig[key];
+          dirty = true;
+        }
+      }
+      if(dirty) {
+        await api.patchConfig(this.props.app, values);
+      }
       ReactGA.event({
         category: 'APPS',
         action: 'Updated a config var',
       });
       this.reload('Updated Config Vars');
     } catch (error) {
+      console.error(error);
       this.setState({
-        submitMessage: error.response.data,
+        submitMessage: error.response ? error.response.data : error.message,
         submitFail: true,
         loading: false,
         key: null,
