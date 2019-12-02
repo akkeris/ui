@@ -176,6 +176,7 @@ function getAddonAttachments(app) {
 function deleteAddonAttachment(app, attachment) {
   return axios.delete(`/api/apps/${app}/addon-attachments/${attachment}`);
 }
+
 function deleteAddon(app, addon) {
   return axios.delete(`/api/apps/${app}/addons/${addon}`);
 }
