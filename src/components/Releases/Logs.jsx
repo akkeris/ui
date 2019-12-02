@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { CircularProgress } from '@material-ui/core';
-// import Ansi from 'ansi-to-react'; - causes exceeded stack range errors and locks up the browser on larger build logs.
 
 import api from '../../services/api';
 

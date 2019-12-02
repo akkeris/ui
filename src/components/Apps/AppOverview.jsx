@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
   CircularProgress, List, ListItem, ListItemText,
   GridList, GridListTile, Snackbar,
-  Divider, Typography,
+  Divider,
 } from '@material-ui/core';
 
 import api from '../../services/api';
@@ -118,23 +118,14 @@ class AppOverview extends Component {
     super(props, context);
     this.state = {
       loading: true,
-      open: false,
-      mOpen: false,
-      rOpen: false,
       submitFail: false,
       submitMessage: '',
-      isMaintenance: false,
-      isElevated: false,
-      restrictedSpace: false,
       autoBuild: null,
-      newAuto: false,
       snackOpen: false,
     };
   }
 
   async componentDidMount() {
-    const { app } = this.props;
-
     let autoBuild;
     try {
       autoBuild = await api.getAutoBuild(this.props.app.name);
@@ -143,7 +134,6 @@ class AppOverview extends Component {
     }
 
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
-      isMaintenance: app.maintenance,
       autoBuild: autoBuild ? autoBuild.data : null,
       loading: false,
     });
@@ -168,7 +158,6 @@ class AppOverview extends Component {
       if (err.response.status === 404) {
         if (this._isMounted) {
           this.setState({
-            rOpen: false,
             loading: false,
             autoBuild: null,
           });
@@ -177,7 +166,6 @@ class AppOverview extends Component {
         this.setState({
           submitMessage: err.response.data,
           submitFail: true,
-          rOpen: false,
           loading: false,
           autoBuild: null,
         });
@@ -201,7 +189,6 @@ class AppOverview extends Component {
   reload = (message) => {
     this.setState({
       loading: false,
-      newAuto: false,
       snackOpen: true,
       message,
     });
@@ -220,13 +207,13 @@ class AppOverview extends Component {
       <div>
         <div className="app-description" style={style.appDescription.container}>
           {this.props.app.description === '' ? (
-            <ListItemText style={style.appDescription.missing} secondary={'No description provided'} />
+            <ListItemText style={style.appDescription.missing} secondary="No description provided" />
           ) : (
             <ListItemText secondary={this.props.app.description} />
           )}
         </div>
         <Divider variant="middle" />
-        <GridList style={style.gridList} cellHeight={'auto'}>
+        <GridList style={style.gridList} cellHeight="auto">
           <GridListTile style={{ padding: '0px' }}>
             <List disablePadding>
               <ListItem style={style.listItem}>
@@ -257,7 +244,7 @@ class AppOverview extends Component {
         </GridList>
         <Divider variant="middle" />
         {this.state.autoBuild ? (
-          <GridList style={style.gridList} cellHeight={'auto'}>
+          <GridList style={style.gridList} cellHeight="auto">
             <GridListTile style={{ padding: '0px' }}>
               <List disablePadding>
                 <ListItem style={style.listItem}>
@@ -296,10 +283,10 @@ class AppOverview extends Component {
             </GridListTile>
           </GridList>
         ) : (
-          <GridList style={style.gridList} cellHeight={'auto'}>
+          <GridList style={style.gridList} cellHeight="auto">
             <GridListTile style={{ padding: '0px' }}>
               <List disablePadding>
-                <ListItemText primary="Git Repo" secondary={'Not Configured'} />
+                <ListItemText primary="Git Repo" secondary="Not Configured" />
               </List>
             </GridListTile>
           </GridList>
@@ -310,7 +297,10 @@ class AppOverview extends Component {
           primary="Current Image"
           secondary={this.props.app.image ? this.props.app.image : 'No Releases'}
         />
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
+        <div style={{
+ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px',
+}}
+        >
           <div>
             <div style={style.tableCell.main}>
               {'Last Release and Most Recent Changes'}
