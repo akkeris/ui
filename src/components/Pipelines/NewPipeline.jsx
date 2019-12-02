@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography,
-} from '@material-ui/core';
+import { Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
 import ReactGA from 'react-ga';
 
 import ConfirmationModal from '../ConfirmationModal';
@@ -145,14 +143,16 @@ export default class NewPipeline extends Component {
                   disabled={stepIndex === 0}
                   onClick={this.handlePrev}
                   style={style.buttons.back}
-                >Back</Button>
+                >Back
+                </Button>
               )}
               <Button
                 variant="contained"
                 className="next"
                 color="primary"
                 onClick={this.handleNext}
-              >{stepIndex === 0 ? 'Finish' : 'Next'}</Button>
+              >{stepIndex === 0 ? 'Finish' : 'Next'}
+              </Button>
             </span>
           )}
         </div>

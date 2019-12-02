@@ -107,7 +107,9 @@ class Pipelines extends Component {
         options: pipelines.map(pipeline => ({ label: pipeline.name, value: pipeline.name, type: 'pipeline' })),
       },
     ];
-    this.setState({ pipelines, sortedPipelines: pipelines, loading: false, options }, () => {
+    this.setState({
+      pipelines, sortedPipelines: pipelines, loading: false, options,
+    }, () => {
       let values;
       try {
         values = JSON.parse(localStorage.getItem('akkeris_pipeline_filters'));
@@ -248,7 +250,9 @@ class Pipelines extends Component {
   }
 
   render() {
-    const { page, rowsPerPage, pipelines, sortBy, sortDirection } = this.state;
+    const {
+      page, rowsPerPage, pipelines, sortBy, sortDirection,
+    } = this.state;
     if (this.state.loading) {
       return (
         <div style={style.refresh.div}>

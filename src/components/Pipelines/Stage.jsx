@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import GlobalStyles from '../../config/GlobalStyles.jsx';
 import { DeveloperBoard, Delete, Edit } from '@material-ui/icons/';
-import { Paper, CircularProgress, Button, Link, IconButton, FormControlLabel, Checkbox } from '@material-ui/core'
-import ReleaseStatus from '../Releases/ReleaseStatus.jsx';
+import { Paper, CircularProgress, Button, Link, IconButton } from '@material-ui/core';
+import ReactGA from 'react-ga';
+import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
+import ReleaseStatus from '../Releases/ReleaseStatus.jsx'; // eslint-disable-line import/extensions
 import api from '../../services/api';
 import util from '../../services/util';
-import ReactGA from 'react-ga';
 import ConfirmationModal from '../ConfirmationModal';
 import CreateOrUpdatePipelineCoupling from './CreateOrUpdatePipelineCoupling';
 import PipelinePromote from './PipelinePromote';
@@ -17,57 +17,60 @@ const style = {
   },
   NoAppsFoundPanel: {
     marginTop: '0.5rem',
-    paddingLeft: '0'
-  }
-} 
+    paddingLeft: '0',
+  },
+};
 
-const couplingCardStyle = {...GlobalStyles.Subtle, ...GlobalStyles.HeaderSmall, ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText, ...GlobalStyles.VerticalAlign};
+const couplingCardStyle = {
+  ...GlobalStyles.Subtle,
+  ...GlobalStyles.HeaderSmall,
+  ...GlobalStyles.StandardLabelMargin,
+  ...GlobalStyles.NoWrappingText,
+  ...GlobalStyles.VerticalAlign,
+};
+
+const noCouplingCardStyle = {
+  ...GlobalStyles.StandardPadding,
+  ...style.NoAppsFoundPanel,
+  ...GlobalStyles.VerySubtle,
+};
+
 const originalState = {
-  loading:true,
-  couplings:[],
-  releases:[],
-  editCoupling:null,
-  deleteCoupling:null,
-  promoteCoupling:null,
-  fullCouplings:null,
+  loading: true,
+  couplings: [],
+  releases: [],
+  editCoupling: null,
+  deleteCoupling: null,
+  promoteCoupling: null,
+  fullCouplings: null,
 };
 
 export default class Stage extends Component {
+  static renderLoading() {
+    const circularStyle = { ...GlobalStyles.CenteredCircularProgress };
+    return (
+      <Paper style={{ ...style.AppPaperPanel, ...GlobalStyles.StandardPadding }}>
+        <div style={couplingCardStyle}>
+          <CircularProgress style={circularStyle} status="loading" />
+        </div>
+      </Paper>
+    );
+  }
+
+  static renderNoCouplingsFound() {
+    return (
+      <div style={noCouplingCardStyle}>
+        No apps exist at this stage.
+      </div>
+    );
+  }
+
   constructor(props, context) {
     super(props, context);
     this.state = util.deepCopy(originalState);
   }
 
   componentDidMount = () => this.refreshStage();
-
-  refreshStage = async(loading = true) => {
-    try {
-      this.setState({loading, ...util.deepCopy(originalState)});
-      const { data: fullCouplings } = await api.getPipelineCouplings(this.props.pipeline.name);
-      let couplings = await Promise.all(util.filterCouplings(fullCouplings, this.props.stage).map(async (coupling) => {
-        try {
-          let { data: statuses } = await api.getReleaseStatuses(coupling.app.id, coupling.release.id);
-          let { data: slug } = await api.getSlug(statuses.release.slug.id);
-          return {...coupling, slug, statuses}
-        } catch (e) {
-          return {...coupling, slug:{source_blob:{}}, statuses:{release:coupling.release, required_status_checks:{contexts:[]}}}
-        }
-      }));
-      this.setState({loading:false, couplings, fullCouplings});
-    } catch (err) {
-      this.props.onError(err);
-    }
-  }
-  
-  canPromote(coupling) {
-    if(coupling.stage === "production") {
-      return false;
-    }
-    if(util.filterCouplings(this.state.fullCouplings, this.props.stages[this.props.stage]).length === 0) {
-      return false;
-    }
-    return true;
-  }
 
   getTargets(stage) {
     if (stage !== 'production') {
@@ -76,11 +79,40 @@ export default class Stage extends Component {
     return null;
   }
 
+  refreshStage = async (loading = true) => {
+    try {
+      this.setState({ loading, ...util.deepCopy(originalState) });
+      const { data: fullCouplings } = await api.getPipelineCouplings(this.props.pipeline.name);
+      const couplings = await Promise.all(util.filterCouplings(fullCouplings, this.props.stage).map(async (coupling) => { // eslint-disable-line max-len
+        try {
+          const { data: statuses } = await api.getReleaseStatuses(coupling.app.id, coupling.release.id); // eslint-disable-line max-len
+          const { data: slug } = await api.getSlug(statuses.release.slug.id);
+          return { ...coupling, slug, statuses };
+        } catch (e) {
+          return { ...coupling, slug: { source_blob: {} }, statuses: { release: coupling.release, required_status_checks: { contexts: [] } } }; // eslint-disable-line max-len
+        }
+      }));
+      this.setState({ loading: false, couplings, fullCouplings });
+    } catch (err) {
+      this.props.onError(err);
+    }
+  }
+
+  canPromote(coupling) {
+    if (coupling.stage === 'production') {
+      return false;
+    }
+    if (util.filterCouplings(this.state.fullCouplings, this.props.stages[this.props.stage]).length === 0) { // eslint-disable-line max-len
+      return false;
+    }
+    return true;
+  }
+
   handleRemoveCoupling = async () => {
     this.setState({ loading: true });
     try {
       await api.deletePipelineCoupling(this.state.deleteCoupling.id);
-      ReactGA.event({ category: 'PIPELINES', action: 'Removed pipeline coupling'});
+      ReactGA.event({ category: 'PIPELINES', action: 'Removed pipeline coupling' });
       await this.refreshStage();
     } catch (err) {
       this.props.onError(err);
@@ -90,7 +122,7 @@ export default class Stage extends Component {
   handleUpdatePipelineCoupling = async (pipeline, coupling, stage, app, statuses) => {
     try {
       await api.updatePipelineCoupling(pipeline.id, coupling.id, statuses);
-      ReactGA.event({ category: 'PIPELINES', action: 'Updated coupling'});
+      ReactGA.event({ category: 'PIPELINES', action: 'Updated coupling' });
       this.refreshStage();
     } catch (err) {
       this.props.onError(err);
@@ -99,21 +131,21 @@ export default class Stage extends Component {
 
   handlePromote = async (pipeline, source, targets, release, safe) => {
     try {
-      ReactGA.event({ category: 'PIPELINES', action: 'Application Promoted'});
-      await api.promotePipeline(pipeline.id, source.app.id, targets.map((x) => { return {app:{id:x.app.id}} }), safe, release.id);
+      ReactGA.event({ category: 'PIPELINES', action: 'Application Promoted' });
+      await api.promotePipeline(pipeline.id, source.app.id, targets.map(x => ({ app: { id: x.app.id } })), safe, release.id); // eslint-disable-line max-len
       this.props.refresh();
     } catch (err) {
-      console.error(err);
+      console.error(err); // eslint-disable-line no-console
       this.props.onError(err);
     }
   }
 
   renderPipelinePromote() {
-    if(this.state.promoteCoupling === null) {
-      return;
+    if (this.state.promoteCoupling === null) {
+      return; // eslint-disable-line consistent-return
     }
-    return (
-      <PipelinePromote 
+    return ( // eslint-disable-line consistent-return
+      <PipelinePromote
         key={`promote-${this.state.promoteCoupling.id}`}
         open={this.state.promoteCoupling !== null}
         pipeline={this.props.pipeline}
@@ -123,15 +155,14 @@ export default class Stage extends Component {
         stages={this.props.stages}
         isElevated={this.props.isElevated}
         onPromote={this.handlePromote}
-        onCancel={() => this.setState({promoteCoupling:null})}
-        onError={(error) => this.setState({promoteCoupling:null, error})}
+        onCancel={() => this.setState({ promoteCoupling: null })}
       />
     );
   }
 
-  renderEditCoupling() {
-    if(this.state.editCoupling !== null) {
-      return (
+  renderEditCoupling() { // eslint-disable-line consistent-return
+    if (this.state.editCoupling !== null) {
+      return ( // eslint-disable-line consistent-return
         <CreateOrUpdatePipelineCoupling
           key={`update-pipeline-coupling-${this.state.editCoupling.id}`}
           open
@@ -139,85 +170,71 @@ export default class Stage extends Component {
           stage={this.props.stage}
           coupling={this.state.editCoupling}
           onCreateOrUpdate={this.handleUpdatePipelineCoupling}
-          onCancel={() => this.setState({editCoupling:null})}
-          onError={(error) => this.setState({editCoupling:null, error})}
+          onCancel={() => this.setState({ editCoupling: null })}
         />
       );
     }
   }
 
-  renderDeleteCoupling() {
-    if(this.state.deleteCoupling !== null) {
+  renderDeleteCoupling() { // eslint-disable-line consistent-return
+    if (this.state.deleteCoupling !== null) {
       return (
         <ConfirmationModal
           key={`delete-confirmation-${this.props.stage}`}
           className={`${this.props.stage}-remove-confirm`}
           open={this.state.deleteCoupling !== null}
           onOk={this.handleRemoveCoupling}
-          onCancel={() => { this.setState({deleteCoupling:null}); }}
+          onCancel={() => { this.setState({ deleteCoupling: null }); }}
           message={`Are you sure you want to remove ${this.state.deleteCoupling.app.name} from the ${this.props.stage} stage?`}
         />
       );
     }
   }
 
-  renderLoading(coupling) {
-    const circularStyle = {...GlobalStyles.CenteredCircularProgress};
-    return (
-      <Paper style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
-        <div style={couplingCardStyle}>
-          <CircularProgress style={circularStyle} status="loading" />
-        </div>
-      </Paper>
-    );
-  }
-
-  renderNoCouplingsFound() {
-    return (
-      <div style={{...GlobalStyles.StandardPadding, ...style.NoAppsFoundPanel, ...GlobalStyles.VerySubtle}}>
-        No apps exist at this stage.
-      </div>
-    );
-  }
-
   renderCouplingWithRelease(coupling) {
-    let description = `${coupling.release.build.commit.message || coupling.statuses.release.description} ${coupling.release.build.author}`;
-    let commitUrl = coupling.slug.source_blob.url || coupling.slug.source_blob.version;
+    const description = `${coupling.release.build.commit.message || coupling.statuses.release.description} ${coupling.release.build.author}`;
+    const commitUrl = coupling.slug.source_blob.url || coupling.slug.source_blob.version;
     return (
-      <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
+      <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{ ...style.AppPaperPanel, ...GlobalStyles.StandardPadding }}>
         <div style={couplingCardStyle}>
-          <DeveloperBoard style={{marginRight:'0.25rem', ...GlobalStyles.FairlySubtle}} fontSize="small"/>
-          <Link style={{...GlobalStyles.Subtle}} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
-          <span style={{flexGrow:'1'}}></span>
+          <DeveloperBoard style={{ marginRight: '0.25rem', ...GlobalStyles.FairlySubtle }} fontSize="small" />
+          <Link style={{ ...GlobalStyles.Subtle }} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
+          <span style={{ flexGrow: '1' }} />
           {this.props.stage !== 'review' ? (
-            <IconButton style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({editCoupling:coupling})}} size="small">
+            <IconButton style={GlobalStyles.FairlySubtle} onClick={() => { this.setState({ editCoupling: coupling }); }} size="small">
               <Edit fontSize="inherit" />
             </IconButton>
           ) : ''}
-          <IconButton className="remove" style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({deleteCoupling:coupling})}} size="small">
+          <IconButton className="remove" style={GlobalStyles.FairlySubtle} onClick={() => { this.setState({ deleteCoupling: coupling }); }} size="small">
             <Delete fontSize="inherit" />
           </IconButton>
         </div>
-        <div style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText}}>
+        <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText }}>
           { coupling.release.build.commit && coupling.release.build.commit.sha ? (
             <a style={GlobalStyles.CommitLink} href={commitUrl}>
-              <pre style={GlobalStyles.CommitLinkPre}><code>#{coupling.release.build.commit.sha.substring(0, 7)}</code></pre>
+              <pre style={GlobalStyles.CommitLinkPre}>
+                <code>#{coupling.release.build.commit.sha.substring(0, 7)}</code>
+              </pre>
             </a>
           ) : '' }
           <span style={GlobalStyles.Subtle}> {description}</span>
         </div>
-        <div style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle}}>
-          <ReleaseStatus release={{release:true, ...coupling.statuses.release}}></ReleaseStatus> 
-          <label> Deployed <pre style={GlobalStyles.CommitLinkPre}><code>v{coupling.release.version}</code></pre> {util.getDateDiff(coupling.release.updated_at)}</label>
+        <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle }}>
+          <ReleaseStatus release={{ release: true, ...coupling.statuses.release }} />
+          <span style={{marginLeft:'0.25rem', verticalAlign:'middle'}}>
+            Deployed <pre style={GlobalStyles.CommitLinkPre}><code>v{coupling.release.version}</code></pre>  { /* eslint-disable-line */ }
+            <span style={{float:'right'}}> {util.getDateDiff(coupling.release.updated_at)}</span>
+          </span>
         </div>
         {this.canPromote(coupling) ? (
-          <Button 
-            style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle, marginTop:'0'}} 
+          <Button
+            style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle, marginTop: '0' }}
             size="small"
-            variant="outlined" 
+            variant="outlined"
             className="promote"
-            fullWidth 
-            onClick={() => this.setState({promoteCoupling: coupling})}>
+            fullWidth
+            onClick={() => this.setState({ promoteCoupling: coupling })}
+          >
             Promote
           </Button>
         ) : ''}
@@ -227,19 +244,19 @@ export default class Stage extends Component {
 
   renderCouplingWithNoRelease(coupling) {
     return (
-      <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{...style.AppPaperPanel, ...GlobalStyles.StandardPadding}}>
+      <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{ ...style.AppPaperPanel, ...GlobalStyles.StandardPadding }}>
         <div style={couplingCardStyle}>
-          <DeveloperBoard style={{marginRight:'0.25rem', ...GlobalStyles.FairlySubtle}} fontSize="small"/>
-          <Link style={{...GlobalStyles.Subtle}} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
-          <span style={{flexGrow:'1'}}></span>
-          <IconButton style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({editCoupling:coupling})}} size="small">
+          <DeveloperBoard style={{ marginRight: '0.25rem', ...GlobalStyles.FairlySubtle }} fontSize="small" />
+          <Link style={{ ...GlobalStyles.Subtle }} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
+          <span style={{ flexGrow: '1' }} />
+          <IconButton style={GlobalStyles.FairlySubtle} onClick={() => { this.setState({ editCoupling: coupling }); }} size="small">
             <Edit fontSize="inherit" />
           </IconButton>
-          <IconButton className="remove" style={GlobalStyles.FairlySubtle} onClick={() => {this.setState({deleteCoupling:coupling})}} size="small">
+          <IconButton className="remove" style={GlobalStyles.FairlySubtle} onClick={() => { this.setState({ deleteCoupling: coupling }); }} size="small">
             <Delete fontSize="inherit" />
           </IconButton>
         </div>
-        <div style={{...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle}}>
+        <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle }}>
          This app does not have any releases.
         </div>
       </Paper>
@@ -248,15 +265,14 @@ export default class Stage extends Component {
 
   render() {
     if (this.state.loading) {
-      return this.renderLoading();
-    } else if(this.state.couplings.length === 0) {
-      return this.renderNoCouplingsFound();
+      return Stage.renderLoading();
+    } else if (this.state.couplings.length === 0) {
+      return Stage.renderNoCouplingsFound();
     } else {
       return [this.renderPipelinePromote(), this.renderEditCoupling(), this.renderDeleteCoupling()]
-        .concat(this.state.couplings.map(
-          (coupling) => coupling.release.id ? 
-            this.renderCouplingWithRelease(coupling) : 
-              this.renderCouplingWithNoRelease(coupling)));
+        .concat(this.state.couplings.map(coupling => (coupling.release.id ?
+          this.renderCouplingWithRelease(coupling) :
+          this.renderCouplingWithNoRelease(coupling))));
     }
   }
 }
@@ -264,7 +280,7 @@ export default class Stage extends Component {
 Stage.propTypes = {
   pipeline: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   stage: PropTypes.string.isRequired,
-  stages: PropTypes.object.isRequired,
+  stages: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   isElevated: PropTypes.bool.isRequired,
   onError: PropTypes.func.isRequired,
   refresh: PropTypes.func.isRequired,

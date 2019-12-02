@@ -375,10 +375,8 @@ export default class AppInfo extends Component {
     }
   }
   cancelHref = (event) => {
-    if(event.preventDefault)
-      event.preventDefault();
-    if(event.stopPropagation)
-      event.stopPropagation();
+    if (event.preventDefault) { event.preventDefault(); }
+    if (event.stopPropagation) { event.stopPropagation(); }
     return false;
   }
   renderHeaderActions() {
@@ -404,14 +402,17 @@ export default class AppInfo extends Component {
     }
 
     return (
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '102px', float: 'right' }}>
+      <div style={{
+ display: 'flex', justifyContent: 'space-between', width: '102px', float: 'right',
+}}
+      >
         <Tooltip title="Favorite" placement="top-end">
           <IconButton
             style={style.iconButton}
             className="favorite-app"
             onClick={this.handleFavorite}
           >
-            {this.state.isFavorite ? <IsFavoriteIcon color={'primary'} /> : <FavoriteIcon color={'primary'} />}
+            {this.state.isFavorite ? <IsFavoriteIcon color="primary" /> : <FavoriteIcon color="primary" />}
           </IconButton>
         </Tooltip>
         <IconButton
@@ -451,7 +452,7 @@ export default class AppInfo extends Component {
           <MenuItem
             style={style.menuItem}
             onClick={() => {
-              this.setState({ editDescriptionOpen: true, menuOpen: false, anchorEl: null });
+              this.setState({ editDescriptionOpen: true, anchorEl: null });
             }}
           >
             <ListItemIcon
@@ -531,7 +532,9 @@ export default class AppInfo extends Component {
   }
 
   render() {
-    const { loading, submitMessage, submitFail, editDescriptionOpen } = this.state;
+    const {
+      loading, submitMessage, submitFail, editDescriptionOpen,
+    } = this.state;
     const currentTab = this.props.match.params.tab;
     if (loading) {
       let notFoundMessage;
@@ -582,7 +585,7 @@ export default class AppInfo extends Component {
           >
             <Tab
               component="a"
-              href={"/apps/" + this.state.app.name + "/info"}
+              href={`/apps/${this.state.app.name}/info`}
               onClick={this.cancelHref}
               disableRipple
               className="info-tab"
@@ -592,7 +595,7 @@ export default class AppInfo extends Component {
             />
             <Tab
               component="a"
-              href={"/apps/" + this.state.app.name + "/dynos"}
+              href={`/apps/${this.state.app.name}/dynos`}
               onClick={this.cancelHref}
               disableRipple
               className="dynos-tab"
@@ -602,7 +605,7 @@ export default class AppInfo extends Component {
             />
             <Tab
               component="a"
-              href={"/apps/" + this.state.app.name + "/releases"}
+              href={`/apps/${this.state.app.name}/releases`}
               onClick={this.cancelHref}
               disableRipple
               className="releases-tab"
@@ -612,7 +615,7 @@ export default class AppInfo extends Component {
             />
             <Tab
               component="a"
-              href={"/apps/" + this.state.app.name + "/addons"}
+              href={`/apps/${this.state.app.name}/addons`}
               onClick={this.cancelHref}
               disableRipple
               className="addons-tab"
@@ -622,7 +625,7 @@ export default class AppInfo extends Component {
             />
             <Tab
               component="a"
-              href={"/apps/" + this.state.app.name + "/webhooks"}
+              href={`/apps/${this.state.app.name}/webhooks`}
               onClick={this.cancelHref}
               disableRipple
               className="webhooks-tab"
@@ -632,7 +635,7 @@ export default class AppInfo extends Component {
             />
             <Tab
               component="a"
-              href={"/apps/" + this.state.app.name + "/config"}
+              href={`/apps/${this.state.app.name}/config`}
               onClick={this.cancelHref}
               disableRipple
               className="config-tab"
@@ -642,7 +645,7 @@ export default class AppInfo extends Component {
             />
             <Tab
               component="a"
-              href={"/apps/" + this.state.app.name + "/metrics"}
+              href={`/apps/${this.state.app.name}/metrics`}
               onClick={this.cancelHref}
               disableRipple
               className="metrics-tab"
@@ -652,7 +655,7 @@ export default class AppInfo extends Component {
             />
             <Tab
               component="a"
-              href={"/apps/" + this.state.app.name + "/logs"}
+              href={`/apps/${this.state.app.name}/logs`}
               onClick={this.cancelHref}
               disableRipple
               className="logs-tab"
@@ -753,7 +756,7 @@ export default class AppInfo extends Component {
           open={this.state.rOpen}
           onOk={this.handleRemoveRepo}
           onCancel={this.handleCancelRepoConfirmation}
-          message={'Are you sure you want to disconnect your repo?'}
+          message="Are you sure you want to disconnect your repo?"
           title="Confirm Repo Removal"
         />
         <ConfirmationModal

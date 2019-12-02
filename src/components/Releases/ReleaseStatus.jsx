@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import Tooltip from '@material-ui/core/Tooltip';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Button from '@material-ui/core/Button';
-import api from '../../services/api';
 import { grey, yellow } from '@material-ui/core/colors';
 import SuccessIcon from '@material-ui/icons/CheckCircle';
 import ErrorIcon from '@material-ui/icons/Cancel';
 import PendingIcon from '@material-ui/icons/Lens';
 import LinearProgress from '@material-ui/core/LinearProgress';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
+import api from '../../services/api';
 
 const textColor = 'rgb(36, 41, 46)';
 const softTextColor = 'rgb(88, 96, 105)';
@@ -22,28 +22,28 @@ const style = {
     borderRadius: '12px',
     margin: '0px',
   },
-  statusButton:{
-    'padding': '0px 0px',
-    'minWidth': 'inherit'
+  statusButton: {
+    padding: '0px 0px',
+    minWidth: 'inherit',
   },
-  loadingCircle:{
-    'padding': '15px',
+  loadingCircle: {
+    padding: '15px',
     'width:': '20px',
-    'height': '20px',
+    height: '20px',
   },
-  statusHeader:{
+  statusHeader: {
     fontSize: '16px',
     fontWeight: '600',
     lineHeight: '22px',
     padding: '15px',
     margin: '0',
   },
-  stateItemFirst:{
+  stateItemFirst: {
     borderTopColor: 'rgb(225, 228, 232)',
     borderTopWidth: '1px',
     borderTopStyle: 'solid',
   },
-  stateItem:{
+  stateItem: {
     borderTopColor: 'rgb(225, 228, 232)',
     borderTopWidth: '1px',
     borderTopStyle: 'solid',
@@ -52,45 +52,45 @@ const style = {
     display: 'flex',
     justifyItems: 'start',
   },
-  stateItemIcon:{
+  stateItemIcon: {
     margin: '1px 12px 0 0',
-    flexGrow: '0'
+    flexGrow: '0',
   },
-  stateImage:{
+  stateImage: {
     maxHeight: '0.9rem',
     maxWidth: '0.9rem',
     margin: '0 9px 0 0',
     verticalAlign: 'middle',
-    flexGrow: '0'
+    flexGrow: '0',
   },
-  stateContextLabel:{
-    color:textColor,
-    whiteSpace:'nowrap',
-    fontWeight:'600',
-    flexGrow: '0'
+  stateContextLabel: {
+    color: textColor,
+    whiteSpace: 'nowrap',
+    fontWeight: '600',
+    flexGrow: '0',
   },
-  stateDescription:{
-    color:softTextColor,
-    margin:'0px 9px 0 4.5px',
-    overflowY:'hidden',
-    overflowX:'hidden',
-    textOverflow:'ellipsis',
-    whiteSpace:'nowrap',
-    display:'inline-block',
-    flexGrow: '1'
+  stateDescription: {
+    color: softTextColor,
+    margin: '0px 9px 0 4.5px',
+    overflowY: 'hidden',
+    overflowX: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    display: 'inline-block',
+    flexGrow: '1',
   },
-  stateLink:{
-    color:linkColor,
-    margin:'0px 9px 0px 0px',
-    flexGrow: '0'
+  stateLink: {
+    color: linkColor,
+    margin: '0px 9px 0px 0px',
+    flexGrow: '0',
   },
-  subHeader:{
-    color:softTextColor,
-    fontSize:'13px',
-    display:'block',
-    fontWeight:'normal',
-  }
-}
+  subHeader: {
+    color: softTextColor,
+    fontSize: '13px',
+    display: 'block',
+    fontWeight: 'normal',
+  },
+};
 
 const HtmlTooltip = withStyles(theme => ({
   tooltip: {
@@ -102,7 +102,7 @@ const HtmlTooltip = withStyles(theme => ({
     border: '1px solid #dadde9',
     boxShadow: 'rgba(27, 31, 35, 0.14902) 0px 1px 15px 0px;',
     borderRadius: '5px',
-    overflow: 'hidden'
+    overflow: 'hidden',
   },
 }))(Tooltip);
 
@@ -119,7 +119,7 @@ function statusIconColor(state) {
       releaseColor = 'rgb(203, 36, 49)';
       break;
     case 'pending':
-      releaseColor = yellow[800];
+      releaseColor = yellow[800]; // eslint-disable-line
       break;
     default:
       releaseColor = 'rgb(203, 36, 49)';
@@ -147,36 +147,36 @@ function statusIcon(state) {
 }
 
 function releaseHeader(state) {
-  switch(state) {
+  switch (state) {
     case 'succeeded':
-      return 'Release successfully deployed.'
+      return 'Release successfully deployed.';
     case 'pending':
-      return 'Release is still pending deployment.'
+      return 'Release is still pending deployment.';
     case 'queue':
-      return 'Release is waiting to be deployed.'
+      return 'Release is waiting to be deployed.';
     case 'failed':
-      return 'The release failed to deploy.'
+      return 'The release failed to deploy.';
     case 'error':
-      return 'The release encountered an error deploying.'
+      return 'The release encountered an error deploying.';
     default:
-      return 'There is no known information on this release.'
+      return 'There is no known information on this release.';
   }
 }
 
 function buildHeader(state) {
-  switch(state) {
+  switch (state) {
     case 'succeeded':
-      return 'Build succeeded, but has not released.'
+      return 'Build succeeded, but has not released.';
     case 'pending':
-      return 'Build is pending, see logs for more info.'
+      return 'Build is pending, see logs for more info.';
     case 'queue':
-      return 'Build is queued.'
+      return 'Build is queued.';
     case 'failed':
-      return 'Build failed, see logs for more info.'
+      return 'Build failed, see logs for more info.';
     case 'error':
-      return 'Build errored out'
+      return 'Build errored out';
     default:
-      return 'There is no known information on this build.'
+      return 'There is no known information on this build.';
   }
 }
 
@@ -184,88 +184,94 @@ export default class ReleaseStatus extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      loading:false,
-      open:false,
-      statuses:null,
-    }
+      open: false,
+      statuses: null,
+    };
   }
 
   handleTooltipClose = async () => {
-    this.setState({open:false});
+    this.setState({ open: false });
   };
 
   handleTooltipOpen = async () => {
-    this.setState({open:true});
-    if(this.state.statuses === null) {
+    this.setState({ open: true });
+    if (this.state.statuses === null) {
       try {
         this.setState({
-          statuses:await api.getReleaseStatuses(this.props.release.app.id, this.props.release.id)
+          statuses: await api.getReleaseStatuses(this.props.release.app.id, this.props.release.id),
         });
       } catch (e) {
-        this.setState({statuses:{data:{statuses:[]}}});
+        this.setState({ statuses: { data: { statuses: [] } } });
       }
     }
   };
 
-  renderSubHeader() {
-    if(this.state.statuses === null || this.state.statuses.data.statuses.length === 0) {
-      return
-    } else {
+  renderSubHeader() { // eslint-disable-line consistent-return
+    if (!(this.state.statuses === null || this.state.statuses.data.statuses.length === 0)) {
       return (
         <sub style={style.subHeader}>{this.state.statuses.data.statuses.length} status checks</sub>
-      )
+      );
     }
   }
 
   renderHeader(statusHeaderStyle) {
-    const text = this.props.release ? releaseHeader(this.props.release.status) : buildHeader(this.props.release.status);
+    const text = this.props.release ?
+      releaseHeader(this.props.release.status) :
+      buildHeader(this.props.release.status);
     return (
       <h3 style={statusHeaderStyle}>
         {text}
         {this.renderSubHeader()}
       </h3>
-    )
+    );
   }
 
   renderStatuses() {
-    if(this.state.statuses === null) {
+    if (this.state.statuses === null) {
       return (
         <LinearProgress />
-      )
-    } else if(this.state.statuses.data.statuses.length === 0) {
+      );
+    } else if (this.state.statuses.data.statuses.length === 0) {
       return (
-        <div key={"key-no-statuses"} style={{...style.stateItem, ...style.stateItemFirst}}>
+        <div key="key-no-statuses" style={{ ...style.stateItem, ...style.stateItemFirst }}>
           <span style={style.stateDescription}>No status checks have been reported</span>
         </div>
-      )
-    } else {
-      // Don't render more than 10.
-      return this.state.statuses.data.statuses.slice(0, 10).map((x, i) => {
-        const releaseColor = statusIconColor(x.state);
-        const StatusIcon = statusIcon(x.state);
-        let stateItemStyle = i === 0 ? {...style.stateItem, ...style.stateItemFirst} : style.stateItem;
-        const stateIconStyle = {fillColor: releaseColor, color: releaseColor, ...style.status, ...style.stateItemIcon};
-        return (
-          <div key={"key" + i.toString()} style={stateItemStyle}>
-            <StatusIcon style={stateIconStyle} />
-            {x.image_url ? (<img style={style.stateImage} src={x.image_url} />) : ''}
-            <strong style={style.stateContextLabel}>{x.context}</strong>
-            {x.description ? (<span style={style.stateDescription}> — {x.description}</span>) : ''}
-            {x.target_url ? (<a style={style.stateLink} href={x.target_url}>Details</a>) : ''}
-          </div>
-        )
-      })
+      );
     }
+    // Don't render more than 10.
+    return this.state.statuses.data.statuses.slice(0, 10).map((x, i) => {
+      const releaseColor = statusIconColor(x.state);
+      const StatusIcon = statusIcon(x.state);
+      const stateItemStyle = i === 0 ?
+        { ...style.stateItem, ...style.stateItemFirst } :
+        style.stateItem;
+      const stateIconStyle = {
+        fillColor: releaseColor, color: releaseColor, ...style.status, ...style.stateItemIcon,
+      };
+      return (
+        <div key={`key${i.toString()}`} style={stateItemStyle}>
+          <StatusIcon style={stateIconStyle} />
+          {x.image_url ? (<img alt={x.context} style={style.stateImage} src={x.image_url} />) : ''}
+          <strong style={style.stateContextLabel}>{x.context}</strong>
+          {x.description ? (<span style={style.stateDescription}> — {x.description}</span>) : ''}
+          {x.target_url ? (<a style={style.stateLink} href={x.target_url}>Details</a>) : ''}
+        </div>
+      );
+    });
   }
 
   render() {
     const stateReleaseColor = statusIconColor(this.props.release.state);
-    const StateIcon = this.props.release.release ? statusIcon(this.props.release.state) : statusIcon(this.props.release.status);
-    const stateStyle = {fillColor: stateReleaseColor, color: stateReleaseColor, ...style.status};
+    const StateIcon = this.props.release.release ?
+      statusIcon(this.props.release.state) :
+      statusIcon(this.props.release.status);
+    const stateStyle = { fillColor: stateReleaseColor, color: stateReleaseColor, ...style.status };
 
     const statusReleaseColor = statusIconColor(this.props.release.status);
-    const statusHeaderStyle = {color:statusReleaseColor, ...style.statusHeader};
-    const statusStyle = this.props.release.release ? stateStyle : {fillColor: statusReleaseColor, color: statusReleaseColor, ...style.status};
+    const statusHeaderStyle = { color: statusReleaseColor, ...style.statusHeader };
+    const statusStyle = this.props.release.release ?
+      stateStyle :
+      { fillColor: statusReleaseColor, color: statusReleaseColor, ...style.status };
 
     return (
       <ClickAwayListener onClickAway={this.handleTooltipClose}>
@@ -287,15 +293,17 @@ export default class ReleaseStatus extends Component {
               </React.Fragment>
             }
           >
-            <Button style={style.statusButton} onClick={this.handleTooltipOpen}><StateIcon style={statusStyle} /></Button>
+            <Button style={style.statusButton} onClick={this.handleTooltipOpen}>
+              <StateIcon style={statusStyle} />
+            </Button>
           </HtmlTooltip>
         </span>
       </ClickAwayListener>
-    )
+    );
   }
 }
-  
+
 
 ReleaseStatus.propTypes = {
-  release:PropTypes.object.isRequired
-}
+  release: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
+};
