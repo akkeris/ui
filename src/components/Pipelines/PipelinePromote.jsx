@@ -114,7 +114,7 @@ export default class PipelinePromote extends Component {
           return { ...target, slug: { source_blob: {} }, releases: [] };
         }
       }));
-      const release = sourceReleases.filter(x => x.current === true);
+      const release = sourceReleases.filter(x => x.current === true)[0];
       const { data: statuses } = await api.getReleaseStatuses(this.props.source.app.id, release.id);
       release.statuses = statuses;
       this.setState({
