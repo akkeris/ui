@@ -25,7 +25,6 @@ const formTextStyle = {
   display: 'block', ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.FairlySubtle, ...GlobalStyles.Text,
 };
 export default class CreateOrUpdatePipelineCoupling extends Component {
-
   static renderPipelineDiagram() {
     const diagramAppRow = {
       display: 'flex', height: '20px', boxShadow: '0 0 10px 1px rgba(0,0,0,0.125)', borderRadius: '3px',
@@ -184,7 +183,13 @@ export default class CreateOrUpdatePipelineCoupling extends Component {
     }
     return ( // eslint-disable-line consistent-return
       <div style={{ marginTop: '24px' }} key={`${this.props.stage}-app-selection`}>
-        <Chip onDelete={() => this.setState({ search: '' })} color="primary" variant="outlined" icon={<DeveloperBoard />} label={this.state.search} />
+        <Chip
+          onDelete={() => this.setState({ search: '' })}
+          color="primary"
+          variant="outlined"
+          icon={<DeveloperBoard />}
+          label={this.state.search}
+        />
       </div>
     );
   }
@@ -211,15 +216,7 @@ export default class CreateOrUpdatePipelineCoupling extends Component {
         <DialogContent style={{ overflowY: 'visible', minHeight: '340px' }} dividers>
           {!this.props.coupling ? (
             <Typography id="dialog-description" variant="h6" style={formSubHeaderStyle}>
-                Choose an application to add to the
-              <pre style={GlobalStyles.CommitLinkPre}>
-                <code>{this.props.stage}</code>
-              </pre>
-                stage in the
-              <pre style={GlobalStyles.CommitLinkPre}>
-                <code>{this.props.pipeline.name}</code>
-              </pre>
-                pipeline.
+              Choose an application to add to the <pre style={GlobalStyles.CommitLinkPre}><code>{this.props.stage}</code></pre> stage in the <pre style={GlobalStyles.CommitLinkPre}><code>{this.props.pipeline.name}</code></pre> pipeline. { /* eslint-disable-line */ }
             </Typography>
             ) : (
               <Typography id="dialog-description" variant="h6" style={formSubHeaderStyle}>
@@ -228,7 +225,7 @@ export default class CreateOrUpdatePipelineCoupling extends Component {
             )}
           {CreateOrUpdatePipelineCoupling.renderPipelineDiagram()}
           <Typography style={formTextStyle}>
-              Pipelines allow you to connect multiple apps together and promote code between them. An app in a pipeline can ensure the quality of the promotion using status checks. <Link rel="noopener" target="_blank" href="https://docs.akkeris.io/architecture/pipelines.html">Learn more</Link>
+              Pipelines allow you to connect multiple apps together and promote code between them. An app in a pipeline can ensure the quality of the promotion using status checks. <Link rel="noopener" target="_blank" href="https://docs.akkeris.io/architecture/pipelines.html">Learn more</Link>  { /* eslint-disable-line */ }
           </Typography>
           {this.state.loading ? this.renderLoading() : this.renderForm()}
         </DialogContent>

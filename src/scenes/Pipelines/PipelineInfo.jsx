@@ -56,7 +56,9 @@ export default class PipelineInfo extends Component {
       const { data: pipeline } = await api.getPipeline(this.props.match.params.pipeline);
       util.updateHistory('pipelines', pipeline.id, pipeline.name);
       const accountResponse = await api.getAccount();
-      const isElevated = (accountResponse.data && 'elevated_access' in accountResponse.data) ? accountResponse.data.elevated_access : true;
+      const isElevated = (accountResponse.data && 'elevated_access' in accountResponse.data) ?
+        accountResponse.data.elevated_access :
+        true;
       this.setState({
         loading: false, pipeline, stages, isElevated,
       });
@@ -141,7 +143,15 @@ export default class PipelineInfo extends Component {
   }
 
   renderError() {
-    return (<ConfirmationModal className="error" open message={this.state.error} onOk={() => this.refreshPipeline()} title="Error" />);
+    return (
+      <ConfirmationModal
+        className="error"
+        open
+        message={this.state.error}
+        onOk={() => this.refreshPipeline()}
+        title="Error"
+      />
+    );
   }
 
   render() {

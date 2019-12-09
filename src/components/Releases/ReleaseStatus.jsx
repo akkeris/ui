@@ -7,6 +7,7 @@ import { grey, yellow } from '@material-ui/core/colors';
 import SuccessIcon from '@material-ui/icons/CheckCircle';
 import ErrorIcon from '@material-ui/icons/Cancel';
 import PendingIcon from '@material-ui/icons/Lens';
+import HelpIcon from '@material-ui/icons/Help';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { withStyles } from '@material-ui/core/styles';
 import api from '../../services/api';
@@ -121,6 +122,9 @@ function statusIconColor(state) {
     case 'pending':
       releaseColor = yellow[800]; // eslint-disable-line
       break;
+    case 'unknown':
+      releaseColor = grey[500]; // eslint-disable-line
+      break;
     default:
       releaseColor = 'rgb(203, 36, 49)';
       break;
@@ -139,6 +143,9 @@ function statusIcon(state) {
     case 'failed':
     case 'error':
       StatusIcon = ErrorIcon;
+      break;
+    case 'unknown':
+      StatusIcon = HelpIcon;
       break;
     default:
       StatusIcon = PendingIcon;
@@ -261,9 +268,9 @@ export default class ReleaseStatus extends Component {
   }
 
   render() {
-    const stateReleaseColor = statusIconColor(this.props.release.state);
+    const stateReleaseColor = statusIconColor((!this.props.release.release || this.props.release.status === 'successful') ? this.props.release.state : this.props.release.status);
     const StateIcon = this.props.release.release ?
-      statusIcon(this.props.release.state) :
+      statusIcon(this.props.release.status === 'successful' ? this.props.release.state : this.props.release.status) :
       statusIcon(this.props.release.status);
     const stateStyle = { fillColor: stateReleaseColor, color: stateReleaseColor, ...style.status };
 
