@@ -155,6 +155,7 @@ export default class Stage extends Component {
         stages={this.props.stages}
         isElevated={this.props.isElevated}
         onPromote={this.handlePromote}
+        onError={this.props.onError}
         onCancel={() => this.setState({ promoteCoupling: null })}
       />
     );
@@ -221,9 +222,9 @@ export default class Stage extends Component {
         </div>
         <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle }}>
           <ReleaseStatus release={{ release: true, ...coupling.statuses.release }} />
-          <span style={{marginLeft:'0.25rem', verticalAlign:'middle'}}>
+          <span style={{ marginLeft: '0.25rem', verticalAlign: 'middle' }}>
             Deployed <pre style={GlobalStyles.CommitLinkPre}><code>v{coupling.release.version}</code></pre>  { /* eslint-disable-line */ }
-            <span style={{float:'right'}}> {util.getDateDiff(coupling.release.updated_at)}</span>
+            <span style={{ float: 'right' }}> {util.getDateDiff(coupling.release.updated_at)}</span>
           </span>
         </div>
         {this.canPromote(coupling) ? (
@@ -268,12 +269,11 @@ export default class Stage extends Component {
       return Stage.renderLoading();
     } else if (this.state.couplings.length === 0) {
       return Stage.renderNoCouplingsFound();
-    } else {
-      return [this.renderPipelinePromote(), this.renderEditCoupling(), this.renderDeleteCoupling()]
-        .concat(this.state.couplings.map(coupling => (coupling.release.id ?
-          this.renderCouplingWithRelease(coupling) :
-          this.renderCouplingWithNoRelease(coupling))));
     }
+    return [this.renderPipelinePromote(), this.renderEditCoupling(), this.renderDeleteCoupling()]
+      .concat(this.state.couplings.map(coupling => (coupling.release.id ?
+        this.renderCouplingWithRelease(coupling) :
+        this.renderCouplingWithNoRelease(coupling))));
   }
 }
 

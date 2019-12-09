@@ -114,7 +114,7 @@ export default class PipelinePromote extends Component {
           return { ...target, slug: { source_blob: {} }, releases: [] };
         }
       }));
-      const release = sourceReleases[sourceReleases.length - 1];
+      const release = sourceReleases.filter(x => x.current === true);
       const { data: statuses } = await api.getReleaseStatuses(this.props.source.app.id, release.id);
       release.statuses = statuses;
       this.setState({
@@ -205,7 +205,7 @@ export default class PipelinePromote extends Component {
             <span style={GlobalStyles.Subtle}> {description}</span>
             <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle, marginBottom: '0' }}>
               Deployed <pre style={GlobalStyles.CommitLinkPre}><code>v{this.state.release.version}</code></pre>  { /* eslint-disable-line */ }
-              <span style={{float:'right'}}>{util.getDateDiff(this.state.release.created_at)}</span>
+              <span style={{ float: 'right' }}>{util.getDateDiff(this.state.release.created_at)}</span>
             </div>
           </div>
         ) : (
@@ -255,7 +255,7 @@ export default class PipelinePromote extends Component {
           </div>
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle }}>
             Deployed <pre style={GlobalStyles.CommitLinkPre}><code>v{coupling.release.version}</code></pre> { /* eslint-disable-line */ }
-            <span style={{float:'right'}}>{util.getDateDiff(coupling.release.updated_at)}</span>
+            <span style={{ float: 'right' }}>{util.getDateDiff(coupling.release.updated_at)}</span>
           </div>
         </Paper>
       );

@@ -18,8 +18,8 @@ import api from '../../services/api';
 import NewBuild from './NewBuild';
 import ConfirmationModal from '../ConfirmationModal';
 import ReleaseStatus from './ReleaseStatus';
-import GlobalStyles from '../../config/GlobalStyles.jsx';
-import util from '../../services/util/index.js';
+import GlobalStyles from '../../config/GlobalStyles';
+import util from '../../services/util/index';
 
 function addRestrictedTooltip(title, placement, children) {
   return (
@@ -28,13 +28,6 @@ function addRestrictedTooltip(title, placement, children) {
     </Tooltip>
   );
 }
-
-function trunc(str, count) {
-  if (!str || str.length < count) { return str; }
-  return `${str.substring(0, count)}...`;
-}
-
-const releaseLimit = 20;
 
 const style = {
   iconButton: {
@@ -119,7 +112,7 @@ const style = {
     },
     actions: {
       container: {
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center', 'flexGrow':0,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexGrow: 0,
       },
       button: {
         width: '50px',
@@ -131,11 +124,11 @@ const style = {
   },
   release: {
     root: {
-      display: 'flex', padding: '12px 24px', minHeight: '64px', alignItems: 'center', 'justifyContent':'space-between',
+      display: 'flex', padding: '12px 24px', minHeight: '64px', alignItems: 'center', justifyContent: 'space-between',
     },
     icon: {
       root: {
-        width: '25px', paddingRight: '24px', 'flexGrow':'0',
+        width: '25px', paddingRight: '24px', flexGrow: '0',
       },
       inner: {
         position: 'relative', height: '100%',
@@ -146,28 +139,28 @@ const style = {
     },
     info: {
       root: {
-        fontSize: '0.8125rem', lineHeight: '10px', 'flexGrow':'1', 
+        fontSize: '0.8125rem', lineHeight: '10px', flexGrow: '1',
       },
     },
     actions: {
       root: {
-         flexGrow:'0', display: 'flex', justifyContent: 'space-between',
+        flexGrow: '0', display: 'flex', justifyContent: 'space-between',
       },
     },
   },
-  textEllipses:{
-    color:'rgb(88, 96, 105)',
-    maxWidth:'700px',
-    overflowY:'hidden',
-    overflowX:'hidden',
-    textOverflow:'ellipsis',
-    whiteSpace:'nowrap',
-    display:'block',
-    verticalAlign:'middle',
-    lineHeight:'1rem',
+  textEllipses: {
+    color: 'rgb(88, 96, 105)',
+    maxWidth: '700px',
+    overflowY: 'hidden',
+    overflowX: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    display: 'block',
+    verticalAlign: 'middle',
+    lineHeight: '1rem',
     boxSizing: 'border-box',
-    marginTop: '0.5rem'
-  }
+    marginTop: '0.5rem',
+  },
 };
 
 export default class Releases extends Component {
@@ -221,34 +214,39 @@ export default class Releases extends Component {
   }
 
   getReleases = async () => {
-    let { data: builds } = await api.getBuilds(this.props.app.name);
-    let { data: releases } = await api.getReleases(this.props.app.name);
+    const { data: builds } = await api.getBuilds(this.props.app.name);
+    const { data: releases } = await api.getReleases(this.props.app.name);
     if (this._isMounted) {
       this.setState({
-          releases:releases
-            .map((release) => {
-              let build = builds.filter((build) => build.id === release.slug.id);
-              return {release:true, slug:build[0] || {}, source_blob:build[0] ? build[0].source_blob : {}, ...release};
-            })
-            .concat(
-              builds
-                .filter((a) => !releases.some((x) => x.slug.id === a.id))
-                .map(a => Object.assign({
-                  releases: releases.filter(b => b.slug.id === a.id),
-                }, a))
-            )
-            .sort((a, b) => new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1),
-          loading: false,
-        });
+        releases: (await Promise.all(releases
+          .map(async (release) => {
+            const build = builds.filter(b => b.id === release.slug.id);
+            if (build.length === 0 && release.slug && release.slug.id) {
+              // this build may have come from a promotion.
+              build[0] = (await api.getSlug(release.slug.id)).data;
+            }
+            const source_blob = build[0] ? build[0].source_blob : {};  // eslint-disable-line 
+            return {
+              release: true, slug: build[0] || {}, source_blob, ...release,
+            };
+          })))
+          .concat(builds
+            .filter(a => !releases.some(x => x.slug.id === a.id))
+            .map(a => Object.assign({
+              releases: releases.filter(b => b.slug.id === a.id),
+            }, a)))
+          .sort((a, b) => (new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1)),
+        loading: false,
+      });
     }
   }
 
   handleConfirmRebuild = (release) => {
-    this.setState({ confirmRebuildOpen: true, rebuildRelease:release });
+    this.setState({ confirmRebuildOpen: true, rebuildRelease: release });
   }
 
   handleCancelRebuild = () => {
-    this.setState({ confirmRebuildOpen: false, rebuildRelease:null });
+    this.setState({ confirmRebuildOpen: false, rebuildRelease: null });
   }
 
   handleRebuild = async () => {
@@ -335,7 +333,6 @@ export default class Releases extends Component {
     this.setState({
       loading: true,
       new: false,
-      newAuto: false,
       snackOpen: false,
     });
     this.getReleases();
@@ -344,8 +341,8 @@ export default class Releases extends Component {
   renderReleases(page, rowsPerPage) {
     return this.state.releases
       .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
-      .map((release, index) => {        
-        let rowColor = release.current ? grey[50] : null;
+      .map((release, index) => {
+        const rowColor = release.current ? grey[50] : null;
         const info1 = [
           release.description,
           release.source_blob.author,
@@ -353,7 +350,6 @@ export default class Releases extends Component {
         const info2 = [
           release.source_blob.message ? release.source_blob.message.replace(/\s+/g, ' ') : '',
         ].filter(x => x && x !== '').map(x => x.toString().replace(/\n/g, ' '));
-
         return (
           <TableRow hover className={`r${index}`} key={release.id} style={{ backgroundColor: rowColor }}>
             <TableCell style={style.release.root}>
@@ -367,40 +363,45 @@ export default class Releases extends Component {
                 </div>
               </div>
               <div style={style.release.info.root}>
-                {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `} {info1.join(' ')} 
+                {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `} {info1.join(' ')}
                 {release.source_blob && release.source_blob.version ? (
-                  <a style={{...GlobalStyles.CommitLink, marginLeft:'0.5em'}} href={release.source_blob.version}>
-                    <pre style={GlobalStyles.CommitLinkPre}><code>#{release.source_blob.commit.substring(0, 7)}</code></pre>
+                  <a style={{ ...GlobalStyles.CommitLink, marginLeft: '0.5em' }} href={release.source_blob.version}>
+                    <pre style={GlobalStyles.CommitLinkPre}><code>#{release.source_blob.commit.substring(0, 7)}</code></pre> { /* eslint-disable-line */ }
                   </a>
-                ) : ''} <ReleaseStatus release={release}></ReleaseStatus>
+                ) : ''} <ReleaseStatus release={release} />
                 <div style={style.textEllipses}>{info2.join('\n')}</div>
-                <div style={style.tableCell.sub}> {util.getDateDiff(new Date(release.created_at))} </div>
+                <div style={style.tableCell.sub}> {util.getDateDiff(new Date(release.created_at))} </div> { /* eslint-disable-line */ }
               </div>
               <div style={style.release.actions.root}>
                 {!release.current && release.release &&
                 <Tooltip title="Rollback" placement="top-end">
-                  <IconButton 
+                  <IconButton
                     color="default"
-                    className="revert" 
-                    onClick={() => this.handleRevertOpen(release)}><RevertIcon /></IconButton>
+                    className="revert"
+                    onClick={() => this.handleRevertOpen(release)}
+                  ><RevertIcon />
+                  </IconButton>
                 </Tooltip>
                 }
                 {!release.release &&
                 <Tooltip title="Rebuild" placement="top-end">
                   <IconButton
-                    disabled={release.slug && release.slug.id ? false : true}
+                    disabled={!(release.slug && release.slug.id)}
                     onClick={() => this.handleConfirmRebuild(release)}
                     style={style.rebuildIcon}
                     color="default"
                     className="rebuild"
-                  ><RebuildIcon/></IconButton>
+                  ><RebuildIcon />
+                  </IconButton>
                 </Tooltip>
                 }
                 <Tooltip title="Build Logs" placement="top-end">
-                  <IconButton 
+                  <IconButton
                     color="default"
-                    className="logs" 
-                    onClick={() => this.handleBuildLogs(release)}><BuildOutputIcon /></IconButton>
+                    className="logs"
+                    onClick={() => this.handleBuildLogs(release)}
+                  ><BuildOutputIcon />
+                  </IconButton>
                 </Tooltip>
               </div>
             </TableCell>
@@ -462,19 +463,23 @@ export default class Releases extends Component {
             className="ok"
             color="primary"
             onClick={() => { this.handleRevertGo(); }}
-          >Ok</Button>
+          >Ok
+          </Button>
           <Button
             className="cancel"
             color="secondary"
             onClick={() => { this.handleRevertClose(); }}
-          >Cancel</Button>
+          >Cancel
+          </Button>
         </DialogActions>
       </Dialog>
     );
   }
 
   render() {
-    const { releases, rowsPerPage, page, isElevated, restrictedSpace } = this.state;
+    const {
+      releases, rowsPerPage, page, isElevated, restrictedSpace,
+    } = this.state;
     let newReleaseButton;
     if (!restrictedSpace || isElevated) {
       newReleaseButton = (
@@ -484,16 +489,18 @@ export default class Releases extends Component {
       );
     } else {
       // Wrap the new release button in a tooltip to avoid confusion as to why it is disabled
-      newReleaseButton = addRestrictedTooltip('Elevated access required', 'right', (
-        <IconButton
-          disabled
-          style={{ ...style.iconButton, opacity: 0.35 }}
-          className="new-build"
-          onClick={() => { this.handleNewBuild(); }}
-        >
-          <AddIcon />
-        </IconButton>
-      ));
+      newReleaseButton = addRestrictedTooltip(
+        'Elevated access required', 'right', (
+          <IconButton
+            disabled
+            style={{ ...style.iconButton, opacity: 0.35 }}
+            className="new-build"
+            onClick={() => { this.handleNewBuild(); }}
+          >
+            <AddIcon />
+          </IconButton>
+        ),
+      );
     }
 
     return (
