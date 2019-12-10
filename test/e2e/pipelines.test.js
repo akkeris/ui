@@ -135,12 +135,44 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .click('button.next')
       .click('button.next')
       .click('button.next')
+
+      // create build on app1
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
+      .click('.dynos-tab')
+      .click('button.new-formation')
+      .typeText('.new-type input', 'web')
+      .click('button.next')
+      .click('button.next') // quantity (1)
+      .click('button.next') // size (gp1)
+      .typeText('.new-port input', '8080', { replace: true })
+      .click('button.next')
+      .click('button.next') // summary
+      .expect(Selector('.formation-snack').innerText)
+      .contains('New Formation Added')
+
+      // new build on app1
+      .click('.releases-tab')
+      .click('button.new-build')
+      .typeText('.url input', 'docker://docker.io/akkeris/apachetest:latest')
+      .click('button.next')
+      .click('button.next') // branch
+      .click('button.next') // version
+      .click('button.next')
+
+      .expect(Selector('.release-snack').innerText)
+      .contains('New Deployment Requested')
+      .expect(Selector('.release-list tbody').childElementCount)
+      .gt(0)
+      .wait(10000)
+
+
       .navigateTo(`${baseUrl}/apps`)   
       .click('button.addFilter')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
       .expect(Selector(`.app-list .${appName}-testcafe`).exists)
       .ok()
+
 
       // App 2
       .click('.new-app')
@@ -198,12 +230,23 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
 
       // Build and Release for app 1
       .navigateTo(`${baseUrl}/apps`)
-      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
-      .click('.releases-tab')
+      .navigateTo(`${baseUrl}/apps/${appName2}-testcafe`)
+      .click('.dynos-tab')
+      .click('button.new-formation')
+      .typeText('.new-type input', 'web')
+      .click('button.next')
+      .click('button.next') // quantity (1)
+      .click('button.next') // size (gp1)
+      .typeText('.new-port input', '8080', { replace: true })
+      .click('button.next')
+      .click('button.next') // summary
+      .expect(Selector('.formation-snack').innerText)
+      .contains('New Formation Added')
 
-      // Create new release
+      // Create new release for app 2
+      .click('.releases-tab')
       .click('button.new-build')
-      .typeText('.url input', 'docker://registry.hub.docker.com/library/httpd:alpine')
+      .typeText('.url input', 'docker://docker.io/akkeris/apachetest:latest')
       .click('button.next')
       .click('button.next') // branch
       .click('button.next') // version
@@ -213,7 +256,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .contains('New Deployment Requested')
       .expect(Selector('.release-list tbody').childElementCount)
       .gt(0)
-      .wait(20000)
+      .wait(10000)
 
       .navigateTo(`${baseUrl}/pipelines`)
       .click('.new-pipeline')
@@ -281,8 +324,8 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
   const appName = t.ctx.appName;
   const appName2 = t.ctx.appName2;
   const appName3 = t.ctx.appName3;
+  const pipelineName = t.ctx.pipelineName;
   await t
-
     // Dev coupling
     .click('button.development-new-coupling')
     .expect(Selector('.development-app-search input').exists)
@@ -330,6 +373,9 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
     .gt(0)
     .expect(Selector(`.production-coupling-list .${appName3}-testcafe button.promote`).exists)
     .notOk()
+
+    .wait(60000)
+    .navigateTo(`${baseUrl}/pipelines/${pipelineName}`)
 
     // Promote to staging
     .click(`.development-coupling-list .${appName}-testcafe button.promote`)
