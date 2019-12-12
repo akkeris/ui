@@ -7,6 +7,7 @@ const verySoftTextColor = 'rgb(176, 192, 210)';
 const linkColor = 'rgb(3, 102, 214)';
 const softBackground = '#F7F8FB';
 const errorColor = 'rgb(203, 36, 49)';
+const successColor = '#2cbe4e';
 
 const GlobalStyles = {
   NoWrappingText:{
@@ -117,6 +118,9 @@ const GlobalStyles = {
   },
   ErrorText: {
     color: errorColor,
+  },
+  SuccessText: {
+    color: successColor,
   },
   DangerButton: {
     borderColor: errorColor,

@@ -268,9 +268,9 @@ export default class ReleaseStatus extends Component {
   }
 
   render() {
-    const stateReleaseColor = statusIconColor((!this.props.release.release || this.props.release.status === 'successful') ? this.props.release.state : this.props.release.status);
+    const stateReleaseColor = statusIconColor((!this.props.release.release || this.props.release.status === 'succeeded') ? this.props.release.state : this.props.release.status);
     const StateIcon = this.props.release.release ?
-      statusIcon(this.props.release.status === 'successful' ? this.props.release.state : this.props.release.status) :
+      statusIcon(this.props.release.status === 'succeeded' ? this.props.release.state : this.props.release.status) :
       statusIcon(this.props.release.status);
     const stateStyle = { fillColor: stateReleaseColor, color: stateReleaseColor, ...style.status };
 

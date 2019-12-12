@@ -174,7 +174,8 @@ export default class PipelinePromote extends Component {
   canPromote() {
     const statuses = this.state.release.statuses.statuses; // eslint-disable-line
     const required = this.requiredStatuses();
-    return required.filter(x => !statuses.includes(x));
+    const successfulContexts = statuses.filter(x => x.state === 'success').map(x => x.context);
+    return required.filter(x => !successfulContexts.includes(x));
   }
 
   renderLoading = () => (<DialogContent><LinearProgress /></DialogContent>);
@@ -264,26 +265,40 @@ export default class PipelinePromote extends Component {
 
   renderPipelineStatus() {
     const needed = this.canPromote();
-    if (needed.length === 0) {
+    const required = this.requiredStatuses();
+    if (needed.length === 0 && required.length === 0) {
       return (
-        <DialogTitle id="scroll-dialog-title2" style={{ ...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle }}>
+        <DialogTitle id="scroll-dialog-title2" style={{ ...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle }}> { /* eslint-disable-line */ }
           <Typography style={formTextStyle}>
             <ArrowDownward style={{ margin: '0 auto', display: 'block' }} color="disabled" />
           </Typography>
         </DialogTitle>
       );
     }
-    const required = this.requiredStatuses();
+    const Icon = needed.length === 0 ? CheckCircle : Error;
+    const IconStyle = needed.length === 0 ? GlobalStyles.SuccessText : GlobalStyles.ErrorText;
     return (
       <div>
-        <DialogTitle disableTypography style={{ display: 'flex', ...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle }}>
-          <Error style={{ marginRight: '0.5rem', ...GlobalStyles.ErrorText }} />
-          <div>
-            <Typography variant="h3" style={{ ...GlobalStyles.Header, ...GlobalStyles.ErrorText }}>
-                Some checks have not succeeded.
-            </Typography>
-            <Typography variant="body1" style={{ ...GlobalStyles.SubHeader }}>{needed.length} of {required.length} status checks have not succeeded</Typography>
-          </div>
+        <DialogTitle disableTypography style={{ display: 'flex', ...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle }}> { /* eslint-disable-line */ }
+          <Icon style={{ marginRight: '0.5rem', ...IconStyle }} />
+          { needed.length === 0 ?
+            (
+              <div>
+                <Typography variant="h3" style={{ ...GlobalStyles.Header, ...GlobalStyles.SuccessText }}>
+                    All checks have passed
+                </Typography>
+                  <Typography variant="body1" style={{ ...GlobalStyles.SubHeader }}>{required.length} successful checks</Typography> { /* eslint-disable-line */ }
+              </div>
+            ) :
+            (
+              <div>
+                <Typography variant="h3" style={{ ...GlobalStyles.Header, ...GlobalStyles.ErrorText }}>
+                    Some checks have not succeeded.
+                </Typography>
+                  <Typography variant="body1" style={{ ...GlobalStyles.SubHeader }}>{needed.length} of {required.length} status checks have not succeeded</Typography> { /* eslint-disable-line */ }
+              </div>
+            )
+          }
         </DialogTitle>
         {required.map((context, i) => {
             const status = this.statusByContext(context);
@@ -307,26 +322,31 @@ export default class PipelinePromote extends Component {
                 <Typography variant="body1" style={{ ...formTextEmphasizedStyle, display: 'flex', alignItems: 'center' }}>
                   <StatusIcon style={statusIconStyle} />
                   {status.image_url ? (<img style={stateImage} alt={status.description} src={status.image_url} />) : ''}
-                  {status.context} <span style={{ ...GlobalStyles.Subtle }}>&nbsp;— {status.description}</span>&nbsp;{status.target_url ? (<a target="_blank" style={GlobalStyles.Link} href={status.target_url}>Details</a>) : ''}
+                  {status.context} <span style={{ ...GlobalStyles.Subtle }}>&nbsp;{( status.description || status.target_url ) ? `—` : ''}&nbsp;{status.description}</span>&nbsp;{status.target_url ? (<a target="_blank" style={GlobalStyles.Link} href={status.target_url}>Details</a>) : ''} { /* eslint-disable-line */ }
                 </Typography>
               </DialogContent>
             );
-          })}
-        <DialogTitle disableTypography style={{ display: 'flex', ...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle }}>
-          <Error style={{ marginRight: '0.5rem', ...GlobalStyles.ErrorText }} />
-          <div>
-            <Typography variant="h3" style={{ ...GlobalStyles.Header, ...GlobalStyles.ErrorText }}>
-                Promotion is blocked
-            </Typography>
-            <Typography variant="body1" style={{ ...GlobalStyles.SubHeader }}>
-              {this.props.isElevated ? (`
-                A promotion should not be performed unless the status checks above succeed. As an elevated access user you may override these checks and promote this release.
-              `) : (`
-                A promotion cannot be performed unless the status checks above succeed. Those with elevated access may still promote a release.
-              `)}
-            </Typography>
-          </div>
-        </DialogTitle>
+        })}
+        { needed.length === 0 ? (
+          <div />
+        ) : (
+          <DialogTitle disableTypography style={{ display: 'flex', ...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle }}>
+            <Error style={{ marginRight: '0.5rem', ...GlobalStyles.ErrorText }} />
+            <div>
+              <Typography variant="h3" style={{ ...GlobalStyles.Header, ...GlobalStyles.ErrorText }}>
+                  Promotion is blocked
+              </Typography>
+              <Typography variant="body1" style={{ ...GlobalStyles.SubHeader }}>
+                {this.props.isElevated ? (`
+                  A promotion should not be performed unless the status checks above succeed. As an elevated access user you may override these checks and promote this release.
+                `) : (`
+                  A promotion cannot be performed unless the status checks above succeed. Those with elevated access may still promote a release.
+                `)}
+              </Typography>
+            </div>
+          </DialogTitle>
+        )}
+
       </div>
     );
   }
