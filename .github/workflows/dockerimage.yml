@@ -13,6 +13,6 @@ jobs:
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: akkeris/ui
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ secrets.DockerUser }}
+        password: ${{ secrets.DockerPassword }}
         tag_names: true
