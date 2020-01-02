@@ -75,6 +75,7 @@ export default class NewAddon extends Component {
   }
 
   componentDidMount() {
+    this._cancelSource = api.getCancelSource();
     this.getServices();
   }
 
@@ -84,21 +85,46 @@ export default class NewAddon extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this._cancelSource.cancel('Component unmounted.');
+  }
+
   getServices = async () => {
-    const { data: services } = await api.getAddonServices();
-    const groupedServices = [{ label: 'Services', options: [] }, { label: 'Credentials', options: [] }];
-    services.forEach((addon) => {
-      const formattedAddon = { value: addon.id, label: addon.human_name };
-      groupedServices[addon.human_name.toLowerCase().includes('credential') ? 1 : 0].options.push(formattedAddon);
-    });
-    this.setState({ services, groupedServices, loading: false });
+    try {
+      const { data: services } = await api.getAddonServices(this._cancelSource.token);
+      const groupedServices = [{ label: 'Services', options: [] }, { label: 'Credentials', options: [] }];
+      services.forEach((addon) => {
+        const formattedAddon = { value: addon.id, label: addon.human_name };
+        groupedServices[addon.human_name.toLowerCase().includes('credential') ? 1 : 0].options.push(formattedAddon);
+      });
+      this.setState({ services, groupedServices, loading: false });
+    } catch (err) {
+      if (!api.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   getPlans = async () => {
-    this.setState({ loading: true });
-    let { data: plans } = await api.getAddonServicePlans(this.state.serviceid);
-    plans = plans.filter(x => x.state !== 'deprecated').map(x => ({ value: x.id, label: x.name, human_name: x.human_name, price: x.price, description: x.description }));
-    this.setState({ plans, loading: false });
+    try {
+      this.setState({ loading: true });
+      let { data: plans } = await api.getAddonServicePlans(
+        this.state.serviceid,
+        this._cancelSource.token,
+      );
+      plans = plans.filter(x => x.state !== 'deprecated').map(x => ({
+        value: x.id,
+        label: x.name,
+        human_name: x.human_name,
+        price: x.price,
+        description: x.description,
+      }));
+      this.setState({ plans, loading: false });
+    } catch (err) {
+      if (!api.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   formatPrice(cents) { // eslint-disable-line class-methods-use-this
@@ -139,6 +165,7 @@ export default class NewAddon extends Component {
       this.setState({
         stepIndex: stepIndex - 1,
         loading: false,
+        plan: stepIndex === 1 ? {} : this.state.plan,
       });
     }
   }
@@ -146,11 +173,15 @@ export default class NewAddon extends Component {
   submitAddon = async () => {
     try {
       this.setState({ loading: true });
-      let { data: addon } = await api.createAddon(this.props.app, this.state.plan.value);
+      let { data: addon } = await api.createAddon(
+        this.props.app,
+        this.state.plan.value,
+        this._cancelSource.token,
+      );
 
       for (let i = 0; i < 2000; i++) {
         if (i % 20 === 0) {
-          ({ data: addon } = await api.getAddon(this.props.app, addon.id)); // eslint-disable-line
+          ({ data: addon } = await api.getAddon(this.props.app, addon.id, this._cancelSource.token)); // eslint-disable-line
         }
         if (i === 1999) {
           throw new Error('It seems this addon is taking too long to complete its task. When the provisioning finishes your application will automatically be restarted with the new addon.');
@@ -169,17 +200,20 @@ export default class NewAddon extends Component {
         await new Promise((res, rej) => setTimeout(res, 500)); // eslint-disable-line
       }
     } catch (error) {
-      if (!error.response) {
-        console.error(error);
+      if (!api.isCancel(error)) {
+        if (error.response) {
+          this.setState({
+            submitMessage: error.response ? error.response.data : error.message,
+            submitFail: true,
+            stepIndex: 0,
+            loading: false,
+            plans: [],
+            plan: {},
+          });
+        } else {
+          console.error(error); // eslint-disable-line no-console
+        }
       }
-      this.setState({
-        submitMessage: error.response ? error.response.data : error.message,
-        submitFail: true,
-        stepIndex: 0,
-        loading: false,
-        plans: [],
-        plan: {},
-      });
     }
   }
 
@@ -210,7 +244,7 @@ export default class NewAddon extends Component {
             <div style={style.selectContainer}>
               <Search
                 options={plans}
-                value={plan ? plan.id : ''}
+                value={(plan && plan.value) ? plan : {}}
                 onChange={this.handlePlanChange}
                 placeholder="Search for a Plan"
               />

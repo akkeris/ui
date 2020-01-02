@@ -14,12 +14,27 @@ const notify = new class Notify {
   send = msg => Object.values(this.listeners).forEach(l => l(msg));
 }();
 
-function getApps() {
-  return axios.get('/api/apps');
+/**
+ * Returns an Axios CancelToken source for cancelling one or more Axios requests.
+ */
+function getCancelSource() {
+  return axios.CancelToken.source();
 }
 
-function getApp(app) {
-  return axios.get(`/api/apps/${app}`);
+/**
+ * Returns whether or not error indicates a cancelled Axios request
+ * @param {*} error The error object to check
+ */
+function isCancel(error) {
+  return axios.isCancel(error);
+}
+
+function getApps(cancelToken) {
+  return axios.get('/api/apps', { cancelToken });
+}
+
+function getApp(app, cancelToken) {
+  return axios.get(`/api/apps/${app}`, { cancelToken });
 }
 
 function deleteApp(app) {
@@ -132,53 +147,52 @@ function createSpace(space, description, compliance, stack) {
   });
 }
 
-function getAppAddons(app) {
-  return axios.get(`/api/apps/${app}/addons`);
+function getAppAddons(app, cancelToken) {
+  return axios.get(`/api/apps/${app}/addons`, { cancelToken });
 }
 
-function getAppsAttachedToAddon(app, addon) {
-  return axios.get(`/api/apps/${app}/addons/${addon}`);
+function getAppsAttachedToAddon(app, addon, cancelToken) {
+  return axios.get(`/api/apps/${app}/addons/${addon}`, { cancelToken });
 }
 
 function getAppWebhooks(app) {
   return axios.get(`/api/apps/${app}/hooks`);
 }
 
-function getAddon(app, addon) {
-  return axios.get(`/api/apps/${app}/addons/${addon}`);
+function getAddon(app, addon, cancelToken) {
+  return axios.get(`/api/apps/${app}/addons/${addon}`, { cancelToken });
 }
 
-function getAddonServices() {
-  return axios.get('/api/addon-services');
+function getAddonServices(cancelToken) {
+  return axios.get('/api/addon-services', { cancelToken });
 }
 
-function getAddonServicePlans(addon) {
-  return axios.get(`/api/addon-services/${addon}/plans`);
+function getAddonServicePlans(addon, cancelToken) {
+  return axios.get(`/api/addon-services/${addon}/plans`, { cancelToken });
 }
 
-function createAddon(app, plan) {
-  return axios.post(`/api/apps/${app}/addons`, {
-    plan,
-  });
+function createAddon(app, plan, cancelToken) {
+  return axios.post(`/api/apps/${app}/addons`, { plan }, { cancelToken });
 }
 
-function attachAddon(app, addon) {
+function attachAddon(app, addon, cancelToken) {
   return axios.post(`/api/apps/${app}/addon-attachments`, {
     app,
     addon,
+    cancelToken,
   });
 }
 
-function getAddonAttachments(app) {
-  return axios.get(`/api/apps/${app}/addon-attachments`);
+function getAddonAttachments(app, cancelToken) {
+  return axios.get(`/api/apps/${app}/addon-attachments`, { cancelToken });
 }
 
-function deleteAddonAttachment(app, attachment) {
-  return axios.delete(`/api/apps/${app}/addon-attachments/${attachment}`);
+function deleteAddonAttachment(app, attachment, cancelToken) {
+  return axios.delete(`/api/apps/${app}/addon-attachments/${attachment}`, { cancelToken });
 }
 
-function deleteAddon(app, addon) {
-  return axios.delete(`/api/apps/${app}/addons/${addon}`);
+function deleteAddon(app, addon, cancelToken) {
+  return axios.delete(`/api/apps/${app}/addons/${addon}`, { cancelToken });
 }
 
 function deleteWebhook(app, webhookId) {
@@ -229,19 +243,19 @@ function redoBuild(app, build) {
 }
 
 async function getReleases(app) {
-  return axios.get(`/api/apps/${app}/releases`)
+  return axios.get(`/api/apps/${app}/releases`);
 }
 
 async function getSlug(slug) {
-  return axios.get(`/api/slugs/${slug}`)
+  return axios.get(`/api/slugs/${slug}`);
 }
 
 async function getRelease(app, release) {
-  return axios.get(`/api/apps/${app}/releases/${release}`)
+  return axios.get(`/api/apps/${app}/releases/${release}`);
 }
 
 async function getReleaseStatuses(app, release) {
-  return axios.get(`/api/apps/${app}/releases/${release}/statuses`)
+  return axios.get(`/api/apps/${app}/releases/${release}/statuses`);
 }
 
 function createRelease(app, slug, release, description) {
@@ -291,7 +305,7 @@ function getPipelines() {
 }
 
 function getPipelineStages() {
-  return axios.get(`/api/pipeline-stages`);
+  return axios.get('/api/pipeline-stages');
 }
 
 function getPipeline(pipeline) {
@@ -318,17 +332,17 @@ function createPipelineCoupling(pipeline, app, stage, statuses) {
     pipeline,
     app,
     stage,
-    required_status_checks:{
-      contexts:statuses,
-    }
+    required_status_checks: {
+      contexts: statuses,
+    },
   });
 }
 
 function updatePipelineCoupling(pipeline, coupling, statuses) {
   return axios.patch(`/api/pipeline-couplings/${coupling}`, {
-    required_status_checks:{
-      contexts:statuses,
-    }
+    required_status_checks: {
+      contexts: statuses,
+    },
   });
 }
 
@@ -554,5 +568,7 @@ export default {
   getHealthcheck,
   notify,
   rebuild,
-  patchAppDescription
+  patchAppDescription,
+  getCancelSource,
+  isCancel,
 };

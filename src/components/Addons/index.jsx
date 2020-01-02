@@ -125,11 +125,11 @@ class Addons extends Component {
       isElevated: false,
       restrictedSpace: false,
     };
+    this._cancelSource = api.getCancelSource();
     this.loadAddons();
   }
 
   componentDidMount() {
-    this._isMounted = true;
     const { app, accountInfo } = this.props;
 
     // If this is a production app, check for the elevated_access role to determine
@@ -148,46 +148,63 @@ class Addons extends Component {
     }
     this.setState({ isElevated, restrictedSpace }); // eslint-disable-line
   }
+
   componentWillUnmount() {
-    this._isMounted = false;
+    this._cancelSource.cancel('Component unmounted.');
   }
 
-  getAppsAttachedToAddon() {
-    const addons = this.state.addons;
-    addons.forEach(async (addon, index) => {
-      const { data } = await api.getAppsAttachedToAddon(this.props.app.name, addon.id);
-      addons[index].attached_to = data.attached_to;
-      if (addons.every(a => (a.attached_to))) {
-        if (this._isMounted) {
-          this.setState({ addons, addonsLoaded: true });
-        }
-      }
-    });
+  getAppsAttachedToAddon = async () => {
+    const { addons, addonAttachments } = this.state;
+    try {
+      const fullAddons = await Promise.all(addons.map(async (addon) => {
+        const { data } = await api.getAppsAttachedToAddon(
+          this.props.app.name,
+          addon.id,
+          this._cancelSource.token,
+        );
+        addon.attached_to = data.attached_to; // eslint-disable-line
+        return addon;
+      }));
 
-    const addonAttachments = this.state.addonAttachments;
-    addonAttachments.forEach(async (attachment, index) => {
-      const { data } = await api.getAppsAttachedToAddon(this.props.app.name, attachment.addon.id);
-      addonAttachments[index].attached_to = data.attached_to;
-      if (addonAttachments.every(a => (a.attached_to))) {
-        if (this._isMounted) {
-          this.setState({ addonAttachments, attachmentsLoaded: true });
-        }
+      const fullAttachments = await Promise.all(addonAttachments.map(async (attachment) => {
+        const { data } = await api.getAppsAttachedToAddon(
+          this.props.app.name,
+          attachment.addon.id,
+          this._cancelSource.token,
+        );
+        attachment.attached_to = data.attached_to; // eslint-disable-line
+        return attachment;
+      }));
+
+      this.setState({
+        addons: fullAddons,
+        attachments: fullAttachments,
+        attachmentsLoaded: true,
+        addonsLoaded: true,
+      });
+    } catch (err) {
+      if (!api.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
       }
-    });
+    }
   }
 
   loadAddons = async () => {
-    const [r1, r2] = await Promise.all([
-      api.getAppAddons(this.props.app.name),
-      api.getAddonAttachments(this.props.app.name),
-    ]);
-    if (this._isMounted) {
+    try {
+      const [r1, r2] = await Promise.all([
+        api.getAppAddons(this.props.app.name, this._cancelSource.token),
+        api.getAddonAttachments(this.props.app.name, this._cancelSource.token),
+      ]);
       this.setState({
         addons: r1.data,
         addonAttachments: r2.data,
         loading: false,
       });
       this.getAppsAttachedToAddon();
+    } catch (err) {
+      if (!api.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
     }
   }
 
@@ -230,40 +247,48 @@ class Addons extends Component {
   handleRemoveAddon = async () => {
     this.setState({ loading: true });
     try {
-      await api.deleteAddon(this.props.app.name, this.state.addon.id);
+      await api.deleteAddon(this.props.app.name, this.state.addon.id, this._cancelSource.token);
       this.reload('Addon Deleted');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        loading: false,
-        new: false,
-        confirmAddonOpen: false,
-        confirmAttachmentOpen: false,
-        attach: false,
-      });
+      if (!api.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          loading: false,
+          new: false,
+          confirmAddonOpen: false,
+          confirmAttachmentOpen: false,
+          attach: false,
+        });
+      }
     }
   }
 
   handleRemoveAddonAttachment = async () => {
     this.setState({ loading: true });
     try {
-      await api.deleteAddonAttachment(this.props.app.name, this.state.attachment.id);
+      await api.deleteAddonAttachment(
+        this.props.app.name,
+        this.state.attachment.id,
+        this._cancelSource.token,
+      );
       ReactGA.event({
         category: 'ADDONS',
         action: 'Deleted addon',
       });
       this.reload('Attachment Deleted');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        loading: false,
-        new: false,
-        confirmAddonOpen: false,
-        confirmAttachmentOpen: false,
-        attach: false,
-      });
+      if (!api.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          loading: false,
+          new: false,
+          confirmAddonOpen: false,
+          confirmAttachmentOpen: false,
+          attach: false,
+        });
+      }
     }
   }
 
@@ -305,22 +330,28 @@ class Addons extends Component {
 
   reload = async (message) => {
     this.setState({ loading: true });
-    const [r1, r2] = await Promise.all([
-      api.getAppAddons(this.props.app.name),
-      api.getAddonAttachments(this.props.app.name),
-    ]);
-    this.setState({
-      addons: r1.data,
-      addonAttachments: r2.data,
-      loading: false,
-      new: false,
-      message,
-      open: true,
-      confirmAddonOpen: false,
-      confirmAttachmentOpen: false,
-      attach: false,
-    });
-    this.getAppsAttachedToAddon();
+    try {
+      const [r1, r2] = await Promise.all([
+        api.getAppAddons(this.props.app.name, this._cancelSource.token),
+        api.getAddonAttachments(this.props.app.name, this._cancelSource.token),
+      ]);
+      this.setState({
+        addons: r1.data,
+        addonAttachments: r2.data,
+        loading: false,
+        new: false,
+        message,
+        open: true,
+        confirmAddonOpen: false,
+        confirmAttachmentOpen: false,
+        attach: false,
+      });
+      this.getAppsAttachedToAddon();
+    } catch (err) {
+      if (!api.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   renderAddons() {
