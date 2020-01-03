@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { IconButton, CircularProgress, Grid, Paper, Typography, Link } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -8,10 +8,10 @@ import ReactGA from 'react-ga';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
 import { Stage } from '../../components/Pipelines';
-import api from '../../services/api';
 import util from '../../services/util';
 import CreateOrUpdatePipelineCoupling from '../../components/Pipelines/CreateOrUpdatePipelineCoupling';
 import History from '../../config/History';
+import BaseComponent from '../../BaseComponent';
 
 const innerPanelStyle = { ...GlobalStyles.InnerPanel, ...GlobalStyles.PaddedInnerPanel };
 const subtleSubHeaderStyle = { ...GlobalStyles.SubHeader, ...GlobalStyles.FairlySubtle };
@@ -25,7 +25,7 @@ const originalState = {
   isElevated: false,
 };
 
-export default class PipelineInfo extends Component {
+export default class PipelineInfo extends BaseComponent {
   static renderLoading() {
     return (
       <Paper style={GlobalStyles.MainPanel}>
@@ -41,7 +41,10 @@ export default class PipelineInfo extends Component {
     this.state = util.deepCopy(originalState);
   }
 
-  componentDidMount = () => this.refreshPipeline();
+  componentDidMount = () => {
+    super.componentDidMount();
+    this.refreshPipeline();
+  }
 
   handleError(err) {
     console.error(err); // eslint-disable-line no-console
@@ -52,10 +55,10 @@ export default class PipelineInfo extends Component {
   refreshPipeline = async (loading = true) => {
     try {
       this.setState({ loading, ...util.deepCopy(originalState) });
-      const { data: stages } = await api.getPipelineStages();
-      const { data: pipeline } = await api.getPipeline(this.props.match.params.pipeline);
+      const { data: stages } = await this.api.getPipelineStages();
+      const { data: pipeline } = await this.api.getPipeline(this.props.match.params.pipeline);
       util.updateHistory('pipelines', pipeline.id, pipeline.name);
-      const accountResponse = await api.getAccount();
+      const accountResponse = await this.api.getAccount();
       const isElevated = (accountResponse.data && 'elevated_access' in accountResponse.data) ?
         accountResponse.data.elevated_access :
         true;
@@ -63,27 +66,33 @@ export default class PipelineInfo extends Component {
         loading: false, pipeline, stages, isElevated,
       });
     } catch (err) {
-      this.handleError(err);
+      if (!this.isCancel(err)) {
+        this.handleError(err);
+      }
     }
   };
 
   handleDeletePipeline = async () => {
     try {
-      await api.deletePipeline(this.props.match.params.pipeline);
+      await this.api.deletePipeline(this.props.match.params.pipeline);
       ReactGA.event({ category: 'PIPELINES', action: 'Deleted pipeline' });
       History.get().push('/pipelines');
     } catch (err) {
-      this.handleError(err);
+      if (!this.isCancel(err)) {
+        this.handleError(err);
+      }
     }
   };
 
   handleCreatePipelineCoupling = async (pipeline, coupling, stage, app, statuses) => {
     try {
-      await api.createPipelineCoupling(pipeline.id, app, stage, statuses);
+      await this.api.createPipelineCoupling(pipeline.id, app, stage, statuses);
       ReactGA.event({ category: 'PIPELINES', action: 'Created new coupling' });
       this.refreshPipeline();
     } catch (err) {
-      this.handleError(err);
+      if (!this.isCancel(err)) {
+        this.handleError(err);
+      }
     }
   }
 

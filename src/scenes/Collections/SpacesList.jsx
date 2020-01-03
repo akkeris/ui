@@ -91,29 +91,35 @@ export default class SpacesList extends BaseComponent {
   }
 
   getData = async () => {
-    const { data: spaces } = await this.api.getSpaces();
+    try {
+      const { data: spaces } = await this.api.getSpaces();
 
-    const options = [
-      {
-        label: 'Spaces',
-        options: spaces.map(space => ({ label: space.name, value: space.name, type: 'space' })),
-      },
-    ];
+      const options = [
+        {
+          label: 'Spaces',
+          options: spaces.map(space => ({ label: space.name, value: space.name, type: 'space' })),
+        },
+      ];
 
-    this.setState({
-      spaces,
-      sortedSpaces: spaces,
-      loading: false,
-      options,
-    }, () => {
-      let values;
-      try {
-        values = JSON.parse(localStorage.getItem('akkeris_space_filters'));
-      } catch (e) {
-        values = [];
+      this.setState({
+        spaces,
+        sortedSpaces: spaces,
+        loading: false,
+        options,
+      }, () => {
+        let values;
+        try {
+          values = JSON.parse(localStorage.getItem('akkeris_space_filters'));
+        } catch (e) {
+          values = [];
+        }
+        this.handleFilterChange(values);
+      });
+    } catch (error) {
+      if (!this.isCancel(error)) {
+        console.error(error); // eslint-disable-line no-console
       }
-      this.handleFilterChange(values);
-    });
+    }
   }
 
   handleNew = () => {

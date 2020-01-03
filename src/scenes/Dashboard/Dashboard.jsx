@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -8,10 +8,10 @@ import {
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import RecentIcon from '@material-ui/icons/AccessTime';
 
-import api from '../../services/api';
 import util from '../../services/util';
 import FavoritesList from '../../components/Apps/FavoritesList';
 import RecentsList from '../../components/RecentsList';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   refresh: {
@@ -41,7 +41,7 @@ const style = {
 
 const tabs = ['favorites', 'recent'];
 
-export default class Dashboard extends Component {
+export default class Dashboard extends BaseComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -53,8 +53,9 @@ export default class Dashboard extends Component {
   }
 
   async componentDidMount() {
+    super.componentDidMount();
     try {
-      const favoriteResponse = await api.getFavorites();
+      const favoriteResponse = await this.api.getFavorites();
       let currentTab = this.props.match.params.tab; // eslint-disable-line
       if (!currentTab || !tabs.includes(currentTab)) {
         currentTab = 'favorites';
@@ -65,8 +66,10 @@ export default class Dashboard extends Component {
         favorites: favoriteResponse.data,
         loading: false,
       });
-    } catch (err) {
-      console.log(err); // eslint-disable-line
+    } catch (error) {
+      if (!this.isCancel(error)) {
+        console.error(error); // eslint-disable-line no-console
+      }
     }
   }
 

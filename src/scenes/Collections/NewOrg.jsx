@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper,
   Typography,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
 
-import api from '../../services/api';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   stepper: {
@@ -46,7 +46,7 @@ const style = {
   },
 };
 
-export default class NewOrg extends Component {
+export default class NewOrg extends BaseComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -113,22 +113,24 @@ export default class NewOrg extends Component {
 
   submitOrg = async () => {
     try {
-      await api.createOrg(this.state.org, this.state.description);
+      await this.api.createOrg(this.state.org, this.state.description);
       ReactGA.event({
         category: 'ORGS',
         action: 'Created new org',
       });
       History.get().push('/collections');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        org: '',
-        description: '',
-        loading: false,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          org: '',
+          description: '',
+          loading: false,
+        });
+      }
     }
   };
 
@@ -232,7 +234,7 @@ export default class NewOrg extends Component {
         <div style={style.div}>
           <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org.length > 12 ? `${org.slice(0,12)}...` : org)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org.length > 12 ? `${org.slice(0, 12)}...` : org)}>
                   Create org name
               </StepLabel>
             </Step>

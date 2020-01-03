@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Checkbox, Paper,
   MenuItem, Select, FormControl, InputLabel, FormControlLabel, Typography,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
-import api from '../../services/api';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const tags = ['internal', 'socs', 'prod', 'dev', 'qa'];
 
@@ -52,7 +52,7 @@ const style = {
   },
 };
 
-export default class NewApp extends Component {
+export default class NewApp extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -71,12 +71,19 @@ export default class NewApp extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getStacks();
   }
 
   getStacks = async () => {
-    const { data: stacks } = await api.getStacks();
-    this.setState({ stacks, stack: stacks[0].name, loading: false });
+    try {
+      const { data: stacks } = await this.api.getStacks();
+      this.setState({ stacks, stack: stacks[0].name, loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleStackChange = (event) => {
@@ -146,7 +153,7 @@ export default class NewApp extends Component {
 
   submitSpace = async () => {
     try {
-      await api.createSpace(
+      await this.api.createSpace(
         this.state.space,
         this.state.description,
         this.state.compliance,
@@ -158,18 +165,20 @@ export default class NewApp extends Component {
       });
       History.get().push('/collections');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        errorText: null,
-        space: '',
-        description: '',
-        compliance: [],
-        stack: this.state.stacks[0].name,
-        loading: false,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          errorText: null,
+          space: '',
+          description: '',
+          compliance: [],
+          stack: this.state.stacks[0].name,
+          loading: false,
+        });
+      }
     }
   };
 
@@ -350,7 +359,7 @@ export default class NewApp extends Component {
         <div style={style.div}>
           <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(space.length > 12 ? `${space.slice(0,12)}...` : space)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(space.length > 12 ? `${space.slice(0, 12)}...` : space)}>
                   Create space name
               </StepLabel>
             </Step>
