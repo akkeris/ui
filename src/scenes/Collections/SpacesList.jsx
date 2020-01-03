@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Table, TableBody, TableHead, TableRow, TableCell, CircularProgress, Paper,
   TableFooter, TablePagination, TableSortLabel, Tooltip, Toolbar, IconButton,
@@ -7,9 +7,9 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import FilterListIcon from '@material-ui/icons/FilterList';
 
-import api from '../../services/api';
 import History from '../../config/History';
 import FilterSelect from '../../components/FilterSelect';
+import BaseComponent from '../../BaseComponent';
 
 
 const style = {
@@ -69,7 +69,7 @@ const style = {
   },
 };
 
-export default class SpacesList extends Component {
+export default class SpacesList extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -86,11 +86,12 @@ export default class SpacesList extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getData();
   }
 
   getData = async () => {
-    const { data: spaces } = await api.getSpaces();
+    const { data: spaces } = await this.api.getSpaces();
 
     const options = [
       {

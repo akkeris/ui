@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, CircularProgress, LinearProgress, Button, Typography,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
 import Search from '../Search';
-import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   stepper: {
@@ -54,7 +54,7 @@ const style = {
 
 const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
-export default class NewAddon extends Component {
+export default class NewAddon extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -75,7 +75,7 @@ export default class NewAddon extends Component {
   }
 
   componentDidMount() {
-    this._cancelSource = api.getCancelSource();
+    super.componentDidMount();
     this.getServices();
   }
 
@@ -85,13 +85,9 @@ export default class NewAddon extends Component {
     }
   }
 
-  componentWillUnmount() {
-    this._cancelSource.cancel('Component unmounted.');
-  }
-
   getServices = async () => {
     try {
-      const { data: services } = await api.getAddonServices(this._cancelSource.token);
+      const { data: services } = await this.api.getAddonServices();
       const groupedServices = [{ label: 'Services', options: [] }, { label: 'Credentials', options: [] }];
       services.forEach((addon) => {
         const formattedAddon = { value: addon.id, label: addon.human_name };
@@ -99,7 +95,7 @@ export default class NewAddon extends Component {
       });
       this.setState({ services, groupedServices, loading: false });
     } catch (err) {
-      if (!api.isCancel(err)) {
+      if (!this.isCancel(err)) {
         console.error(err); // eslint-disable-line no-console
       }
     }
@@ -108,10 +104,7 @@ export default class NewAddon extends Component {
   getPlans = async () => {
     try {
       this.setState({ loading: true });
-      let { data: plans } = await api.getAddonServicePlans(
-        this.state.serviceid,
-        this._cancelSource.token,
-      );
+      let { data: plans } = await this.api.getAddonServicePlans(this.state.serviceid);
       plans = plans.filter(x => x.state !== 'deprecated').map(x => ({
         value: x.id,
         label: x.name,
@@ -121,7 +114,7 @@ export default class NewAddon extends Component {
       }));
       this.setState({ plans, loading: false });
     } catch (err) {
-      if (!api.isCancel(err)) {
+      if (!this.isCancel(err)) {
         console.error(err); // eslint-disable-line no-console
       }
     }
@@ -173,15 +166,14 @@ export default class NewAddon extends Component {
   submitAddon = async () => {
     try {
       this.setState({ loading: true });
-      let { data: addon } = await api.createAddon(
+      let { data: addon } = await this.api.createAddon(
         this.props.app,
         this.state.plan.value,
-        this._cancelSource.token,
       );
 
       for (let i = 0; i < 2000; i++) {
         if (i % 20 === 0) {
-          ({ data: addon } = await api.getAddon(this.props.app, addon.id, this._cancelSource.token)); // eslint-disable-line
+          ({ data: addon } = await this.api.getAddon(this.props.app, addon.id)); // eslint-disable-line
         }
         if (i === 1999) {
           throw new Error('It seems this addon is taking too long to complete its task. When the provisioning finishes your application will automatically be restarted with the new addon.');
@@ -200,7 +192,7 @@ export default class NewAddon extends Component {
         await new Promise((res, rej) => setTimeout(res, 500)); // eslint-disable-line
       }
     } catch (error) {
-      if (!api.isCancel(error)) {
+      if (!this.isCancel(error)) {
         if (error.response) {
           this.setState({
             submitMessage: error.response ? error.response.data : error.message,

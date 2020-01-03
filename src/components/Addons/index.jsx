@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Button, IconButton, Snackbar, Typography, CircularProgress, Dialog,
@@ -10,12 +10,12 @@ import { withTheme } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
 import DeleteIcon from '@material-ui/icons/Delete';
-import api from '../../services/api';
 import NewAddon from './NewAddon';
 import AttachAddon from './AttachAddon';
 import ConfirmationModal from '../ConfirmationModal';
 import AttachmentIcon from '../Icons/AttachmentIcon';
 import DeleteAttachmentIcon from '../Icons/DeleteAttachmentIcon';
+import BaseComponent from '../../BaseComponent';
 
 // fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
 function isEmpty(obj) {
@@ -101,7 +101,7 @@ const style = {
   },
 };
 
-class Addons extends Component {
+class Addons extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -125,11 +125,11 @@ class Addons extends Component {
       isElevated: false,
       restrictedSpace: false,
     };
-    this._cancelSource = api.getCancelSource();
     this.loadAddons();
   }
 
   componentDidMount() {
+    super.componentDidMount();
     const { app, accountInfo } = this.props;
 
     // If this is a production app, check for the elevated_access role to determine
@@ -149,28 +149,19 @@ class Addons extends Component {
     this.setState({ isElevated, restrictedSpace }); // eslint-disable-line
   }
 
-  componentWillUnmount() {
-    this._cancelSource.cancel('Component unmounted.');
-  }
-
   getAppsAttachedToAddon = async () => {
     const { addons, addonAttachments } = this.state;
     try {
       const fullAddons = await Promise.all(addons.map(async (addon) => {
-        const { data } = await api.getAppsAttachedToAddon(
-          this.props.app.name,
-          addon.id,
-          this._cancelSource.token,
-        );
+        const { data } = await this.api.getAppsAttachedToAddon(this.props.app.name, addon.id);
         addon.attached_to = data.attached_to; // eslint-disable-line
         return addon;
       }));
 
       const fullAttachments = await Promise.all(addonAttachments.map(async (attachment) => {
-        const { data } = await api.getAppsAttachedToAddon(
+        const { data } = await this.api.getAppsAttachedToAddon(
           this.props.app.name,
           attachment.addon.id,
-          this._cancelSource.token,
         );
         attachment.attached_to = data.attached_to; // eslint-disable-line
         return attachment;
@@ -183,7 +174,7 @@ class Addons extends Component {
         addonsLoaded: true,
       });
     } catch (err) {
-      if (!api.isCancel(err)) {
+      if (!this.isCancel(err)) {
         console.error(err); // eslint-disable-line no-console
       }
     }
@@ -192,8 +183,8 @@ class Addons extends Component {
   loadAddons = async () => {
     try {
       const [r1, r2] = await Promise.all([
-        api.getAppAddons(this.props.app.name, this._cancelSource.token),
-        api.getAddonAttachments(this.props.app.name, this._cancelSource.token),
+        this.api.getAppAddons(this.props.app.name),
+        this.api.getAddonAttachments(this.props.app.name),
       ]);
       this.setState({
         addons: r1.data,
@@ -202,7 +193,7 @@ class Addons extends Component {
       });
       this.getAppsAttachedToAddon();
     } catch (err) {
-      if (!api.isCancel(err)) {
+      if (!this.isCancel(err)) {
         console.error(err); // eslint-disable-line no-console
       }
     }
@@ -247,10 +238,10 @@ class Addons extends Component {
   handleRemoveAddon = async () => {
     this.setState({ loading: true });
     try {
-      await api.deleteAddon(this.props.app.name, this.state.addon.id, this._cancelSource.token);
+      await this.api.deleteAddon(this.props.app.name, this.state.addon.id);
       this.reload('Addon Deleted');
     } catch (error) {
-      if (!api.isCancel(error)) {
+      if (!this.isCancel(error)) {
         this.setState({
           submitMessage: error.response.data,
           submitFail: true,
@@ -267,10 +258,9 @@ class Addons extends Component {
   handleRemoveAddonAttachment = async () => {
     this.setState({ loading: true });
     try {
-      await api.deleteAddonAttachment(
+      await this.api.deleteAddonAttachment(
         this.props.app.name,
         this.state.attachment.id,
-        this._cancelSource.token,
       );
       ReactGA.event({
         category: 'ADDONS',
@@ -278,7 +268,7 @@ class Addons extends Component {
       });
       this.reload('Attachment Deleted');
     } catch (error) {
-      if (!api.isCancel(error)) {
+      if (!this.isCancel(error)) {
         this.setState({
           submitMessage: error.response.data,
           submitFail: true,
@@ -332,8 +322,8 @@ class Addons extends Component {
     this.setState({ loading: true });
     try {
       const [r1, r2] = await Promise.all([
-        api.getAppAddons(this.props.app.name, this._cancelSource.token),
-        api.getAddonAttachments(this.props.app.name, this._cancelSource.token),
+        this.api.getAppAddons(this.props.app.name),
+        this.api.getAddonAttachments(this.props.app.name),
       ]);
       this.setState({
         addons: r1.data,
@@ -348,7 +338,7 @@ class Addons extends Component {
       });
       this.getAppsAttachedToAddon();
     } catch (err) {
-      if (!api.isCancel(err)) {
+      if (!this.isCancel(err)) {
         console.error(err); // eslint-disable-line no-console
       }
     }

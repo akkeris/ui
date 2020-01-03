@@ -50,19 +50,21 @@ export default class FavoritesList extends Component {
         </TableRow>
       );
     }
-    return this.props.favorites.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
-      <TableRow
-        className={app.name}
-        key={app.id}
-        style={style.tableRow}
-        hover
-        onClick={() => this.handleRowSelection(app)}
-      >
-        <TableCell style={style.tableRow}>
-          <div style={style.tableRowColumn.main}>{app.name}</div>
-        </TableCell>
-      </TableRow>
-    ));
+    return this.props.favorites
+      .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
+      .map(app => (
+        <TableRow
+          className={app.name}
+          key={app.id}
+          style={style.tableRow}
+          hover
+          onClick={() => this.handleRowSelection(app)}
+        >
+          <TableCell style={style.tableRow}>
+            <div style={style.tableRowColumn.main}>{app.name}</div>
+          </TableCell>
+        </TableRow>
+      ));
   }
 
   handleRowSelection = (app) => {

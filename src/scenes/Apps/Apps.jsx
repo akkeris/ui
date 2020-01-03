@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Toolbar, IconButton, CircularProgress, Paper, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import api from '../../services/api';
 import AppList from '../../components/Apps/AppList';
 import History from '../../config/History';
 import FilterSelect from '../../components/FilterSelect';
+import BaseComponent from '../../BaseComponent';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
@@ -63,7 +63,7 @@ const style = {
   },
 };
 
-export default class Apps extends Component {
+export default class Apps extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -84,51 +84,58 @@ export default class Apps extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getData();
   }
 
   getData = async () => {
-    const { data: spaces } = await api.getSpaces();
-    const { data: regions } = await api.getRegions();
-    let { data: apps } = await api.getApps();
-    const { data: favorites } = await api.getFavorites();
-    apps = apps.map(app => ({
-      ...app,
-      isFavorite: (favorites.findIndex(x => x.name === app.name) > -1),
-    }));
+    try {
+      const { data: spaces } = await this.api.getSpaces();
+      const { data: regions } = await this.api.getRegions();
+      let { data: apps } = await this.api.getApps();
+      const { data: favorites } = await this.api.getFavorites();
+      apps = apps.map(app => ({
+        ...app,
+        isFavorite: (favorites.findIndex(x => x.name === app.name) > -1),
+      }));
 
-    const options = [
-      {
-        label: 'Spaces',
-        options: spaces.map(space => ({ label: space.name, value: space.name, type: 'space' })),
-      },
-      {
-        label: 'Regions',
-        options: regions.map(region => ({ label: region.name, value: region.name, type: 'region' })),
-      },
-      {
-        label: 'Apps',
-        options: apps.map(app => ({ label: app.name, value: app.name, type: 'app' })),
-      },
-    ];
+      const options = [
+        {
+          label: 'Spaces',
+          options: spaces.map(space => ({ label: space.name, value: space.name, type: 'space' })),
+        },
+        {
+          label: 'Regions',
+          options: regions.map(region => ({ label: region.name, value: region.name, type: 'region' })),
+        },
+        {
+          label: 'Apps',
+          options: apps.map(app => ({ label: app.name, value: app.name, type: 'app' })),
+        },
+      ];
 
-    this.setState({
-      spaces,
-      filteredSpaces: spaces,
-      regions,
-      apps,
-      filteredApps: apps,
-      loading: false,
-      options,
-    }, () => {
-      let values;
-      try {
-        values = JSON.parse(localStorage.getItem('akkeris_app_filters'));
-      } catch (e) {
-        values = [];
+      this.setState({
+        spaces,
+        filteredSpaces: spaces,
+        regions,
+        apps,
+        filteredApps: apps,
+        loading: false,
+        options,
+      }, () => {
+        let values;
+        try {
+          values = JSON.parse(localStorage.getItem('akkeris_app_filters'));
+        } catch (e) {
+          values = [];
+        }
+        this.handleFilterChange(values);
+      });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
       }
-      this.handleFilterChange(values);
-    });
+    }
   }
 
   handleFilterChange = (values) => {

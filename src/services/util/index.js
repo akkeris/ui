@@ -115,8 +115,8 @@ function clearHistory() {
 }
 
 function getDateDiff(date /* : Date */) {
-  if(typeof date === 'string') {
-    date = new Date(date);
+  if (typeof date === 'string') {
+    date = new Date(date); // eslint-disable-line no-param-reassign
   }
   const seconds = Math.floor((new Date() - date) / 1000);
   let interval = Math.floor(seconds / 31536000);
