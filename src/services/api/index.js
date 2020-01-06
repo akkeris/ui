@@ -29,53 +29,57 @@ function isCancel(error) {
   return axios.isCancel(error);
 }
 
+// Note: for all functions below, this.cancelToken will be undefined (and ignored)
+// unless the function is bound to an object that has this.cancelToken set
+// before it is invoked.
+
 function getApps() {
-  return axios.get('/api/apps', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/apps', { cancelToken: this.cancelToken });
 }
 
 function getApp(app) {
-  return axios.get(`/api/apps/${app}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}`, { cancelToken: this.cancelToken });
 }
 
 function deleteApp(app) {
   notify.send('app delete');
-  return axios.delete(`/api/apps/${app}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/apps/${app}`, { cancelToken: this.cancelToken });
 }
 
 function createApp(name, org, space, description) {
   notify.send('app create');
-  return axios.post('/api/apps', { org, name, space, description }, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.post('/api/apps', { org, name, space, description }, { cancelToken: this.cancelToken });
 }
 
 function appSetup(blueprint) {
-  return axios.post('/api/app-setups', blueprint, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.post('/api/app-setups', blueprint, { cancelToken: this.cancelToken });
 }
 
 function getAppSetup(id) {
-  return axios.get(`/api/app-setups/${id}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/app-setups/${id}`, { cancelToken: this.cancelToken });
 }
 
 function patchApp(app, isMaintenance) {
   return axios.patch(`/api/apps/${app}`, {
     maintenance: isMaintenance,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function patchAppDescription(app, description) {
   return axios.patch(`/api/apps/${app}`, {
     description: !description || description === '' ? '' : description,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function getAudits(app, space, size, user) {
   return axios.get(
     `/api/audits?app=${app}&space=${space}${user ? `&user=${user}` : ''}${size ? `&size=${size}` : ''}`,
-    { cancelToken: this ? this.cancelToken : undefined },
+    { cancelToken: this.cancelToken },
   );
 }
 
 function getFormations(app) {
-  return axios.get(`/api/apps/${app}/formation`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/formation`, { cancelToken: this.cancelToken });
 }
 
 function createFormation(app, size, quantity, type, port, command) {
@@ -85,7 +89,7 @@ function createFormation(app, size, quantity, type, port, command) {
     type,
     port,
     command,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function createWebHook(app, url, events, secret) {
@@ -94,11 +98,11 @@ function createWebHook(app, url, events, secret) {
     events,
     active: true,
     secret,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function deleteFormation(app, formation) {
-  return axios.delete(`/api/apps/${app}/formation/${formation}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/apps/${app}/formation/${formation}`, { cancelToken: this.cancelToken });
 }
 
 function patchFormation(app, type, size, quantity, command, port, healthcheck, removeHealthcheck) {
@@ -110,7 +114,7 @@ function patchFormation(app, type, size, quantity, command, port, healthcheck, r
     port,
     healthcheck,
     removeHealthcheck,
-  }], { cancelToken: this ? this.cancelToken : undefined });
+  }], { cancelToken: this.cancelToken });
 }
 
 function patchWebhook(app, id, url, events, secret, active) {
@@ -119,26 +123,26 @@ function patchWebhook(app, id, url, events, secret, active) {
     events,
     secret,
     active,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 function getWebhookResults(app, id) {
-  return axios.get(`/api/apps/${app}/hooks/${id}/results`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/hooks/${id}/results`, { cancelToken: this.cancelToken });
 }
 
 function restartFormation(app, type) {
-  return axios.delete(`/api/apps/${app}/dynos/${type}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/apps/${app}/dynos/${type}`, { cancelToken: this.cancelToken });
 }
 
 function getFormationSizes() {
-  return axios.get('/api/sizes', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/sizes', { cancelToken: this.cancelToken });
 }
 
 function getDynos(app) {
-  return axios.get(`/api/apps/${app}/dynos`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/dynos`, { cancelToken: this.cancelToken });
 }
 
 function getSpaces() {
-  return axios.get('/api/spaces', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/spaces', { cancelToken: this.cancelToken });
 }
 
 function createSpace(space, description, compliance, stack) {
@@ -147,66 +151,66 @@ function createSpace(space, description, compliance, stack) {
     description,
     compliance,
     stack,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function getAppAddons(app) {
-  return axios.get(`/api/apps/${app}/addons`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/addons`, { cancelToken: this.cancelToken });
 }
 
 function getAppsAttachedToAddon(app, addon) {
-  return axios.get(`/api/apps/${app}/addons/${addon}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/addons/${addon}`, { cancelToken: this.cancelToken });
 }
 
 function getAppWebhooks(app) {
-  return axios.get(`/api/apps/${app}/hooks`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/hooks`, { cancelToken: this.cancelToken });
 }
 
 function getAddon(app, addon) {
-  return axios.get(`/api/apps/${app}/addons/${addon}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/addons/${addon}`, { cancelToken: this.cancelToken });
 }
 
 function getAddonServices() {
-  return axios.get('/api/addon-services', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/addon-services', { cancelToken: this.cancelToken });
 }
 
 function getAddonServicePlans(addon) {
-  return axios.get(`/api/addon-services/${addon}/plans`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/addon-services/${addon}/plans`, { cancelToken: this.cancelToken });
 }
 
 function createAddon(app, plan) {
-  return axios.post(`/api/apps/${app}/addons`, { plan }, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.post(`/api/apps/${app}/addons`, { plan }, { cancelToken: this.cancelToken });
 }
 
 function attachAddon(app, addon) {
   return axios.post(`/api/apps/${app}/addon-attachments`, {
     app,
     addon,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function getAddonAttachments(app) {
-  return axios.get(`/api/apps/${app}/addon-attachments`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/addon-attachments`, { cancelToken: this.cancelToken });
 }
 
 function deleteAddonAttachment(app, attachment) {
-  return axios.delete(`/api/apps/${app}/addon-attachments/${attachment}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/apps/${app}/addon-attachments/${attachment}`, { cancelToken: this.cancelToken });
 }
 
 function deleteAddon(app, addon) {
-  return axios.delete(`/api/apps/${app}/addons/${addon}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/apps/${app}/addons/${addon}`, { cancelToken: this.cancelToken });
 }
 
 function deleteWebhook(app, webhookId) {
-  return axios.delete(`/api/apps/${app}/hooks/${webhookId}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/apps/${app}/hooks/${webhookId}`, { cancelToken: this.cancelToken });
 }
 
 function getBuilds(app) {
-  return axios.get(`/api/apps/${app}/builds`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/builds`, { cancelToken: this.cancelToken });
 }
 
 function getBuildResult(app, build) {
-  return axios.get(`/api/apps/${app}/builds/${build}/result`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/builds/${build}/result`, { cancelToken: this.cancelToken });
 }
 
 function createBuild(app, org, checksum, url, repo, sha, branch, version) {
@@ -217,7 +221,7 @@ function createBuild(app, org, checksum, url, repo, sha, branch, version) {
     sha,
     branch,
     version,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function createAutoBuild(app, repo, branch, statusCheck, autoDeploy, username, token) {
@@ -229,35 +233,35 @@ function createAutoBuild(app, repo, branch, statusCheck, autoDeploy, username, t
     autoDeploy,
     username,
     token,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function getAutoBuild(app) {
-  return axios.get(`/api/apps/${app}/builds/auto/github`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/builds/auto/github`, { cancelToken: this.cancelToken });
 }
 
 function deleteAutoBuild(app) {
-  return axios.delete(`/api/apps/${app}/builds/auto/github`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/apps/${app}/builds/auto/github`, { cancelToken: this.cancelToken });
 }
 
 function redoBuild(app, build) {
-  return axios.put(`/api/apps/${app}/builds/${build}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.put(`/api/apps/${app}/builds/${build}`, { cancelToken: this.cancelToken });
 }
 
 async function getReleases(app) {
-  return axios.get(`/api/apps/${app}/releases`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/releases`, { cancelToken: this.cancelToken });
 }
 
 async function getSlug(slug) {
-  return axios.get(`/api/slugs/${slug}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/slugs/${slug}`, { cancelToken: this.cancelToken });
 }
 
 async function getRelease(app, release) {
-  return axios.get(`/api/apps/${app}/releases/${release}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/releases/${release}`, { cancelToken: this.cancelToken });
 }
 
 async function getReleaseStatuses(app, release) {
-  return axios.get(`/api/apps/${app}/releases/${release}/statuses`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/releases/${release}/statuses`, { cancelToken: this.cancelToken });
 }
 
 function createRelease(app, slug, release, description) {
@@ -265,68 +269,68 @@ function createRelease(app, slug, release, description) {
     slug,
     release,
     description,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 async function rebuild(app, release) {
-  return axios.put(`/api/apps/${app}/builds/${release.slug.id}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.put(`/api/apps/${app}/builds/${release.slug.id}`, { cancelToken: this.cancelToken });
 }
 
 function getOrgs() {
-  return axios.get('/api/organizations', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/organizations', { cancelToken: this.cancelToken });
 }
 
 function createOrg(org, description) {
   return axios.post('/api/organizations', {
     name: org,
     description,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function getConfig(app) {
-  return axios.get(`/api/apps/${app}/config-vars`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/config-vars`, { cancelToken: this.cancelToken });
 }
 
 function patchConfig(app, values) {
-  return axios.patch(`/api/apps/${app}/config-vars`, values, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.patch(`/api/apps/${app}/config-vars`, values, { cancelToken: this.cancelToken });
 }
 
 function getLogs(app) {
   return axios.post(`/api/apps/${app}/log-sessions`, {
     lines: 10,
     tail: true,
-  }, { cancelToken: this ? this.cancelToken : undefined }); // then follow log session route
+  }, { cancelToken: this.cancelToken }); // then follow log session route
 }
 
 function getMetrics(app) {
-  return axios.get(`/api/apps/${app}/metrics?resolution=10m`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/apps/${app}/metrics?resolution=10m`, { cancelToken: this.cancelToken });
 }
 
 function getPipelines() {
-  return axios.get('/api/pipelines', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/pipelines', { cancelToken: this.cancelToken });
 }
 
 function getPipelineStages() {
-  return axios.get('/api/pipeline-stages', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/pipeline-stages', { cancelToken: this.cancelToken });
 }
 
 function getPipeline(pipeline) {
-  return axios.get(`/api/pipelines/${pipeline}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/pipelines/${pipeline}`, { cancelToken: this.cancelToken });
 }
 
 function getPipelineCouplings(pipeline) {
-  return axios.get(`/api/pipelines/${pipeline}/pipeline-couplings`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/pipelines/${pipeline}/pipeline-couplings`, { cancelToken: this.cancelToken });
 }
 
 function getAvailablePipelineStatuses(pipeline) {
-  return axios.get(`/api/pipelines/${pipeline}/statuses`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/pipelines/${pipeline}/statuses`, { cancelToken: this.cancelToken });
 }
 
 function createPipeline(pipeline) {
   notify.send('pipe create');
   return axios.post('/api/pipelines', {
     name: pipeline,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function createPipelineCoupling(pipeline, app, stage, statuses) {
@@ -337,7 +341,7 @@ function createPipelineCoupling(pipeline, app, stage, statuses) {
     required_status_checks: {
       contexts: statuses,
     },
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function updatePipelineCoupling(pipeline, coupling, statuses) {
@@ -345,7 +349,7 @@ function updatePipelineCoupling(pipeline, coupling, statuses) {
     required_status_checks: {
       contexts: statuses,
     },
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 // targets must be array with objects with targets[i].app.id
@@ -364,31 +368,31 @@ function promotePipeline(pipeline, source, targets, safe, release) {
     },
     targets,
     safe,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function deletePipelineCoupling(coupling) {
-  return axios.delete(`/api/pipeline-couplings/${coupling}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/pipeline-couplings/${coupling}`, { cancelToken: this.cancelToken });
 }
 
 function deletePipeline(pipeline) {
   notify.send('pipe delete');
-  return axios.delete(`/api/pipelines/${pipeline}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/pipelines/${pipeline}`, { cancelToken: this.cancelToken });
 }
 
 function getUser() {
-  return axios.get('/api/account', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/account', { cancelToken: this.cancelToken });
 }
 
 function getAccount() {
-  return axios.get('/api/account', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/account', { cancelToken: this.cancelToken });
 }
 
 function getLogSession(app) {
   return axios.post(
     `/api/apps/${app}/log-sessions`,
     { lines: 10, tail: true },
-    { cancelToken: this ? this.cancelToken : undefined },
+    { cancelToken: this.cancelToken },
   );
 }
 
@@ -401,19 +405,19 @@ function getLogPlex(url, cb) {
     onDownloadProgress(e) {
       cb(null, e.currentTarget.responseText);
     },
-    cancelToken: this ? this.cancelToken : undefined,
+    cancelToken: this.cancelToken,
   });
 }
 
 function getInvoices(past12) {
   return new Promise((resolve, reject) => {
-    axios.get('/api/account/invoices', { cancelToken: this ? this.cancelToken : undefined }).then((response) => {
+    axios.get('/api/account/invoices', { cancelToken: this.cancelToken }).then((response) => {
       if (past12) {
         response.data = response.data.slice(-12);
       }
       Promise.all(response.data.map(x => axios.get(
         `/api${x['$ref']}`, // eslint-disable-line dot-notation
-        { cancelToken: this ? this.cancelToken : undefined },
+        { cancelToken: this.cancelToken },
       )))
         .then(res => resolve(res.map(x => x.data)))
         .catch(e => reject(e));
@@ -422,20 +426,20 @@ function getInvoices(past12) {
 }
 
 function getInvoice(invoice) {
-  return axios.get(`/api/account/invoices/${invoice}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/account/invoices/${invoice}`, { cancelToken: this.cancelToken });
 }
 
 function getSites() {
-  return axios.get('/api/sites', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/sites', { cancelToken: this.cancelToken });
 }
 
 function getSite(site) {
-  return axios.get(`/api/sites/${site}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/sites/${site}`, { cancelToken: this.cancelToken });
 }
 
 function deleteSite(site) {
   notify.send('site delete');
-  return axios.delete(`/api/sites/${site}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/sites/${site}`, { cancelToken: this.cancelToken });
 }
 
 function createSite(domain, region, isInternal) {
@@ -444,23 +448,23 @@ function createSite(domain, region, isInternal) {
     domain,
     region,
     internal: isInternal,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function getRoutes(site) {
-  return axios.get(`/api/sites/${site}/routes`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/api/sites/${site}/routes`, { cancelToken: this.cancelToken });
 }
 
 function getStacks() {
-  return axios.get('/api/stacks', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/stacks', { cancelToken: this.cancelToken });
 }
 
 function getRegions() {
-  return axios.get('/api/regions', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/regions', { cancelToken: this.cancelToken });
 }
 
 function deleteRoute(route) {
-  return axios.delete(`/api/routes/${route}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/routes/${route}`, { cancelToken: this.cancelToken });
 }
 
 function createRoute(site, app, source, target) {
@@ -469,27 +473,27 @@ function createRoute(site, app, source, target) {
     source_path: source,
     target_path: target,
     app,
-  }, { cancelToken: this ? this.cancelToken : undefined });
+  }, { cancelToken: this.cancelToken });
 }
 
 function getFavorites() {
-  return axios.get('/api/favorites', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/api/favorites', { cancelToken: this.cancelToken });
 }
 
 function deleteFavorite(favorite) {
-  return axios.delete(`/api/favorites/${favorite}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.delete(`/api/favorites/${favorite}`, { cancelToken: this.cancelToken });
 }
 
 function createFavorite(app) {
-  return axios.post('/api/favorites', { app }, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.post('/api/favorites', { app }, { cancelToken: this.cancelToken });
 }
 
 function getHealthcheck(uri) {
-  return axios.get(`/healthcheck?uri=${encodeURIComponent(uri)}`, { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get(`/healthcheck?uri=${encodeURIComponent(uri)}`, { cancelToken: this.cancelToken });
 }
 
 function getGAToken() {
-  return axios.get('/analytics', { cancelToken: this ? this.cancelToken : undefined });
+  return axios.get('/analytics', { cancelToken: this.cancelToken });
 }
 
 export default {
