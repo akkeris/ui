@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import deepmerge from 'deepmerge';
 import { CircularProgress, Typography, IconButton } from '@material-ui/core';
 import { MuiThemeProvider } from '@material-ui/core/styles';
@@ -7,12 +7,12 @@ import PropTypes from 'prop-types';
 import { LazyLog, ScrollFollow } from 'react-lazylog';
 import Loading from 'react-lazylog/build/Loading';
 import Ansi from 'ansi-to-react';
-import api from '../../services/api';
+import BaseComponent from '../../BaseComponent';
 
 // https://gist.github.com/tcase360/3d0e370eca06189f025670d7dd40fe30
 const debounce = (fn, time) => {
   let timeout;
-  return function () {
+  return function () { // eslint-disable-line
     const functionCall = () => fn.apply(this, arguments);
     clearTimeout(timeout);
     timeout = setTimeout(functionCall, time);
@@ -101,7 +101,7 @@ function highlight(data) {
   return <Ansi className="ansi">{data.replace(/^([A-z0-9\:\-\+\.]+Z) ([A-z\-0-9]+) ([A-z\.0-9\/\[\]\-]+)\: /gm, '\u001b[36m$1\u001b[0m $2 \u001b[38;5;104m$3:\u001b[0m ')}</Ansi>; // eslint-disable-line
 }
 
-export default class Logs extends Component {
+export default class Logs extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -117,6 +117,7 @@ export default class Logs extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     window.addEventListener('resize', debounce(this.resize, 150));
   }
 
@@ -125,6 +126,7 @@ export default class Logs extends Component {
   }
 
   componentWillUnmount() {
+    super.componentWillUnmount();
     window.removeEventListener('resize', debounce(this.resize, 150));
   }
 
@@ -135,8 +137,14 @@ export default class Logs extends Component {
   }
 
   loadLogs = async () => {
-    const { data: logSession } = await api.getLogSession(this.props.app);
-    this.setState({ reading: true, loading: false, connected: true, url: `/log-plex/${encodeURIComponent(logSession.logplex_url)}` });
+    try {
+      const { data: logSession } = await this.api.getLogSession(this.props.app);
+      this.setState({ reading: true, loading: false, connected: true, url: `/log-plex/${encodeURIComponent(logSession.logplex_url)}` });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleLogDisconnect = () => {

@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
 import History from '../../config/History';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   tableRow: {
@@ -28,7 +29,7 @@ const style = {
   },
 };
 
-export default class FavoritesList extends Component {
+export default class FavoritesList extends BaseComponent {
   static previewAnnotation() {
     return (
       <span style={style.preview}>Preview</span>

@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Table, TableBody, TableRow, TableFooter, TableCell, TablePagination, TableHead,
   TableSortLabel, Tooltip,
 } from '@material-ui/core';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import BaseComponent from '../../BaseComponent';
 import History from '../../config/History';
 
 
@@ -35,7 +36,7 @@ const style = {
   },
 };
 
-export default class AppList extends Component {
+export default class AppList extends BaseComponent {
   static previewAnnotation() {
     return (
       <span style={style.preview}>Preview</span>

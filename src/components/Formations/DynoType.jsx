@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Select, MenuItem, IconButton, TextField, FormControl, InputLabel, CircularProgress,
@@ -16,9 +16,9 @@ import HealthyIcon from '@material-ui/icons/CheckCircle';
 import UnhealthyIcon from '@material-ui/icons/Cancel';
 import ReactGA from 'react-ga';
 
-import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import RestartIcon from '../Icons/RestartIcon';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   iconButton: {
@@ -107,7 +107,7 @@ const style = {
   },
 };
 
-export default class DynoType extends Component {
+export default class DynoType extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -123,10 +123,12 @@ export default class DynoType extends Component {
       healthy: false,
       checkingHealth: (props.formation.quantity > 0),
       displayStatus: false,
+      loading: true,
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    super.componentDidMount();
     this.reset();
   }
 
@@ -151,14 +153,16 @@ export default class DynoType extends Component {
 
     this.setState({ checkingHealth: true, healthy: false, displayStatus: true });
     try {
-      const response = await api.getHealthcheck(url);
+      const response = await this.api.getHealthcheck(url);
       if (response.status >= 200 && response.status < 300) {
         this.setState({ healthy: true, checkingHealth: false });
       } else {
         throw Error();
       }
     } catch (err) {
-      this.setState({ healthy: false, checkingHealth: false });
+      if (!this.isCancel(err)) {
+        this.setState({ healthy: false, checkingHealth: false });
+      }
     }
   }
 
@@ -200,29 +204,33 @@ export default class DynoType extends Component {
 
   handleRemoveFormation = async () => {
     try {
-      await api.deleteFormation(this.props.app.name, this.props.formation.type);
+      await this.api.deleteFormation(this.props.app.name, this.props.formation.type);
       ReactGA.event({
         category: 'DYNOS',
         action: 'Deleted Formation',
       });
       this.props.onComplete('Removed Formation');
     } catch (error) {
-      this.reset();
-      this.props.onError(error.response.data);
+      if (!this.isCancel(error)) {
+        this.reset();
+        this.props.onError(error.response.data);
+      }
     }
   }
 
   handleRestart = async () => {
     try {
-      await api.restartFormation(this.props.app.name, this.props.formation.type);
+      await this.api.restartFormation(this.props.app.name, this.props.formation.type);
       ReactGA.event({
         category: 'DYNOS',
         action: 'Restarted formation',
       });
       this.props.onAlert('Formation Restarted');
     } catch (error) {
-      this.reset();
-      this.props.onError(error.response.data);
+      if (!this.isCancel(error)) {
+        this.reset();
+        this.props.onError(error.response.data);
+      }
     }
   }
 
@@ -234,7 +242,7 @@ export default class DynoType extends Component {
       healthcheck = `/${this.state.healthcheck.replace(/^\/+/, '')}`;
     }
     try {
-      await api.patchFormation(
+      await this.api.patchFormation(
         this.props.app.name,
         this.props.formation.type,
         this.state.size,
@@ -251,8 +259,10 @@ export default class DynoType extends Component {
       });
       this.props.onComplete('Updated Formation');
     } catch (error) {
-      this.reset();
-      this.props.onError(error.response.data);
+      if (!this.isCancel(error)) {
+        this.reset();
+        this.props.onError(error.response.data);
+      }
     }
   }
 
@@ -274,6 +284,7 @@ export default class DynoType extends Component {
       displayStatus: (
         this.props.formation.healthcheck !== null && this.props.formation.healthcheck !== '' && this.props.formation.quantity > 0
       ),
+      loading: false,
     });
   }
 
@@ -417,9 +428,7 @@ export default class DynoType extends Component {
                   className="size-select"
                   fullWidth
                   value={this.state.size}
-                  renderValue={value => (
-                    `${value} - ${this.props.sizes.find(x => x.name === value).resources.limits.memory}`
-                  )}
+                  renderValue={value => `${value} - ${this.props.sizes.find(x => x.name === value).resources.limits.memory}`}
                   onChange={this.handleChange('size')}
                   input={<Input name="size" id="size-select-input" />}
                 >
@@ -571,7 +580,7 @@ export default class DynoType extends Component {
               </div>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails style={{ flexDirection: 'column', padding: '8px 12px 24px' }}>
-              {this.renderInfoRow()}
+              {!this.state.loading && this.renderInfoRow()}
               <Table style={{ tableLayout: 'fixed' }} className={`${this.props.formation.type}-dynos`}>
                 <TableHead>
                   <TableRow>
