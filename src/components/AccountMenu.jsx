@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Avatar, Menu, MenuItem } from '@material-ui/core';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
-import History from '../config/History';
+import BaseComponent from '../BaseComponent';
 
 const style = {
   avatar: {
@@ -24,7 +24,7 @@ const style = {
   },
 };
 
-export default class AccountMenu extends Component {
+export default class AccountMenu extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {

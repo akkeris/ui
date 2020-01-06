@@ -1,15 +1,15 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog, DialogContent, DialogTitle, DialogContentText, DialogActions,
   List, ListItem, ListItemText, Button, CircularProgress,
 } from '@material-ui/core';
 import RemoveIcon from '@material-ui/icons/Delete';
+import ReactGA from 'react-ga';
 
-import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import History from '../../config/History';
-import ReactGA from 'react-ga';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   refresh: {
@@ -37,7 +37,7 @@ const style = {
   },
 };
 
-export default class SiteOverview extends Component {
+export default class SiteOverview extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -48,7 +48,8 @@ export default class SiteOverview extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    super.componentDidMount();
     this.setState({
       loading: false,
     });
@@ -80,17 +81,19 @@ export default class SiteOverview extends Component {
 
   handleRemoveSite = async () => {
     try {
-      await api.deleteSite(this.props.site.domain);
+      await this.api.deleteSite(this.props.site.domain);
       ReactGA.event({
         category: 'SITES',
         action: 'Removed site',
       });
       History.get().push('/sites');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+        });
+      }
     }
   }
 

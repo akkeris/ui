@@ -12,8 +12,8 @@ import BaseComponent from '../../BaseComponent';
 // https://gist.github.com/tcase360/3d0e370eca06189f025670d7dd40fe30
 const debounce = (fn, time) => {
   let timeout;
-  return function () { // eslint-disable-line
-    const functionCall = () => fn.apply(this, arguments);
+  return function (...args) { // eslint-disable-line
+    const functionCall = () => fn.apply(this, args);
     clearTimeout(timeout);
     timeout = setTimeout(functionCall, time);
   };
@@ -131,7 +131,8 @@ export default class Logs extends BaseComponent {
   }
 
   resize = () => {
-    if (this.divElement !== undefined && this.state.expandedHeight !== this.divElement.clientHeight - 60) {
+    if (this.divElement !== undefined &&
+      this.state.expandedHeight !== this.divElement.clientHeight - 60) {
       this.setState({ expandedHeight: this.divElement.clientHeight - 60 });
     }
   }
@@ -169,7 +170,10 @@ export default class Logs extends BaseComponent {
     } else if (reading) {
       return (
         <MuiThemeProvider theme={theme}>
-          <div style={expanded ? style.expanded : undefined} ref={(divElement) => { this.divElement = divElement; }}>
+          <div
+            style={expanded ? style.expanded : undefined}
+            ref={(divElement) => { this.divElement = divElement; }}
+          >
             <div style={style.logsHeader.rootContainer}>
               <div style={style.logsHeader.statusContainer}>
                 <span style={{ ...style.logsHeader.statusIcon, color: connected ? 'green' : 'red' }}>&#9679;</span>

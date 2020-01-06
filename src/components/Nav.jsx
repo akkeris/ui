@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import deepmerge from 'deepmerge';
 import { Link } from 'react-router-dom';
 import {
@@ -17,8 +17,8 @@ import GlobalSearch from './GlobalSearch';
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
 import AccountMenu from './AccountMenu';
-import api from '../services/api';
 import History from '../config/History';
+import BaseComponent from '../BaseComponent';
 
 const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
@@ -103,7 +103,7 @@ const style = {
   },
 };
 
-export default class Nav extends Component {
+export default class Nav extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -113,12 +113,19 @@ export default class Nav extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getUser();
   }
 
   getUser = async () => {
-    const { data: account } = await api.getUser();
-    this.setState({ account });
+    try {
+      const { data: account } = await this.api.getUser();
+      this.setState({ account });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleToggle = () => this.setState({ open: !this.state.open });

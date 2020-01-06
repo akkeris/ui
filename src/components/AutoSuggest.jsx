@@ -1,18 +1,19 @@
-import React, { Component } from 'react';
+import React from 'react';
 import deepmerge from 'deepmerge';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { TextField, MenuItem, Paper, withStyles } from '@material-ui/core';
 import parse from 'autosuggest-highlight/parse';
 import Autosuggest from 'react-autosuggest';
 import PropTypes from 'prop-types';
+import BaseComponent from '../BaseComponent';
 
 const styles = theme => ({
   input: {
-    width:'100%',
+    width: '100%',
     minWidth: '300px',
   },
   container: {
-    width:'100%',
+    width: '100%',
     position: 'relative',
     minWidth: '300px',
   },
@@ -37,7 +38,7 @@ const styles = theme => ({
 
 /* eslint-disable react/default-props-match-prop-types, react/prop-types */
 
-class AutoSuggest extends Component {
+class AutoSuggest extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.popperNode = null;

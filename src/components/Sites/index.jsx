@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Table, TableBody, TableHead, TableRow, TableCell, TableFooter, TablePagination,
   Tooltip, TableSortLabel,
 } from '@material-ui/core';
 import History from '../../config/History';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   tableRow: {
@@ -22,7 +23,7 @@ const style = {
   },
 };
 
-export default class SitesList extends Component {
+export default class SitesList extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {

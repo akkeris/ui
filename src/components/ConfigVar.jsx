@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { IconButton, TextField } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import EditIcon from '@material-ui/icons/Edit';
 import SaveIcon from '@material-ui/icons/Save';
+import BaseComponent from '../BaseComponent';
 
 const style = {
   container: {
@@ -34,7 +35,7 @@ const style = {
   },
 };
 
-export default class ConfigVar extends Component {
+export default class ConfigVar extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {

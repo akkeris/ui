@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, TextField, Collapse, Button, Typography,
@@ -6,7 +6,7 @@ import {
 import ReactGA from 'react-ga';
 import ConfirmationModal from '../ConfirmationModal';
 import Search from '../Search';
-import api from '../../services/api';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   stepper: {
@@ -37,7 +37,7 @@ const style = {
   },
 };
 
-export default class NewRoute extends Component {
+export default class NewRoute extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -55,13 +55,20 @@ export default class NewRoute extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getApps();
   }
 
   getApps = async () => {
-    const { data: apps } = await api.getApps();
-    apps.forEach((i) => { i.value = i.id; i.label = i.name; }); // eslint-disable-line
-    this.setState({ apps, app: apps[0], loading: false });
+    try {
+      const { data: apps } = await this.api.getApps();
+      apps.forEach((i) => { i.value = i.id; i.label = i.name; }); // eslint-disable-line
+      this.setState({ apps, app: apps[0], loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleClose = () => {
@@ -114,7 +121,7 @@ export default class NewRoute extends Component {
 
   submitRoute = async () => {
     try {
-      await api.createRoute(
+      await this.api.createRoute(
         this.props.site,
         this.state.app.id,
         this.state.source,
@@ -126,17 +133,19 @@ export default class NewRoute extends Component {
       });
       this.props.onComplete('Route Created');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        loading: false,
-        errorText: null,
-        source: '',
-        target: '',
-        app: null,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          loading: false,
+          errorText: null,
+          source: '',
+          target: '',
+          app: null,
+        });
+      }
     }
   }
 

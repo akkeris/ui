@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Table, TableBody, TableRow, TableCell, Card, CardHeader } from '@material-ui/core';
 import { withTheme } from '@material-ui/core/styles';
@@ -81,7 +81,7 @@ function getNamedShortMonth(date) {
   }
 }
 
-class InvoiceList extends Component {
+class InvoiceList extends PureComponent {
   getInvoiceHistory() {
     // only show the last 20 entries.
     const data = this.props.invoices.map((invoice) => {

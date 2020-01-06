@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Tooltip from '@material-ui/core/Tooltip';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
@@ -10,7 +10,7 @@ import PendingIcon from '@material-ui/icons/Lens';
 import HelpIcon from '@material-ui/icons/Help';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { withStyles } from '@material-ui/core/styles';
-import api from '../../services/api';
+import BaseComponent from '../../BaseComponent';
 
 const textColor = 'rgb(36, 41, 46)';
 const softTextColor = 'rgb(88, 96, 105)';
@@ -187,7 +187,7 @@ function buildHeader(state) {
   }
 }
 
-export default class ReleaseStatus extends Component {
+export default class ReleaseStatus extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -205,10 +205,15 @@ export default class ReleaseStatus extends Component {
     if (this.state.statuses === null) {
       try {
         this.setState({
-          statuses: await api.getReleaseStatuses(this.props.release.app.id, this.props.release.id),
+          statuses: await this.api.getReleaseStatuses(
+            this.props.release.app.id,
+            this.props.release.id,
+          ),
         });
       } catch (e) {
-        this.setState({ statuses: { data: { statuses: [] } } });
+        if (!this.isCancel(e)) {
+          this.setState({ statuses: { data: { statuses: [] } } });
+        }
       }
     }
   };

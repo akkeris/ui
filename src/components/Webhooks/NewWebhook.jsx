@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, Checkbox, Grid, TextField, IconButton, Typography,
@@ -6,9 +6,9 @@ import {
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
 import HelpIcon from '@material-ui/icons/Help';
-import api from '../../services/api';
 import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
 import ConfirmationModal from '../ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   checkbox: {
@@ -74,7 +74,7 @@ const style = {
 
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'preview-released', 'released', 'crashed'];
 
-export default class NewWebhook extends Component {
+export default class NewWebhook extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -173,22 +173,24 @@ export default class NewWebhook extends Component {
   submitWebHook = async () => {
     try {
       this.setState({ stepIndex: 4 });
-      await api.createWebHook(this.props.app, this.state.url, this.state.events, this.state.secret ? this.state.secret : ' ');
+      await this.api.createWebHook(this.props.app, this.state.url, this.state.events, this.state.secret ? this.state.secret : ' ');
       ReactGA.event({
         category: 'WEBHOOK',
         action: 'Created new webhook',
       });
       this.props.onComplete('Webhook Created');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data || 'Tick tock, Captain Hook!',
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        events: [],
-        url: '',
-        secret: '',
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data || 'Tick tock, Captain Hook!',
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          events: [],
+          url: '',
+          secret: '',
+        });
+      }
     }
   }
 
