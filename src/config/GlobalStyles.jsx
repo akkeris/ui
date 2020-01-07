@@ -103,7 +103,6 @@ const GlobalStyles = {
   },
   CommitLink: {
     display:'inline',
-    textDecoration:'none',
     color: '#475366',
     backgroundColor: softBackground,
     padding: '2.5px 5px 3px 5px',
@@ -131,6 +130,32 @@ const GlobalStyles = {
     fontSize:'0.85rem',
     lineHieght:'1rem',
   }
+};
+
+/* Composite Styles */
+
+GlobalStyles.FormSubHeaderStyle = {
+  ...GlobalStyles.StandardLabelMargin,
+  ...GlobalStyles.HeaderSmall,
+  ...GlobalStyles.Subtle,
+  fontSize: '0.75rem',
+  textTransform: 'uppercase',
+};
+
+GlobalStyles.ConfigVarStyle = {
+  ...GlobalStyles.CommitLink, 
+  ...GlobalStyles.CommitLinkPre,
+  fontFamily:'courier',
+  padding:'7.5px 10px', 
+  boxSizing:'border-box',
+  width:'100%',
+  /*overflow:'hidden', 
+  textOverflow:'ellipsis',
+  whiteSpace:'nowrap',*/
+  whiteSpace:'pre',
+  overflow:'scroll',
+  display:'inline-block',
+  height:'2.25rem',
 };
 
 export default GlobalStyles;

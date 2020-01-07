@@ -271,6 +271,10 @@ function getConfig(app) {
   return axios.get(`/api/apps/${app}/config-vars`);
 }
 
+function getConfigNotes(app) {
+  return axios.get(`/api/apps/${app}/config-vars/notes`);
+}
+
 function patchConfig(app, values) {
   return axios.patch(`/api/apps/${app}/config-vars`, values);
 }
@@ -491,6 +495,7 @@ export default {
   deleteWebhook,
   getBuilds,
   getConfig,
+  getConfigNotes,
   getLogs,
   getMetrics,
   getBuildResult,

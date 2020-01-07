@@ -365,10 +365,10 @@ export default class Releases extends Component {
               <div style={style.release.info.root}>
                 {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `} {info1.join(' ')}
                 {release.source_blob && release.source_blob.version ? (
-                  <a style={{ ...GlobalStyles.CommitLink, marginLeft: '0.5em' }} href={release.source_blob.version}>
-                    <pre style={GlobalStyles.CommitLinkPre}><code>#{release.source_blob.commit.substring(0, 7)}</code></pre> { /* eslint-disable-line */ }
+                  <a style={{ textDecoration:'none', marginLeft: '0.5em' }} href={release.source_blob.version}>
+                    <pre style={GlobalStyles.CommitLink}><code>#{release.source_blob.commit.substring(0, 7)}</code></pre> { /* eslint-disable-line */ }
                   </a>
-                ) : ''} <ReleaseStatus release={release} />
+                ) : ''}&nbsp;<ReleaseStatus release={release} />
                 <div style={style.textEllipses}>{info2.join('\n')}</div>
                 <div style={style.tableCell.sub}> {util.getDateDiff(new Date(release.created_at))} </div> { /* eslint-disable-line */ }
               </div>
