@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Table, TableBody, TableRow, TableFooter, TableCell, TablePagination, TableHead,
   TableSortLabel, Tooltip,
 } from '@material-ui/core';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import BaseComponent from '../../BaseComponent';
 import History from '../../config/History';
 
 
@@ -35,7 +36,7 @@ const style = {
   },
 };
 
-export default class AppList extends Component {
+export default class AppList extends BaseComponent {
   static previewAnnotation() {
     return (
       <span style={style.preview}>Preview</span>
@@ -85,7 +86,7 @@ export default class AppList extends Component {
     return this.props.apps.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => ( // eslint-disable-line
       <TableRow
         component="a"
-        href={'/apps/' + app.name + '/info'}
+        href={`/apps/${app.name}/info`}
         className={app.name}
         key={app.id}
         style={style.tableRow}
@@ -117,7 +118,7 @@ export default class AppList extends Component {
         <Table className="app-list">
           <TableHead component="div">
             <TableRow component="div">
-              <TableCell component="div" style={{width:'40%'}}>
+              <TableCell component="div" style={{ width: '40%' }}>
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -132,7 +133,7 @@ export default class AppList extends Component {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell component="div" style={{width:'30%'}}>
+              <TableCell component="div" style={{ width: '30%' }}>
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -147,7 +148,7 @@ export default class AppList extends Component {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell component="div" style={{width:'20%'}}>
+              <TableCell component="div" style={{ width: '20%' }}>
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"
@@ -162,7 +163,7 @@ export default class AppList extends Component {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell component="div" style={{width:'10%'}}>
+              <TableCell component="div" style={{ width: '10%' }}>
                 <Tooltip
                   title="Sort"
                   placement="bottom-start"

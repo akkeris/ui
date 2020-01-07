@@ -1,10 +1,10 @@
 // utils/GoogleAnalytics.js
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import ReactGA from 'react-ga';
 import { Route } from 'react-router-dom';
 
-class GoogleAnalytics extends Component {
+class GoogleAnalytics extends PureComponent {
   async componentDidMount() {
     this.logPageChange(
       this.props.location.pathname,
@@ -43,7 +43,7 @@ GoogleAnalytics.propTypes = {
     pathname: PropTypes.string,
     search: PropTypes.string,
   }).isRequired,
-  options: PropTypes.object,
+  options: PropTypes.object, // eslint-disable-line
 };
 
 const RouteTracker = () =>

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, Table, TableBody, TableRow, TableCell, IconButton, Tooltip,
@@ -12,9 +12,9 @@ import RemoveIcon from '@material-ui/icons/Clear';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 
-import api from '../../services/api';
 import NewConfigVar from './NewConfigVar';
 import ConfirmationModal from '../ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 // fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
 function isEmpty(obj) {
@@ -87,7 +87,7 @@ const style = {
   },
 };
 
-export default class ConfigVar extends Component {
+export default class ConfigVar extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -103,20 +103,21 @@ export default class ConfigVar extends Component {
       edit: false,
       newValue: null,
     };
-    this.getConfigVars();
   }
 
   componentDidMount() {
-    this._isMounted = true;
-  }
-  componentWillUnmount() {
-    this._isMounted = false;
+    super.componentDidMount();
+    this.getConfigVars();
   }
 
   getConfigVars = async () => {
-    const { data: config } = await api.getConfig(this.props.app);
-    if (this._isMounted) {
+    try {
+      const { data: config } = await this.api.getConfig(this.props.app);
       this.setState({ config, loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
     }
   }
 
@@ -146,23 +147,25 @@ export default class ConfigVar extends Component {
     const removeConfig = {};
     removeConfig[this.state.key] = null;
     try {
-      await api.patchConfig(this.props.app, removeConfig);
+      await this.api.patchConfig(this.props.app, removeConfig);
       ReactGA.event({
         category: 'APPS',
         action: 'Removed config var',
       });
       this.reload('Updated Config Vars');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        loading: false,
-        key: null,
-        new: false,
-        confirmOpen: false,
-        edit: null,
-        newValue: null,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          loading: false,
+          key: null,
+          new: false,
+          confirmOpen: false,
+          edit: null,
+          newValue: null,
+        });
+      }
     }
   }
 
@@ -200,27 +203,27 @@ export default class ConfigVar extends Component {
     const editConfig = {};
     editConfig[this.state.key] = this.state.newValue;
     try {
-      let values = {}
+      const values = {};
       let dirty = false;
-      for(let key in editConfig) {
-        if(key === "PORT") {
-          let port = editConfig[key]
+      for (const key in editConfig) {
+        if (key === 'PORT') {
+          let port = editConfig[key];
           try {
             port = parseInt(port, 10);
-            if(port < 1 || port > 65535) {
+            if (port < 1 || port > 65535) {
               throw new Error('Port out of range');
             }
           } catch (e) {
-            throw new Error('The port specified had an invalid value, it must be a number greater than 0 and less than 65535: ' + e.message);
+            throw new Error(`The port specified had an invalid value, it must be a number greater than 0 and less than 65535: ${e.message}`);
           }
-          await api.patchFormation(this.props.app, "web", undefined, undefined, undefined, port);
+          await this.api.patchFormation(this.props.app, 'web', undefined, undefined, undefined, port);
         } else {
           values[key] = editConfig[key];
           dirty = true;
         }
       }
-      if(dirty) {
-        await api.patchConfig(this.props.app, values);
+      if (dirty) {
+        await this.api.patchConfig(this.props.app, values);
       }
       ReactGA.event({
         category: 'APPS',
@@ -228,16 +231,18 @@ export default class ConfigVar extends Component {
       });
       this.reload('Updated Config Vars');
     } catch (error) {
-      console.error(error);
-      this.setState({
-        submitMessage: error.response ? error.response.data : error.message,
-        submitFail: true,
-        loading: false,
-        key: null,
-        new: false,
-        newValue: null,
-        edit: false,
-      });
+      if (!this.isCancel(error)) {
+        console.error(error); // eslint-disable-line no-console
+        this.setState({
+          submitMessage: error.response ? error.response.data : error.message,
+          submitFail: true,
+          loading: false,
+          key: null,
+          new: false,
+          newValue: null,
+          edit: false,
+        });
+      }
     }
   }
 
@@ -248,19 +253,25 @@ export default class ConfigVar extends Component {
   }
 
   reload = async (message) => {
-    this.setState({ loading: true });
-    const { data: config } = await api.getConfig(this.props.app);
-    this.setState({
-      config,
-      loading: false,
-      new: false,
-      message,
-      open: true,
-      confirmOpen: false,
-      newValue: null,
-      edit: false,
-      key: null,
-    });
+    try {
+      this.setState({ loading: true });
+      const { data: config } = await this.api.getConfig(this.props.app);
+      this.setState({
+        config,
+        loading: false,
+        new: false,
+        message,
+        open: true,
+        confirmOpen: false,
+        newValue: null,
+        edit: false,
+        key: null,
+      });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   renderConfigVars() {

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Paper, CircularProgress, LinearProgress, TextField, Select, MenuItem, Button, Divider,
   List, ListItem, ListItemIcon, ListItemText, FormControl, InputLabel,
@@ -9,8 +9,8 @@ import jsonminify from 'jsonminify';
 import Ansi from 'ansi-to-react';
 import ReactGA from 'react-ga';
 import ConfigVar from '../../components/ConfigVar';
-import api from '../../services/api';
 import History from '../../config/History';
+import BaseComponent from '../../BaseComponent';
 
 /* eslint-disable react/jsx-no-bind */
 
@@ -103,7 +103,7 @@ const style = {
   },
 };
 
-export default class AppSetups extends Component {
+export default class AppSetups extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -122,6 +122,7 @@ export default class AppSetups extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     const params = new URLSearchParams(window.location.search);
     let blueprint = params.get('blueprint');
     if (!blueprint) {
@@ -161,9 +162,15 @@ export default class AppSetups extends Component {
   }
 
   getData = async () => {
-    const { data: orgs } = await api.getOrgs();
-    const { data: spaces } = await api.getSpaces();
-    this.setState({ spaces, orgs, loading: false });
+    try {
+      const { data: orgs } = await this.api.getOrgs();
+      const { data: spaces } = await this.api.getSpaces();
+      this.setState({ spaces, orgs, loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleOrgChange = (event) => {
@@ -217,32 +224,36 @@ export default class AppSetups extends Component {
 
     const handleFinished = async (statusResp) => {
       try {
-        const appInfo = await api.getApp(`${this.state.blueprint.app.name}-${this.state.blueprint.app.space}`);
+        const appInfo = await this.api.getApp(`${this.state.blueprint.app.name}-${this.state.blueprint.app.space}`);
         this.setState({ panel: 'ready', progress: statusResp.data.progress * 100, appInfo });
         setTimeout(() => {
           this.setState({ panel: 'done', progress: statusResp.data.progress * 100, appInfo });
         }, 5000);
         this.scrollBuildDown();
       } catch (error) {
-        printError(error);
-        this.scrollBuildDown();
+        if (!this.isCancel(error)) {
+          printError(error);
+          this.scrollBuildDown();
+        }
       }
     };
 
     try {
-      const { data: status } = await api.appSetup(this.state.blueprint);
+      const { data: status } = await this.api.appSetup(this.state.blueprint);
       ReactGA.event({
         category: 'APP_SETUP',
         action: 'Submitted blueprint app',
       });
       this.setState({ status, panel: 'running', progress: 0 });
     } catch (error) {
-      printError(error);
+      if (!this.isCancel(error)) {
+        printError(error);
+      }
     }
 
     const intv = setInterval(async () => {
       try {
-        const statusResp = await api.getAppSetup(this.state.status.id);
+        const statusResp = await this.api.getAppSetup(this.state.status.id);
         if (statusResp.data.progress === 1) {
           if (statusResp.data.build && (statusResp.data.build.status === 'pending' || statusResp.data.build.status === 'queued')) {
             this.setState({ progress: statusResp.data.progress * 100, logs: statusResp.data.build.lines.join('\n') });
@@ -261,8 +272,10 @@ export default class AppSetups extends Component {
           this.scrollBuildDown();
         }
       } catch (error) {
-        clearInterval(intv);
-        printError(error);
+        if (!this.isCancel(error)) {
+          clearInterval(intv);
+          printError(error);
+        }
       }
     }, 500);
   }

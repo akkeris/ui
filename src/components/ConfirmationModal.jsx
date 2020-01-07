@@ -1,17 +1,19 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
-  Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress, Menu, withStyles,
+  Button, Dialog, DialogTitle, DialogContent, DialogContentText,
+  DialogActions, CircularProgress, withStyles,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
+import BaseComponent from '../BaseComponent';
 
 const StyledDialog = withStyles({
   paper: {
-    overflow: "visible"
-  }
+    overflow: 'visible',
+  },
 })(Dialog);
 
 /* eslint-disable react/prefer-stateless-function */
-export default class ConfirmationModal extends Component {
+export default class ConfirmationModal extends BaseComponent {
   constructor(props) {
     super(props);
     this.state = {

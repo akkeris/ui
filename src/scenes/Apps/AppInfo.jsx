@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
   Tooltip, IconButton, Menu, MenuItem, Divider, ListItemIcon, ListItemText,
@@ -33,11 +33,11 @@ import Metrics from '../../components/Metrics';
 import Addons from '../../components/Addons';
 import Logs from '../../components/Logs';
 import AppOverview from '../../components/Apps/AppOverview';
-import api from '../../services/api';
 import util from '../../services/util';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import NewAutoBuild from '../../components/Releases/NewAutoBuild';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   iconButton: {
@@ -89,7 +89,7 @@ function addRestrictedTooltip(title, children) {
 
 const tabs = ['info', 'dynos', 'releases', 'addons', 'config', 'logs', 'metrics', 'webhooks'];
 
-export default class AppInfo extends Component {
+export default class AppInfo extends BaseComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -116,6 +116,8 @@ export default class AppInfo extends Component {
   }
 
   async componentDidMount() {
+    super.componentDidMount();
+
     // Landed on an invalid tab
     const currentTab = this.props.match.params.tab;
     if (!currentTab || !tabs.includes(currentTab)) {
@@ -138,15 +140,11 @@ export default class AppInfo extends Component {
     }
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  async loadApp() {
+  async loadApp(message) {
     try {
-      const appResponse = await api.getApp(this.props.match.params.app);
-      const favoriteResponse = await api.getFavorites();
-      const accountResponse = await api.getAccount();
+      const appResponse = await this.api.getApp(this.props.match.params.app);
+      const favoriteResponse = await this.api.getFavorites();
+      const accountResponse = await this.api.getAccount();
 
       let isElevated = false;
       let restrictedSpace = false;
@@ -157,8 +155,6 @@ export default class AppInfo extends Component {
         restrictedSpace = true;
       }
 
-      this._isMounted = true;
-
       this.setState({
         app: appResponse.data,
         accountInfo: accountResponse.data,
@@ -168,11 +164,17 @@ export default class AppInfo extends Component {
         isElevated,
         isMaintenance: appResponse.data.maintenance,
       });
+
+      if (message) {
+        this.setState({ message, open: true });
+      }
     } catch (err) {
-      this.setState({
-        submitMessage: err.response.data,
-        submitFail: true,
-      });
+      if (!this.isCancel(err)) {
+        this.setState({
+          submitMessage: err.response.data,
+          submitFail: true,
+        });
+      }
     }
   }
 
@@ -188,10 +190,7 @@ export default class AppInfo extends Component {
       editDescriptionOpen: false,
       newDescription: '',
     });
-    await this.loadApp();
-    if (message) {
-      this.setState({ message, open: true });
-    }
+    await this.loadApp(message);
   }
 
   handleClose = () => {
@@ -208,19 +207,21 @@ export default class AppInfo extends Component {
 
   handleRemoveApp = async () => {
     try {
-      await api.deleteApp(this.state.app.name);
+      await this.api.deleteApp(this.state.app.name);
       ReactGA.event({
         category: 'APPS',
         action: 'Deleted app',
       });
       History.get().push('/apps');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        open: false,
-        dOpen: false,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          open: false,
+          dOpen: false,
+        });
+      }
     }
   }
 
@@ -264,7 +265,7 @@ export default class AppInfo extends Component {
 
   handleMaintenanceToggle = async () => {
     try {
-      await api.patchApp(this.state.app.name, this.state.isMaintenance);
+      await this.api.patchApp(this.state.app.name, this.state.isMaintenance);
       this.reload('Maintenance Mode Updated');
       ReactGA.event({
         category: 'APPS',
@@ -272,19 +273,21 @@ export default class AppInfo extends Component {
       });
       this.setState({ mOpen: false, loading: false });
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        loading: false,
-        mOpen: false,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          loading: false,
+          mOpen: false,
+        });
+      }
     }
   }
 
   handleRemoveRepo = async () => {
     try {
-      await api.deleteAutoBuild(this.state.app.name);
-      const appResponse = await api.getApp(this.props.match.params.app);
+      await this.api.deleteAutoBuild(this.state.app.name);
+      const appResponse = await this.api.getApp(this.props.match.params.app);
       this.setState({ rOpen: false, loading: false, app: appResponse.data });
       this.reload('Repo Detached');
       ReactGA.event({
@@ -292,12 +295,14 @@ export default class AppInfo extends Component {
         action: 'Detached repo from app',
       });
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        rOpen: false,
-        loading: false,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          rOpen: false,
+          loading: false,
+        });
+      }
     }
   }
 
@@ -309,21 +314,26 @@ export default class AppInfo extends Component {
     this.setState({ newAuto: false, anchorEl: null });
   }
 
-  handleFavorite = () => {
-    if (this.state.isFavorite) {
-      api.deleteFavorite(this.state.app.name);
-      ReactGA.event({
-        category: 'APPS',
-        action: 'Removed favorite',
-      });
-      this.setState({ isFavorite: false });
-    } else {
-      api.createFavorite(this.state.app.name);
-      ReactGA.event({
-        category: 'APPS',
-        action: 'Added favorite',
-      });
-      this.setState({ isFavorite: true });
+  handleFavorite = async () => {
+    try {
+      if (this.state.isFavorite) {
+        await this.api.deleteFavorite(this.state.app.name);
+        ReactGA.event({
+          category: 'APPS',
+          action: 'Removed favorite',
+        });
+      } else {
+        await this.api.createFavorite(this.state.app.name);
+        ReactGA.event({
+          category: 'APPS',
+          action: 'Added favorite',
+        });
+      }
+      this.setState({ isFavorite: !this.state.isFavorite });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
     }
   }
 
@@ -336,8 +346,17 @@ export default class AppInfo extends Component {
   }
 
   handleSubmitNewDescription = async () => {
-    await api.patchAppDescription(this.state.app.name, this.state.newDescription);
-    this.reloadApp('Description updated!');
+    try {
+      await this.api.patchAppDescription(
+        this.state.app.name,
+        this.state.newDescription,
+      );
+      this.reloadApp('Description updated!');
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleCloseNewDescription = () => {
@@ -353,32 +372,35 @@ export default class AppInfo extends Component {
   }
 
   reloadAutoBuild = async (message) => {
-    this.setState({ newAuto: false });
     try {
-      const appResponse = await api.getApp(this.props.match.params.app);
-      if (this._isMounted) {
-        this.setState({ open: true, app: appResponse.data, message });
-      }
+      this.setState({ newAuto: false });
+      const appResponse = await this.api.getApp(this.props.match.params.app);
+      this.setState({ open: true, app: appResponse.data, message });
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        rOpen: false,
-        loading: false,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          rOpen: false,
+          loading: false,
+        });
+      }
     }
   }
+
   changeActiveTab = (event, newTab) => {
     const currentTab = this.props.match.params.tab;
     if (currentTab !== newTab) {
       History.get().push(`${this.state.basePath}/${newTab}`);
     }
   }
+
   cancelHref = (event) => {
     if (event.preventDefault) { event.preventDefault(); }
     if (event.stopPropagation) { event.stopPropagation(); }
     return false;
   }
+
   renderHeaderActions() {
     const { anchorEl, restrictedSpace, isElevated } = this.state;
     const menuOpen = Boolean(anchorEl);
@@ -403,8 +425,8 @@ export default class AppInfo extends Component {
 
     return (
       <div style={{
- display: 'flex', justifyContent: 'space-between', width: '102px', float: 'right',
-}}
+        display: 'flex', justifyContent: 'space-between', width: '102px', float: 'right',
+      }}
       >
         <Tooltip title="Favorite" placement="top-end">
           <IconButton

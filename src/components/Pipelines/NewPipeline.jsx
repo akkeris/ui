@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
 import ReactGA from 'react-ga';
 
 import History from '../../config/History';
 import ConfirmationModal from '../ConfirmationModal';
-import api from '../../services/api';
+import BaseComponent from '../../BaseComponent';
 
 
 const style = {
@@ -28,7 +28,7 @@ const style = {
   },
 };
 
-export default class NewPipeline extends Component {
+export default class NewPipeline extends BaseComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -76,7 +76,7 @@ export default class NewPipeline extends Component {
 
   submitPipeline = async () => {
     try {
-      await api.createPipeline(this.state.pipeline);
+      await this.api.createPipeline(this.state.pipeline);
       this.props.onComplete('Pipeline Added');
       ReactGA.event({
         category: 'PIPELINES',
@@ -84,14 +84,16 @@ export default class NewPipeline extends Component {
       });
       History.get().push(`/pipelines/${this.state.pipeline}/review`);
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        errorText: null,
-        pipeline: '',
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          errorText: null,
+          pipeline: '',
+        });
+      }
     }
   };
 

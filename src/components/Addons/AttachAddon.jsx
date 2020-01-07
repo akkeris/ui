@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Button, Step, Stepper, StepLabel, Select, MenuItem, Typography, CircularProgress,
@@ -6,8 +6,8 @@ import {
 import ReactGA from 'react-ga';
 import ConfirmationModal from '../ConfirmationModal';
 import AutoSuggest from '../AutoSuggest';
-import api from '../../services/api';
 import util from '../../services/util';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   stepper: {
@@ -50,7 +50,7 @@ const style = {
   },
 };
 
-export default class AttachAddon extends Component {
+export default class AttachAddon extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -69,6 +69,7 @@ export default class AttachAddon extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getApps();
   }
 
@@ -80,19 +81,27 @@ export default class AttachAddon extends Component {
 
   getApps = async () => {
     const { app } = this.props;
-    const { data: apps } = await api.getApps();
-    // Remove the current app from the results
-    apps.splice(apps.findIndex(i => i.name.toLowerCase() === app.toLowerCase()), 1);
-    this.setState({ apps, loading: false });
+    try {
+      const { data: apps } = await this.api.getApps();
+      // Remove the current app from the results
+      apps.splice(apps.findIndex(i => i.name.toLowerCase() === app.toLowerCase()), 1);
+      this.setState({ apps, loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   getAddons = async (prevState) => {
     this.setState({ loading: true }); // eslint-disable-line react/no-did-update-set-state
     try {
-      const response = await api.getAppAddons(this.state.app);
+      const response = await this.api.getAppAddons(this.state.app);
       this.setState({ addons: response.data, addon: response.data[0], loading: false });
     } catch (err) {
-      this.setState(prevState, () => this.setState({ loadingErrorMessage: 'Could not find specified app', loadingError: true }));
+      if (!this.isCancel(err)) {
+        this.setState(prevState, () => this.setState({ loadingErrorMessage: 'Could not find specified app', loadingError: true }));
+      }
     }
   }
 
@@ -136,23 +145,25 @@ export default class AttachAddon extends Component {
 
   submitAddonAttachment = async () => {
     try {
-      await api.attachAddon(this.props.app, this.state.addon.id);
+      await this.api.attachAddon(this.props.app, this.state.addon.id);
       ReactGA.event({
         category: 'ADDONS',
         action: 'Attached new addon',
       });
       this.props.onComplete('Addon Attached');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        loading: false,
-        addons: [],
-        addon: {},
-        app: '',
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          loading: false,
+          addons: [],
+          addon: {},
+          app: '',
+        });
+      }
     }
   }
 

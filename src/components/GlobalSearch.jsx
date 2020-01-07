@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import AsyncSearch from 'react-select/lib/Async';
 import {
@@ -7,6 +7,7 @@ import {
 import SearchIcon from '@material-ui/icons/Search';
 import { withStyles } from '@material-ui/core/styles';
 import api from '../services/api';
+import BaseComponent from '../BaseComponent';
 
 const styles = theme => ({
   rootBase: {
@@ -196,13 +197,14 @@ const components = {
 
 let timer = null;
 
-class GlobalSearch extends Component {
+class GlobalSearch extends BaseComponent {
   constructor(props) {
     super(props);
     this.state = { options: [], value: {}, focused: false };
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getOptions();
     api.notify.add({ name: 'globalSearch', cb: () => setTimeout(() => this.getOptions(), 2000) });
   }
@@ -219,34 +221,41 @@ class GlobalSearch extends Component {
   }
 
   componentWillUnmount() {
+    super.componentWillUnmount();
     api.notify.remove('globalSearch');
   }
 
   getOptions = async () => {
-    const { data: apps } = await api.getApps();
-    const { data: pipelines } = await api.getPipelines();
-    const { data: sites } = await api.getSites();
+    try {
+      const { data: apps } = await this.api.getApps();
+      const { data: pipelines } = await this.api.getPipelines();
+      const { data: sites } = await this.api.getSites();
 
-    apps.sort((a, b) => a.name.replace(/[-]/g, '').toLowerCase().localeCompare(b.name.replace(/[-]/g, '').toLowerCase()));
-    pipelines.sort((a, b) => a.name.replace(/[-]/g, '').toLowerCase().localeCompare(b.name.replace(/[-]/g, '').toLowerCase()));
-    sites.sort((a, b) => a.domain.replace(/[-._]/g, '').toLowerCase().localeCompare(b.domain.replace(/[-._]/g, '').toLowerCase()));
+      apps.sort((a, b) => a.name.replace(/[-]/g, '').toLowerCase().localeCompare(b.name.replace(/[-]/g, '').toLowerCase()));
+      pipelines.sort((a, b) => a.name.replace(/[-]/g, '').toLowerCase().localeCompare(b.name.replace(/[-]/g, '').toLowerCase()));
+      sites.sort((a, b) => a.domain.replace(/[-._]/g, '').toLowerCase().localeCompare(b.domain.replace(/[-._]/g, '').toLowerCase()));
 
-    this.setState({
-      options: [
-        {
-          label: 'Apps',
-          options: apps.map(app => ({ value: app.name, label: app.name, uri: `/apps/${app.name}/info` })),
-        },
-        {
-          label: 'Pipelines',
-          options: pipelines.map(pipe => ({ value: pipe.id, label: pipe.name, uri: `/pipelines/${pipe.name}/review` })),
-        },
-        {
-          label: 'Sites',
-          options: sites.map(site => ({ value: site.id, label: site.domain, uri: `/sites/${site.id}/info` })),
-        },
-      ],
-    });
+      this.setState({
+        options: [
+          {
+            label: 'Apps',
+            options: apps.map(app => ({ value: app.name, label: app.name, uri: `/apps/${app.name}/info` })),
+          },
+          {
+            label: 'Pipelines',
+            options: pipelines.map(pipe => ({ value: pipe.id, label: pipe.name, uri: `/pipelines/${pipe.name}/review` })),
+          },
+          {
+            label: 'Sites',
+            options: sites.map(site => ({ value: site.id, label: site.domain, uri: `/sites/${site.id}/info` })),
+          },
+        ],
+      });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   focusChanged = () => this.setState({ focused: !this.state.focused });

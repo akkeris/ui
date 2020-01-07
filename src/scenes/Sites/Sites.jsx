@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Toolbar, IconButton, CircularProgress, Paper, MenuItem, Tooltip,
 } from '@material-ui/core';
@@ -7,7 +7,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import { Link } from 'react-router-dom';
 import SitesList from '../../components/Sites';
 import FilterSelect from '../../components/FilterSelect';
-import api from '../../services/api';
+import BaseComponent from '../../BaseComponent';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
@@ -62,7 +62,7 @@ const style = {
   },
 };
 
-class Sites extends Component {
+class Sites extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -79,13 +79,22 @@ class Sites extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getData();
   }
 
   getData = async () => {
-    const { data: sites } = await api.getSites();
-    const { data: regions } = await api.getRegions();
+    let sites = [];
+    let regions = [];
 
+    try {
+      ({ data: sites } = await this.api.getSites());
+      ({ data: regions } = await this.api.getRegions());
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
     const options = [
       {
         label: 'Regions',

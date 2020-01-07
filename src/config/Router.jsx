@@ -5,7 +5,6 @@ import Loadable from 'react-loadable';
 import Loading from '../components/Loading';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
-import api from '../services/api';
 
 import History from './History';
 import globalTheme from './GlobalTheme';
@@ -162,7 +161,7 @@ const SitesRoutes = () => (
 const Router = () => (
   <BrowserRouter history={History.get()}>
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
-      { GA.init({token: sessionStorage.getItem('ga_token') }) && <GA.RouteTracker /> }
+      { GA.init({ token: sessionStorage.getItem('ga_token') }) && <GA.RouteTracker /> }
       <MuiThemeProvider theme={globalTheme}>
         <div style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%' }}>
           <Nav />

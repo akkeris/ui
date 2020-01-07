@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Toolbar, IconButton, CircularProgress, Paper, Table, TableBody, TableRow, TableCell,
   Snackbar, Divider, Collapse, TableFooter, TablePagination, TableHead, TableSortLabel, Tooltip,
@@ -8,9 +8,9 @@ import RemoveIcon from '@material-ui/icons/Clear';
 import FilterListIcon from '@material-ui/icons/FilterList';
 
 import { NewPipeline } from '../../components/Pipelines';
-import api from '../../services/api';
 import History from '../../config/History';
 import FilterSelect from '../../components/FilterSelect';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   refresh: {
@@ -75,7 +75,7 @@ const style = {
   },
 };
 
-class Pipelines extends Component {
+class Pipelines extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -96,28 +96,35 @@ class Pipelines extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getData();
   }
 
   getData = async () => {
-    const { data: pipelines } = await api.getPipelines();
-    const options = [
-      {
-        label: 'Pipeline',
-        options: pipelines.map(pipeline => ({ label: pipeline.name, value: pipeline.name, type: 'pipeline' })),
-      },
-    ];
-    this.setState({
-      pipelines, sortedPipelines: pipelines, loading: false, options,
-    }, () => {
-      let values;
-      try {
-        values = JSON.parse(localStorage.getItem('akkeris_pipeline_filters'));
-      } catch (e) {
-        values = [];
+    try {
+      const { data: pipelines } = await this.api.getPipelines();
+      const options = [
+        {
+          label: 'Pipeline',
+          options: pipelines.map(pipeline => ({ label: pipeline.name, value: pipeline.name, type: 'pipeline' })),
+        },
+      ];
+      this.setState({
+        pipelines, sortedPipelines: pipelines, loading: false, options,
+      }, () => {
+        let values;
+        try {
+          values = JSON.parse(localStorage.getItem('akkeris_pipeline_filters'));
+        } catch (e) {
+          values = [];
+        }
+        this.handleFilterChange(values);
+      });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
       }
-      this.handleFilterChange(values);
-    });
+    }
   }
 
   handleFilterChange = (values) => {
@@ -175,18 +182,24 @@ class Pipelines extends Component {
   }
 
   reload = async (message) => {
-    this.setState({ loading: true });
-    const { data: pipelines } = await api.getPipelines();
-    this.setState({
-      pipelines,
-      sortedPipelines: pipelines,
-      message,
-      loading: false,
-      new: false,
-      open: true,
-      page: 0,
-      rowsPerPage: 15,
-    });
+    try {
+      this.setState({ loading: true });
+      const { data: pipelines } = await this.api.getPipelines();
+      this.setState({
+        pipelines,
+        sortedPipelines: pipelines,
+        message,
+        loading: false,
+        new: false,
+        open: true,
+        page: 0,
+        rowsPerPage: 15,
+      });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleChangePage = (event, page) => {

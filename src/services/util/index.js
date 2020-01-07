@@ -90,7 +90,8 @@ function updateHistory(type, item, label) {
     recentItems = JSON.parse(localStorage.getItem('akkeris_history'));
     const duplicate = recentItems.find(i => i.item === item);
     if (duplicate) {
-      recentItems.splice(recentItems.indexOf(duplicate), 1); // Remove duplicate so it only appears once (as the most recent item)
+      // Remove duplicate so it only appears once (as the most recent item)
+      recentItems.splice(recentItems.indexOf(duplicate), 1);
     }
     recentItems.unshift({ type, item, label });
     if (recentItems.length > 20) { recentItems.pop(); } // Only keep the most recent 20 items
@@ -115,8 +116,8 @@ function clearHistory() {
 }
 
 function getDateDiff(date /* : Date */) {
-  if(typeof date === 'string') {
-    date = new Date(date);
+  if (typeof date === 'string') {
+    date = new Date(date); // eslint-disable-line no-param-reassign
   }
   const seconds = Math.floor((new Date() - date) / 1000);
   let interval = Math.floor(seconds / 31536000);

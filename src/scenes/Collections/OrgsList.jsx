@@ -1,11 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
-  Table, TableBody, TableRow, TableCell, TableFooter, TablePagination, Toolbar, IconButton, CircularProgress, Paper,
+  Table, TableBody, TableRow, TableCell, TableFooter, TablePagination,
+  Toolbar, IconButton, CircularProgress, Paper,
 } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add' 
+import AddIcon from '@material-ui/icons/Add';
 
-import api from '../../services/api';
 import History from '../../config/History';
+import BaseComponent from '../../BaseComponent';
 
 
 const style = {
@@ -61,7 +62,7 @@ const style = {
   },
 };
 
-export default class OrgList extends Component {
+export default class OrgList extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -73,12 +74,19 @@ export default class OrgList extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getOrgs();
   }
 
   getOrgs = async () => {
-    const { data: orgs } = await api.getOrgs();
-    this.setState({ orgs, loading: false });
+    try {
+      const { data: orgs } = await this.api.getOrgs();
+      this.setState({ orgs, loading: false });
+    } catch (error) {
+      if (!this.isCancel(error)) {
+        console.error(error); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleChangePage = (event, page) => {

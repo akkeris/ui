@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import deepmerge from 'deepmerge';
 import PropTypes from 'prop-types';
 import {
@@ -18,9 +18,9 @@ import SaveIcon from '@material-ui/icons/Save';
 import BackIcon from '@material-ui/icons/ArrowBack';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
+import BaseComponent from '../../BaseComponent';
 
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'preview-released', 'released', 'crashed'];
 
@@ -198,7 +198,7 @@ const style = {
   },
 };
 
-export default class Webhook extends Component {
+export default class Webhook extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -225,10 +225,15 @@ export default class Webhook extends Component {
 
   getHookHistory = async () => {
     try {
-      const { data: history } = await api.getWebhookResults(this.props.app, this.props.webhook.id);
+      const { data: history } = await this.api.getWebhookResults(
+        this.props.app,
+        this.props.webhook.id,
+      );
       this.setState({ history, loading: false });
     } catch (error) {
-      this.props.onError(error);
+      if (!this.isCancel(error)) {
+        this.props.onError(error);
+      }
     }
   }
 
@@ -264,17 +269,19 @@ export default class Webhook extends Component {
 
   handleRemoveWebhook = async () => {
     try {
-      await api.deleteWebhook(this.props.app, this.props.webhook.id);
+      await this.api.deleteWebhook(this.props.app, this.props.webhook.id);
       ReactGA.event({
         category: 'WEBHOOK',
         action: 'Deleted webhook',
       });
       this.props.onComplete('Webhook Deleted');
     } catch (error) {
-      this.setState({
-        loading: false,
-        errorMessage: error.response.data,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          loading: false,
+          errorMessage: error.response.data,
+        });
+      }
     }
   }
 
@@ -313,7 +320,7 @@ export default class Webhook extends Component {
 
   patchWebhook = async () => {
     try {
-      await api.patchWebhook(
+      await this.api.patchWebhook(
         this.props.app,
         this.props.webhook.id,
         /^(HTTP|HTTP|http(s)?:\/\/)/.test(this.state.url) ? this.state.url : `http://${this.state.url}`,
@@ -327,8 +334,10 @@ export default class Webhook extends Component {
       });
       this.props.onComplete('Updated Webhook');
     } catch (error) {
-      this.reset(this.props.webhook.events);
-      this.props.onError(error.response.data);
+      if (!this.isCancel(error)) {
+        this.reset(this.props.webhook.events);
+        this.props.onError(error.response.data);
+      }
     }
   }
 
