@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   TextField,
@@ -10,6 +10,7 @@ import {
 
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
+import BaseComponent from '../../BaseComponent';
 
 
 const style = {
@@ -43,7 +44,7 @@ const style = {
   },
 };
 
-export default class KeyValue extends Component {
+export default class KeyValue extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -66,7 +67,7 @@ export default class KeyValue extends Component {
     }));
   }
 
-  removeConfig = (idx, event) => {
+  removeConfig = (idx) => {
     const values = [...this.state.values];
     values.splice(idx, 1);
     this.setState({ values });
@@ -77,7 +78,7 @@ export default class KeyValue extends Component {
   }
 
   render() {
-    const { errorText, values } = this.state;
+    const { values } = this.state;
     return (
       <div className={style.container} >
 
