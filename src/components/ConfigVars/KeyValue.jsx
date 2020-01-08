@@ -5,10 +5,7 @@ import {
   TableCell,
   TextField,
   Tooltip,
-  Typography,
   IconButton,
-  Button,
-  Fab,
 } from '@material-ui/core';
 
 import AddIcon from '@material-ui/icons/Add';
@@ -35,11 +32,11 @@ const style = {
       overflowWrap: 'break-word',
     },
     textField: {
-      'fontFamily':'Courier',
+      fontFamily: 'Courier',
       ...GlobalStyles.Subtle,
-      ...GlobalStyles.Text, 
-      'overflow':'auto', 
-      'whiteSpace':'nowrap'
+      ...GlobalStyles.Text,
+      overflow: 'auto',
+      whiteSpace: 'nowrap',
     },
   },
   tableCell: {
@@ -53,19 +50,19 @@ export default class KeyValue extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      key:this.props.configkey,
-      value:this.props.value,
-      saved:this.props.saved,
-      notes:util.deepCopy(this.props.notes),
+      key: this.props.configkey,
+      value: this.props.value,
+      saved: this.props.saved,
+      notes: util.deepCopy(this.props.notes),
     };
   }
 
   handleAddConfigVar() {
-    if(this.state.key.trim() === "") {
+    if (this.state.key.trim() === '') {
       return;
     }
     this.props.onChange(this.state.key, this.state.value, this.state.notes);
-    this.setState({key: "", value:""});
+    this.setState({ key: '', value: '' });
   }
 
   handleEditConfigVar() {
@@ -82,31 +79,31 @@ export default class KeyValue extends BaseComponent {
         <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
           <TextField
             className="new-config-var-key"
-            onChange={(event) => this.setState({key:event.target.value})}
-            InputProps={{style:style.configVar.textField}} 
-            placeholder="KEY" 
-            size="small" 
+            onChange={event => this.setState({ key: event.target.value })}
+            InputProps={{ style: style.configVar.textField }}
+            placeholder="KEY"
+            size="small"
             value={this.state.key}
-            autoFocus={true} 
+            autoFocus
             required
-            variant="outlined" 
-            fullWidth={true}
+            variant="outlined"
+            fullWidth
             margin="dense"
           />
         </TableCell>
         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
-          <TextField 
+          <TextField
             className="new-config-var-value"
-            onChange={(event) => this.setState({value:event.target.value})}
-            InputProps={{style:style.configVar.textField}} 
-            placeholder="VALUE" 
-            size="small" 
-            required 
+            onChange={event => this.setState({ value: event.target.value })}
+            InputProps={{ style: style.configVar.textField }}
+            placeholder="VALUE"
+            size="small"
+            required
             value={this.state.value}
-            variant="outlined" 
-            fullWidth={true} 
-            margin="dense" 
-            multiline={true} 
+            variant="outlined"
+            fullWidth
+            margin="dense"
+            multiline
           />
         </TableCell>
         <TableCell style={style.tableCell}>
@@ -119,92 +116,90 @@ export default class KeyValue extends BaseComponent {
           </div>
         </TableCell>
       </TableRow>
-    )
+    );
   }
 
-  renderConfigVarNotes() {
+  renderConfigVarNotes() { /* eslint-disable-line */
     if(this.props.notes && this.props.notes.description && this.props.notes.description !== "") { /* eslint-disable-line */
-      return (
+      return ( /* eslint-disable-line */
         <Tooltip title={this.props.notes.description} placement="top-start">
           <IconButton>
             <InfoIcon style={GlobalStyles.Subtle} />
           </IconButton>
         </Tooltip>
-      )
+      );
     }
   }
 
   renderEditAction() {
-    if(this.props.locked) {
-      return;
-    } else {
-      let disabled = this.props.deleted || !this.props.editable;
-      let editStyle = disabled ? GlobalStyles.VerySubtle : GlobalStyles.Suble;
-      return (
-        <Tooltip title="Edit" placement="top-start">
-          <IconButton disabled={disabled} className="edit" onClick={() => this.handleEditConfigVar()}> { /* eslint-disable-line */ }
-            <EditIcon style={editStyle} />
-          </IconButton>
-        </Tooltip>
-      )
+    if (this.props.locked) {
+      return; /* eslint-disable-line */
     }
+    const disabled = this.props.deleted || !this.props.editable;
+    const editStyle = disabled ? GlobalStyles.VerySubtle : GlobalStyles.Suble;
+    return ( /* eslint-disable-line */
+      <Tooltip title="Edit" placement="top-start">
+        <IconButton disabled={disabled} className="edit" onClick={() => this.handleEditConfigVar()}> { /* eslint-disable-line */ }
+          <EditIcon style={editStyle} />
+        </IconButton>
+      </Tooltip>
+    );
   }
 
-  renderDeleteAction() {
-    if(this.props.locked) {
+  renderDeleteAction() { /* eslint-disable-line */
+    if (this.props.locked) {
       return;
-    } else {
-      let disabled = this.props.deleted || this.props.required;
-      let deleteStyle = disabled ? GlobalStyles.VerySubtle : GlobalStyles.Suble;
-      return (
-        <Tooltip title="Remove" placement="top-start">
-          <IconButton
-            className="remove" 
-            disabled={disabled}
-            onClick={() => this.handleRemoveConfigVar()}>
-              <DeleteIcon style={deleteStyle} />
-          </IconButton>
-        </Tooltip>
-      )
     }
+    const disabled = this.props.deleted || this.props.required;
+    const deleteStyle = disabled ? GlobalStyles.VerySubtle : GlobalStyles.Suble;
+    return ( /* eslint-disable-line */
+      <Tooltip title="Remove" placement="top-start">
+        <IconButton
+          className="remove"
+          disabled={disabled}
+          onClick={() => this.handleRemoveConfigVar()}
+        >
+          <DeleteIcon style={deleteStyle} />
+        </IconButton>
+      </Tooltip>
+    );
   }
 
   renderEditConfigVar() {
-    let configVarStyle = util.deepCopy(GlobalStyles.ConfigVarStyle);
+    const configVarStyle = util.deepCopy(GlobalStyles.ConfigVarStyle);
     configVarStyle.maxWidth = '450px';
     configVarStyle.verticalAlign = 'top';
-    configVarStyle.backgroundColor = this.props.saved ? 
-      'rgba(0,0,0,0.025)' : 
+    configVarStyle.backgroundColor = this.props.saved ?
+      'rgba(0,0,0,0.025)' :
       'rgba(255,0,0,0.075)';
-    if(this.props.deleted) {
+    if (this.props.deleted) {
       configVarStyle.textDecoration = 'line-through';
     }
 
     return (
        <TableRow className={this.props.configkey} key={this.props.configkey} style={style.tableRow}> { /* eslint-disable-line */ }
-        <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
+         <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
           <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.configkey}</span> { /* eslint-disable-line */ }
-        </TableCell>
-        <TableCell style={{ ...style.configVar, ...style.tableCell }}>
+         </TableCell>
+         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
           <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.value}</span> { /* eslint-disable-line */ }
-        </TableCell>
-        <TableCell style={style.tableCell}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            {this.renderConfigVarNotes()}
-            {this.renderEditAction()}
-            {this.renderDeleteAction()}
-          </div>
-        </TableCell>
-      </TableRow>
-    )
+         </TableCell>
+         <TableCell style={style.tableCell}>
+           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+             {this.renderConfigVarNotes()}
+             {this.renderEditAction()}
+             {this.renderDeleteAction()}
+           </div>
+         </TableCell>
+       </TableRow>
+    );
   }
 
   render() {
-    if(this.props.new) {
+    if (this.props.new) {
       return this.renderAddConfigVar();
-    } else {
-      return this.renderEditConfigVar();
     }
+    return this.renderEditConfigVar();
   }
 }
 
@@ -213,7 +208,7 @@ KeyValue.propTypes = {
   onDelete: PropTypes.func.isRequired,
   configkey: PropTypes.string,
   value: PropTypes.string,
-  notes: PropTypes.object,
+  notes: PropTypes.object, /* eslint-disable-line */
   saved: PropTypes.bool.isRequired,
   new: PropTypes.bool.isRequired,
   deleted: PropTypes.bool.isRequired,
@@ -223,8 +218,8 @@ KeyValue.propTypes = {
 };
 
 KeyValue.defaultProps = {
-  configkey: "",
-  value: "",
+  configkey: '',
+  value: '',
   notes: {},
   locked: true,
   required: false,
