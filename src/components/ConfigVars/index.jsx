@@ -163,6 +163,10 @@ export default class ConfigVar extends BaseComponent {
       if(!isEmpty(changesNotes)) {
         await this.api.patchConfigNotes(this.props.app, changesNotes);
       }
+      ReactGA.event({
+        category: 'APPS',
+        action: 'Updated a config var',
+      });
       await this.refresh();
     } catch (err) {
       if (!this.isCancel(err)) {
