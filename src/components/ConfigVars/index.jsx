@@ -422,7 +422,7 @@ export default class ConfigVar extends BaseComponent {
               <Tooltip title={toolTipTitle} placement="bottom-start">
                 <IconButton
                   color={lockedIconColor}
-                  className="new-config" 
+                  className="lock-config" 
                   onClick={() => this.handleLockAndUnlock()}>
                   <LockedIcon />
                 </IconButton>
@@ -517,7 +517,7 @@ export default class ConfigVar extends BaseComponent {
           <Button className="cancel" color="secondary" onClick={() => this.handleCancelProposeSaveConfigVar()}> { /* eslint-disable-line */ }
             Cancel
           </Button>
-          <Button className="submit" color="primary" onClick={() => this.handleSaveConfigVar()}>
+          <Button className="save-config-vars" color="primary" onClick={() => this.handleSaveConfigVar()}>
             Save Changes
           </Button>
         </DialogActions>
@@ -592,7 +592,7 @@ export default class ConfigVar extends BaseComponent {
           <Button className="cancel" color="secondary" onClick={() => this.setState({edit:false})}>
             Cancel
           </Button>
-          <Button className="submit" color="primary" onClick={() => this.handleEditConfigVar()}>
+          <Button className="submit-config-vars" color="primary" onClick={() => this.handleEditConfigVar()}>
             Stage Changes
           </Button>
         </DialogActions>

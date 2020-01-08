@@ -9,7 +9,6 @@ const botUsername = process.env.BOT_USER;
 if (!global.createdApps) {
   global.createdApps = [];
 }
-
 fixture('Apps Page') // eslint-disable-line no-undef
   .page(`${baseUrl}/apps`)
   .beforeEach(async (t) => {
@@ -317,7 +316,6 @@ test('Should be able to create and edit app description', async (t) => { // esli
     .expect(Selector(`.app-list .${appName}-testcafe`).exists)
     .notOk();
 });
-
 fixture('AppInfo Page') // eslint-disable-line no-undef
   .page(`${baseUrl}/apps`)
   .beforeEach(async (t) => {
@@ -1347,13 +1345,14 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.history-dialog button.ok')
     // Create config item to fire a webhook
     .click('.config-tab')
-    .click('button.new-config')
-    .typeText('.key-0 input', 'test')
-    .typeText(Selector('.value-0 textarea').withAttribute('style'), 'test')
-    .click('.next')
-    .click('.next')
-    .expect(Selector('.config-snack').innerText)
-    .contains('Added Config Var')
+    .click('button.lock-config')
+    .typeText('.new-config-var .new-config-var-key input', 'test')
+    .typeText('.new-config-var .new-config-var-value textarea[placeholder="VALUE"]', 'test')
+    .click('.new-config-var .add')
+    .click('.submit-config-vars')
+    .click('button.lock-config')
+    .click('button.save-config-vars')
+    .wait(1000)
     .click('.webhooks-tab')
     // Expect an event
     .click('.webhook-item-0 .webhook-title') // Open edit dropdown
@@ -1387,55 +1386,54 @@ test('Should be able to create edit and remove config vars', async (t) => { // e
     .click('.config-tab')
 
     // Check new component shows
-    .click('button.new-config')
-    .expect(Selector('.key-0').exists)
+    .click('.config-tab')
+    .click('button.lock-config')
+    .expect(Selector('.new-config-var .new-config-var-key input').exists)
     .ok()
 
     // Make sure we can cancel
-    .click('button.config-cancel')
-    .expect(Selector('.key-0').exists)
+    .click('button.lock-config')
+    .expect(Selector('.new-config-var .new-config-var-key input').exists)
     .notOk()
 
     // Create new config var
-    .click('button.new-config')
-    .typeText('.key-0 input', 'MERP')
-    .typeText(Selector('.value-0 textarea').withAttribute('style'), 'DERP')
-    .click('button.add-config')
-    .typeText('.key-1 input', 'FOO')
-    .typeText(Selector('.value-1 textarea').withAttribute('style'), 'BAR')
+    .click('button.lock-config')
+    .typeText('.new-config-var .new-config-var-key input', 'MERP')
+    .typeText('.new-config-var .new-config-var-value textarea[placeholder="VALUE"]', 'DERP')
+    .click('.new-config-var .add')
+    .click('.submit-config-vars')
+    .click('button.lock-config')
+    .click('button.save-config-vars')
 
+    .click('button.lock-config')
+    .typeText('.new-config-var .new-config-var-key input', 'FOO')
+    .typeText('.new-config-var .new-config-var-value textarea[placeholder="VALUE"]', 'BAR')
+    .click('.new-config-var .add')
+    .click('.submit-config-vars')
+    .click('button.lock-config')
+    .click('button.save-config-vars')
 
-    .click('button.next')
-
-    // Check step 2 caption, stepper summary
-    .expect(Selector('.new-config-summary').innerText)
-    .contains('The following environment variables will be added to the app:')
-    .expect(Selector('.new-config-summary .MERP').exists)
-    .ok()
-    .expect(Selector('.new-config-summary .FOO').exists)
-    .ok()
-    .click('button.next')
-
-    .expect(Selector('.config-snack').innerText)
-    .contains('Added Config Var')
     .expect(Selector('.config-list .MERP').innerText)
     .contains('DERP')
     .expect(Selector('.config-list .FOO').innerText)
     .contains('BAR')
 
     // Edit config var
+    .click('button.lock-config')
     .click('.config-list .MERP button.edit')
     .typeText(Selector('.config-edit-value textarea').withAttribute('style'), 'Testcafe', { replace: true })
     // .typeText('.config-edit-value input', 'Testcafe', { replace: true })
-    .click('.submit')
-    .expect(Selector('.config-snack').innerText)
-    .contains('Updated Config Var')
+    .click('.submit-config-vars')
+    .click('button.lock-config')
+    .click('button.save-config-vars')
     .expect(Selector('.config-list .MERP').innerText)
     .contains('Testcafe')
 
     // Remove config var
+    .click('button.lock-config')
     .click('.config-list .MERP button.remove')
-    .click('.remove-config .ok')
+    .click('button.lock-config')
+    .click('button.save-config-vars')
     .expect(Selector('.config-list .MERP').exists)
     .notOk();
 });
