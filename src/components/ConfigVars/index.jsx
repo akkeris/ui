@@ -151,8 +151,8 @@ export default class ConfigVar extends BaseComponent {
        * find a port change. */
       if(changes["PORT"]) {
         let port = parseInt(changes["PORT"], 10);
-        if(Number.isNaN(port)) {
-          return this.setState({"error":"The PORT config var must be a number between 1 and 65,000"});
+        if(Number.isNaN(port) || port < 1 || port > 65535) {
+          return this.setState({"error":"The port specified had an invalid value, it must be a number greater than 0 and less than 65535"});
         }
         await this.api.patchFormation(this.props.app, "web", void(0), void(0), void(0), port, void(0), void(0));
         delete changes["PORT"];
