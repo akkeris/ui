@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
 } from '@material-ui/core';
@@ -8,10 +8,10 @@ import PropTypes from 'prop-types';
 
 import SiteOverView from '../../components/Sites/SiteOverview';
 import RouteList from '../../components/Sites/RouteList';
-import api from '../../services/api';
 import util from '../../services/util';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   refresh: {
@@ -45,7 +45,7 @@ const style = {
 
 const tabs = ['info', 'routes'];
 
-export default class SiteInfo extends Component {
+export default class SiteInfo extends BaseComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -61,6 +61,7 @@ export default class SiteInfo extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getSite();
   }
 
@@ -78,7 +79,7 @@ export default class SiteInfo extends Component {
 
   getSite = async () => {
     try {
-      const { data: site } = await api.getSite(this.props.match.params.site);
+      const { data: site } = await this.api.getSite(this.props.match.params.site);
       // If current tab not provided or invalid, rewrite it to be /info
       let currentTab = this.props.match.params.tab;
       if (!currentTab || !tabs.includes(currentTab)) {
@@ -88,10 +89,12 @@ export default class SiteInfo extends Component {
       this.setState({ currentTab, site, loading: false });
       util.updateHistory('sites', site.id, site.domain);
     } catch (error) {
-      this.setState({
-        submitFail: true,
-        submitMessage: error.response.data,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitFail: true,
+          submitMessage: error.response.data,
+        });
+      }
     }
   }
 

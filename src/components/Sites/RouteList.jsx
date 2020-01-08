@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Table, TableHead, TableBody, TableRow, TableCell, Paper, TablePagination,
   CircularProgress, Snackbar, IconButton, Tooltip, TableFooter, Collapse, Typography,
@@ -10,10 +10,10 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import PropTypes from 'prop-types';
 import ReactGA from 'react-ga';
 
-import api from '../../services/api';
 import NewRoute from './NewRoute';
 import ConfirmationModal from '../ConfirmationModal';
 import History from '../../config/History';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   refresh: {
@@ -63,7 +63,7 @@ const style = {
   },
 };
 
-export default class RouteList extends Component {
+export default class RouteList extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -80,12 +80,19 @@ export default class RouteList extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getRoutes();
   }
 
   getRoutes = async () => {
-    const { data: routes } = await api.getRoutes(this.props.site);
-    this.setState({ routes, loading: false });
+    try {
+      const { data: routes } = await this.api.getRoutes(this.props.site);
+      this.setState({ routes, loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleNewRoute = () => {
@@ -99,21 +106,23 @@ export default class RouteList extends Component {
   handleRemoveRoute = async () => {
     this.setState({ loading: true });
     try {
-      await api.deleteRoute(this.state.route.id);
+      await this.api.deleteRoute(this.state.route.id);
       ReactGA.event({
         category: 'SITES',
         action: 'Deleted route',
       });
       this.reload('Route Deleted');
     } catch (error) {
-      this.setState({
-        new: false,
-        loading: false,
-        open: false,
-        route: null,
-        confirmOpen: false,
-      });
-      this.props.onError(error.response.data);
+      if (!this.isCancel(error)) {
+        this.setState({
+          new: false,
+          loading: false,
+          open: false,
+          route: null,
+          confirmOpen: false,
+        });
+        this.props.onError(error.response.data);
+      }
     }
   }
 
@@ -135,17 +144,23 @@ export default class RouteList extends Component {
   }
 
   reload = async (message) => {
-    this.setState({ loading: true });
-    const { data: routes } = await api.getRoutes(this.props.site);
-    this.setState({
-      routes,
-      loading: false,
-      new: false,
-      message,
-      open: true,
-      confirmOpen: false,
-      route: null,
-    });
+    try {
+      this.setState({ loading: true });
+      const { data: routes } = await this.api.getRoutes(this.props.site);
+      this.setState({
+        routes,
+        loading: false,
+        new: false,
+        message,
+        open: true,
+        confirmOpen: false,
+        route: null,
+      });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleChangePage = (event, page) => {

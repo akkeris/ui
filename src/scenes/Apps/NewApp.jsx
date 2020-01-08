@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Typography, CircularProgress,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
 
 import Search from '../../components/Search';
-import api from '../../services/api';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
@@ -65,7 +65,7 @@ const style = {
   },
 };
 
-export default class NewApp extends Component {
+export default class NewApp extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -87,13 +87,20 @@ export default class NewApp extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getData();
   }
 
   getData = async () => {
-    const { data: orgs } = await api.getOrgs();
-    const { data: spaces } = await api.getSpaces();
-    this.setState({ orgs, spaces, loading: false, collapsed: false });
+    try {
+      const { data: orgs } = await this.api.getOrgs();
+      const { data: spaces } = await this.api.getSpaces();
+      this.setState({ orgs, spaces, loading: false, collapsed: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleChange = name => (event) => {
@@ -145,26 +152,28 @@ export default class NewApp extends Component {
 
   submitApp = async () => {
     try {
-      await api.createApp(this.state.app, this.state.org.value, this.state.space.value, this.state.description); // eslint-disable-line
-      await api.createFavorite(`${this.state.app}-${this.state.space.value}`);
+      await this.api.createApp(this.state.app, this.state.org.value, this.state.space.value, this.state.description); // eslint-disable-line
+      await this.api.createFavorite(`${this.state.app}-${this.state.space.value}`);
       ReactGA.event({
         category: 'Apps',
         action: 'Created new app',
       });
       History.get().push(`/apps/${this.state.app}-${this.state.space.value}`);
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        errorText: null,
-        space: {},
-        org: {},
-        app: '',
-        description: '',
-        loading: false,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          errorText: null,
+          space: {},
+          org: {},
+          app: '',
+          description: '',
+          loading: false,
+        });
+      }
     }
   }
 
@@ -297,7 +306,7 @@ export default class NewApp extends Component {
         <div style={style.div}>
           <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app.length > 12 ? `${app.slice(0,12)}...` : app)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app.length > 12 ? `${app.slice(0, 12)}...` : app)}>
                   Create app name
               </StepLabel>
             </Step>

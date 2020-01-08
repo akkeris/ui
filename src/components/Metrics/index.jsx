@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { CircularProgress, ListSubheader, Divider } from '@material-ui/core';
 import CPUIcon from '@material-ui/icons/Memory';
 import { pink } from '@material-ui/core/colors';
 
-import api from '../../services/api';
 import recommendations from '../../services/util/recommendations';
 import Charts from './Charts';
+import BaseComponent from '../../BaseComponent';
 
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable max-len */
@@ -97,7 +97,7 @@ function groupMetrics(names) {
     .concat(metricGroups);
 }
 
-export default class Metrics extends Component {
+export default class Metrics extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -106,29 +106,30 @@ export default class Metrics extends Component {
       metrics: {},
       notes: null,
     };
-    this.loadMetrics();
   }
 
   componentDidMount() {
-    this._isMounted = true;
-  }
-  componentWillUnmount() {
-    this._isMounted = false;
+    super.componentDidMount();
+    this.loadMetrics();
   }
 
   loadMetrics = async () => {
-    const { data: sizes } = await api.getFormationSizes();
-    const { data: formations } = await api.getFormations(this.props.app);
-    const { data: metrics } = await api.getMetrics(this.props.app);
-    const { data: addons } = await api.getAppAddons(this.props.app);
-    const notes = await recommendations.execute(metrics, formations, addons, sizes);
-    if (this._isMounted) {
+    try {
+      const { data: sizes } = await this.api.getFormationSizes();
+      const { data: formations } = await this.api.getFormations(this.props.app);
+      const { data: metrics } = await this.api.getMetrics(this.props.app);
+      const { data: addons } = await this.api.getAppAddons(this.props.app);
+      const notes = await recommendations.execute(metrics, formations, addons, sizes);
       this.setState({
         metrics,
         loading: false,
         reading: true,
         notes,
       });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
     }
   }
 

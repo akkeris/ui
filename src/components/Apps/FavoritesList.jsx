@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
 import History from '../../config/History';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   tableRow: {
@@ -28,7 +29,7 @@ const style = {
   },
 };
 
-export default class FavoritesList extends Component {
+export default class FavoritesList extends BaseComponent {
   static previewAnnotation() {
     return (
       <span style={style.preview}>Preview</span>
@@ -50,19 +51,21 @@ export default class FavoritesList extends Component {
         </TableRow>
       );
     }
-    return this.props.favorites.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(app => (
-      <TableRow
-        className={app.name}
-        key={app.id}
-        style={style.tableRow}
-        hover
-        onClick={() => this.handleRowSelection(app)}
-      >
-        <TableCell style={style.tableRow}>
-          <div style={style.tableRowColumn.main}>{app.name}</div>
-        </TableCell>
-      </TableRow>
-    ));
+    return this.props.favorites
+      .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
+      .map(app => (
+        <TableRow
+          className={app.name}
+          key={app.id}
+          style={style.tableRow}
+          hover
+          onClick={() => this.handleRowSelection(app)}
+        >
+          <TableCell style={style.tableRow}>
+            <div style={style.tableRowColumn.main}>{app.name}</div>
+          </TableCell>
+        </TableRow>
+      ));
   }
 
   handleRowSelection = (app) => {

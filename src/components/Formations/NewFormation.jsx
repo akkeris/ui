@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Radio, RadioGroup,
   FormControl, FormLabel, FormControlLabel, MenuItem, Typography,
   Button, TextField, Select, Collapse,
 } from '@material-ui/core';
-import api from '../../services/api';
-import ConfirmationModal from '../ConfirmationModal';
 import ReactGA from 'react-ga';
+import ConfirmationModal from '../ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   radio: {
@@ -38,7 +38,7 @@ const style = {
   },
 };
 
-export default class NewFormation extends Component {
+export default class NewFormation extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.types = '';
@@ -60,27 +60,34 @@ export default class NewFormation extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getSizes();
   }
 
   getSizes = async () => {
-    const { data: formationSizes } = await api.getFormationSizes();
-    const sizes = [];
-    formationSizes.forEach((size) => {
-      if (size.name.indexOf('prod') === -1) {
-        sizes.push(size);
+    try {
+      const { data: formationSizes } = await this.api.getFormationSizes();
+      const sizes = [];
+      formationSizes.forEach((size) => {
+        if (size.name.indexOf('prod') === -1) {
+          sizes.push(size);
+        }
+      });
+      sizes.sort((a, b) =>
+        parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10),
+      );
+      this.setState({
+        sizes,
+        size: sizes[0].name,
+        type: '',
+        quantity: 1,
+        loading: false,
+      });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
       }
-    });
-    sizes.sort((a, b) =>
-      parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10),
-    );
-    this.setState({
-      sizes,
-      size: sizes[0].name,
-      type: '',
-      quantity: 1,
-      loading: false,
-    });
+    }
   }
 
   handleClose = () => {
@@ -141,7 +148,7 @@ export default class NewFormation extends Component {
 
   submitFormation = async () => {
     try {
-      await api.createFormation(
+      await this.api.createFormation(
         this.props.app.name,
         this.state.size,
         this.state.quantity,
@@ -156,19 +163,21 @@ export default class NewFormation extends Component {
       });
       this.props.onComplete('New Formation Added');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        loading: false,
-        size: this.state.sizes[0].name,
-        type: '',
-        port: '',
-        command: '',
-        quantity: 1,
-        errorText: '',
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          loading: false,
+          size: this.state.sizes[0].name,
+          type: '',
+          port: '',
+          command: '',
+          quantity: 1,
+          errorText: '',
+        });
+      }
     }
   }
 
@@ -365,7 +374,7 @@ export default class NewFormation extends Component {
       <div style={style.stepper}>
         <Stepper activeStep={stepIndex}>
           <Step>
-            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type.length > 12 ? `${type.slice(0,12)}...` : type)}>
+            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type.length > 12 ? `${type.slice(0, 12)}...` : type)}>
               Select Type
             </StepLabel>
           </Step>

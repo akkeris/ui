@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination, Typography } from '@material-ui/core';
+import { Table, TableBody, TableRow, TableFooter, TableCell, TablePagination } from '@material-ui/core';
 import History from '../config/History';
+import BaseComponent from '../BaseComponent';
 
 const style = {
   tableRow: {
@@ -28,14 +29,17 @@ const style = {
   },
 };
 
-export default class RecentsList extends Component {
+export default class RecentsList extends BaseComponent {
   state = {
     page: 0,
     rowsPerPage: 15,
   }
 
   getRecents(page, rowsPerPage) {
-    return this.props.recents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(recent => (
+    return this.props.recents.slice(
+      page * rowsPerPage,
+      (page * rowsPerPage) + rowsPerPage,
+    ).map(recent => (
       <TableRow
         className={recent.item}
         key={recent.item}

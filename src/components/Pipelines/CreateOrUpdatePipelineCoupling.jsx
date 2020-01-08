@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, LinearProgress, Link, Typography, FormControlLabel } from '@material-ui/core';
 import { DeveloperBoard, ArrowDownward } from '@material-ui/icons/';
-import api from '../../services/api';
 import AutoSuggest from '../AutoSuggest';
 import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
 import util from '../../services/util';
+import BaseComponent from '../../BaseComponent';
 
 const originalState = {
   loading: true,
@@ -24,7 +24,7 @@ const formSubHeaderStyle = {
 const formTextStyle = {
   display: 'block', ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.FairlySubtle, ...GlobalStyles.Text,
 };
-export default class CreateOrUpdatePipelineCoupling extends Component {
+export default class CreateOrUpdatePipelineCoupling extends BaseComponent {
   static renderPipelineDiagram() {
     const diagramAppRow = {
       display: 'flex', height: '20px', boxShadow: '0 0 10px 1px rgba(0,0,0,0.125)', borderRadius: '3px',
@@ -70,7 +70,10 @@ export default class CreateOrUpdatePipelineCoupling extends Component {
     this.state = util.deepCopy(originalState);
   }
 
-  componentDidMount = () => this.refresh()
+  componentDidMount() {
+    super.componentDidMount();
+    this.refresh();
+  }
 
   refresh = async (loading = true) => {
     try {
@@ -79,11 +82,15 @@ export default class CreateOrUpdatePipelineCoupling extends Component {
         ...util.deepCopy(originalState),
         selected: this.props.coupling ? this.props.coupling.required_status_checks.contexts : [],
       });
-      const { data: apps } = await api.getApps();
-      const { data: statuses } = await api.getAvailablePipelineStatuses(this.props.pipeline.name);
+      const { data: apps } = await this.api.getApps();
+      const {
+        data: statuses,
+      } = await this.api.getAvailablePipelineStatuses(this.props.pipeline.name);
       this.setState({ loading: false, apps, statuses });
     } catch (e) {
-      console.error(e); // eslint-disable-line no-console
+      if (!this.isCancel(e)) {
+        console.error(e); // eslint-disable-line no-console
+      }
     }
   }
 
@@ -218,11 +225,11 @@ export default class CreateOrUpdatePipelineCoupling extends Component {
             <Typography id="dialog-description" variant="h6" style={formSubHeaderStyle}>
               Choose an application to add to the <pre style={GlobalStyles.CommitLink}><code>{this.props.stage}</code></pre> stage in the <pre style={GlobalStyles.CommitLink}><code>{this.props.pipeline.name}</code></pre> pipeline. { /* eslint-disable-line */ }
             </Typography>
-            ) : (
-              <Typography id="dialog-description" variant="h6" style={formSubHeaderStyle}>
+          ) : (
+            <Typography id="dialog-description" variant="h6" style={formSubHeaderStyle}>
                 Pipelines &amp; Pipeline Couplings
-              </Typography>
-            )}
+            </Typography>
+          )}
           {CreateOrUpdatePipelineCoupling.renderPipelineDiagram()}
           <Typography style={formTextStyle}>
               Pipelines allow you to connect multiple apps together and promote code between them. An app in a pipeline can ensure the quality of the promotion using status checks. <Link rel="noopener" target="_blank" href="https://docs.akkeris.io/architecture/pipelines.html">Learn more</Link>  { /* eslint-disable-line */ }

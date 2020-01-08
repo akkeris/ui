@@ -1,15 +1,15 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { DeveloperBoard, Delete, Edit } from '@material-ui/icons/';
 import { Paper, CircularProgress, Button, Link, IconButton } from '@material-ui/core';
 import ReactGA from 'react-ga';
 import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
 import ReleaseStatus from '../Releases/ReleaseStatus.jsx'; // eslint-disable-line import/extensions
-import api from '../../services/api';
 import util from '../../services/util';
 import ConfirmationModal from '../ConfirmationModal';
 import CreateOrUpdatePipelineCoupling from './CreateOrUpdatePipelineCoupling';
 import PipelinePromote from './PipelinePromote';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   AppPaperPanel: {
@@ -45,7 +45,7 @@ const originalState = {
   fullCouplings: null,
 };
 
-export default class Stage extends Component {
+export default class Stage extends BaseComponent {
   static renderLoading() {
     const circularStyle = { ...GlobalStyles.CenteredCircularProgress };
     return (
@@ -70,7 +70,10 @@ export default class Stage extends Component {
     this.state = util.deepCopy(originalState);
   }
 
-  componentDidMount = () => this.refreshStage();
+  componentDidMount() {
+    super.componentDidMount();
+    this.refreshStage();
+  }
 
   getTargets(stage) {
     if (stage !== 'production') {
@@ -82,11 +85,11 @@ export default class Stage extends Component {
   refreshStage = async (loading = true) => {
     try {
       this.setState({ loading, ...util.deepCopy(originalState) });
-      const { data: fullCouplings } = await api.getPipelineCouplings(this.props.pipeline.name);
+      const { data: fullCouplings } = await this.api.getPipelineCouplings(this.props.pipeline.name);
       const couplings = await Promise.all(util.filterCouplings(fullCouplings, this.props.stage).map(async (coupling) => { // eslint-disable-line max-len
         try {
-          const { data: statuses } = await api.getReleaseStatuses(coupling.app.id, coupling.release.id); // eslint-disable-line max-len
-          const { data: slug } = await api.getSlug(statuses.release.slug.id);
+          const { data: statuses } = await this.api.getReleaseStatuses(coupling.app.id, coupling.release.id); // eslint-disable-line max-len
+          const { data: slug } = await this.api.getSlug(statuses.release.slug.id);
           return { ...coupling, slug, statuses };
         } catch (e) {
           return { ...coupling, slug: { source_blob: {} }, statuses: { release: coupling.release, required_status_checks: { contexts: [] } } }; // eslint-disable-line max-len
@@ -94,7 +97,9 @@ export default class Stage extends Component {
       }));
       this.setState({ loading: false, couplings, fullCouplings });
     } catch (err) {
-      this.props.onError(err);
+      if (!this.isCancel(err)) {
+        this.props.onError(err);
+      }
     }
   }
 
@@ -111,32 +116,38 @@ export default class Stage extends Component {
   handleRemoveCoupling = async () => {
     this.setState({ loading: true });
     try {
-      await api.deletePipelineCoupling(this.state.deleteCoupling.id);
+      await this.api.deletePipelineCoupling(this.state.deleteCoupling.id);
       ReactGA.event({ category: 'PIPELINES', action: 'Removed pipeline coupling' });
       await this.refreshStage();
     } catch (err) {
-      this.props.onError(err);
+      if (!this.isCancel(err)) {
+        this.props.onError(err);
+      }
     }
   }
 
   handleUpdatePipelineCoupling = async (pipeline, coupling, stage, app, statuses) => {
     try {
-      await api.updatePipelineCoupling(pipeline.id, coupling.id, statuses);
+      await this.api.updatePipelineCoupling(pipeline.id, coupling.id, statuses);
       ReactGA.event({ category: 'PIPELINES', action: 'Updated coupling' });
       this.refreshStage();
     } catch (err) {
-      this.props.onError(err);
+      if (!this.isCancel(err)) {
+        this.props.onError(err);
+      }
     }
   }
 
   handlePromote = async (pipeline, source, targets, release, safe) => {
     try {
       ReactGA.event({ category: 'PIPELINES', action: 'Application Promoted' });
-      await api.promotePipeline(pipeline.id, source.app.id, targets.map(x => ({ app: { id: x.app.id } })), safe, release.id); // eslint-disable-line max-len
+      await this.api.promotePipeline(pipeline.id, source.app.id, targets.map(x => ({ app: { id: x.app.id } })), safe, release.id); // eslint-disable-line max-len
       this.props.refresh();
     } catch (err) {
-      console.error(err); // eslint-disable-line no-console
-      this.props.onError(err);
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+        this.props.onError(err);
+      }
     }
   }
 

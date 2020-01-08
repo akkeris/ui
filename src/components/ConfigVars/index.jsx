@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, Table, TableBody, TableRow, TableCell, IconButton, Tooltip,
@@ -12,11 +12,16 @@ import {
 } from '@material-ui/icons';
 import SaveIcon from '@material-ui/icons/Save';
 import api from '../../services/api';
-import NewConfigVar from './NewConfigVar';
-import KeyValue from './KeyValue';
-import ConfirmationModal from '../ConfirmationModal';
+import KeyValue from "./KeyValue.jsx";
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Clear';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+
 import GlobalStyles from '../../config/GlobalStyles';
 import util from '../../services/util';
+
+import BaseComponent from '../../BaseComponent';
 
 // fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
 function isEmpty(obj) {
@@ -80,51 +85,105 @@ const originalState = {
   proposeAdded: [],
   proposeRemoved: [],
   proposeUpdated: [],
+  proposeMetadata: [],
   edit: false,
   editKey: "",
   editValue: "",
   editNotes: {},
   editOriginalKey:"",
+  error:null,
 };
 
-export default class ConfigVar extends Component {
+export default class ConfigVar extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = util.deepCopy(originalState);
   }
 
-  componentDidMount = () => this.getConfigVars()
+  componentDidMount = async () => {
+    await super.componentDidMount();
+    try {
+      this.getConfigVars();
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+        this.setState({"error":err.message});
+      }
+      this.setState({"error":err.message});
+    }
+  }
+
+  refresh = async () => {
+    try {
+      this.setState(util.deepCopy(originalState));
+      await this.getConfigVars();
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+        this.setState({"error":err.message});
+      }
+    }
+  }
 
   getConfigVars = async () => {
-    const { data: config } = await api.getConfig(this.props.app);
-    const { data: notes } = await api.getConfigNotes(this.props.app);
-
+    const { data: config } = await this.api.getConfig(this.props.app);
+    const { data: notes } = await this.api.getConfigNotes(this.props.app);
     /* group service config vars */
     let serviceConfig = {};
     for(let key in notes) {
       if(notes[key].type === "addon" && config[key]) {
         if(!serviceConfig[notes[key].addon.id]) {
-          const addon_resp = await api.getAddon(this.props.app, notes[key].addon.name);
+          const addon_resp = await this.api.getAddon(this.props.app, notes[key].addon.name);
           serviceConfig[notes[key].addon.id] = {addon:addon_resp.data, config:[]};
-          console.log('addon_id', notes[key].addon.id, 'addon object:', serviceConfig[notes[key]]);
         }
         serviceConfig[notes[key].addon.id].config.push(key);
       }
     }
-
     this.setState({ config, originalConfig: config, notes, serviceConfig, loading: false });
   }
 
-  handleSaveConfigVar() {
-    console.log('send', this.state.changes, this.state.changesNotes);
+  handleSaveConfigVar = async () => {
+    try {
+      let changes = util.deepCopy(this.state.changes);
+      let changesNotes = util.deepCopy(this.state.changesNotes);
+      /* Port must be changed through a formation change,
+       * as a convenience lets update the formation if we 
+       * find a port change. */
+      if(changes["PORT"]) {
+        let port = parseInt(changes["PORT"], 10);
+        if(Number.isNaN(port)) {
+          return this.setState({"error":"The PORT config var must be a number between 1 and 65,000"});
+        }
+        await this.api.patchFormation(this.props.app, "web", void(0), void(0), void(0), port, void(0), void(0));
+        delete changes["PORT"];
+      }
+      if(!isEmpty(changes)) {
+        await this.api.patchConfig(this.props.app, changes);
+      }
+      if(!isEmpty(changesNotes)) {
+        await this.api.patchConfigNotes(this.props.app, changesNotes);
+      }
+      await this.refresh();
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+        this.setState({"error":err.message});
+      }
+    }
   }
 
   handleCancelProposeSaveConfigVar() {
-    this.setState({propose:false, proposeAdded:[], proposeRemoved:[], proposeUpdated:[]});
+    this.setState({
+      propose:false, 
+      proposeAdded:[], 
+      proposeRemoved:[], 
+      proposeUpdated:[], 
+      proposeMetadata:[]
+    });
   }
 
   handleProposeSaveConfigVar() {
-    let added = [], removed = [], updated = [];
+    let added = [], removed = [], updated = [], metadata = [];
     for (let key in this.state.changes) {
       if(this.state.changes[key] === null) {
         removed.push(key);
@@ -134,7 +193,16 @@ export default class ConfigVar extends Component {
         updated.push(key);
       }
     }
-    this.setState({propose:true, proposeAdded:added, proposeRemoved:removed, proposeUpdated:updated});
+    for (let key in this.state.changesNotes) {
+      metadata.push(key);
+    }
+    this.setState({
+      propose:true, 
+      proposeAdded:added, 
+      proposeRemoved:removed, 
+      proposeUpdated:updated, 
+      proposeMetadata:metadata
+    });
   }
 
   handleEditConfigVar() {
@@ -158,12 +226,22 @@ export default class ConfigVar extends Component {
       delete config[this.state.editOriginalKey];
       changes[this.state.editOriginalKey] = null;
     }
-    if(notesValue) {
+    if(!notes[key] && notesValue) {
+      // If a new config var is being added and new notes as well.
+      changesNotes[key] = notesValue;
+      notes[key] = notesValue;
+    } else if(notes[key] && notesValue && 
+        (notesValue.description !== notes[key].description || 
+          notesValue.required !== notes[key].required)) 
+    {
+      // If an existing config var is having its notes updated.
       changesNotes[key] = {...notes[key], ...notesValue};
       notes[key] = {...notes[key], ...notesValue};
     }
-    config[key] = value;
-    changes[key] = value;
+    if(config[key] !== value) {
+      config[key] = value;
+      changes[key] = value;
+    }
     this.setState({
       config,
       changes,
@@ -190,7 +268,7 @@ export default class ConfigVar extends Component {
   handleLockAndUnlock() {
     if(this.state.locked) {
       this.setState({locked:!this.state.locked});
-    } else if (isEmpty(this.state.changes)) {
+    } else if (isEmpty(this.state.changes) && isEmpty(this.state.changesNotes)) {
       this.setState({locked:!this.state.locked});
     } else {     
       this.handleProposeSaveConfigVar();
@@ -264,7 +342,10 @@ export default class ConfigVar extends Component {
       .sort()
       .filter((key) => this.state.notes[key].type !== 'addon')
       .map((key) => {
-        let saved = this.state.changes[key] || this.state.changes[key] === null ? false : true;
+        let saved = (this.state.changes[key] ? false : true);
+        if(this.state.changes[key] === null || this.state.changesNotes[key]) {
+          saved = false;
+        }
         let deleted = this.state.changes[key] === null ? true : false;
         return (<KeyValue 
           new={false} 
@@ -292,7 +373,7 @@ export default class ConfigVar extends Component {
             <TableRow key={"addon-" + addon_id} style={style.tableRow}>
               <TableCell colSpan={3} style={style.tableCell}>
                   <Typography variant="h5" style={{...GlobalStyles.HeaderSmall}}>
-                    Addon {addon.name}
+                    From addon {addon.plan.name} ({addon.id})
                   </Typography>
               </TableCell>
             </TableRow>
@@ -354,6 +435,7 @@ export default class ConfigVar extends Component {
   }
 
   renderProposeConfigVarChanges() {
+    const configVarStyle = {...GlobalStyles.ConfigVarStyle, marginTop:'0.25rem', marginBottom:'0.25rem', 'verticalAlign':'top'};
     return (
       <Dialog
         className="config-propose"
@@ -363,18 +445,18 @@ export default class ConfigVar extends Component {
         onExited={() => this.handleCancelProposeSaveConfigVar()}
       >
         <DialogTitle style={{ ...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle }}>
-          Proposed Config Var Changes
+          Proposed Changes
         </DialogTitle>
         <DialogContent style={{ ...GlobalStyles.PaperSubtleContainerStyle }} dividers>
-          {this.state.proposeUpdated.length > 0 ? (
-            <div key="update-config-vars-proposed">
+          {this.state.proposeAdded.length > 0 ? (
+            <div key="added-config-vars-proposed">
               <Typography variant="h6" style={{ ...GlobalStyles.FormSubHeaderStyle }}>
-                Update
+                Add
               </Typography>
               <Paper style={{ marginBottom: '0.5rem', ...GlobalStyles.StandardPadding }}>
-                {this.state.proposeUpdated.map((x) => {
+                {this.state.proposeAdded.map((x) => {
                   return (
-                    <div key={"code-style-" + x} style={{...GlobalStyles.ConfigVarStyle, 'verticalAlign':'top'}}>
+                    <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
                       {x}={JSON.stringify(this.state.changes[x])}
                     </div>
                   )
@@ -390,7 +472,7 @@ export default class ConfigVar extends Component {
               <Paper style={{ marginBottom: '0.5rem', ...GlobalStyles.StandardPadding }}>
                 {this.state.proposeRemoved.map((x) => {
                   return (
-                    <div key={"code-style-" + x} style={{...GlobalStyles.ConfigVarStyle, 'verticalAlign':'top'}}>
+                    <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
                       {x}={JSON.stringify(this.state.changes[x])}
                     </div>
                   )
@@ -398,16 +480,32 @@ export default class ConfigVar extends Component {
               </Paper>
             </div>
           ) : ''}
-          {this.state.proposeAdded.length > 0 ? (
-            <div key="added-config-vars-proposed">
+          {this.state.proposeUpdated.length > 0 ? (
+            <div key="update-config-vars-proposed">
               <Typography variant="h6" style={{ ...GlobalStyles.FormSubHeaderStyle }}>
-                Add
+                Update
               </Typography>
               <Paper style={{ marginBottom: '0.5rem', ...GlobalStyles.StandardPadding }}>
-                {this.state.proposeAdded.map((x) => {
+                {this.state.proposeUpdated.map((x) => {
                   return (
-                    <div key={"code-style-" + x} style={{...GlobalStyles.ConfigVarStyle, 'verticalAlign':'top'}}>
+                    <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
                       {x}={JSON.stringify(this.state.changes[x])}
+                    </div>
+                  )
+                })}
+              </Paper>
+            </div>
+          ) : ''}
+          {this.state.proposeMetadata.length > 0 ? (
+            <div key="metadata-config-vars-proposed">
+              <Typography variant="h6" style={{ ...GlobalStyles.FormSubHeaderStyle }}>
+                Update Notes or Required Status
+              </Typography>
+              <Paper style={{ marginBottom: '0.5rem', ...GlobalStyles.StandardPadding }}>
+                {this.state.proposeMetadata.map((x) => {
+                  return (
+                    <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
+                      {x}
                     </div>
                   )
                 })}
@@ -416,7 +514,7 @@ export default class ConfigVar extends Component {
           ) : ''}
         </DialogContent>
         <DialogActions>
-          <Button className="cancel" color="secondary" onClick={() => this.handleCancelProposeSaveConfigVar()}>
+          <Button className="cancel" color="secondary" onClick={() => this.handleCancelProposeSaveConfigVar()}> { /* eslint-disable-line */ }
             Cancel
           </Button>
           <Button className="submit" color="primary" onClick={() => this.handleSaveConfigVar()}>
@@ -502,6 +600,38 @@ export default class ConfigVar extends Component {
     );
   }
 
+  // TODO: Move this into the scene and call it from here
+  // with a onError delegate. We don't need an error dialog
+  // for every component, just every scene.
+  renderError() {
+    return (
+      <Dialog
+        className="error"
+        open={this.state.error ? true : false}
+        fullWidth
+        onClose={() => this.setState({error:null})}
+        onExited={() => this.setState({error:null})}
+      >
+        <DialogTitle style={{ ...GlobalStyles.HeaderSmall, ...GlobalStyles.Subtle }}>
+          Uh Oh.
+        </DialogTitle>
+        <DialogContent style={{ ...GlobalStyles.PaperSubtleContainerStyle }} dividers>
+          <Typography variant="h6" style={{ ...GlobalStyles.FormSubHeaderStyle }}>
+            Error
+          </Typography>
+          <Paper style={{ marginBottom: '0.5rem', ...GlobalStyles.StandardPadding }}>
+            {this.state.error}
+          </Paper>
+        </DialogContent>
+        <DialogActions>
+          <Button className="ok" color="secondary" onClick={() => this.refresh()}>
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+
   renderLoading() {
     return (
       <div style={style.refresh.div}>
@@ -534,6 +664,7 @@ export default class ConfigVar extends Component {
         </Table>
         {this.renderEditConfigVarDialog()}
         {this.renderProposeConfigVarChanges()}
+        {this.renderError()}
       </div>
     );
   }

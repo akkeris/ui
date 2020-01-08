@@ -1,8 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { CircularProgress } from '@material-ui/core';
-
-import api from '../../services/api';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   logs: {
@@ -29,9 +28,10 @@ const style = {
     },
   },
 };
+
 let intv = null;
 
-export default class Logs extends Component {
+export default class Logs extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -41,9 +41,12 @@ export default class Logs extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     intv = setInterval(async () => {
       try {
-        const { data: buildResult } = await api.getBuildResult(this.props.app, this.props.build);
+        const {
+          data: buildResult,
+        } = await this.api.getBuildResult(this.props.app, this.props.build);
         const logs = buildResult.lines.join('\n');
         if (!this.props.open || !buildResult.build || (buildResult.build.status !== 'pending' && buildResult.build.status !== 'queued')) {
           clearInterval(intv);
@@ -51,15 +54,18 @@ export default class Logs extends Component {
         this.setState({ logs, loading: false });
         this.scrollBuildDown();
       } catch (error) {
-        clearInterval(intv);
-        this.setState({
-          loading: false,
-        });
+        if (!this.isCancel(error)) {
+          clearInterval(intv);
+          this.setState({
+            loading: false,
+          });
+        }
       }
     }, 1000);
   }
 
   componentWillUnmount() {
+    super.componentWillUnmount();
     if (intv) {
       clearInterval(intv);
     }

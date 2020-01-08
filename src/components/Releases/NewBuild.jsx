@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, TextField, Typography, Collapse,
 } from '@material-ui/core';
-import api from '../../services/api';
-import ConfirmationModal from '../ConfirmationModal';
 import ReactGA from 'react-ga';
+import ConfirmationModal from '../ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   stepper: {
@@ -33,7 +33,7 @@ const style = {
   },
 };
 
-export default class NewBuild extends Component {
+export default class NewBuild extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -85,7 +85,7 @@ export default class NewBuild extends Component {
 
   submitBuild = async () => {
     try {
-      await api.createBuild(
+      await this.api.createBuild(
         this.props.app, this.props.org, null, this.state.url,
         null, null, this.state.branch, this.state.version,
       );
@@ -95,17 +95,19 @@ export default class NewBuild extends Component {
       });
       this.props.onComplete('New Deployment Requested');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        loading: false,
-        errorText: null,
-        url: '',
-        branch: null,
-        version: null,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          loading: false,
+          errorText: null,
+          url: '',
+          branch: null,
+          version: null,
+        });
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   TableRow,
@@ -17,6 +17,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import InfoIcon from '@material-ui/icons/Info';
 import GlobalStyles from '../../config/GlobalStyles';
 import util from '../../services/util';
+import BaseComponent from '../../BaseComponent';
+
 
 const style = {
   tableRow: {
@@ -47,7 +49,7 @@ const style = {
   },
 };
 
-export default class KeyValue extends Component {
+export default class KeyValue extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -121,7 +123,7 @@ export default class KeyValue extends Component {
   renderConfigVarNotes() {
     if(this.props.notes && this.props.notes.description && this.props.notes.description !== "") { /* eslint-disable-line */
       return (
-        <Tooltip title={this.props.notes.description} arrow placement="top-start">
+        <Tooltip title={this.props.notes.description} placement="top-start">
           <IconButton>
             <InfoIcon style={GlobalStyles.Subtle} />
           </IconButton>
@@ -138,7 +140,7 @@ export default class KeyValue extends Component {
       let editStyle = disabled ? GlobalStyles.VerySubtle : GlobalStyles.Suble;
       return (
         <Tooltip title="Edit" placement="top-start">
-          <IconButton disabled={disabled} className="edit" onClick={() => this.handleEditConfigVar()}>
+          <IconButton disabled={disabled} className="edit" onClick={() => this.handleEditConfigVar()}> { /* eslint-disable-line */ }
             <EditIcon style={editStyle} />
           </IconButton>
         </Tooltip>
@@ -169,22 +171,20 @@ export default class KeyValue extends Component {
     let configVarStyle = util.deepCopy(GlobalStyles.ConfigVarStyle);
     configVarStyle.maxWidth = '450px';
     configVarStyle.verticalAlign = 'top';
-    if(!this.props.saved) {
-      configVarStyle.backgroundColor = 'rgba(255,0,0,0.075)';
-    } else {
-      configVarStyle.backgroundColor = 'rgba(0,0,0,0.025)';
-    }
+    configVarStyle.backgroundColor = this.props.saved ? 
+      'rgba(0,0,0,0.025)' : 
+      'rgba(255,0,0,0.075)';
     if(this.props.deleted) {
       configVarStyle.textDecoration = 'line-through';
     }
 
     return (
-       <TableRow hover className={this.props.configkey} key={this.props.configkey} style={style.tableRow}>
+       <TableRow className={this.props.configkey} key={this.props.configkey} style={style.tableRow}> { /* eslint-disable-line */ }
         <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
-          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.configkey}</span>
+          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.configkey}</span> { /* eslint-disable-line */ }
         </TableCell>
         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
-          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.value}</span>
+          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.value}</span> { /* eslint-disable-line */ }
         </TableCell>
         <TableCell style={style.tableCell}>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

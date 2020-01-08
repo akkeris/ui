@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, Snackbar, IconButton, TableCell, Tooltip, Typography, Collapse,
@@ -7,11 +7,11 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
 import ReloadIcon from '@material-ui/icons/Refresh';
-import api from '../../services/api';
 import util from '../../services/util';
 import NewFormation from './NewFormation';
 import DynoType from './DynoType';
 import ConfirmationModal from '../ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   iconButton: {
@@ -52,7 +52,7 @@ const style = {
   },
 };
 
-export default class Formations extends Component {
+export default class Formations extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -66,39 +66,41 @@ export default class Formations extends Component {
       message: '',
       new: false,
     };
-    this.getFormations();
   }
 
   componentDidMount() {
-    this._isMounted = true;
-  }
-  componentWillUnmount() {
-    this._isMounted = false;
+    super.componentDidMount();
+    this.getFormations();
   }
 
   getFormations = async () => {
-    const [r1, r2, r3] = await Promise.all([
-      api.getFormations(this.props.app.name),
-      api.getFormationSizes(),
-      api.getDynos(this.props.app.name),
-    ]);
-    const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
-    const dynos = r3.data;
-    let sizes = [];
-    r2.data.forEach((size) => {
-      if (size.name.indexOf('prod') === -1) {
-        sizes.push(size);
-      }
-    });
-    sizes = sizes.sort((a, b) =>
-      parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10));
-    if (this._isMounted) {
+    try {
+      const [r1, r2, r3] = await Promise.all([
+        this.api.getFormations(this.props.app.name),
+        this.api.getFormationSizes(),
+        this.api.getDynos(this.props.app.name),
+      ]);
+      const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
+      const dynos = r3.data;
+      let sizes = [];
+      r2.data.forEach((size) => {
+        if (size.name.indexOf('prod') === -1) {
+          sizes.push(size);
+        }
+      });
+      sizes = sizes.sort((a, b) =>
+        parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10));
+
       this.setState({
         sizes,
         dynos,
         formations,
         loading: false,
       });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
     }
   }
 
@@ -136,14 +138,14 @@ export default class Formations extends Component {
   }
 
   reload = async (message) => {
-    this.setState({ loading: true });
-    const [r1, r2] = await Promise.all([
-      api.getFormations(this.props.app.name),
-      api.getDynos(this.props.app.name),
-    ]);
-    const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
-    const dynos = r2.data;
-    if (this._isMounted) {
+    try {
+      this.setState({ loading: true });
+      const [r1, r2] = await Promise.all([
+        this.api.getFormations(this.props.app.name),
+        this.api.getDynos(this.props.app.name),
+      ]);
+      const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
+      const dynos = r2.data;
       if (message) {
         this.setState({
           formations,
@@ -159,6 +161,10 @@ export default class Formations extends Component {
           dynos,
           loading: false,
         });
+      }
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
       }
     }
   }

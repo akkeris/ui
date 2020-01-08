@@ -172,18 +172,30 @@ class Search extends PureComponent {
 
 /* eslint-disable */
 
-//  Props:
-//    onChange - Callback function executed when an option is selected
-//    value - Currently selected option - should be changed by onChange
-//    placeholder - Text to display when no option is selected
-//    options - Array of objects { value: '', label: '' } to display as selectable options
-
 Search.propTypes = {
+  /**
+   * Callback function executed when an option is selected
+   */
   onChange: PropTypes.func.isRequired,
+  /**
+   * Currently selected option (should be changed by onChange)
+   */
   value: PropTypes.object.isRequired,
+  /**
+   * Text to display when no option is selected
+   */
   placeholder: PropTypes.string.isRequired,
+  /**
+   * Array of objects to display as selectable options - { value:'', label: '' }
+   */
   options: PropTypes.array.isRequired,
+  /**
+   * Classes to pass to the internal SelectComponent 
+   */
   classes: PropTypes.object.isRequired,
+  /** 
+   * Material UI theme for styling
+   */
   theme: PropTypes.object.isRequired,
   error: PropTypes.bool,
   autoFocus: PropTypes.bool,

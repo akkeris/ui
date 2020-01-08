@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { withTheme } from '@material-ui/core/styles';
 import {
   List, ListItem, ListItemText, CircularProgress, Button, Paper, ListSubheader, Divider,
@@ -9,7 +9,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PropTypes from 'prop-types';
 import { ResponsiveContainer, Line, LineChart, XAxis, YAxis } from 'recharts';
 import LightbulbIcon from '../../components/Icons/LightbulbOutline';
-import api from '../../services/api';
+import BaseComponent from '../../BaseComponent';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -63,7 +63,7 @@ function getData(month, items, app) {
   return data;
 }
 
-class InvoiceInfo extends Component {
+class InvoiceInfo extends BaseComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -76,12 +76,19 @@ class InvoiceInfo extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getInvoice();
   }
 
   getInvoice = async () => {
-    const { data } = await api.getInvoice(this.props.match.params.invoice);
-    this.setState({ data, loading: false });
+    try {
+      const { data } = await this.api.getInvoice(this.props.match.params.invoice);
+      this.setState({ data, loading: false });
+    } catch (error) {
+      if (!this.isCancel(error)) {
+        console.error(error); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleClick = (index, org) => {

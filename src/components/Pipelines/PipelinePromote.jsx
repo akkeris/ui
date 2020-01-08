@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, LinearProgress, Link, Paper, Typography, Select, MenuItem, FormControlLabel } from '@material-ui/core';
 import { ArrowDownward, CheckBoxOutlineBlank, CheckBox, Delete, DeveloperBoard, Edit, Error, CheckCircle, Cancel, Lens } from '@material-ui/icons/';
 import { grey, yellow } from '@material-ui/core/colors';
 import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
-import api from '../../services/api';
 import util from '../../services/util';
+import BaseComponent from '../../BaseComponent';
 
 const originalState = {
   loading: true,
@@ -83,39 +83,47 @@ function statusIconColor(state) {
   return releaseColor;
 }
 
-export default class PipelinePromote extends Component {
+export default class PipelinePromote extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = util.deepCopy(originalState);
   }
 
-  componentDidMount = async () => this.refresh()
+  async componentDidMount() {
+    super.componentDidMount();
+    this.refresh();
+  }
 
   refresh = async (loading = true) => {
     try {
       this.setState({ loading, ...util.deepCopy(originalState) });
-      const { data: sourceApp } = await api.getApp(this.props.source.app.id);
-      const { data: sourceReleases } = await api.getReleases(this.props.source.app.id);
-      const { data: fullCouplings } = await api.getPipelineCouplings(this.props.pipeline.name);
+      const { data: sourceApp } = await this.api.getApp(this.props.source.app.id);
+      const { data: sourceReleases } = await this.api.getReleases(this.props.source.app.id);
+      const { data: fullCouplings } = await this.api.getPipelineCouplings(this.props.pipeline.name);
       let targets = util.filterCouplings(fullCouplings, this.props.stages[this.props.stage]);
       targets = await Promise.all(targets.map(async (target) => {
         try {
-          const { data: slug } = await api.getSlug(target.release.build.id);
-          const { data: releases } = await api.getReleases(target.app.id);
+          const { data: slug } = await this.api.getSlug(target.release.build.id);
+          const { data: releases } = await this.api.getReleases(target.app.id);
           return { ...target, slug, releases };
         } catch (e) {
           return { ...target, slug: { source_blob: {} }, releases: [] };
         }
       }));
       const release = sourceReleases.filter(x => x.current === true)[0];
-      const { data: statuses } = await api.getReleaseStatuses(this.props.source.app.id, release.id);
+
+      const {
+        data: statuses,
+      } = await this.api.getReleaseStatuses(this.props.source.app.id, release.id);
       release.statuses = statuses;
       this.setState({
         loading: false, sourceApp, sourceReleases, targets, release,
       });
     } catch (e) {
-      console.error(e); // eslint-disable-line no-console
-      this.props.onError(e);
+      if (!this.isCancel(e)) {
+        console.error(e); // eslint-disable-line no-console
+        this.props.onError(e);
+      }
     }
   }
 
@@ -138,10 +146,22 @@ export default class PipelinePromote extends Component {
   }
 
   handleChangeRelease = async (event) => {
-    const { data: release } = await api.getRelease(this.props.source.app.id, event.target.value);
-    const { data: statuses } = await api.getReleaseStatuses(this.props.source.app.id, release.id);
-    release.statuses = statuses;
-    this.setState({ editRelease: false, release });
+    try {
+      const {
+        data: release,
+      } = await this.api.getRelease(this.props.source.app.id, event.target.value);
+
+      const {
+        data: statuses,
+      } = await this.api.getReleaseStatuses(this.props.source.app.id, release.id);
+
+      release.statuses = statuses;
+      this.setState({ editRelease: false, release });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleSafePromoteChange(event) {
@@ -207,7 +227,7 @@ export default class PipelinePromote extends Component {
             <Select onChange={this.handleChangeRelease} style={{ ...GlobalStyles.Subtle, ...GlobalStyles.Text, width: '100%' }} value={this.state.release.id}>
               {this.state.sourceReleases.slice(-15).map(release => (
                 <MenuItem key={`menuitem-${release.id}`} value={release.id}>v{release.version} Deployed {util.getDateDiff(release.created_at)} - {release.description}</MenuItem>
-                ))}
+              ))}
             </Select>
           </div>
         )}
@@ -294,31 +314,31 @@ export default class PipelinePromote extends Component {
           }
         </DialogTitle>
         {required.map((context, i) => {
-            const status = this.statusByContext(context);
-            const StatusIcon = statusIcon(status.state);
-            const dividerStyle = (i > 0) ? { borderTop: '0px' } : {};
-            const statusIconStyle = {
-              color: statusIconColor(status.state),
-              fillColor: statusIconColor(status.state),
-              marginTop: '0.1rem',
-              maxHeight: '0.8rem',
-              maxWidth: '0.8rem',
-              marginLeft: '0.25rem',
-              marginRight: '1rem',
-            };
-            return (
-              <DialogContent
-                key={context}
-                dividers
-                style={{ ...GlobalStyles.PaperSubtleContainerStyle, ...dividerStyle }}
-              >
-                <Typography variant="body1" style={{ ...formTextEmphasizedStyle, display: 'flex', alignItems: 'center' }}>
-                  <StatusIcon style={statusIconStyle} />
-                  {status.image_url ? (<img style={stateImage} alt={status.description} src={status.image_url} />) : ''}
+          const status = this.statusByContext(context);
+          const StatusIcon = statusIcon(status.state);
+          const dividerStyle = (i > 0) ? { borderTop: '0px' } : {};
+          const statusIconStyle = {
+            color: statusIconColor(status.state),
+            fillColor: statusIconColor(status.state),
+            marginTop: '0.1rem',
+            maxHeight: '0.8rem',
+            maxWidth: '0.8rem',
+            marginLeft: '0.25rem',
+            marginRight: '1rem',
+          };
+          return (
+            <DialogContent
+              key={context}
+              dividers
+              style={{ ...GlobalStyles.PaperSubtleContainerStyle, ...dividerStyle }}
+            >
+              <Typography variant="body1" style={{ ...formTextEmphasizedStyle, display: 'flex', alignItems: 'center' }}>
+                <StatusIcon style={statusIconStyle} />
+                {status.image_url ? (<img style={stateImage} alt={status.description} src={status.image_url} />) : ''}
                   {status.context} <span style={{ ...GlobalStyles.Subtle }}>&nbsp;{( status.description || status.target_url ) ? `—` : ''}&nbsp;{status.description}</span>&nbsp;{status.target_url ? (<a target="_blank" style={GlobalStyles.Link} href={status.target_url}>Details</a>) : ''} { /* eslint-disable-line */ }
-                </Typography>
-              </DialogContent>
-            );
+              </Typography>
+            </DialogContent>
+          );
         })}
         { needed.length === 0 ? (
           <div />
@@ -386,8 +406,8 @@ export default class PipelinePromote extends Component {
             <FormControlLabel
               className="force-check"
               style={{
- flexGrow: '1', marginLeft: '0.5rem', ...GlobalStyles.Subtle, ...GlobalStyles.Text,
-}}
+                flexGrow: '1', marginLeft: '0.5rem', ...GlobalStyles.Subtle, ...GlobalStyles.Text,
+              }}
               control={
                 <Checkbox
                   style={GlobalStyles.Subtle}
@@ -396,10 +416,10 @@ export default class PipelinePromote extends Component {
                   icon={<CheckBoxOutlineBlank fontSize="small" />}
                   checkedIcon={<CheckBox fontSize="small" />}
                 />
-                }
+              }
               label={<span style={GlobalStyles.Text}>Override safety checks</span>}
             />
-            ) : ''}
+          ) : ''}
           <Button onClick={this.props.onCancel} color="secondary">Cancel</Button>
           <Button className="ok" onClick={() => this.handleOk()} variant={promoteButtonVariant} style={promoteButtonStyle} disabled={this.state.loading || (statusChecksFailed && !this.props.isElevated)} color="primary">
               Promote

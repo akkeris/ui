@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, CircularProgress, LinearProgress, Button, Typography,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
 import Search from '../Search';
-import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   stepper: {
@@ -54,7 +54,7 @@ const style = {
 
 const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
-export default class NewAddon extends Component {
+export default class NewAddon extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -75,6 +75,7 @@ export default class NewAddon extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getServices();
   }
 
@@ -85,20 +86,38 @@ export default class NewAddon extends Component {
   }
 
   getServices = async () => {
-    const { data: services } = await api.getAddonServices();
-    const groupedServices = [{ label: 'Services', options: [] }, { label: 'Credentials', options: [] }];
-    services.forEach((addon) => {
-      const formattedAddon = { value: addon.id, label: addon.human_name };
-      groupedServices[addon.human_name.toLowerCase().includes('credential') ? 1 : 0].options.push(formattedAddon);
-    });
-    this.setState({ services, groupedServices, loading: false });
+    try {
+      const { data: services } = await this.api.getAddonServices();
+      const groupedServices = [{ label: 'Services', options: [] }, { label: 'Credentials', options: [] }];
+      services.forEach((addon) => {
+        const formattedAddon = { value: addon.id, label: addon.human_name };
+        groupedServices[addon.human_name.toLowerCase().includes('credential') ? 1 : 0].options.push(formattedAddon);
+      });
+      this.setState({ services, groupedServices, loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   getPlans = async () => {
-    this.setState({ loading: true });
-    let { data: plans } = await api.getAddonServicePlans(this.state.serviceid);
-    plans = plans.filter(x => x.state !== 'deprecated').map(x => ({ value: x.id, label: x.name, human_name: x.human_name, price: x.price, description: x.description }));
-    this.setState({ plans, loading: false });
+    try {
+      this.setState({ loading: true });
+      let { data: plans } = await this.api.getAddonServicePlans(this.state.serviceid);
+      plans = plans.filter(x => x.state !== 'deprecated').map(x => ({
+        value: x.id,
+        label: x.name,
+        human_name: x.human_name,
+        price: x.price,
+        description: x.description,
+      }));
+      this.setState({ plans, loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   formatPrice(cents) { // eslint-disable-line class-methods-use-this
@@ -139,6 +158,7 @@ export default class NewAddon extends Component {
       this.setState({
         stepIndex: stepIndex - 1,
         loading: false,
+        plan: stepIndex === 1 ? {} : this.state.plan,
       });
     }
   }
@@ -146,11 +166,14 @@ export default class NewAddon extends Component {
   submitAddon = async () => {
     try {
       this.setState({ loading: true });
-      let { data: addon } = await api.createAddon(this.props.app, this.state.plan.value);
+      let { data: addon } = await this.api.createAddon(
+        this.props.app,
+        this.state.plan.value,
+      );
 
       for (let i = 0; i < 2000; i++) {
         if (i % 20 === 0) {
-          ({ data: addon } = await api.getAddon(this.props.app, addon.id)); // eslint-disable-line
+          ({ data: addon } = await this.api.getAddon(this.props.app, addon.id)); // eslint-disable-line
         }
         if (i === 1999) {
           throw new Error('It seems this addon is taking too long to complete its task. When the provisioning finishes your application will automatically be restarted with the new addon.');
@@ -169,17 +192,20 @@ export default class NewAddon extends Component {
         await new Promise((res, rej) => setTimeout(res, 500)); // eslint-disable-line
       }
     } catch (error) {
-      if (!error.response) {
-        console.error(error);
+      if (!this.isCancel(error)) {
+        if (error.response) {
+          this.setState({
+            submitMessage: error.response ? error.response.data : error.message,
+            submitFail: true,
+            stepIndex: 0,
+            loading: false,
+            plans: [],
+            plan: {},
+          });
+        } else {
+          console.error(error); // eslint-disable-line no-console
+        }
       }
-      this.setState({
-        submitMessage: error.response ? error.response.data : error.message,
-        submitFail: true,
-        stepIndex: 0,
-        loading: false,
-        plans: [],
-        plan: {},
-      });
     }
   }
 
@@ -210,7 +236,7 @@ export default class NewAddon extends Component {
             <div style={style.selectContainer}>
               <Search
                 options={plans}
-                value={plan ? plan.id : ''}
+                value={(plan && plan.value) ? plan : {}}
                 onChange={this.handlePlanChange}
                 placeholder="Search for a Plan"
               />

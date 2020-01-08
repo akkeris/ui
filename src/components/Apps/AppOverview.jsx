@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, List, ListItem, ListItemText,
@@ -6,9 +6,9 @@ import {
   Divider,
 } from '@material-ui/core';
 
-import api from '../../services/api';
 import ConfirmationModal from '../ConfirmationModal';
 import Audits from '../Audits';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   link: {
@@ -113,7 +113,7 @@ const style = {
   },
 };
 
-class AppOverview extends Component {
+class AppOverview extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -126,18 +126,22 @@ class AppOverview extends Component {
   }
 
   async componentDidMount() {
+    super.componentDidMount();
     let autoBuild;
     try {
-      autoBuild = await api.getAutoBuild(this.props.app.name);
+      autoBuild = await this.api.getAutoBuild(this.props.app.name);
     } catch (err) {
-      autoBuild = null;
+      if (!this.isCancel(err)) {
+        autoBuild = null;
+      } else {
+        return;
+      }
     }
 
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       autoBuild: autoBuild ? autoBuild.data : null,
       loading: false,
     });
-    this._isMounted = true;
   }
 
   componentDidUpdate(prevProps) {
@@ -146,23 +150,20 @@ class AppOverview extends Component {
     }
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
   getRepo = async () => {
     let autoBuild;
     try {
-      autoBuild = await api.getAutoBuild(this.props.app.name);
+      autoBuild = await this.api.getAutoBuild(this.props.app.name);
     } catch (err) {
+      if (this.isCancel(err)) {
+        return;
+      }
       if (err.response.status === 404) {
-        if (this._isMounted) {
-          this.setState({
-            loading: false,
-            autoBuild: null,
-          });
-        }
-      } else if (this._isMounted) {
+        this.setState({
+          loading: false,
+          autoBuild: null,
+        });
+      } else {
         this.setState({
           submitMessage: err.response.data,
           submitFail: true,
@@ -298,8 +299,8 @@ class AppOverview extends Component {
           secondary={this.props.app.image ? this.props.app.image : 'No Releases'}
         />
         <div style={{
- display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px',
-}}
+          display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px',
+        }}
         >
           <div>
             <div style={style.tableCell.main}>

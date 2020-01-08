@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, Button, Collapse,
@@ -8,8 +8,7 @@ import ReactGA from 'react-ga';
 
 import ConfirmationModal from '../ConfirmationModal';
 import KeyValue from './KeyValue';
-
-import api from '../../services/api';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   container: {
@@ -41,7 +40,7 @@ const style = {
   },
 };
 
-export default class NewConfigVar extends Component {
+export default class NewConfigVar extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -80,7 +79,7 @@ export default class NewConfigVar extends Component {
     });
   }
 
-  handleNext = (values, event) => {
+  handleNext = (values) => {
     const { stepIndex } = this.state;
     if (values.every(a => a.key === '')) {
       this.setState({ errorText: 'Must enter at least one valid keypair' });
@@ -124,27 +123,29 @@ export default class NewConfigVar extends Component {
     // remap
     const config = await this.state.values.reduce((aggr, item) => {
       if (item.key && item.value) {
-        aggr[item.key] = item.value.trim();
+        aggr[item.key] = item.value.trim(); // eslint-disable-line
       }
       return aggr;
     }, {});
     try {
-      await api.patchConfig(this.props.app, config);
+      await this.api.patchConfig(this.props.app, config);
       ReactGA.event({
         category: 'APPS',
         action: 'Added new config var(s)',
       });
       this.props.onComplete('Added Config Var');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        loading: false,
-        errorText: null,
-        values: [],
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          loading: false,
+          errorText: null,
+          values: [],
+        });
+      }
     }
   }
 

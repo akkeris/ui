@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import SHA256 from 'crypto-js/sha256';
 import {
@@ -6,7 +6,7 @@ import {
   Dialog, DialogContent, DialogActions, DialogTitle, TableFooter, TablePagination,
 } from '@material-ui/core';
 
-import api from '../../services/api';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   tableRow: {
@@ -68,7 +68,7 @@ function sillyfunc(prefix, input) {
   });
 }
 
-export default class Audits extends Component {
+export default class Audits extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -82,19 +82,19 @@ export default class Audits extends Component {
   }
 
   componentDidMount() {
-    this._isMounted = true;
+    super.componentDidMount();
     this.getAudits();
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
   getAudits = async () => {
-    const { app } = this.props;
-    const { data: audits } = await api.getAudits(app.simple_name, app.space.name, 100);
-    if (this._isMounted) {
+    try {
+      const { app } = this.props;
+      const { data: audits } = await this.api.getAudits(app.simple_name, app.space.name, 100);
       this.setState({ audits, loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
     }
   }
 

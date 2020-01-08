@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import {
   Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Switch,
@@ -7,9 +7,9 @@ import {
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
 
-import api from '../../services/api';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   stepper: {
@@ -54,7 +54,7 @@ const style = {
   },
 };
 
-export default class NewSite extends Component {
+export default class NewSite extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -72,12 +72,19 @@ export default class NewSite extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getRegions();
   }
 
   getRegions = async () => {
-    const { data: regions } = await api.getRegions();
-    this.setState({ regions, loading: false, region: regions[0].name });
+    try {
+      const { data: regions } = await this.api.getRegions();
+      this.setState({ regions, loading: false, region: regions[0].name });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleClose = () => {
@@ -136,24 +143,26 @@ export default class NewSite extends Component {
 
   submitSite = async () => {
     try {
-      await api.createSite(this.state.domain, this.state.region, this.state.internal);
+      await this.api.createSite(this.state.domain, this.state.region, this.state.internal);
       ReactGA.event({
         category: 'SITES',
         action: 'Created new site',
       });
       History.get().push('/sites');
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        errorText: null,
-        domain: '',
-        region: '',
-        internal: false,
-        loading: false,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          errorText: null,
+          domain: '',
+          region: '',
+          internal: false,
+          loading: false,
+        });
+      }
     }
   };
 
@@ -289,7 +298,7 @@ export default class NewSite extends Component {
         <div style={style.div}>
           <Stepper activeStep={stepIndex} style={style.stepper}>
             <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain.length > 12 ? `${domain.slice(0,12)}...` : domain)}>
+              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain.length > 12 ? `${domain.slice(0, 12)}...` : domain)}>
                   Create domain
               </StepLabel>
             </Step>

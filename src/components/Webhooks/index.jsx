@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   CircularProgress, IconButton, Snackbar, Typography, Collapse,
@@ -7,10 +7,10 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
 
-import api from '../../services/api';
 import NewWebhook from './NewWebhook';
 import Webhook from './Webhook';
 import ConfirmationModal from '../ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   refresh: {
@@ -52,7 +52,7 @@ const style = {
   },
 };
 
-export default class Webhooks extends Component {
+export default class Webhooks extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -66,20 +66,21 @@ export default class Webhooks extends Component {
       submitMessage: '',
       events: [],
     };
-    this.getWebhooks();
   }
 
   componentDidMount() {
-    this._isMounted = true;
-  }
-  componentWillUnmount() {
-    this._isMounted = false;
+    super.componentDidMount();
+    this.getWebhooks();
   }
 
   getWebhooks = async () => {
-    const { data: webhooks } = await api.getAppWebhooks(this.props.app);
-    if (this._isMounted) {
+    try {
+      const { data: webhooks } = await this.api.getAppWebhooks(this.props.app);
       this.setState({ webhooks, loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
     }
   }
 
@@ -110,16 +111,22 @@ export default class Webhooks extends Component {
   }
 
   reload = async (message) => {
-    this.setState({ loading: true });
-    const { data: webhooks } = await api.getAppWebhooks(this.props.app);
-    this.setState({
-      webhooks,
-      loading: false,
-      new: false,
-      message,
-      open: true,
-      confirmWebhookOpen: false,
-    });
+    try {
+      this.setState({ loading: true });
+      const { data: webhooks } = await this.api.getAppWebhooks(this.props.app);
+      this.setState({
+        webhooks,
+        loading: false,
+        new: false,
+        message,
+        open: true,
+        confirmWebhookOpen: false,
+      });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   renderWebhooks() {

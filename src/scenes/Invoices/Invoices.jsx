@@ -1,8 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { CircularProgress, Paper } from '@material-ui/core';
-import axios from 'axios';
-import api from '../../services/api';
 import InvoiceList from '../../components/Invoices/InvoiceList';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   refresh: {
@@ -42,7 +41,7 @@ const style = {
   },
 };
 
-export default class Invoices extends Component {
+export default class Invoices extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -52,26 +51,18 @@ export default class Invoices extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getInvoices();
-    this._isMounted = true;
-  }
-
-  componentWillUnmount() {
-    if (this.cancelSource.token) {
-      this.cancelSource.cancel();
-    }
-    this._isMounted = false;
   }
 
   getInvoices = async () => {
-    this.cancelSource = axios.CancelToken.source();
     try {
-      const invoices = await api.getInvoices(true, this.cancelSource.token);
-      if (this._isMounted) {
-        this.setState({ invoices, loading: false });
+      const invoices = await this.api.getInvoices(true);
+      this.setState({ invoices, loading: false });
+    } catch (error) {
+      if (!this.isCancel(error)) {
+        console.error(error); // eslint-disable-line no-console
       }
-    } catch (err) {
-      if (!axios.isCancel(err)) { console.err(err); }
     }
   }
 

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { grey } from '@material-ui/core/colors';
 import {
@@ -14,12 +14,12 @@ import ReleaseIcon from '@material-ui/icons/Backup';
 import RevertIcon from '@material-ui/icons/Replay';
 import RebuildIcon from '../Icons/RebuildIcon';
 import Logs from './Logs';
-import api from '../../services/api';
 import NewBuild from './NewBuild';
 import ConfirmationModal from '../ConfirmationModal';
 import ReleaseStatus from './ReleaseStatus';
 import GlobalStyles from '../../config/GlobalStyles';
 import util from '../../services/util/index';
+import BaseComponent from '../../BaseComponent';
 
 function addRestrictedTooltip(title, placement, children) {
   return (
@@ -163,7 +163,7 @@ const style = {
   },
 };
 
-export default class Releases extends Component {
+export default class Releases extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -184,11 +184,11 @@ export default class Releases extends Component {
       confirmRebuildOpen: false,
       rebuildRelease: null,
     };
-    this.getReleases();
   }
 
   componentDidMount() {
-    this._isMounted = true;
+    super.componentDidMount();
+    this.getReleases();
 
     const { app, accountInfo } = this.props;
 
@@ -209,35 +209,39 @@ export default class Releases extends Component {
 
     this.setState({ isElevated, restrictedSpace }); // eslint-disable-line 
   }
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
 
   getReleases = async () => {
-    const { data: builds } = await api.getBuilds(this.props.app.name);
-    const { data: releases } = await api.getReleases(this.props.app.name);
-    if (this._isMounted) {
+    try {
+      const { data: builds } = await this.api.getBuilds(this.props.app.name);
+      let { data: releases } = await this.api.getReleases(this.props.app.name);
+
+      releases = (await Promise.all(releases
+        .map(async (release) => {
+          const build = builds.filter(b => b.id === release.slug.id);
+          if (build.length === 0 && release.slug && release.slug.id) {
+            // this build may have come from a promotion.
+            build[0] = (await this.api.getSlug(release.slug.id)).data;
+          }
+          const source_blob = build[0] ? build[0].source_blob : {};  // eslint-disable-line 
+          return {
+            release: true, slug: build[0] || {}, source_blob, ...release,
+          };
+        })))
+        .concat(builds
+          .filter(a => !releases.some(x => x.slug.id === a.id))
+          .map(a => Object.assign({
+            releases: releases.filter(b => b.slug.id === a.id),
+          }, a)))
+        .sort((a, b) => (new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1));
+
       this.setState({
-        releases: (await Promise.all(releases
-          .map(async (release) => {
-            const build = builds.filter(b => b.id === release.slug.id);
-            if (build.length === 0 && release.slug && release.slug.id) {
-              // this build may have come from a promotion.
-              build[0] = (await api.getSlug(release.slug.id)).data;
-            }
-            const source_blob = build[0] ? build[0].source_blob : {};  // eslint-disable-line 
-            return {
-              release: true, slug: build[0] || {}, source_blob, ...release,
-            };
-          })))
-          .concat(builds
-            .filter(a => !releases.some(x => x.slug.id === a.id))
-            .map(a => Object.assign({
-              releases: releases.filter(b => b.slug.id === a.id),
-            }, a)))
-          .sort((a, b) => (new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1)),
+        releases,
         loading: false,
       });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
     }
   }
 
@@ -250,9 +254,15 @@ export default class Releases extends Component {
   }
 
   handleRebuild = async () => {
-    this.setState({ confirmRebuildOpen: false });
-    await api.rebuild(this.props.app.name, this.state.rebuildRelease);
-    this.reload('Rebuilding image...');
+    try {
+      this.setState({ confirmRebuildOpen: false });
+      await this.api.rebuild(this.props.app.name, this.state.rebuildRelease);
+      this.reload('Rebuilding image...');
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleRevertOpen(release) {
@@ -264,15 +274,21 @@ export default class Releases extends Component {
   }
 
   handleRevertGo = async () => {
-    this.setState({ revert: null, revertOpen: false, loading: true });
-    await api.createRelease(
-      this.props.app.name,
-      null,
-      this.state.revert.id,
-      `Rollback to release v${this.state.revert.version}`,
-    );
-    this.getReleases();
-    this.setState({ loading: false });
+    try {
+      this.setState({ revert: null, revertOpen: false, loading: true });
+      await this.api.createRelease(
+        this.props.app.name,
+        null,
+        this.state.revert.id,
+        `Rollback to release v${this.state.revert.version}`,
+      );
+      this.getReleases();
+      this.setState({ loading: false });
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
   }
 
   handleClose() {

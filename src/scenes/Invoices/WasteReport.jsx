@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Paper, List, ListSubheader, CircularProgress, LinearProgress,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
-import api from '../../services/api';
 import recommendations from '../../services/util/recommendations';
+import BaseComponent from '../../BaseComponent';
 
 /* eslint-disable no-console */
 
@@ -72,7 +72,7 @@ const style = {
   },
 };
 
-export default class WasteReport extends Component {
+export default class WasteReport extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -87,12 +87,22 @@ export default class WasteReport extends Component {
   }
 
   componentDidMount() {
+    super.componentDidMount();
     this.getData();
   }
 
   getData = async () => {
-    const { data: sizes } = await api.getFormationSizes();
-    let { data: apps } = await api.getApps();
+    let sizes = [];
+    let apps = [];
+    try {
+      ({ data: sizes } = await this.api.getFormationSizes());
+      ({ data: apps } = await this.api.getApps());
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
+
     apps = apps.filter(x => x.organization.name === this.props.match.params.org);
     this.setState({
       sizes,
@@ -102,10 +112,18 @@ export default class WasteReport extends Component {
       progress: 0,
     });
 
+    let queue;
+    try {
+      queue = apps.map(x => () => this.api.getMetrics(x.name))
+        .concat(apps.map(x => () => this.api.getFormations(x.name)))
+        .concat(apps.map(x => () => this.api.getAppAddons(x.name)));
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
+
     const totalRequests = apps.length * 3;
-    const queue = apps.map(x => api.getMetrics.bind(api, x.name))
-      .concat(apps.map(x => api.getFormations.bind(api, x.name)))
-      .concat(apps.map(x => api.getAppAddons.bind(api, x.name)));
     const results = [];
     const errors = [];
 

@@ -10,16 +10,16 @@ const errorColor = 'rgb(203, 36, 49)';
 const successColor = '#2cbe4e';
 
 const GlobalStyles = {
-  NoWrappingText:{
-    whiteSpace:'nowrap', 
-    overflow:'hidden',
-    display:'block',
-    textOverflow:'ellipsis',
+  NoWrappingText: {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    display: 'block',
+    textOverflow: 'ellipsis',
   },
-  LargePadding:{
+  LargePadding: {
     padding: '1rem',
   },
-  StandardPadding:{
+  StandardPadding: {
     padding: '0.25rem 0.5rem',
   },
   StandardLabelMargin: {
@@ -43,63 +43,63 @@ const GlobalStyles = {
     display: 'flex',
     height: '100%',
   },
-  PaddedInnerPanel:{
+  PaddedInnerPanel: {
     padding: '1rem',
   },
   MainPanel: {
-    maxWidth:'1024px',
-    margin:'2rem auto',
+    maxWidth: '1024px',
+    margin: '2rem auto',
     minHeight: '400px',
     marginTop: '2rem',
     marginBottom: '2rem',
   },
-  Subtle:{
-    color:softTextColor,
+  Subtle: {
+    color: softTextColor,
   },
-  FairlySubtle:{
-    color:fairlySoftTextColor,
+  FairlySubtle: {
+    color: fairlySoftTextColor,
   },
-  VerySubtle:{
-    color:verySoftTextColor,
+  VerySubtle: {
+    color: verySoftTextColor,
   },
-  Header:{
-    fontSize:'1rem',
-    fontWeight:'600',
-    marginTop:'0.25rem',
-    marginBottom:'0.25rem',
+  Header: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    marginTop: '0.25rem',
+    marginBottom: '0.25rem',
   },
-  HeaderSmall:{
-    fontSize:'0.85rem',
-    fontWeight:'500',
+  HeaderSmall: {
+    fontSize: '0.85rem',
+    fontWeight: '500',
   },
-  VerticalAlign:{
-    display:'flex', 
-    justifyContent:'space-between', 
-    alignItems:'center',
+  VerticalAlign: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  SubHeader:{
-    fontSize:'0.85rem',
-    fontWeight:'400',
-    display:'block',
+  SubHeader: {
+    fontSize: '0.85rem',
+    fontWeight: '400',
+    display: 'block',
   },
-  TopOfPaperHeaderLarge:{
-    color:softTextColor,
-    fontSize:'1.25rem',
-    lineHeight:'1em',
-    fontWeight:'400',
+  TopOfPaperHeaderLarge: {
+    color: softTextColor,
+    fontSize: '1.25rem',
+    lineHeight: '1em',
+    fontWeight: '400',
     overflow: 'hidden',
-    backgroundColor:'white',
-    borderRadius:'5px 5px 0 0',
-    boxShadow: 'rgba(0, 0, 0, 0.0980392) 0px 0px 0px 1px inset'
+    backgroundColor: 'white',
+    borderRadius: '5px 5px 0 0',
+    boxShadow: 'rgba(0, 0, 0, 0.0980392) 0px 0px 0px 1px inset',
   },
-  PaperSubtleContainerStyle:{
+  PaperSubtleContainerStyle: {
     backgroundColor: softBackground,
   },
-  SubtleContainerStyle:{
+  SubtleContainerStyle: {
     backgroundColor: softBackground,
     boxShadow: '0 0 4px -3px black',
-    padding:'0.25rem 0.75rem',
-    borderRadius: '3px'
+    padding: '0.25rem 0.75rem',
+    borderRadius: '3px',
   },
   CommitLink: {
     display:'inline',
@@ -107,10 +107,10 @@ const GlobalStyles = {
     backgroundColor: softBackground,
     padding: '2.5px 5px 3px 5px',
     borderRadius: '2.5px',
-    boxShadow: 'rgba(0, 0, 0, 0.0980392) 0px 0px 0px 1px inset'
+    boxShadow: 'rgba(0, 0, 0, 0.0980392) 0px 0px 0px 1px inset',
   },
   CommitLinkPre: {
-    display:'inline'
+    display: 'inline',
   },
   Link: {
     color: linkColor,
@@ -127,9 +127,9 @@ const GlobalStyles = {
     color: 'white',
   },
   Text: {
-    fontSize:'0.85rem',
-    lineHieght:'1rem',
-  }
+    fontSize: '0.85rem',
+    lineHieght: '1rem',
+  },
 };
 
 /* Composite Styles */

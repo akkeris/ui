@@ -1,14 +1,13 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   FormGroup, FormControlLabel, Switch, Typography, FormControl, Radio, RadioGroup, FormLabel,
   Step, Stepper, StepLabel, Button, TextField, Collapse,
 } from '@material-ui/core';
 import gh from 'parse-github-url';
-import ConfirmationModal from '../ConfirmationModal';
 import ReactGA from 'react-ga';
-
-import api from '../../services/api';
+import ConfirmationModal from '../ConfirmationModal';
+import BaseComponent from '../../BaseComponent';
 
 const style = {
   stepper: {
@@ -36,7 +35,7 @@ const style = {
   },
 };
 
-export default class NewAutoBuild extends Component {
+export default class NewAutoBuild extends BaseComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
@@ -111,7 +110,7 @@ export default class NewAutoBuild extends Component {
 
   submitBuild = async () => {
     try {
-      await api.createAutoBuild(
+      await this.api.createAutoBuild(
         this.props.app,
         this.state.repo,
         (this.state.branch === '' ? 'master' : this.state.branch),
@@ -126,18 +125,20 @@ export default class NewAutoBuild extends Component {
         action: 'App attached to repo',
       });
     } catch (error) {
-      this.setState({
-        submitMessage: error.response.data,
-        submitFail: true,
-        finished: false,
-        stepIndex: 0,
-        loading: false,
-        branch: '',
-        repo: '',
-        autoDeploy: true,
-        username: null,
-        statusCheck: true,
-      });
+      if (!this.isCancel(error)) {
+        this.setState({
+          submitMessage: error.response.data,
+          submitFail: true,
+          finished: false,
+          stepIndex: 0,
+          loading: false,
+          branch: '',
+          repo: '',
+          autoDeploy: true,
+          username: null,
+          statusCheck: true,
+        });
+      }
     }
   }
 
