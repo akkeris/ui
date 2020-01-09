@@ -75,8 +75,9 @@ export default class KeyValue extends BaseComponent {
   renderAddConfigVar() {
     return (
       <TableRow hover className="new-config-var" key="new-config-var" style={style.tableRow}>
-        <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
+        <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell}}>
           <TextField
+            style={{maxWidth:'300px'}}
             className="new-config-var-key"
             onChange={event => this.setState({ key: event.target.value })}
             InputProps={{ style: style.configVar.textField }}
@@ -92,6 +93,7 @@ export default class KeyValue extends BaseComponent {
         </TableCell>
         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
           <TextField
+            style={{maxWidth:'450px'}}
             className="new-config-var-value"
             onChange={event => this.setState({ value: event.target.value })}
             InputProps={{ style: style.configVar.textField }}
