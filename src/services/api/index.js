@@ -292,7 +292,7 @@ function getConfig(app) {
 }
 
 function getConfigNotes(app) {
-  return axios.get(`/api/apps/${app}/config-vars/notes`);
+  return axios.get(`/api/apps/${app}/config-vars/notes`, { cancelToken: this.cancelToken });
 }
 
 function patchConfig(app, values) {

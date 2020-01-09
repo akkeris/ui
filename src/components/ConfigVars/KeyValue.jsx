@@ -58,11 +58,10 @@ export default class KeyValue extends BaseComponent {
   }
 
   handleAddConfigVar() {
-    if (this.state.key.trim() === '') {
-      return;
+    if (this.state.key.trim() !== '') {
+      this.props.onChange(this.state.key, this.state.value, this.state.notes);
+      this.setState({ key: '', value: '' });
     }
-    this.props.onChange(this.state.key, this.state.value, this.state.notes);
-    this.setState({ key: '', value: '' });
   }
 
   handleEditConfigVar() {
@@ -119,22 +118,17 @@ export default class KeyValue extends BaseComponent {
     );
   }
 
-  renderConfigVarNotes() { /* eslint-disable-line */
-    if(this.props.notes && this.props.notes.description && this.props.notes.description !== "") { /* eslint-disable-line */
-      return ( /* eslint-disable-line */
-        <Tooltip title={this.props.notes.description} placement="top-start">
-          <IconButton>
-            <InfoIcon style={GlobalStyles.Subtle} />
-          </IconButton>
-        </Tooltip>
-      );
-    }
+  renderConfigVarNotes() { 
+    return ( 
+      <Tooltip title={this.props.notes.description} placement="top-start">
+        <IconButton>
+          <InfoIcon style={GlobalStyles.Subtle} />
+        </IconButton>
+      </Tooltip>
+    );
   }
 
   renderEditAction() {
-    if (this.props.locked) {
-      return; /* eslint-disable-line */
-    }
     const disabled = this.props.deleted || !this.props.editable;
     const editStyle = disabled ? GlobalStyles.VerySubtle : GlobalStyles.Suble;
     return ( /* eslint-disable-line */
@@ -146,13 +140,10 @@ export default class KeyValue extends BaseComponent {
     );
   }
 
-  renderDeleteAction() { /* eslint-disable-line */
-    if (this.props.locked) {
-      return;
-    }
+  renderDeleteAction() {
     const disabled = this.props.deleted || this.props.required;
     const deleteStyle = disabled ? GlobalStyles.VerySubtle : GlobalStyles.Suble;
-    return ( /* eslint-disable-line */
+    return (
       <Tooltip title="Remove" placement="top-start">
         <IconButton
           className="remove"
@@ -175,23 +166,23 @@ export default class KeyValue extends BaseComponent {
     if (this.props.deleted) {
       configVarStyle.textDecoration = 'line-through';
     }
-
+    const hasNotes = this.props.notes && this.props.notes.description && this.props.notes.description !== "";
     return (
-       <TableRow className={this.props.configkey} key={this.props.configkey} style={style.tableRow}> { /* eslint-disable-line */ }
-         <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
+      <TableRow className={this.props.configkey} key={this.props.configkey} style={style.tableRow}> { /* eslint-disable-line */ }
+        <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
           <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.configkey}</span> { /* eslint-disable-line */ }
-         </TableCell>
-         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
+        </TableCell>
+        <TableCell style={{ ...style.configVar, ...style.tableCell }}>
           <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.value}</span> { /* eslint-disable-line */ }
-         </TableCell>
-         <TableCell style={style.tableCell}>
-           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-             {this.renderConfigVarNotes()}
-             {this.renderEditAction()}
-             {this.renderDeleteAction()}
-           </div>
-         </TableCell>
-       </TableRow>
+        </TableCell>
+        <TableCell style={style.tableCell}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {hasNotes && this.renderConfigVarNotes()}
+            {this.props.locked && this.renderEditAction()}
+            {this.props.locked && this.renderDeleteAction()}
+          </div>
+        </TableCell>
+      </TableRow>
     );
   }
 

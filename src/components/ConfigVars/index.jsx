@@ -321,9 +321,6 @@ export default class ConfigVar extends BaseComponent {
   }
 
   renderAddConfigVar() {
-    if (this.state.locked) {
-      return; /* eslint-disable-line */
-    }
     return ( /* eslint-disable-line */
       <KeyValue
         key="new-config-var-key"
