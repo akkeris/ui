@@ -178,8 +178,8 @@ export default class KeyValue extends BaseComponent {
         <TableCell style={style.tableCell}>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             {hasNotes && this.renderConfigVarNotes()}
-            {this.props.locked && this.renderEditAction()}
-            {this.props.locked && this.renderDeleteAction()}
+            {!this.props.locked && this.renderEditAction()}
+            {!this.props.locked && this.renderDeleteAction()}
           </div>
         </TableCell>
       </TableRow>
