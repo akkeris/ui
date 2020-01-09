@@ -17,13 +17,6 @@ const originalState = {
   safe: false,
 };
 
-const formSubHeaderStyle = {
-  ...GlobalStyles.StandardLabelMargin,
-  ...GlobalStyles.HeaderSmall,
-  ...GlobalStyles.Subtle,
-  fontSize: '0.75rem',
-  textTransform: 'uppercase',
-};
 const formTextStyle = {
   display: 'block',
   ...GlobalStyles.StandardLabelMargin,
@@ -219,13 +212,13 @@ export default class PipelinePromote extends BaseComponent {
         {!this.state.editRelease ? (
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText }}>
             { commitUrl ? (
-              <a style={GlobalStyles.CommitLink} target="_blank" href={commitUrl}>
-                <pre style={GlobalStyles.CommitLinkPre}><code>#{commitSha}</code></pre>
+              <a style={{textDecoration:'none'}} target="_blank" href={commitUrl}>
+                <pre style={GlobalStyles.CommitLink} ><code>#{commitSha}</code></pre>
               </a>
             ) : '' }
             <span style={GlobalStyles.Subtle}> {description}</span>
             <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle, marginBottom: '0' }}>
-              Deployed <pre style={GlobalStyles.CommitLinkPre}><code>v{this.state.release.version}</code></pre>  { /* eslint-disable-line */ }
+              Deployed <pre style={GlobalStyles.CommitLink}><code>v{this.state.release.version}</code></pre>  { /* eslint-disable-line */ }
               <span style={{ float: 'right' }}>{util.getDateDiff(this.state.release.created_at)}</span>
             </div>
           </div>
@@ -266,8 +259,8 @@ export default class PipelinePromote extends BaseComponent {
           </div>
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText }}>
             { coupling.release.build.commit && coupling.release.build.commit.sha ? (
-              <a style={GlobalStyles.CommitLink} target="_blank" href={commitUrl}>
-                <pre style={GlobalStyles.CommitLinkPre}>
+              <a style={{textDecoration:'none'}} target="_blank" href={commitUrl}>
+                <pre style={GlobalStyles.CommitLink}>
                   <code>#{coupling.release.build.commit.sha.substring(0, 7)}</code>
                 </pre>
               </a>
@@ -275,7 +268,7 @@ export default class PipelinePromote extends BaseComponent {
             <span style={GlobalStyles.Subtle}> {description}</span>
           </div>
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle }}>
-            Deployed <pre style={GlobalStyles.CommitLinkPre}><code>v{coupling.release.version}</code></pre> { /* eslint-disable-line */ }
+            Deployed <pre style={GlobalStyles.CommitLink}><code>v{coupling.release.version}</code></pre> { /* eslint-disable-line */ }
             <span style={{ float: 'right' }}>{util.getDateDiff(coupling.release.updated_at)}</span>
           </div>
         </Paper>
@@ -307,7 +300,7 @@ export default class PipelinePromote extends BaseComponent {
                 <Typography variant="h3" style={{ ...GlobalStyles.Header, ...GlobalStyles.SuccessText }}>
                     All checks have passed
                 </Typography>
-                  <Typography variant="body1" style={{ ...GlobalStyles.SubHeader }}>{required.length} successful checks</Typography> { /* eslint-disable-line */ }
+                <Typography variant="body1" style={{ ...GlobalStyles.SubHeader }}>{required.length} successful checks</Typography> { /* eslint-disable-line */ }
               </div>
             ) :
             (
@@ -315,7 +308,7 @@ export default class PipelinePromote extends BaseComponent {
                 <Typography variant="h3" style={{ ...GlobalStyles.Header, ...GlobalStyles.ErrorText }}>
                     Some checks have not succeeded.
                 </Typography>
-                  <Typography variant="body1" style={{ ...GlobalStyles.SubHeader }}>{needed.length} of {required.length} status checks have not succeeded</Typography> { /* eslint-disable-line */ }
+                <Typography variant="body1" style={{ ...GlobalStyles.SubHeader }}>{needed.length} of {required.length} status checks have not succeeded</Typography> { /* eslint-disable-line */ }
               </div>
             )
           }
@@ -375,14 +368,14 @@ export default class PipelinePromote extends BaseComponent {
     return (
       <div>
         <DialogContent dividers style={{ ...GlobalStyles.PaperSubtleContainerStyle }}>
-          <Typography id="dialog-description" variant="h6" style={{ ...formSubHeaderStyle }}>
+          <Typography id="dialog-description" variant="h6" style={{ ...GlobalStyles.FormSubHeaderStyle }}>
             From {this.props.stage}
           </Typography>
           {this.renderSource()}
         </DialogContent>
         {this.renderPipelineStatus()}
         <DialogContent dividers style={{ ...GlobalStyles.PaperSubtleContainerStyle }}>
-          <Typography id="dialog-description2" variant="h6" style={{ ...formSubHeaderStyle }}>
+          <Typography id="dialog-description2" variant="h6" style={{ ...GlobalStyles.FormSubHeaderStyle }}>
             To {this.props.stages[this.props.stage]}
           </Typography>
           {this.renderTargets()}

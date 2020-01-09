@@ -291,8 +291,16 @@ function getConfig(app) {
   return axios.get(`/api/apps/${app}/config-vars`, { cancelToken: this.cancelToken });
 }
 
+function getConfigNotes(app) {
+  return axios.get(`/api/apps/${app}/config-vars/notes`, { cancelToken: this.cancelToken });
+}
+
 function patchConfig(app, values) {
   return axios.patch(`/api/apps/${app}/config-vars`, values, { cancelToken: this.cancelToken });
+}
+
+function patchConfigNotes(app, values) {
+  return axios.patch(`/api/apps/${app}/config-vars/notes`, values, { cancelToken: this.cancelToken });
 }
 
 function getLogs(app) {
@@ -517,6 +525,8 @@ export default {
   deleteWebhook,
   getBuilds,
   getConfig,
+  getConfigNotes,
+  patchConfigNotes,
   getLogs,
   getMetrics,
   getBuildResult,

@@ -128,7 +128,7 @@ export default class CreateOrUpdatePipelineCoupling extends BaseComponent {
         <div key="status-check-box" style={{ marginTop: '2rem' }}>
           <Typography variant="h6" style={formSubHeaderStyle}>Require these status checks before allowing promotions</Typography>
           <Typography variant="body1" style={formTextStyle}>
-            Choose which <Link rel="noopener" target="_blank" href="https://docs.akkeris.io/architecture/pipelines.html">status checks</Link> must pass before code can be promoted to the <pre style={GlobalStyles.CommitLinkPre}><code>{this.props.stage}</code></pre> stage. When enabled, code may not be introduced into this app or stage of the pipeline without first being deployed to a prior stage where the checks have passed.
+            Choose which <Link rel="noopener" target="_blank" href="https://docs.akkeris.io/architecture/pipelines.html">status checks</Link> must pass before code can be promoted to the <pre style={GlobalStyles.CommitLink}><code>{this.props.stage}</code></pre> stage. When enabled, code may not be introduced into this app or stage of the pipeline without first being deployed to a prior stage where the checks have passed.
           </Typography>
           <div key="status-check-list" style={{ ...GlobalStyles.SubtleContainerStyle }}>
             {this.state.statuses.map(status => (
@@ -223,7 +223,7 @@ export default class CreateOrUpdatePipelineCoupling extends BaseComponent {
         <DialogContent style={{ overflowY: 'visible', minHeight: '340px' }} dividers>
           {!this.props.coupling ? (
             <Typography id="dialog-description" variant="h6" style={formSubHeaderStyle}>
-              Choose an application to add to the <pre style={GlobalStyles.CommitLinkPre}><code>{this.props.stage}</code></pre> stage in the <pre style={GlobalStyles.CommitLinkPre}><code>{this.props.pipeline.name}</code></pre> pipeline. { /* eslint-disable-line */ }
+              Choose an application to add to the <pre style={GlobalStyles.CommitLink}><code>{this.props.stage}</code></pre> stage in the <pre style={GlobalStyles.CommitLink}><code>{this.props.pipeline.name}</code></pre> pipeline. { /* eslint-disable-line */ }
             </Typography>
           ) : (
             <Typography id="dialog-description" variant="h6" style={formSubHeaderStyle}>
