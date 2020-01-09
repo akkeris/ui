@@ -75,8 +75,9 @@ export default class KeyValue extends BaseComponent {
   renderAddConfigVar() {
     return (
       <TableRow hover className="new-config-var" key="new-config-var" style={style.tableRow}>
-        <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
+        <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell}}>
           <TextField
+            style={{maxWidth:'300px'}}
             className="new-config-var-key"
             onChange={event => this.setState({ key: event.target.value })}
             InputProps={{ style: style.configVar.textField }}
@@ -92,6 +93,7 @@ export default class KeyValue extends BaseComponent {
         </TableCell>
         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
           <TextField
+            style={{maxWidth:'450px'}}
             className="new-config-var-value"
             onChange={event => this.setState({ value: event.target.value })}
             InputProps={{ style: style.configVar.textField }}
@@ -170,7 +172,7 @@ export default class KeyValue extends BaseComponent {
     return (
       <TableRow className={this.props.configkey} key={this.props.configkey} style={style.tableRow}> { /* eslint-disable-line */ }
         <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
-          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.configkey}</span> { /* eslint-disable-line */ }
+          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle, 'maxWidth':'300px'}}>{this.props.configkey}</span> { /* eslint-disable-line */ }
         </TableCell>
         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
           <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.value}</span> { /* eslint-disable-line */ }
