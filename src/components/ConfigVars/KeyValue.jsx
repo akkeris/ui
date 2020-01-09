@@ -170,7 +170,7 @@ export default class KeyValue extends BaseComponent {
     return (
       <TableRow className={this.props.configkey} key={this.props.configkey} style={style.tableRow}> { /* eslint-disable-line */ }
         <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
-          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.configkey}</span> { /* eslint-disable-line */ }
+          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle, 'maxWidth':'300px'}}>{this.props.configkey}</span> { /* eslint-disable-line */ }
         </TableCell>
         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
           <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.value}</span> { /* eslint-disable-line */ }
