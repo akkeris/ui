@@ -361,7 +361,7 @@ export default class ConfigVar extends BaseComponent {
         );
       })
       .concat([
-        this.renderAddConfigVar(),
+        !this.state.locked ? this.renderAddConfigVar() : null,
       ])
       .concat(Object.keys(this.state.serviceConfig).map((addonId) => {
         const addon = this.state.serviceConfig[addonId].addon; /* eslint-disable-line */
