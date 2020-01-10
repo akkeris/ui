@@ -94,13 +94,17 @@ export default class AttachAddon extends BaseComponent {
   }
 
   getAddons = async (prevState) => {
-    this.setState({ loading: true }); // eslint-disable-line react/no-did-update-set-state
+    this.setState({ loading: true });
+    const { app } = this.state;
     try {
-      const response = await this.api.getAppAddons(this.state.app);
-      this.setState({ addons: response.data, addon: response.data[0], loading: false });
+      const { data: addons } = await this.api.getAppAddons(app);
+      if (!addons || addons.length < 1) {
+        this.setState(prevState, () => this.setState({ loadingErrorMessage: `Specified app "${app}" does not have any addons.`, loadingError: true }));
+      }
+      this.setState({ addons, addon: addons[0], loading: false });
     } catch (err) {
       if (!this.isCancel(err)) {
-        this.setState(prevState, () => this.setState({ loadingErrorMessage: 'Could not find specified app', loadingError: true }));
+        this.setState(prevState, () => this.setState({ loadingErrorMessage: `Could not find specified app "${app}"`, loadingError: true }));
       }
     }
   }
