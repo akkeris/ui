@@ -212,7 +212,7 @@ export default class PipelinePromote extends BaseComponent {
         {!this.state.editRelease ? (
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText }}>
             { commitUrl ? (
-              <a style={{textDecoration:'none'}} target="_blank" href={commitUrl}>
+              <a style={{ textDecoration: 'none' }} target="_blank" href={commitUrl}>
                 <pre style={GlobalStyles.CommitLink} ><code>#{commitSha}</code></pre>
               </a>
             ) : '' }
@@ -259,7 +259,7 @@ export default class PipelinePromote extends BaseComponent {
           </div>
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText }}>
             { coupling.release.build.commit && coupling.release.build.commit.sha ? (
-              <a style={{textDecoration:'none'}} target="_blank" href={commitUrl}>
+              <a style={{ textDecoration: 'none' }} target="_blank" href={commitUrl}>
                 <pre style={GlobalStyles.CommitLink}>
                   <code>#{coupling.release.build.commit.sha.substring(0, 7)}</code>
                 </pre>
@@ -268,8 +268,13 @@ export default class PipelinePromote extends BaseComponent {
             <span style={GlobalStyles.Subtle}> {description}</span>
           </div>
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle }}>
-            Deployed <pre style={GlobalStyles.CommitLink}><code>v{coupling.release.version}</code></pre> { /* eslint-disable-line */ }
-            <span style={{ float: 'right' }}>{util.getDateDiff(coupling.release.updated_at)}</span>
+            {coupling.release.version ? (
+              <React.Fragment>
+                {'Deployed '}
+                <pre style={GlobalStyles.CommitLink}><code>v{coupling.release.version}</code></pre>
+                <span style={{ float: 'right' }}>{util.getDateDiff(coupling.release.updated_at)}</span>
+              </React.Fragment>
+            ) : <span>This app does not have any releases.</span>}
           </div>
         </Paper>
       );
