@@ -38,12 +38,15 @@ const style = {
     },
   },
   refresh: {
+    tableCell: {
+      padding: '0px',
+    },
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '350px',
-      marginTop: '20%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexGrow: 1,
+      height: '450px',
     },
     indicator: {
       display: 'inline-block',
@@ -456,10 +459,10 @@ export default class ConfigVar extends BaseComponent {
               </Typography>
               <Paper style={{ marginBottom: '0.5rem', ...GlobalStyles.StandardPadding }}>
                 {this.state.proposeAdded.map(x => (
-                    <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
-                      {x}={JSON.stringify(this.state.changes[x])}
-                    </div>
-                  ))}
+                  <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
+                    {x}={JSON.stringify(this.state.changes[x])}
+                  </div>
+                ))}
               </Paper>
             </div>
           ) : ''}
@@ -470,10 +473,10 @@ export default class ConfigVar extends BaseComponent {
               </Typography>
               <Paper style={{ marginBottom: '0.5rem', ...GlobalStyles.StandardPadding }}>
                 {this.state.proposeRemoved.map(x => (
-                    <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
-                      {x}={JSON.stringify(this.state.changes[x])}
-                    </div>
-                  ))}
+                  <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
+                    {x}={JSON.stringify(this.state.changes[x])}
+                  </div>
+                ))}
               </Paper>
             </div>
           ) : ''}
@@ -484,10 +487,10 @@ export default class ConfigVar extends BaseComponent {
               </Typography>
               <Paper style={{ marginBottom: '0.5rem', ...GlobalStyles.StandardPadding }}>
                 {this.state.proposeUpdated.map(x => (
-                    <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
-                      {x}={JSON.stringify(this.state.changes[x])}
-                    </div>
-                  ))}
+                  <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
+                    {x}={JSON.stringify(this.state.changes[x])}
+                  </div>
+                ))}
               </Paper>
             </div>
           ) : ''}
@@ -498,10 +501,10 @@ export default class ConfigVar extends BaseComponent {
               </Typography>
               <Paper style={{ marginBottom: '0.5rem', ...GlobalStyles.StandardPadding }}>
                 {this.state.proposeMetadata.map(x => (
-                    <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
-                      {x}
-                    </div>
-                  ))}
+                  <div key={"code-style-" + x} style={configVarStyle}> { /* eslint-disable-line */ }
+                    {x}
+                  </div>
+                ))}
               </Paper>
             </div>
           ) : ''}
@@ -628,22 +631,23 @@ export default class ConfigVar extends BaseComponent {
 
   renderLoading() { /* eslint-disable-line */
     return (
-      <div style={style.refresh.div}>
-        <CircularProgress
-          top={0}
-          size={40}
-          left={0}
-          style={style.refresh.indicator}
-          status="loading"
-        />
-      </div>
+      <TableRow>
+        <TableCell style={style.refresh.tableCell} colSpan={3}>
+          <div style={style.refresh.div}>
+            <CircularProgress
+              top={0}
+              size={40}
+              left={0}
+              style={style.refresh.indicator}
+              status="loading"
+            />
+          </div>
+        </TableCell>
+      </TableRow>
     );
   }
 
   render() {
-    if (this.state.loading) {
-      return this.renderLoading();
-    }
     return (
       <div>
         <Table className="config-list">
@@ -657,7 +661,10 @@ export default class ConfigVar extends BaseComponent {
             {this.renderHeader()}
           </TableHead>
           <TableBody>
-            {isEmpty(this.state.config) ? this.renderNoConfigVars() : this.renderConfigVars()}
+            {this.state.loading && this.renderLoading()}
+            {!this.state.loading && (
+              isEmpty(this.state.config) ? this.renderNoConfigVars() : this.renderConfigVars()
+            )}
           </TableBody>
         </Table>
         {this.renderEditConfigVarDialog()}

@@ -32,12 +32,16 @@ const style = {
     paddingTop: '5px',
   },
   gridContainer: {
-    width: '400px',
+    width: '550px',
   },
-  stepper: {
+  root: {
     width: '100%',
     maxWidth: 700,
     margin: 'auto',
+    paddingBottom: '12px',
+  },
+  stepper: {
+    height: '40px',
   },
   buttons: {
     div: {
@@ -70,6 +74,27 @@ const style = {
   bold: {
     fontWeight: 'bold',
   },
+  refresh: {
+    div: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexGrow: 1,
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
+    },
+  },
+  contentContainer: {
+    margin: '0 32px', height: '330px', display: 'flex', flexDirection: 'column',
+  },
+  stepContainer: {
+    flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+  },
+  buttonContainer: {
+    paddingTop: '12px',
+  },
 };
 
 const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'preview-released', 'released', 'crashed'];
@@ -88,6 +113,7 @@ export default class NewWebhook extends BaseComponent {
       errorText: '',
       checkedAll: false,
       eventsDialogOpen: false,
+      loading: false,
     };
   }
 
@@ -172,7 +198,7 @@ export default class NewWebhook extends BaseComponent {
 
   submitWebHook = async () => {
     try {
-      this.setState({ stepIndex: 4 });
+      this.setState({ loading: true });
       await this.api.createWebHook(this.props.app, this.state.url, this.state.events, this.state.secret ? this.state.secret : ' ');
       ReactGA.event({
         category: 'WEBHOOK',
@@ -291,13 +317,6 @@ export default class NewWebhook extends BaseComponent {
             </Typography>
           </div>
         );
-        // Have to have this otherwise it displays "Error- Captain Hook not found" on submit
-      case 4:
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress />
-          </div>
-        );
       default:
         return 'Error- Captain Hook not found';
     }
@@ -305,7 +324,7 @@ export default class NewWebhook extends BaseComponent {
 
   renderEventCheckboxes() { // eslint-disable-line class-methods-use-this
     return defaultEvents.map(event => (
-      <Grid key={`checkbox-${event}`} item xs={6}>
+      <Grid key={`checkbox-${event}`} item xs={4}>
         <FormControlLabel
           control={
             <Checkbox
@@ -346,40 +365,36 @@ export default class NewWebhook extends BaseComponent {
   }
 
   renderContent() {
-    const { stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'visible' };
+    const { loading, stepIndex } = this.state;
     return (
-      <div style={contentStyle}>
-        <div>{this.renderStepContent(stepIndex)}</div>
-        <div style={style.buttons.div}>
-          {stepIndex > 0 && (
-            <Button
-              className="back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.back}
-            >Back</Button>
-          )}
-          {stepIndex < 3 && (
-            <Button
-              variant="contained"
-              className="next"
-              color="primary"
-              onClick={this.handleNext}
-            >
-              Next
-            </Button>
-          )}
-          {stepIndex >= 3 && (
-            <Button
-              variant="contained"
-              className="next"
-              color="primary"
-              onClick={this.submitWebHook}
-            >
-              Finish
-            </Button>
-          )}
+      <div style={style.contentContainer}>
+        {!loading ? (
+          <div style={style.stepContainer}>
+            {this.renderStepContent(stepIndex)}
+          </div>
+        ) : (
+          <div style={style.refresh.div}>
+            <CircularProgress top={0} size={40} left={0} status="loading" />
+          </div>
+        )}
+        <div style={style.buttonContainer}>
+          <Button
+            className="back"
+            disabled={stepIndex === 0}
+            onClick={this.handlePrev}
+            style={style.buttons.back}
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            className="next"
+            color="primary"
+            onClick={stepIndex > 2 ? this.submitWebHook : this.handleNext}
+            disabled={stepIndex > 3}
+          >
+            {stepIndex < 3 ? 'Next' : 'Finish'}
+          </Button>
         </div>
       </div>
     );
@@ -388,8 +403,8 @@ export default class NewWebhook extends BaseComponent {
   render() {
     const { stepIndex, submitFail, submitMessage } = this.state;
     return (
-      <div style={style.stepper}>
-        <Stepper activeStep={stepIndex}>
+      <div style={style.root}>
+        <Stepper style={style.stepper} activeStep={stepIndex}>
           <Step>
             <StepLabel>Choose URL</StepLabel>
           </Step>
@@ -403,9 +418,7 @@ export default class NewWebhook extends BaseComponent {
             <StepLabel>Confirm</StepLabel>
           </Step>
         </Stepper>
-        <div>
-          {this.renderContent()}
-        </div>
+        {this.renderContent()}
         <ConfirmationModal
           open={submitFail}
           onOk={this.handleClose}

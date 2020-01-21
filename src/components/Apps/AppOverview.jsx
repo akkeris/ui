@@ -25,12 +25,11 @@ const style = {
   },
   refresh: {
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '40px',
-      marginTop: '10%',
-      paddingBottom: '10%',
+      height: '511px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     indicator: {
       display: 'inline-block',

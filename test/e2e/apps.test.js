@@ -396,7 +396,9 @@ test('Should be able to toggle into maintenance mode', async (t) => { // eslint-
     .typeText('.new-type input', 'web')
     .click('button.next')
     .click('button.next') // quantity (1)
-    .click('button.next') // size (gp1)
+    .typeText(Selector('.select-textfield'), 'gp1')
+    .pressKey('enter')
+    .click('button.next')
     .typeText('.new-port input', '8000', { replace: true })
     .click('button.next')
     .click('button.next') // summary
@@ -478,7 +480,8 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     // Check step 2 caption
     .expect(Selector('.step-1-label .step-label-caption').innerText)
     .contains('2')
-    .click('.new-size .gp2')
+    .typeText(Selector('.select-textfield'), 'gp2')
+    .pressKey('enter')
     .click('button.next')
 
     // Check step 3 caption
@@ -503,6 +506,8 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .typeText('.new-type input', 'web')
     .click('button.next')
     .click('button.next')
+    .typeText(Selector('.select-textfield'), 'gp1')
+    .pressKey('enter')
     .click('button.next')
     .click('button.next')
     .click('button.next')

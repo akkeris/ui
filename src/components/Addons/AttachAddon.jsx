@@ -10,29 +10,27 @@ import util from '../../services/util';
 import BaseComponent from '../../BaseComponent';
 
 const style = {
-  stepper: {
+  root: {
     width: '100%',
     maxWidth: 700,
     margin: 'auto',
     minHeight: 200,
+    paddingBottom: '12px',
+  },
+  stepper: {
+    height: '40px',
   },
   buttons: {
-    div: {
-      marginTop: 24,
-      marginBottom: 12,
-    },
     back: {
       marginRight: 12,
     },
   },
   refresh: {
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '50px',
-      paddingTop: '36px',
-      paddingBottom: '36px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexGrow: 1,
     },
     indicator: {
       display: 'inline-block',
@@ -47,6 +45,15 @@ const style = {
   },
   stepDescription: {
     marginTop: '24px',
+  },
+  contentContainer: {
+    margin: '0 32px', height: '200px', display: 'flex', flexDirection: 'column',
+  },
+  stepContainer: {
+    flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+  },
+  buttonContainer: {
+    paddingTop: '12px',
   },
 };
 
@@ -111,7 +118,6 @@ export default class AttachAddon extends BaseComponent {
 
   handleSearch = (searchText) => {
     this.setState({ app: searchText });
-    this.handleNext();
   }
 
   handleClose = () => {
@@ -154,7 +160,7 @@ export default class AttachAddon extends BaseComponent {
         category: 'ADDONS',
         action: 'Attached new addon',
       });
-      this.props.onComplete('Addon Attached');
+      this.props.onComplete('Addon Attached', true);
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({
@@ -195,6 +201,8 @@ export default class AttachAddon extends BaseComponent {
               handleSearch={this.handleSearch}
               errorText={this.state.errorText}
               color="black"
+              holdSelection
+              initialValue={this.state.app}
             />
             <Typography variant="body2" style={style.stepDescription}>
               {'Select the application that has an addon that you want to attach (e.g. test-dev).'}
@@ -233,48 +241,48 @@ export default class AttachAddon extends BaseComponent {
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0px 32px 24px' };
-    if (finished) {
-      this.submitAddonAttachment();
-    } else {
-      return (
-        <div style={contentStyle}>
-          <div>{this.renderStep(stepIndex)}</div>
-          <div style={style.buttons.div}>
-            {stepIndex > 0 && (
-              <Button
-                className="back"
-                disabled={stepIndex === 0}
-                onClick={this.handlePrev}
-                style={style.buttons.back}
-              >
-                Back
-              </Button>
-            )}
-            {stepIndex > 0 && (
-              <Button
-                variant="contained"
-                className="next"
-                color="primary"
-                onClick={this.handleNext}
-              >
-                {stepIndex === 2 ? 'Finish' : 'Next'}
-              </Button>
-            )}
+    const { stepIndex, loading } = this.state;
+
+    return (
+      <div style={style.contentContainer}>
+        {!loading ? (
+          <div style={style.stepContainer}>
+            {this.renderStep(stepIndex)}
           </div>
+        ) : (
+          <div style={style.refresh.div}>
+            <CircularProgress top={0} size={40} left={0} status="loading" />
+          </div>
+        )}
+        <div style={style.buttonContainer}>
+          <Button
+            className="back"
+            disabled={stepIndex === 0}
+            onClick={this.handlePrev}
+            style={style.buttons.back}
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            className="next"
+            color="primary"
+            onClick={stepIndex > 1 ? this.submitAddonAttachment : this.handleNext}
+            disabled={(stepIndex === 0 && this.state.app === '') || stepIndex > 2}
+          >
+            {stepIndex < 2 ? 'Next' : 'Finish'}
+          </Button>
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   }
 
   render() {
-    const { loading, stepIndex, finished, app, addon } = this.state;
+    const { stepIndex, app, addon } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
-      <div style={style.stepper}>
-        <Stepper activeStep={stepIndex}>
+      <div style={style.root}>
+        <Stepper style={style.stepper} activeStep={stepIndex}>
           <Step>
             <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app)}>
                 Select App
@@ -289,16 +297,7 @@ export default class AttachAddon extends BaseComponent {
             <StepLabel>Confirm</StepLabel>
           </Step>
         </Stepper>
-        {(!loading || finished) && (
-          <div>
-            {this.renderContent()}
-          </div>
-        )}
-        {loading && (
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        )}
+        {this.renderContent()}
         <ConfirmationModal
           open={this.state.submitFail}
           onOk={this.handleClose}

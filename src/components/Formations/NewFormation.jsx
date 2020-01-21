@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, Radio, RadioGroup,
-  FormControl, FormLabel, FormControlLabel, MenuItem, Typography,
-  Button, TextField, Select, Collapse,
+  Step, Stepper, StepLabel, MenuItem, Typography,
+  Button, TextField, Select, CircularProgress,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
+import Search from '../Search';
 import ConfirmationModal from '../ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
 
@@ -13,10 +13,15 @@ const style = {
   radio: {
     paddingLeft: '14px',
   },
-  stepper: {
+  root: {
     width: '100%',
-    maxWidth: 800,
+    maxWidth: 700,
     margin: 'auto',
+    minHeight: 200,
+    paddingBottom: '12px',
+  },
+  stepper: {
+    height: 40,
   },
   buttons: {
     div: {
@@ -27,6 +32,18 @@ const style = {
       marginRight: 15,
     },
   },
+  refresh: {
+    div: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexGrow: 1,
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
+    },
+  },
   stepDescription: {
     marginTop: '24px',
   },
@@ -35,6 +52,18 @@ const style = {
   },
   bold: {
     fontWeight: 'bold',
+  },
+  contentContainer: {
+    margin: '0 32px', height: '250px', display: 'flex', flexDirection: 'column',
+  },
+  stepContainer: {
+    flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+  },
+  buttonContainer: {
+    paddingTop: '12px',
+  },
+  searchContainer: {
+    maxWidth: '600px',
   },
 };
 
@@ -50,7 +79,7 @@ export default class NewFormation extends BaseComponent {
       submitFail: false,
       submitMessage: '',
       sizes: [],
-      size: '',
+      size: {},
       quantity: 1,
       type: 'web',
       port: 9000,
@@ -67,18 +96,45 @@ export default class NewFormation extends BaseComponent {
   getSizes = async () => {
     try {
       const { data: formationSizes } = await this.api.getFormationSizes();
+
       const sizes = [];
       formationSizes.forEach((size) => {
         if (size.name.indexOf('prod') === -1) {
           sizes.push(size);
         }
       });
-      sizes.sort((a, b) =>
-        parseInt(a.resources.limits.memory, 10) - parseInt(b.resources.limits.memory, 10),
-      );
+
+      const groupedSizes = sizes.reduce((acc, size) => {
+        const idx = acc.findIndex(e => e.label.toLowerCase() === size.type.toLowerCase());
+        if (idx === -1) {
+          acc.push({
+            label: size.type.charAt(0).toUpperCase() + size.type.slice(1),
+            options: [{
+              value: size.name,
+              label: `${size.name}: ${size.description}`,
+            }],
+          });
+        } else {
+          acc[idx].options.push({
+            value: size.name,
+            label: `${size.name}: ${size.description}`,
+            memory: parseInt(size.resources.limits.memory, 10),
+          });
+        }
+        return acc;
+      }, []);
+
+      groupedSizes.forEach(size => size.options.sort((a, b) => a.memory - b.memory));
+      groupedSizes.sort((a, b) => {
+        const la = a.label.toLowerCase();
+        const lb = b.label.toLowerCase();
+        if (la < lb) return -1;
+        if (la > lb) return 1;
+        return 0;
+      });
+
       this.setState({
-        sizes,
-        size: sizes[0].name,
+        sizes: groupedSizes,
         type: '',
         quantity: 1,
         loading: false,
@@ -102,12 +158,11 @@ export default class NewFormation extends BaseComponent {
       this.setState({ errorText: 'Alphanumeric characters only' });
     } else if (stepIndex === 0 && !this.state.type) {
       this.setState({ errorText: 'Field required' });
+    } else if (stepIndex === 2 && !this.state.size.value) {
+      this.setState({ errorText: 'Field required' });
     } else if ((stepIndex === 3 && this.state.command === '' && this.state.type !== 'web') || (stepIndex === 3 && this.state.port === null && this.state.type === 'web')) {
       this.setState({ errorText: 'Field required' });
     } else if (!this.state.loading) {
-      if (stepIndex === 4) {
-        this.submitFormation();
-      }
       this.setState({
         stepIndex: stepIndex + 1,
         loading: stepIndex >= 4,
@@ -146,11 +201,16 @@ export default class NewFormation extends BaseComponent {
     }
   }
 
+  handleSizeChange = (event) => {
+    this.setState({ errorText: '', size: event });
+  }
+
   submitFormation = async () => {
+    this.setState({ loading: true });
     try {
       await this.api.createFormation(
         this.props.app.name,
-        this.state.size,
+        this.state.size.value,
         this.state.quantity,
         this.state.type,
         this.state.type === 'web' ? this.state.port : null,
@@ -161,7 +221,7 @@ export default class NewFormation extends BaseComponent {
         category: 'DYNOS',
         action: 'Created new formation',
       });
-      this.props.onComplete('New Formation Added');
+      this.props.onComplete('New Formation Added', true);
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({
@@ -170,7 +230,7 @@ export default class NewFormation extends BaseComponent {
           finished: false,
           stepIndex: 0,
           loading: false,
-          size: this.state.sizes[0].name,
+          size: {},
           type: '',
           port: '',
           command: '',
@@ -181,20 +241,6 @@ export default class NewFormation extends BaseComponent {
     }
   }
 
-  renderSizes() {
-    return this.state.sizes.map(size => (
-      <FormControlLabel
-        key={size.name}
-        value={size.name}
-        className={size.name}
-        label={`${size.name} : ${size.description}`}
-        control={
-          <Radio color="primary" />
-        }
-      />
-    ));
-  }
-
   renderQuantity() {
     return this.quantities.map(quantity => (
       <MenuItem className={`q${quantity}`} key={quantity} value={quantity}>{quantity}</MenuItem>
@@ -202,7 +248,7 @@ export default class NewFormation extends BaseComponent {
   }
 
   renderStepContent(stepIndex) {
-    const { type, quantity, size, port, errorText, command } = this.state;
+    const { type, quantity, size, sizes, port, errorText, command } = this.state;
     switch (stepIndex) {
       case 0:
         return (
@@ -236,20 +282,16 @@ export default class NewFormation extends BaseComponent {
         );
       case 2:
         return (
-          <div>
-            <FormControl component="fieldset">
-              <FormLabel component="h1" style={{ color: 'black' }}>
-                Sizes
-              </FormLabel>
-              <RadioGroup
-                name="sizeSelect"
-                className="new-size"
-                value={size}
-                onChange={this.handleChange('size')}
-              >
-                {this.renderSizes()}
-              </RadioGroup>
-            </FormControl>
+          <div style={style.searchContainer}>
+            <Search
+              options={sizes}
+              value={size}
+              onChange={this.handleSizeChange}
+              placeholder="Select a Size"
+              label="Size"
+              helperText={errorText}
+              error={!!errorText}
+            />
           </div>
         );
       case 3:
@@ -306,7 +348,7 @@ export default class NewFormation extends BaseComponent {
               {'] '}
               <span style={style.bold}>{type}</span>
               {' dyno(s) will be created with size  '}
-              <span style={style.bold}>{size}</span>
+              <span style={style.bold}>{size.value}</span>
               {', and will '}
               {type === 'web' && port === 9000 && 'use the default port.'}
               {type === 'web' && port !== 9000 && (
@@ -323,37 +365,40 @@ export default class NewFormation extends BaseComponent {
             </Typography>
           </div>
         );
-      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
-      case 5:
-        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
   }
 
   renderContent() {
-    const { stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'visible' };
+    const { stepIndex, loading } = this.state;
 
     return (
-      <div style={contentStyle}>
-        <div>{this.renderStepContent(stepIndex)}</div>
-        <div style={style.buttons.div}>
-          {stepIndex > 0 && (
-            <Button
-              className="back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.back}
-            >
+      <div style={style.contentContainer}>
+        {!loading ? (
+          <div style={style.stepContainer}>
+            {this.renderStepContent(stepIndex)}
+          </div>
+        ) : (
+          <div style={style.refresh.div}>
+            <CircularProgress top={0} size={40} left={0} status="loading" />
+          </div>
+        )}
+        <div style={style.buttonContainer}>
+          <Button
+            className="back"
+            disabled={stepIndex === 0}
+            onClick={this.handlePrev}
+            style={style.buttons.back}
+          >
               Back
-            </Button>
-          )}
+          </Button>
           <Button
             variant="contained"
             className="next"
             color="primary"
-            onClick={this.handleNext}
+            onClick={stepIndex < 4 ? this.handleNext : this.submitFormation}
+            disabled={loading}
           >
             {stepIndex === 4 ? 'Finish' : 'Next'}
           </Button>
@@ -364,15 +409,14 @@ export default class NewFormation extends BaseComponent {
 
   render() {
     const {
-      loading, stepIndex, submitFail, submitMessage,
-      type, quantity, size,
+      stepIndex, submitFail, submitMessage, type, quantity, size,
     } = this.state;
 
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
-      <div style={style.stepper}>
-        <Stepper activeStep={stepIndex}>
+      <div style={style.root}>
+        <Stepper style={style.stepper} activeStep={stepIndex}>
           <Step>
             <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type.length > 12 ? `${type.slice(0, 12)}...` : type)}>
               Select Type
@@ -384,7 +428,7 @@ export default class NewFormation extends BaseComponent {
             </StepLabel>
           </Step>
           <Step>
-            <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(size)}>
+            <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(size.value)}>
               Select Size
             </StepLabel>
           </Step>
@@ -395,9 +439,7 @@ export default class NewFormation extends BaseComponent {
             <StepLabel>Confirm</StepLabel>
           </Step>
         </Stepper>
-        <Collapse in={!loading}>
-          {this.renderContent()}
-        </Collapse>
+        {this.renderContent()}
         <ConfirmationModal
           open={submitFail}
           onOk={this.handleClose}

@@ -73,6 +73,7 @@
     "testcafe-browser-provider-selenium": "^0.4.0",
     "testcafe-react-selectors": "0.0.8-alpha3",
     "transfer-webpack-plugin": "0.1.4",
+    "url-parse": "^1.4.7",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.1.2",
     "webpack-dev-middleware": "3.4.0",

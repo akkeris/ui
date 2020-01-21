@@ -143,7 +143,9 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .typeText('.new-type input', 'web')
       .click('button.next')
       .click('button.next') // quantity (1)
-      .click('button.next') // size (gp1)
+      .typeText(Selector('.select-textfield'), 'gp1')
+      .pressKey('enter')
+      .click('button.next')
       .typeText('.new-port input', '8080', { replace: true })
       .click('button.next')
       .click('button.next') // summary
@@ -166,7 +168,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .wait(10000)
 
 
-      .navigateTo(`${baseUrl}/apps`)   
+      .navigateTo(`${baseUrl}/apps`)
       .click('button.addFilter')
       .typeText(Selector('.filter-select-input input'), 'testcafe')
       .click('.filter-select-results .testcafe')
@@ -235,7 +237,9 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .typeText('.new-type input', 'web')
       .click('button.next')
       .click('button.next') // quantity (1)
-      .click('button.next') // size (gp1)
+      .typeText(Selector('.select-textfield'), 'gp1')
+      .pressKey('enter')
+      .click('button.next')
       .typeText('.new-port input', '8080', { replace: true })
       .click('button.next')
       .click('button.next') // summary
