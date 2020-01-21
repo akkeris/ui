@@ -162,7 +162,7 @@ class AutoSuggest extends BaseComponent {
         <TextField
           onKeyPress={event => catchReturn(event, value)}
           error={errorText ? true : undefined}
-          value={holdSelection ? value : ''}
+          value={holdSelection ? value : undefined}
           {...other}
         />
       </MuiThemeProvider>

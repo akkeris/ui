@@ -834,6 +834,7 @@ test // eslint-disable-line no-undef
       .click('button.attach-addon')
       .typeText('.app-search input', `${appName2}-testcafe`)
       .pressKey('enter')
+      .click('button.next')
       .expect(Selector('.step-0-label .step-label-caption').exists)
       .ok()
       .click('.addon-menu')

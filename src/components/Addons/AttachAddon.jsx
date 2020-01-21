@@ -155,6 +155,7 @@ export default class AttachAddon extends BaseComponent {
 
   submitAddonAttachment = async () => {
     try {
+      this.setState({ loading: true });
       await this.api.attachAddon(this.props.app, this.state.addon.id);
       ReactGA.event({
         category: 'ADDONS',
