@@ -9,10 +9,15 @@ import ConfirmationModal from '../ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
 
 const style = {
-  stepper: {
+  root: {
     width: '100%',
     maxWidth: 700,
     margin: 'auto',
+    minHeight: 200,
+    paddingBottom: '12px',
+  },
+  stepper: {
+    height: 40,
   },
   buttons: {
     div: {
@@ -34,11 +39,10 @@ const style = {
   },
   refresh: {
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '50px',
-      paddingTop: '24px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexGrow: 1,
     },
     indicator: {
       display: 'inline-block',
@@ -67,6 +71,15 @@ const style = {
         margin: 'auto 0',
       },
     },
+  },
+  contentContainer: {
+    margin: '0 32px', height: '250px', display: 'flex', flexDirection: 'column',
+  },
+  stepContainer: {
+    flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+  },
+  buttonContainer: {
+    paddingTop: '12px',
   },
 };
 
@@ -164,8 +177,8 @@ export default class NewBuild extends BaseComponent {
           errorText: null,
           url: '',
           displayUrl: {},
-          branch: null,
-          version: null,
+          branch: '',
+          version: '',
         });
       }
     }
@@ -262,40 +275,38 @@ export default class NewBuild extends BaseComponent {
             </div>
           </div>
         );
-      case 4:
-        return (
-          <div style={style.refresh.div}>
-            <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-          </div>
-        );
       default:
         return 'You\'re a long way from home sonny jim!';
     }
   }
 
   renderContent() {
-    const { stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
+    const { stepIndex, loading } = this.state;
     return (
-      <div style={contentStyle}>
-        <div>{this.renderStepContent(stepIndex)}</div>
+      <div style={style.contentContainer}>
+        {!loading ? (
+          <div style={style.stepContainer}>
+            {this.renderStepContent(stepIndex)}
+          </div>
+        ) : (
+          <div style={style.refresh.div}>
+            <CircularProgress top={0} size={40} left={0} status="loading" />
+          </div>
+        )}
         <div style={style.buttons.div}>
-          {stepIndex < 4 && (
-            <Button
-              className="back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.back}
-            >Back</Button>
-          )}
-          {stepIndex < 4 && (
-            <Button
-              variant="contained"
-              className="next"
-              color="primary"
-              onClick={this.handleNext}
-            >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
-          )}
+          <Button
+            className="back"
+            disabled={stepIndex === 0}
+            onClick={this.handlePrev}
+            style={style.buttons.back}
+          >Back</Button>
+          <Button
+            variant="contained"
+            className="next"
+            color="primary"
+            onClick={this.handleNext}
+            disabled={loading}
+          >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
     );
@@ -306,8 +317,8 @@ export default class NewBuild extends BaseComponent {
       stepIndex, submitFail, submitMessage,
     } = this.state;
     return (
-      <div style={style.stepper}>
-        <Stepper activeStep={stepIndex}>
+      <div style={style.root}>
+        <Stepper style={style.stepper} activeStep={stepIndex}>
           <Step>
             <StepLabel>Url</StepLabel>
           </Step>

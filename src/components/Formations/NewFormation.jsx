@@ -221,7 +221,10 @@ export default class NewFormation extends BaseComponent {
         category: 'DYNOS',
         action: 'Created new formation',
       });
-      this.props.onComplete('New Formation Added', true);
+
+      // Add a pleasing amount of loading instead of flashing the indicator
+      // for a variable amount of time
+      setTimeout(() => this.props.onComplete('New Formation Added', true), 1000);
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({

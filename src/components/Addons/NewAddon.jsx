@@ -191,7 +191,10 @@ export default class NewAddon extends BaseComponent {
             category: 'ADDONS',
             action: 'Created new addon',
           });
-          this.props.onComplete('Addon Created', true);
+
+          // Add a pleasing amount of loading instead of flashing the indicator
+          // for a variable amount of time
+          setTimeout(() => this.props.onComplete('Addon Created', true), 1000);
           this.setState({ provisioning: false, provisionStatus: 0, provisionMessage: '' });
           return;
         }
@@ -312,7 +315,7 @@ export default class NewAddon extends BaseComponent {
             className="next"
             color="primary"
             onClick={stepIndex > 1 ? this.submitAddon : this.handleNext}
-            disabled={stepIndex > 2 || (stepIndex === 0 ? (serviceid === '') : (isEmpty(plan)))}
+            disabled={loading || stepIndex > 2 || (stepIndex === 0 ? (serviceid === '') : (isEmpty(plan)))}
           >
             {stepIndex < 2 ? 'Next' : 'Finish'}
           </Button>

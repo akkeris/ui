@@ -160,7 +160,10 @@ export default class AttachAddon extends BaseComponent {
         category: 'ADDONS',
         action: 'Attached new addon',
       });
-      this.props.onComplete('Addon Attached', true);
+
+      // Add a pleasing amount of loading instead of flashing the indicator
+      // for a variable amount of time
+      setTimeout(() => this.props.onComplete('Addon Attached', true), 1000);
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({
@@ -268,7 +271,7 @@ export default class AttachAddon extends BaseComponent {
             className="next"
             color="primary"
             onClick={stepIndex > 1 ? this.submitAddonAttachment : this.handleNext}
-            disabled={(stepIndex === 0 && this.state.app === '') || stepIndex > 2}
+            disabled={loading || (stepIndex === 0 && this.state.app === '') || stepIndex > 2}
           >
             {stepIndex < 2 ? 'Next' : 'Finish'}
           </Button>

@@ -204,7 +204,10 @@ export default class NewWebhook extends BaseComponent {
         category: 'WEBHOOK',
         action: 'Created new webhook',
       });
-      this.props.onComplete('Webhook Created');
+
+      // Add a pleasing amount of loading instead of flashing the indicator
+      // for a variable amount of time
+      setTimeout(() => this.props.onComplete('Webhook Created', true), 1000);
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({
