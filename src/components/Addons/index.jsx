@@ -61,12 +61,15 @@ const style = {
     },
   },
   refresh: {
+    tableCell: {
+      padding: '0px',
+    },
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '350px',
-      marginTop: '20%',
+      height: '450px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     indicator: {
       display: 'inline-block',
@@ -110,6 +113,7 @@ class Addons extends BaseComponent {
       attachment: null,
       loading: true,
       open: false,
+      collapse: true,
       confirmAddonOpen: false,
       confirmAttachmentOpen: false,
       message: '',
@@ -220,23 +224,22 @@ class Addons extends BaseComponent {
   }
 
   handleNewAddon = () => {
-    this.setState({ new: true });
+    this.setState({ new: true, collapse: false });
   }
 
   handleNewAddonCancel = () => {
-    this.setState({ new: false });
+    this.setState({ collapse: true });
   }
 
   handleAttachAddon = () => {
-    this.setState({ attach: true });
+    this.setState({ attach: true, collapse: false });
   }
 
   handleAttachAddonCancel = () => {
-    this.setState({ attach: false });
+    this.setState({ collapse: true });
   }
 
   handleRemoveAddon = async () => {
-    this.setState({ loading: true });
     try {
       await this.api.deleteAddon(this.props.app.name, this.state.addon.id);
       this.reload('Addon Deleted');
@@ -247,6 +250,7 @@ class Addons extends BaseComponent {
           submitFail: true,
           loading: false,
           new: false,
+          collapse: true,
           confirmAddonOpen: false,
           confirmAttachmentOpen: false,
           attach: false,
@@ -256,7 +260,6 @@ class Addons extends BaseComponent {
   }
 
   handleRemoveAddonAttachment = async () => {
-    this.setState({ loading: true });
     try {
       await this.api.deleteAddonAttachment(
         this.props.app.name,
@@ -274,6 +277,7 @@ class Addons extends BaseComponent {
           submitFail: true,
           loading: false,
           new: false,
+          collapse: true,
           confirmAddonOpen: false,
           confirmAttachmentOpen: false,
           attach: false,
@@ -318,8 +322,10 @@ class Addons extends BaseComponent {
     this.setState({ submitFail: false });
   }
 
-  reload = async (message) => {
-    this.setState({ loading: true });
+  reload = async (message, noLoading) => {
+    if (!noLoading) {
+      this.setState({ loading: true });
+    }
     try {
       const [r1, r2] = await Promise.all([
         this.api.getAppAddons(this.props.app.name),
@@ -330,6 +336,7 @@ class Addons extends BaseComponent {
         addonAttachments: r2.data,
         loading: false,
         new: false,
+        collapse: true,
         message,
         open: true,
         confirmAddonOpen: false,
@@ -465,7 +472,12 @@ class Addons extends BaseComponent {
   render() {
     return (
       <div style={{ overflow: 'visible' }}>
-        <Collapse unmountOnExit mountOnEnter in={this.state.attach || this.state.new}>
+        <Collapse
+          unmountOnExit
+          mountOnEnter
+          onExited={() => this.setState({ new: false, attach: false })}
+          in={!this.state.collapse}
+        >
           <div style={style.collapse.container}>
             <div style={style.collapse.header.container}>
               <Typography style={style.collapse.header.title} variant="overline">{this.state.attach && 'Attach Addon'}{this.state.new && 'New Addon'}</Typography>
@@ -497,7 +509,7 @@ class Addons extends BaseComponent {
               <TableCell style={style.headerCell}>
                 <div style={style.headerActions.container}>
                   <div style={style.headerActions.button}>
-                    {!this.state.attach && !this.state.new && (
+                    {this.state.collapse && (
                       <Tooltip title="Attach Addon" placement="bottom-end">
                         <IconButton
                           className="attach-addon"
@@ -510,7 +522,7 @@ class Addons extends BaseComponent {
                     )}
                   </div>
                   <div style={style.headerActions.button}>
-                    {!this.state.new && !this.state.attach && (
+                    {this.state.collapse && (
                       <Tooltip title="New Addon" placement="bottom-end">
                         <IconButton
                           className="new-addon"
@@ -529,7 +541,7 @@ class Addons extends BaseComponent {
           {this.state.loading ? (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={4}>
+                <TableCell style={style.refresh.tableCell} colSpan={4}>
                   <div style={style.refresh.div}>
                     <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
                   </div>

@@ -23,12 +23,15 @@ const style = {
     },
   },
   refresh: {
+    tableCell: {
+      padding: '0px',
+    },
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '250px',
-      marginTop: '20%',
+      height: '450px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     indicator: {
       display: 'inline-block',
@@ -65,6 +68,7 @@ export default class Formations extends BaseComponent {
       open: false,
       message: '',
       new: false,
+      collapse: true,
     };
   }
 
@@ -123,11 +127,11 @@ export default class Formations extends BaseComponent {
   }
 
   handleNewFormation = () => {
-    this.setState({ new: true });
+    this.setState({ collapse: false, new: true });
   }
 
   handleNewFormationCancel = () => {
-    this.setState({ new: false });
+    this.setState({ collapse: true });
   }
 
   info = (message) => {
@@ -137,9 +141,11 @@ export default class Formations extends BaseComponent {
     });
   }
 
-  reload = async (message) => {
+  reload = async (message, noLoading) => {
     try {
-      this.setState({ loading: true });
+      if (!noLoading) {
+        this.setState({ loading: true });
+      }
       const [r1, r2] = await Promise.all([
         this.api.getFormations(this.props.app.name),
         this.api.getDynos(this.props.app.name),
@@ -154,12 +160,14 @@ export default class Formations extends BaseComponent {
           new: false,
           open: true,
           message,
+          collapse: true,
         });
       } else {
         this.setState({
           formations,
           dynos,
           loading: false,
+          collapse: true,
         });
       }
     } catch (err) {
@@ -187,7 +195,12 @@ export default class Formations extends BaseComponent {
   render() {
     return (
       <div>
-        <Collapse in={this.state.new} mountOnEnter unmountOnExit>
+        <Collapse
+          in={!this.state.collapse}
+          mountOnEnter
+          unmountOnExit
+          onExited={() => this.setState({ new: false })}
+        >
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', padding: '6px 26px 0px' }}>
               <Typography style={{ flex: 1 }} variant="overline">New Formation</Typography>
@@ -198,35 +211,32 @@ export default class Formations extends BaseComponent {
         </Collapse>
         <div style={style.header.container}>
           <Typography variant="overline">Formation</Typography>
-          <div style={style.header.icons.container} >
-            <div style={{ width: '50px' }}>
-              {!this.state.new && (
+          {this.state.collapse && (
+            <div style={style.header.icons.container} >
+              <div style={{ width: '50px' }}>
                 <Tooltip title="Refresh" placement="bottom-end">
                   <IconButton style={style.iconButton} className="reload-formations" onClick={() => this.reload()}><ReloadIcon /></IconButton>
                 </Tooltip>
-              )}
-            </div>
-            <div style={{ width: '50px' }}>
-              {!this.state.new && (
+              </div>
+              <div style={{ width: '50px' }}>
                 <Tooltip title="New Formation" placement="bottom-end">
                   <IconButton style={style.iconButton} className="new-formation" onClick={this.handleNewFormation}><AddIcon /></IconButton>
                 </Tooltip>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <Table className="formation-list">
           <TableBody>
-            {this.state.loading && (
+            {this.state.loading ? (/* eslint-disable-line no-nested-ternary */
               <TableRow>
-                <TableCell>
+                <TableCell style={style.refresh.tableCell}>
                   <div style={style.refresh.div}>
                     <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
                   </div>
                 </TableCell>
               </TableRow>
-            )}
-            {!this.state.loading && (
+            ) : (
               (!this.state.formations || this.state.formations.length === 0) ? (
                 <TableRow><TableCell><span className="no-results">No Dynos</span></TableCell></TableRow>
               ) : this.renderFormations()

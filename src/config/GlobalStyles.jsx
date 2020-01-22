@@ -102,7 +102,7 @@ const GlobalStyles = {
     borderRadius: '3px',
   },
   CommitLink: {
-    display:'inline',
+    display: 'inline',
     color: '#475366',
     backgroundColor: softBackground,
     padding: '2.5px 5px 3px 5px',
@@ -143,19 +143,20 @@ GlobalStyles.FormSubHeaderStyle = {
 };
 
 GlobalStyles.ConfigVarStyle = {
-  ...GlobalStyles.CommitLink, 
+  ...GlobalStyles.CommitLink,
   ...GlobalStyles.CommitLinkPre,
-  fontFamily:'courier',
-  padding:'7.5px 10px', 
-  boxSizing:'border-box',
-  width:'100%',
-  /*overflow:'hidden', 
+  fontFamily: 'courier',
+  padding: '7.5px 10px',
+  boxSizing: 'border-box',
+  width: '100%',
+  /* overflow:'hidden',
   textOverflow:'ellipsis',
-  whiteSpace:'nowrap',*/
-  whiteSpace:'pre',
-  overflow:'scroll',
-  display:'inline-block',
-  height:'2.25rem',
+  whiteSpace:'nowrap', */
+  whiteSpace: 'pre',
+  overflowX: 'auto',
+  scrollbarWidth: 'thin',
+  display: 'inline-block',
+  height: '2.4rem',
 };
 
 export default GlobalStyles;

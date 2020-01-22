@@ -1,25 +1,31 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  Step, Stepper, StepLabel, Button, TextField, Typography, Collapse,
+  Step, Stepper, StepLabel, Button, TextField, Typography, CircularProgress,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
+import Url from 'url-parse';
 import ConfirmationModal from '../ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
 
 const style = {
-  stepper: {
+  root: {
     width: '100%',
     maxWidth: 700,
     margin: 'auto',
+    minHeight: 200,
+    paddingBottom: '12px',
+  },
+  stepper: {
+    height: 40,
   },
   buttons: {
     div: {
       marginTop: 24,
-      marginBottom: 24,
+      marginBottom: 12,
     },
     back: {
-      marginRight: 15,
+      marginRight: 12,
     },
   },
   stepDescription: {
@@ -30,6 +36,50 @@ const style = {
   },
   bold: {
     fontWeight: 'bold',
+  },
+  refresh: {
+    div: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexGrow: 1,
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
+    },
+  },
+  stepContent: {
+    inputStep: {
+      root: {
+        height: '200px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+      },
+    },
+    summaryStep: {
+      root: {
+        height: '200px',
+        display: 'flex',
+        wordWrap: 'anywhere',
+        overflowY: 'auto',
+      },
+      wrapper: {
+        height: 'min-content',
+        margin: 'auto 0',
+      },
+    },
+  },
+  contentContainer: {
+    margin: '0 32px', height: '250px', display: 'flex', flexDirection: 'column',
+  },
+  stepContainer: {
+    flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+  },
+  buttonContainer: {
+    paddingTop: '12px',
   },
 };
 
@@ -46,6 +96,7 @@ export default class NewBuild extends BaseComponent {
       url: '',
       branch: '',
       version: '',
+      displayUrl: {},
     };
   }
 
@@ -55,13 +106,34 @@ export default class NewBuild extends BaseComponent {
 
   handleNext = () => {
     const { stepIndex } = this.state;
+
+    if (stepIndex === 0 && this.state.url !== '') {
+      try {
+        // Make sure it's a valid URI
+        new URL(this.state.url); // eslint-disable-line no-new
+        // Parse URI
+        const displayUrl = new Url(this.state.url, '');
+        // If password/token exists, shorten and hide it
+        if (displayUrl.password !== '') {
+          displayUrl.set('password', '[redacted]');
+        }
+        this.setState({ displayUrl });
+      } catch (e) {
+        this.setState({ errorText: 'Invalid URI' });
+        return;
+      }
+    }
+
     if (stepIndex === 0 && this.state.url === '') {
       this.setState({ errorText: 'field required' });
-    } else if (!this.state.loading) {
+    } else if (stepIndex === 3) {
+      this.setState({
+        loading: true,
+        stepIndex: 4,
+      }, () => this.submitBuild());
+    } else {
       this.setState({
         stepIndex: stepIndex + 1,
-        finished: stepIndex >= 3,
-        loading: stepIndex >= 3,
         errorText: null,
       });
     }
@@ -69,13 +141,10 @@ export default class NewBuild extends BaseComponent {
 
   handlePrev = () => {
     const { stepIndex } = this.state;
-    if (!this.state.loading) {
-      this.setState({
-        stepIndex: stepIndex - 1,
-        loading: false,
-        errorText: null,
-      });
-    }
+    this.setState({
+      stepIndex: stepIndex - 1,
+      errorText: null,
+    });
   }
 
   // Handles changes for org, checksum, URL, repo, SHA, branch, and version.
@@ -93,7 +162,10 @@ export default class NewBuild extends BaseComponent {
         category: 'RELEASES',
         action: 'Created new release',
       });
-      this.props.onComplete('New Deployment Requested');
+
+      // Add a pleasing amount of loading instead of flashing the indicator
+      // for a variable amount of time
+      setTimeout(() => this.props.onComplete('New Deployment Requested'), 1000);
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({
@@ -104,8 +176,9 @@ export default class NewBuild extends BaseComponent {
           loading: false,
           errorText: null,
           url: '',
-          branch: null,
-          version: null,
+          displayUrl: {},
+          branch: '',
+          version: '',
         });
       }
     }
@@ -113,10 +186,11 @@ export default class NewBuild extends BaseComponent {
 
   renderStepContent(stepIndex) {
     const { url, errorText, branch, version } = this.state;
+
     switch (stepIndex) {
       case 0:
         return (
-          <div>
+          <div style={style.stepContent.inputStep.root}>
             <TextField
               className="url"
               label="URL"
@@ -129,18 +203,17 @@ export default class NewBuild extends BaseComponent {
               fullWidth
             />
             <Typography variant="body2" style={style.stepDescription}>
-              {`
-                The URI to fetch the image or sources for this build.
-                If an image is provided no build will occur, but the image will be fetched.
-                See Docker Integrations at the top for more information on using build images.
-                Data URI's are also allowed to push code rather than pull.
-              `}
+              {'The URI to fetch the image or sources for this build.'}
             </Typography>
+            <ul>
+              <Typography component="li" variant="body2">A scheme is required (e.g. docker://, https://)</Typography>
+              <Typography component="li" variant="body2">If an image is provided, no build will occur. Instead, the image will be fetched.</Typography> {/* eslint-disable-line */}
+            </ul>
           </div>
         );
       case 1:
         return (
-          <div>
+          <div style={style.stepContent.inputStep.root}>
             <TextField
               className="branch"
               label="Branch (optional)"
@@ -156,7 +229,7 @@ export default class NewBuild extends BaseComponent {
         );
       case 2:
         return (
-          <div>
+          <div style={style.stepContent.inputStep.root}>
             <TextField
               className="version"
               label="Version (optional)"
@@ -172,61 +245,67 @@ export default class NewBuild extends BaseComponent {
         );
       case 3:
         return (
-          <div className="new-build-summary">
-            <Typography variant="h6" style={style.h6}>Summary</Typography>
-            <Typography variant="subtitle1">
-              {'A new build will be created from '}
-              <span style={style.bold}>{url}</span>
-              {'. '}
-              {branch !== '' && (
-                <React.Fragment>
-                  {'The branch '}
-                  <span style={style.bold}>{branch}</span>
-                  {' will be displayed in the logs and build info. '}
-                </React.Fragment>
-              )}
-              {version !== '' && (
-                <React.Fragment>
-                  {'The version '}
-                  <span style={style.bold}>{version}</span>
-                  {' will be displayed in the logs and build info.'}
-                </React.Fragment>
-              )}
-            </Typography>
+          <div className="new-build-summary" style={style.stepContent.summaryStep.root}>
+            <div style={style.stepContent.summaryStep.wrapper}>
+              <Typography variant="h6" style={style.h6}>Summary</Typography>
+              <Typography variant="subtitle1">
+                {'A new build will be created from '}
+                <span style={style.bold}>{this.state.displayUrl.toString()}</span>
+                {'.'}
+                {(branch !== '' || version !== '') && (
+                  <React.Fragment>
+                    <br />
+                    {'The '}{branch !== '' && (
+                      <React.Fragment>
+                        {'branch '}
+                        <span style={style.bold}>{branch}</span>
+                        {version !== '' && ' and '}
+                      </React.Fragment>
+                    )}
+                    {version !== '' && (
+                      <React.Fragment>
+                        {'version '}
+                        <span style={style.bold}>{version}</span>
+                      </React.Fragment>
+                    )}
+                    {' will be displayed in the logs and build info.'}
+                  </React.Fragment>
+                )}
+              </Typography>
+            </div>
           </div>
         );
-      // Have to have this otherwise it displays "you're a long way from home sonny jim" on submit
-      case 4:
-        return '';
       default:
         return 'You\'re a long way from home sonny jim!';
     }
   }
 
   renderContent() {
-    const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
-    if (finished) {
-      this.submitBuild();
-    }
-
+    const { stepIndex, loading } = this.state;
     return (
-      <div style={contentStyle}>
-        <div>{this.renderStepContent(stepIndex)}</div>
+      <div style={style.contentContainer}>
+        {!loading ? (
+          <div style={style.stepContainer}>
+            {this.renderStepContent(stepIndex)}
+          </div>
+        ) : (
+          <div style={style.refresh.div}>
+            <CircularProgress top={0} size={40} left={0} status="loading" />
+          </div>
+        )}
         <div style={style.buttons.div}>
-          {stepIndex > 0 && (
-            <Button
-              className="back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.back}
-            >Back</Button>
-          )}
+          <Button
+            className="back"
+            disabled={stepIndex === 0}
+            onClick={this.handlePrev}
+            style={style.buttons.back}
+          >Back</Button>
           <Button
             variant="contained"
             className="next"
             color="primary"
             onClick={this.handleNext}
+            disabled={loading}
           >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
@@ -235,11 +314,11 @@ export default class NewBuild extends BaseComponent {
 
   render() {
     const {
-      loading, stepIndex, submitFail, submitMessage,
+      stepIndex, submitFail, submitMessage,
     } = this.state;
     return (
-      <div style={style.stepper}>
-        <Stepper activeStep={stepIndex}>
+      <div style={style.root}>
+        <Stepper style={style.stepper} activeStep={stepIndex}>
           <Step>
             <StepLabel>Url</StepLabel>
           </Step>
@@ -253,9 +332,7 @@ export default class NewBuild extends BaseComponent {
             <StepLabel>Confirm</StepLabel>
           </Step>
         </Stepper>
-        <Collapse in={!loading}>
-          {this.renderContent()}
-        </Collapse>
+        {this.renderContent()}
         <ConfirmationModal
           open={submitFail}
           onOk={this.handleClose}

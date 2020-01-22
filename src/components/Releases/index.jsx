@@ -73,11 +73,11 @@ const style = {
   },
   refresh: {
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '350px',
-      marginTop: '20%',
+      height: '450px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     indicator: {
       display: 'inline-block',
@@ -183,6 +183,7 @@ export default class Releases extends BaseComponent {
       restrictedSpace: false,
       confirmRebuildOpen: false,
       rebuildRelease: null,
+      collapse: true,
     };
   }
 
@@ -300,11 +301,11 @@ export default class Releases extends BaseComponent {
   }
 
   handleNewBuild() {
-    this.setState({ new: true });
+    this.setState({ collapse: false, new: true });
   }
 
   handleNewBuildCancel() {
-    this.setState({ new: false });
+    this.setState({ collapse: true });
   }
 
   handleBuildLogs(release) {
@@ -313,14 +314,6 @@ export default class Releases extends BaseComponent {
       release,
       title: `Logs for v${release.id}`,
     });
-  }
-
-  handleNewRelease() {
-    this.setState({ new: true });
-  }
-
-  handleNewReleaseCancel() {
-    this.setState({ new: false });
   }
 
   handleSnackClose() {
@@ -341,6 +334,7 @@ export default class Releases extends BaseComponent {
       new: false,
       snackOpen: true,
       message,
+      collapse: true,
     });
     this.getReleases();
   }
@@ -350,6 +344,7 @@ export default class Releases extends BaseComponent {
       loading: true,
       new: false,
       snackOpen: false,
+      collapse: true,
     });
     this.getReleases();
   }
@@ -381,7 +376,7 @@ export default class Releases extends BaseComponent {
               <div style={style.release.info.root}>
                 {!release.release ? `Build ${release.status} - ` : `Deployed v${release.version} - `} {info1.join(' ')}
                 {release.source_blob && release.source_blob.version ? (
-                  <a style={{ textDecoration:'none', marginLeft: '0.5em' }} href={release.source_blob.version}>
+                  <a style={{ textDecoration: 'none', marginLeft: '0.5em' }} href={release.source_blob.version}>
                     <pre style={GlobalStyles.CommitLink}><code>#{release.source_blob.commit.substring(0, 7)}</code></pre> { /* eslint-disable-line */ }
                   </a>
                 ) : ''}&nbsp;<ReleaseStatus release={release} />
@@ -511,7 +506,6 @@ export default class Releases extends BaseComponent {
             disabled
             style={{ ...style.iconButton, opacity: 0.35 }}
             className="new-build"
-            onClick={() => { this.handleNewBuild(); }}
           >
             <AddIcon />
           </IconButton>
@@ -521,7 +515,12 @@ export default class Releases extends BaseComponent {
 
     return (
       <div>
-        <Collapse unmountOnExit mountOnEnter in={this.state.new}>
+        <Collapse
+          unmountOnExit
+          mountOnEnter
+          onExited={() => this.setState({ new: false })}
+          in={!this.state.collapse}
+        >
           <div style={style.collapse.container}>
             <div style={style.collapse.header.container}>
               <Typography style={style.collapse.header.title} variant="overline">{this.state.new && 'New Build'}</Typography>
@@ -544,7 +543,7 @@ export default class Releases extends BaseComponent {
         </Collapse>
         <div style={style.header.container}>
           <Typography style={style.header.title} variant="overline">Release</Typography>
-          {!this.state.new && (
+          {this.state.collapse && (
             <div style={style.header.actions.container}>
               <div style={style.header.actions.button}>
                 {newReleaseButton}

@@ -64,6 +64,9 @@ const Control = props => (
       },
     }}
     autoFocus={props.selectProps.autoFocus}
+    InputLabelProps={{
+      shrink: !!props.selectProps.textFieldProps.label,
+    }}
     {...props.selectProps.textFieldProps}
   />
 );
@@ -138,7 +141,10 @@ const components = {
 
 class Search extends PureComponent {
   render() {
-    const { onChange, value, classes, theme, placeholder, options, error, autoFocus } = this.props;
+    const {
+      onChange, value, classes, theme, placeholder,
+      options, error, autoFocus, label, helperText,
+    } = this.props;
 
     const selectStyles = {
       input: base => ({
@@ -154,7 +160,7 @@ class Search extends PureComponent {
       <div className={classes.root}>
         <NoSsr>
           <SelectComponent
-            textFieldProps={{ error }}
+            textFieldProps={{ error, label, helperText }}
             classes={classes}
             styles={selectStyles}
             options={options}
@@ -199,11 +205,15 @@ Search.propTypes = {
   theme: PropTypes.object.isRequired,
   error: PropTypes.bool,
   autoFocus: PropTypes.bool,
+  label: PropTypes.string,
+  helperText: PropTypes.string,
 };
 
 Search.defaultProps = {
   error: false,
   autoFocus: false,
+  label: null,
+  helperText: '',
 }
 /* eslint-enable */
 

@@ -50,7 +50,7 @@ const GlobalTheme = createMuiTheme({
   overrides: {
     MuiStepper: {
       root: {
-        padding: '24px 0px',
+        padding: '12px 0px',
       },
     },
     MuiToolbar: { // Used in the main Scenes for their toolbar above the table (apps, orgs, etc)

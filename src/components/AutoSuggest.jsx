@@ -43,7 +43,7 @@ class AutoSuggest extends BaseComponent {
     super(props, context);
     this.popperNode = null;
     this.state = {
-      single: '',
+      single: props.initialValue,
       popper: '',
       suggestions: [],
     };
@@ -156,18 +156,18 @@ class AutoSuggest extends BaseComponent {
   }
 
   renderInputComponent(inputProps) { // eslint-disable-line class-methods-use-this
-    const { catchReturn, errorText, value, muiTheme, ...other } = inputProps;
+    const { catchReturn, errorText, value, muiTheme, holdSelection, ...other } = inputProps;
     return (
       <MuiThemeProvider theme={muiTheme}>
         <TextField
           onKeyPress={event => catchReturn(event, value)}
           error={errorText ? true : undefined}
+          value={holdSelection ? value : undefined}
           {...other}
         />
       </MuiThemeProvider>
     );
   }
-
 
   render() {
     const { classes, errorText, labelText, className, placeholder } = this.props;
@@ -192,6 +192,7 @@ class AutoSuggest extends BaseComponent {
             label: errorText || labelText || undefined,
             value: this.state.single,
             onChange: this.handleChange('single'),
+            holdSelection: this.props.holdSelection,
           }}
           theme={{
             input: classes.input,
@@ -219,6 +220,8 @@ AutoSuggest.propTypes = {
   handleSearch: PropTypes.func,
   className: PropTypes.string,
   placeholder: PropTypes.string,
+  holdSelection: PropTypes.bool,
+  initialValue: PropTypes.string,
 };
 
 AutoSuggest.defaultProps = {
@@ -227,6 +230,8 @@ AutoSuggest.defaultProps = {
   className: '',
   placeholder: 'Search',
   color: 'white',
+  holdSelction: false,
+  initialValue: '',
 };
 
 export default withStyles(styles)(AutoSuggest);

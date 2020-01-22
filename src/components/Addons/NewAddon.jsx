@@ -9,29 +9,27 @@ import ConfirmationModal from '../ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
 
 const style = {
-  stepper: {
+  root: {
     width: '100%',
     maxWidth: 700,
     margin: 'auto',
-    minHeight: 200,
+    height: '266px',
+    paddingBottom: '12px',
+  },
+  stepper: {
+    height: '40px',
   },
   buttons: {
-    div: {
-      marginTop: 24,
-      marginBottom: 12,
-    },
     back: {
       marginRight: 12,
     },
   },
   refresh: {
     div: {
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: '40px',
-      height: '50px',
-      paddingTop: '36px',
-      paddingBottom: '36px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexGrow: 1,
     },
     indicator: {
       display: 'inline-block',
@@ -49,6 +47,15 @@ const style = {
   },
   bold: {
     fontWeight: 'bold',
+  },
+  contentContainer: {
+    margin: '0 32px', height: '200px', display: 'flex', flexDirection: 'column',
+  },
+  stepContainer: {
+    flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+  },
+  buttonContainer: {
+    paddingTop: '12px',
   },
 };
 
@@ -166,6 +173,7 @@ export default class NewAddon extends BaseComponent {
   submitAddon = async () => {
     try {
       this.setState({ loading: true });
+
       let { data: addon } = await this.api.createAddon(
         this.props.app,
         this.state.plan.value,
@@ -183,8 +191,11 @@ export default class NewAddon extends BaseComponent {
             category: 'ADDONS',
             action: 'Created new addon',
           });
-          this.props.onComplete('Addon Created');
-          this.setState({ provisioning: false, provisionStatus: 0, provisionMessage: '', loading: false });
+
+          // Add a pleasing amount of loading instead of flashing the indicator
+          // for a variable amount of time
+          setTimeout(() => this.props.onComplete('Addon Created', true), 1000);
+          this.setState({ provisioning: false, provisionStatus: 0, provisionMessage: '' });
           return;
         }
         this.setState({ provisioning: true, provisionStatus: Math.atan(0.2 * i) / (Math.PI / 2), provisionMessage: addon.state_description || 'Provisioning...', loading: false });
@@ -278,43 +289,36 @@ export default class NewAddon extends BaseComponent {
   }
 
   renderContent() {
-    const { stepIndex, serviceid, plan } = this.state;
-    const contentStyle = { margin: '0 32px' };
+    const { stepIndex, serviceid, plan, loading } = this.state;
     return (
-      <div style={contentStyle}>
-        <div>{this.renderStep(stepIndex)}</div>
-        <div style={style.buttons.div}>
-          {stepIndex > 0 && (
-            <Button
-              className="back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.back}
-            >
-              Back
-            </Button>
-          )}
-          {(stepIndex === 0 || stepIndex === 1) && (
-            <Button
-              variant="contained"
-              className="next"
-              color="primary"
-              onClick={this.handleNext}
-              disabled={stepIndex === 0 ? (serviceid === '') : (isEmpty(plan))}
-            >
-              Next
-            </Button>
-          )}
-          {stepIndex > 1 && (
-            <Button
-              variant="contained"
-              className="next"
-              color="primary"
-              onClick={this.submitAddon}
-            >
-              Finish
-            </Button>
-          )}
+      <div style={style.contentContainer}>
+        {!loading ? (
+          <div style={style.stepContainer}>
+            {this.renderStep(stepIndex)}
+          </div>
+        ) : (
+          <div style={style.refresh.div}>
+            <CircularProgress top={0} size={40} left={0} status="loading" />
+          </div>
+        )}
+        <div style={style.buttonContainer}>
+          <Button
+            className="back"
+            disabled={stepIndex === 0}
+            onClick={this.handlePrev}
+            style={style.buttons.back}
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            className="next"
+            color="primary"
+            onClick={stepIndex > 1 ? this.submitAddon : this.handleNext}
+            disabled={loading || stepIndex > 2 || (stepIndex === 0 ? (serviceid === '') : (isEmpty(plan)))}
+          >
+            {stepIndex < 2 ? 'Next' : 'Finish'}
+          </Button>
         </div>
       </div>
     );
@@ -322,7 +326,7 @@ export default class NewAddon extends BaseComponent {
 
   render() {
     const {
-      loading, stepIndex, provisioning, provisionMessage, provisionStatus,
+      stepIndex, provisioning, provisionMessage, provisionStatus,
       submitFail, submitMessage, service, plan,
     } = this.state;
     const provisionStyle = { display: 'block', ...style.stepper };
@@ -336,9 +340,9 @@ export default class NewAddon extends BaseComponent {
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
 
     return (
-      <div>
+      <div style={style.root}>
         <div style={provisionStyle}>
-          <Stepper activeStep={stepIndex}>
+          <Stepper style={style.stepper} activeStep={stepIndex}>
             <Step>
               <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(service.label)}>
                 Select Addon Service
@@ -353,15 +357,7 @@ export default class NewAddon extends BaseComponent {
               <StepLabel>Confirm</StepLabel>
             </Step>
           </Stepper>
-          {!loading ? (
-            <div>
-              {this.renderContent()}
-            </div>
-          ) : (
-            <div style={style.refresh.div}>
-              <CircularProgress top={0} size={40} left={0} style={style.refresh.indicator} status="loading" />
-            </div>
-          )}
+          {this.renderContent()}
           <ConfirmationModal
             open={submitFail}
             onOk={this.handleClose}
