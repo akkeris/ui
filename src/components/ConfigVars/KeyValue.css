@@ -1,0 +1,34 @@
+.config-span {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  /* Firefox (non-webkit) */
+  scrollbar-width: thin !important;
+}
+
+/* Chrome/Safari (webkit) */
+
+/* Total scrollbar area */
+.config-span::-webkit-scrollbar {
+  height:10px;
+  /* Hide vertical scrollbar */
+  width: 0px;
+}
+
+/* Draggable scrollbar thumb */
+.config-span::-webkit-scrollbar-thumb {
+  height: 6px;
+  border: 3px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  -webkit-border-radius: 7px;
+  background-color: rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+
+.config-span:hover::-webkit-scrollbar-thumb{
+  background-color: rgba(0,0,0,0.3);
+}
+
+/* Remove scrollbar buttons */
+.config-span::-webkit-scrollbar-button {
+  display:none;
+}

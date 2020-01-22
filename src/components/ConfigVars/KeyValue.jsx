@@ -15,6 +15,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import GlobalStyles from '../../config/GlobalStyles';
 import util from '../../services/util';
 import BaseComponent from '../../BaseComponent';
+import './KeyValue.css';
 
 
 const style = {
@@ -75,9 +76,9 @@ export default class KeyValue extends BaseComponent {
   renderAddConfigVar() {
     return (
       <TableRow hover className="new-config-var" key="new-config-var" style={style.tableRow}>
-        <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell}}>
+        <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
           <TextField
-            style={{maxWidth:'300px'}}
+            style={{ maxWidth: '300px' }}
             className="new-config-var-key"
             onChange={event => this.setState({ key: event.target.value })}
             InputProps={{ style: style.configVar.textField }}
@@ -93,7 +94,7 @@ export default class KeyValue extends BaseComponent {
         </TableCell>
         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
           <TextField
-            style={{maxWidth:'450px'}}
+            style={{ maxWidth: '450px' }}
             className="new-config-var-value"
             onChange={event => this.setState({ value: event.target.value })}
             InputProps={{ style: style.configVar.textField }}
@@ -120,8 +121,8 @@ export default class KeyValue extends BaseComponent {
     );
   }
 
-  renderConfigVarNotes() { 
-    return ( 
+  renderConfigVarNotes() {
+    return (
       <Tooltip title={this.props.notes.description} placement="top-start">
         <IconButton>
           <InfoIcon style={GlobalStyles.Subtle} />
@@ -168,14 +169,14 @@ export default class KeyValue extends BaseComponent {
     if (this.props.deleted) {
       configVarStyle.textDecoration = 'line-through';
     }
-    const hasNotes = this.props.notes && this.props.notes.description && this.props.notes.description !== "";
+    const hasNotes = this.props.notes && this.props.notes.description && this.props.notes.description !== '';
     return (
       <TableRow className={this.props.configkey} key={this.props.configkey} style={style.tableRow}> { /* eslint-disable-line */ }
         <TableCell padding="none" style={{ ...style.configVar, ...style.tableCell }}>
-          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle, 'maxWidth':'300px'}}>{this.props.configkey}</span> { /* eslint-disable-line */ }
+          <span className="config-span" style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle, 'maxWidth':'300px'}}>{this.props.configkey}</span> { /* eslint-disable-line */ }
         </TableCell>
         <TableCell style={{ ...style.configVar, ...style.tableCell }}>
-          <span style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.value}</span> { /* eslint-disable-line */ }
+          <span className="config-span" style={{...GlobalStyles.CommitLink, ...GlobalStyles.CommitLinkPre, ...configVarStyle}}>{this.props.value}</span> { /* eslint-disable-line */ }
         </TableCell>
         <TableCell style={style.tableCell}>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
