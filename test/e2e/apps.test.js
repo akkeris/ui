@@ -863,6 +863,7 @@ test // eslint-disable-line no-undef
       .click('button.attach-addon')
       .typeText('.app-search input', `${appName2}-testcafe`)
       .pressKey('enter')
+      .click('button.next')
       .click('.addon-menu')
       .click('.akkeris-postgresql')
       .click('button.next')
