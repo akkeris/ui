@@ -504,6 +504,10 @@ function getGAToken() {
   return axios.get('/analytics', { cancelToken: this.cancelToken });
 }
 
+function getAvailableHooks() {
+  return axios.get('/api/docs/hooks', { cancelToken: this.cancelToken });
+}
+
 export default {
   getGAToken,
   appSetup,
@@ -593,4 +597,5 @@ export default {
   patchAppDescription,
   getCancelSource,
   isCancel,
+  getAvailableHooks,
 };
