@@ -19,10 +19,7 @@ import BackIcon from '@material-ui/icons/ArrowBack';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import ConfirmationModal from '../ConfirmationModal';
-import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
 import BaseComponent from '../../BaseComponent';
-
-const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'preview-released', 'released', 'crashed'];
 
 const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
@@ -218,7 +215,7 @@ export default class Webhook extends BaseComponent {
       historyIndex: 0,
       dialogSubtitle: 'Select an item to view detailed information.',
       loading: false,
-      checkedAll: this.props.webhook.events.length === defaultEvents.length,
+      checkedAll: this.props.webhook.events.length === this.props.availableHooks.length,
       eventsDialogOpen: false,
     };
   }
@@ -298,14 +295,14 @@ export default class Webhook extends BaseComponent {
     }
     this.setState({
       events: currEvents,
-      checkedAll: currEvents.length === defaultEvents.length,
+      checkedAll: currEvents.length === this.props.availableHooks.length,
     });
   }
 
   handleCheckAll = (event, checked) => {
     let currEvents = [];
     if (checked) {
-      for (let i = 0; i < defaultEvents.length; i++) { currEvents.push(defaultEvents[i]); }
+      this.props.availableHooks.forEach(e => currEvents.push(e.type));
       this.setState({ checkedAll: true });
     } else {
       currEvents = [];
@@ -389,22 +386,22 @@ export default class Webhook extends BaseComponent {
       active: this.props.webhook.active,
       open: false,
       history: [],
-      checkedAll: this.props.webhook.events.length === defaultEvents.length,
+      checkedAll: this.props.webhook.events.length === this.props.availableHooks.length,
       eventsDialogOpen: false,
     });
   }
 
   renderEventCheckboxes() { // eslint-disable-line class-methods-use-this
-    return defaultEvents.map(event => (
-      <Grid item xs={4} key={event}>
+    return this.props.availableHooks.map(event => (
+      <Grid item xs={4} key={event.type}>
         <FormControlLabel
-          label={event}
+          label={event.type}
           control={
             <Checkbox
-              className={`checkbox-${event}`}
-              key={event}
-              value={event}
-              checked={this.state.events.includes(event)}
+              className={`checkbox-event-${event.type}`}
+              key={event.type}
+              value={event.type}
+              checked={this.state.events.includes(event.type)}
               onChange={this.handleCheck}
               disabled={!this.state.edit}
               style={style.webhookDetail.events.checkbox}
@@ -441,9 +438,11 @@ export default class Webhook extends BaseComponent {
       >
         <DialogTitle>Description of Events</DialogTitle>
         <DialogContent>
-          {eventDescriptions.data.map((event, index) => (
-            <p key={`${event}.length`}><b>{defaultEvents[index]}</b><br />{event}</p>
-          ))}
+          <div>
+            {this.props.availableHooks.map(event => (
+              <p key={`${event.type}_description`}><b>{event.type}</b><br />{event.description}</p>
+            ))}
+          </div>
         </DialogContent>
         <DialogActions>
           <Button
@@ -737,4 +736,5 @@ Webhook.propTypes = {
   webhook: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
   onError: PropTypes.func.isRequired,
   onComplete: PropTypes.func.isRequired,
+  availableHooks: PropTypes.arrayOf(PropTypes.object).isRequired,
 };

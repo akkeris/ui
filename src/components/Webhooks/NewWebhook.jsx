@@ -6,7 +6,6 @@ import {
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
 import HelpIcon from '@material-ui/icons/Help';
-import eventDescriptions from './EventDescriptions.js'; // eslint-disable-line import/extensions
 import ConfirmationModal from '../ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
 
@@ -87,7 +86,7 @@ const style = {
     },
   },
   contentContainer: {
-    margin: '0 32px', height: '330px', display: 'flex', flexDirection: 'column',
+    margin: '0 32px', height: '412px', display: 'flex', flexDirection: 'column',
   },
   stepContainer: {
     flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
@@ -96,8 +95,6 @@ const style = {
     paddingTop: '12px',
   },
 };
-
-const defaultEvents = ['release', 'build', 'formation_change', 'logdrain_change', 'addon_change', 'config_change', 'destroy', 'preview', 'preview-released', 'released', 'crashed'];
 
 export default class NewWebhook extends BaseComponent {
   constructor(props, context) {
@@ -134,14 +131,14 @@ export default class NewWebhook extends BaseComponent {
     }
     this.setState({
       events: currEvents,
-      checkedAll: currEvents.length === defaultEvents.length,
+      checkedAll: currEvents.length === this.props.availableHooks.length,
     });
   }
 
   handleCheckAll = (event, checked) => {
     let currEvents = [];
     if (checked) {
-      for (let i = 0; i < defaultEvents.length; i++) { currEvents.push(defaultEvents[i]); }
+      this.props.availableHooks.forEach(e => currEvents.push(e.type));
       this.setState({ checkedAll: true });
     } else {
       currEvents = [];
@@ -218,6 +215,8 @@ export default class NewWebhook extends BaseComponent {
           events: [],
           url: '',
           secret: '',
+          loading: false,
+          checkedAll: false,
         });
       }
     }
@@ -263,7 +262,7 @@ export default class NewWebhook extends BaseComponent {
             </div>
             {this.renderEventsInfoDialog()}
             <div className="events" style={{ padding: '6px' }}>
-              <Grid container spacing={1} style={style.gridContainer}>
+              <Grid container spacing={1} style={style.gridContainer} className="new-webhook-events-grid">
                 {this.renderEventCheckboxes(this.webhook)}
                 <Grid item xs={12} style={style.checkAllContainer}>
                   <FormControlLabel
@@ -326,20 +325,20 @@ export default class NewWebhook extends BaseComponent {
   }
 
   renderEventCheckboxes() { // eslint-disable-line class-methods-use-this
-    return defaultEvents.map(event => (
-      <Grid key={`checkbox-${event}`} item xs={4}>
+    return this.props.availableHooks.map(event => (
+      <Grid key={`checkbox-${event.type}`} item xs={4}>
         <FormControlLabel
           control={
             <Checkbox
-              className={`checkbox-${event}`}
-              key={event}
-              value={event}
-              checked={this.state.events.includes(event)}
+              className={`checkbox-event-${event.type}`}
+              key={event.type}
+              value={event.type}
+              checked={this.state.events.includes(event.type)}
               onChange={this.handleCheck}
               style={style.checkbox}
             />
           }
-          label={event}
+          label={event.type}
         />
       </Grid>
     ));
@@ -351,8 +350,8 @@ export default class NewWebhook extends BaseComponent {
         <DialogTitle>Description of Events</DialogTitle>
         <DialogContent>
           <div>
-            {eventDescriptions.data.map((event, index) => (
-              <p key={`${event}.length`}><b>{defaultEvents[index]}</b><br />{event}</p>
+            {this.props.availableHooks.map(event => (
+              <p key={`${event.type}_description`}><b>{event.type}</b><br />{event.description}</p>
             ))}
           </div>
         </DialogContent>
@@ -438,4 +437,5 @@ export default class NewWebhook extends BaseComponent {
 NewWebhook.propTypes = {
   app: PropTypes.string.isRequired,
   onComplete: PropTypes.func.isRequired,
+  availableHooks: PropTypes.arrayOf(PropTypes.object).isRequired,
 };

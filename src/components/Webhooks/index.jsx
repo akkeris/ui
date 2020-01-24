@@ -76,8 +76,9 @@ export default class Webhooks extends BaseComponent {
 
   getWebhooks = async () => {
     try {
+      const { data: availableHooks } = await this.api.getAvailableHooks();
       const { data: webhooks } = await this.api.getAppWebhooks(this.props.app);
-      this.setState({ webhooks, loading: false });
+      this.setState({ webhooks, availableHooks, loading: false });
     } catch (err) {
       if (!this.isCancel(err)) {
         console.error(err); // eslint-disable-line no-console
@@ -111,9 +112,11 @@ export default class Webhooks extends BaseComponent {
     this.setState({ submitFail: false });
   }
 
-  reload = async (message) => {
+  reload = async (message, noLoading) => {
     try {
-      this.setState({ loading: true });
+      if (!noLoading) {
+        this.setState({ loading: true });
+      }
       const { data: webhooks } = await this.api.getAppWebhooks(this.props.app);
       this.setState({
         webhooks,
@@ -143,6 +146,7 @@ export default class Webhooks extends BaseComponent {
             onComplete={this.reload}
             onError={this.handleError}
             key={webhook.id}
+            availableHooks={this.state.availableHooks}
           />
         </div>
       ));
@@ -162,7 +166,13 @@ export default class Webhooks extends BaseComponent {
               <Typography style={style.collapse.header.title} variant="overline">{this.state.new && 'New Webhook'}</Typography>
               {this.state.new && <IconButton className="webhook-cancel" onClick={this.handleNewWebhookCancel}><RemoveIcon /></IconButton>}
             </div>
-            {this.state.new && <NewWebhook app={this.props.app} onComplete={this.reload} />}
+            {this.state.new && (
+              <NewWebhook
+                app={this.props.app}
+                onComplete={this.reload}
+                availableHooks={this.state.availableHooks}
+              />
+            )}
           </div>
         </Collapse>
         <div style={{ height: '52px', display: 'flex', padding: '4px 24px', borderBottom: '1px solid rgba(224, 224, 224, 1)', alignItems: 'center', color: 'rgba(0, 0, 0, 0.87)' }}>

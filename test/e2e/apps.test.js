@@ -953,107 +953,63 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('button.next')
 
     // Events validation tests
+
+    // Try moving on without selecting an event
     .click('button.next')
     .expect(Selector('.events-errorText').innerText)
     .contains('Must select at least one event')
-    .click('.checkbox-release')
+    .click(Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input').nth(0))
     .click('button.next')
     .click('button.back')
     .expect(Selector('.events-errorText').exists)
     .notOk()
-    .expect(Selector('.checkbox-release input').checked)
+    // Event should stay checked, other events should not be checked
+    .expect(Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input').nth(0).checked)
     .ok()
-    .expect(Selector('.checkbox-build input').checked)
+    .expect(Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input').nth(1).checked)
     .notOk()
+    // Test that event descriptions show up
     .click('.events-info-button')
     .expect(Selector('.events-info-dialog').exists)
     .ok()
     .click('.events-info-dialog .ok')
 
     // Check All Tests
+
     // Click "check all" and make sure they are all checked
-    .click('.checkbox-check-all')
-    .expect(Selector('.checkbox-release input').checked)
-    .ok()
-    .expect(Selector('.checkbox-build input').checked)
-    .ok()
-    .expect(Selector('.checkbox-formation_change input').checked)
-    .ok()
-    .expect(Selector('.checkbox-logdrain_change input').checked)
-    .ok()
-    .expect(Selector('.checkbox-addon_change input').checked)
-    .ok()
-    .expect(Selector('.checkbox-config_change input').checked)
-    .ok()
-    .expect(Selector('.checkbox-destroy input').checked)
-    .ok()
-    .expect(Selector('.checkbox-preview input').checked)
-    .ok()
-    .expect(Selector('.checkbox-preview-released input').checked)
-    .ok()
-    .expect(Selector('.checkbox-released input').checked)
-    .ok()
-    .expect(Selector('.checkbox-crashed input').checked)
-    .ok()
-    .expect(Selector('.checkbox-check-all input').checked)
-    .ok()
+    .click('.checkbox-check-all');
+
+  let checkboxElements = Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input');
+  let checkboxCount = await checkboxElements.count;
+  for (let i = 0; i < checkboxCount; i++) {
+    await t.expect(checkboxElements.nth(i).checked).ok(); // eslint-disable-line no-await-in-loop
+  }
+
+
+  // Make sure all checkbox elements are checked after page is changed
+  await t
     .click('button.next')
-    .click('button.back')
-    .expect(Selector('.checkbox-release input').checked)
-    .ok()
-    .expect(Selector('.checkbox-build input').checked)
-    .ok()
-    .expect(Selector('.checkbox-formation_change input').checked)
-    .ok()
-    .expect(Selector('.checkbox-logdrain_change input').checked)
-    .ok()
-    .expect(Selector('.checkbox-addon_change input').checked)
-    .ok()
-    .expect(Selector('.checkbox-config_change input').checked)
-    .ok()
-    .expect(Selector('.checkbox-destroy input').checked)
-    .ok()
-    .expect(Selector('.checkbox-preview input').checked)
-    .ok()
-    .expect(Selector('.checkbox-preview-released input').checked)
-    .ok()
-    .expect(Selector('.checkbox-released input').checked)
-    .ok()
-    .expect(Selector('.checkbox-crashed input').checked)
-    .ok()
-    .expect(Selector('.checkbox-check-all input').checked)
-    .ok()
+    .click('button.back');
 
-    // Click check all again and make sure they are all unchecked
-    .click('.checkbox-check-all')
-    .expect(Selector('.checkbox-release input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-build input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-formation_change input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-logdrain_change input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-addon_change input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-config_change input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-destroy input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-preview input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-preview-released input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-released input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-crashed input').checked)
-    .notOk()
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
+  checkboxElements = Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input');
+  checkboxCount = await checkboxElements.count;
+  for (let i = 0; i < checkboxCount; i++) {
+    await t.expect(checkboxElements.nth(i).checked).ok(); // eslint-disable-line no-await-in-loop
+  }
 
-    // Click one and make sure that 'check all' is unchecked
-    .click('.checkbox-release')
-    .expect(Selector('.checkbox-release input').checked)
+  // Click check all again and make sure they are all unchecked
+  await t.click('.checkbox-check-all');
+
+  checkboxElements = Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input');
+  checkboxCount = await checkboxElements.count;
+  for (let i = 0; i < checkboxCount; i++) {
+    await t.expect(checkboxElements.nth(i).checked).notOk(); // eslint-disable-line no-await-in-loop
+  }
+
+  // Click one and make sure that 'check all' is unchecked
+  await t
+    .click(checkboxElements.nth(0))
+    .expect(checkboxElements.nth(0).checked)
     .ok()
     .expect(Selector('.checkbox-check-all input').checked)
     .notOk()
@@ -1062,8 +1018,8 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.checkbox-check-all')
     .expect(Selector('.checkbox-check-all input').checked)
     .ok()
-    .click('.checkbox-release')
-    .expect(Selector('.checkbox-release input').checked)
+    .click(checkboxElements.nth(0))
+    .expect(checkboxElements.nth(0).checked)
     .notOk()
     .expect(Selector('.checkbox-check-all input').checked)
     .notOk()
@@ -1072,40 +1028,25 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.checkbox-check-all')
     .click('.checkbox-check-all')
     .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-release')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-build')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-formation_change')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-logdrain_change')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-addon_change')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-config_change')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-destroy')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-preview')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-preview-released')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-released')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .notOk()
-    .click('.checkbox-crashed')
-    .expect(Selector('.checkbox-check-all input').checked)
-    .ok()
+    .notOk();
+
+  checkboxElements = Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input');
+  checkboxCount = await checkboxElements.count;
+  for (let i = 0; i < checkboxCount; i++) {
+    if (i !== checkboxCount - 1) {
+      await t // eslint-disable-line no-await-in-loop
+        .click(checkboxElements.nth(i))
+        .expect(Selector('.checkbox-check-all input').checked)
+        .notOk();
+    } else {
+      await t // eslint-disable-line no-await-in-loop
+        .click(checkboxElements.nth(i))
+        .expect(Selector('.checkbox-check-all input').checked)
+        .ok();
+    }
+  }
+
+  await t
     .click('button.next')
 
     // Secret validation tests
@@ -1142,8 +1083,8 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('button.new-webhook')
     .typeText('.webhook-url input', 'http://example.com/hook1')
     .click('button.next')
-    .click('.checkbox-config_change')
-    .click('.checkbox-release')
+    .click(Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input').nth(0))
+    .click(Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input').nth(1))
     .click('button.next')
     .click('button.next') // Also tests for empty secret
     .click('button.next')
@@ -1152,8 +1093,8 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('button.new-webhook')
     .typeText('.webhook-url input', 'http://example.com/hook2')
     .click('button.next')
-    .click('.checkbox-config_change')
-    .click('.checkbox-release')
+    .click(Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input').nth(0))
+    .click(Selector('.new-webhook-events-grid  *[class*="checkbox-event"] input').nth(1))
     .click('button.next')
     .typeText('.webhook-secret input', 'secret')
     .click('button.next')
@@ -1210,64 +1151,38 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .expect(Selector('.webhook-item-0 .edit-url input').value)
     .contains('http://new-url.com/')
 
+
     // Test at least one event in edit
     .click('.checkbox-check-all')
     .click('.checkbox-check-all')
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-item-0 .events-errorText').innerText)
     .contains('Must select at least one event')
-    .click('.checkbox-check-all')
-    .expect(Selector('.webhook-item-0 .checkbox-release input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-build input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-formation_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-logdrain_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-addon_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-config_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-destroy input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-preview input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-preview-released input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-released input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-crashed input').checked)
-    .ok()
+    .click('.checkbox-check-all');
+
+
+  checkboxElements = Selector('.webhook-item-0 *[class*="checkbox-event"] input');
+  checkboxCount = await checkboxElements.count;
+  for (let i = 0; i < checkboxCount; i++) {
+    await t.expect(checkboxElements.nth(i).checked).ok(); // eslint-disable-line no-await-in-loop
+  }
+
+  await t
     .expect(Selector('.webhook-item-0 .checkbox-check-all input').checked)
     .ok()
     .click('.webhook-item-0 .webhook-save')
     .expect(Selector('.webhook-snack').innerText)
     .contains('Updated Webhook')
     .click('.webhook-item-0 .webhook-title') // Open edit dropdown
-    .click('.webhook-item-0 .webhook-edit')
-    .expect(Selector('.webhook-item-0 .checkbox-release input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-build input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-formation_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-logdrain_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-addon_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-config_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-destroy input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-preview input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-preview-released input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-released input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-crashed input').checked)
-    .ok()
+    .click('.webhook-item-0 .webhook-edit');
+
+  checkboxElements = Selector('.webhook-item-0 *[class*="checkbox-event"] input');
+  checkboxCount = await checkboxElements.count;
+  for (let i = 0; i < checkboxCount; i++) {
+    await t.expect(checkboxElements.nth(i).checked).ok(); // eslint-disable-line no-await-in-loop
+  }
+
+  await t
     .expect(Selector('.webhook-item-0 .checkbox-check-all input').checked)
     .ok()
 
@@ -1308,7 +1223,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .click('.webhook-item-0 .active-toggle input')
     .typeText('.webhook-item-0 .edit-url input', 'http://old-url.com/')
     .click('.checkbox-check-all')
-    .click('.checkbox-release')
+    .click(Selector('.webhook-item-0 *[class*="checkbox-event"] input').nth(0))
     .click('.webhook-item-0 .webhook-back')
     .click('.webhook-item-0 .webhook-edit')
     // Expect url to revert
@@ -1316,30 +1231,16 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     .contains('http://new-url.com/')
     // Expect toggle to revert
     .expect(Selector('.webhook-item-0 .active-toggle input').checked)
-    .ok()
-    // Expect events to revert
-    .expect(Selector('.webhook-item-0 .checkbox-release input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-build input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-formation_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-logdrain_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-addon_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-config_change input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-destroy input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-preview input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-preview-released input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-released input').checked)
-    .ok()
-    .expect(Selector('.webhook-item-0 .checkbox-crashed input').checked)
-    .ok()
+    .ok();
+
+  checkboxElements = Selector('.webhook-item-0 *[class*="checkbox-event"] input');
+  checkboxCount = await checkboxElements.count;
+  for (let i = 0; i < checkboxCount; i++) {
+    await t.expect(checkboxElements.nth(i).checked).ok(); // eslint-disable-line no-await-in-loop
+  }
+
+  // Expect events to revert
+  await t
     .expect(Selector('.webhook-item-0 .checkbox-check-all input').checked)
     .ok()
 
