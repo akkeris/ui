@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import {
   Step, Stepper, StepLabel, TextField, Collapse, Button, Typography,
 } from '@material-ui/core';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import ReactGA from 'react-ga';
+import deepmerge from 'deepmerge';
 import ConfirmationModal from '../ConfirmationModal';
 import Search from '../Search';
 import BaseComponent from '../../BaseComponent';
@@ -53,6 +55,16 @@ export default class NewRoute extends BaseComponent {
       apps: [],
     };
   }
+
+  theme = parentTheme => deepmerge(parentTheme, {
+    overrides: {
+      MuiStepper: {
+        root: {
+          padding: '24px 0px',
+        },
+      },
+    },
+  });
 
   componentDidMount() {
     super.componentDidMount();
@@ -269,38 +281,40 @@ export default class NewRoute extends BaseComponent {
     const renderCaption = text => <Typography variant="caption">{text}</Typography>;
 
     return (
-      <div style={style.stepper}>
-        <Stepper activeStep={stepIndex}>
-          <Step>
-            <StepLabel optional={stepIndex > 0 && renderCaption(source)}>
+      <MuiThemeProvider theme={this.theme}>
+        <div style={style.stepper}>
+          <Stepper activeStep={stepIndex}>
+            <Step>
+              <StepLabel optional={stepIndex > 0 && renderCaption(source)}>
                 Input Source
-            </StepLabel>
-          </Step>
-          <Step>
-            <StepLabel optional={stepIndex > 1 && renderCaption(app.name)}>
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel optional={stepIndex > 1 && renderCaption(app.name)}>
                 Select App
-            </StepLabel>
-          </Step>
-          <Step>
-            <StepLabel optional={stepIndex > 2 && renderCaption(target)}>
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel optional={stepIndex > 2 && renderCaption(target)}>
                 Input Target
-            </StepLabel>
-          </Step>
-          <Step>
-            <StepLabel>Confirm</StepLabel>
-          </Step>
-        </Stepper>
-        <Collapse in={!loading}>
-          {this.renderContent()}
-        </Collapse>
-        <ConfirmationModal
-          open={submitFail}
-          onOk={this.handleClose}
-          message={submitMessage}
-          title="Error"
-          className="new-route-error"
-        />
-      </div>
+              </StepLabel>
+            </Step>
+            <Step>
+              <StepLabel>Confirm</StepLabel>
+            </Step>
+          </Stepper>
+          <Collapse in={!loading}>
+            {this.renderContent()}
+          </Collapse>
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="new-route-error"
+          />
+        </div>
+      </MuiThemeProvider>
     );
   }
 }

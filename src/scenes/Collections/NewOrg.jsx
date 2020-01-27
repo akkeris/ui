@@ -4,6 +4,8 @@ import {
   Typography,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import deepmerge from 'deepmerge';
 
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
@@ -60,6 +62,16 @@ export default class NewOrg extends BaseComponent {
       submitMessage: '',
     };
   }
+
+  theme = parentTheme => deepmerge(parentTheme, {
+    overrides: {
+      MuiStepper: {
+        root: {
+          padding: '24px 0px',
+        },
+      },
+    },
+  });
 
   handleNext = () => {
     if ((this.state.stepIndex === 0 && this.state.org === '') || (this.state.stepIndex === 1 && this.state.description === '')) {
@@ -230,33 +242,35 @@ export default class NewOrg extends BaseComponent {
     const { loading, stepIndex, submitFail, submitMessage, org } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
-      <Paper style={style.paper}>
-        <div style={style.div}>
-          <Stepper activeStep={stepIndex} style={style.stepper}>
-            <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org.length > 12 ? `${org.slice(0, 12)}...` : org)}>
+      <MuiThemeProvider theme={this.theme}>
+        <Paper style={style.paper}>
+          <div style={style.div}>
+            <Stepper activeStep={stepIndex} style={style.stepper}>
+              <Step>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(org.length > 12 ? `${org.slice(0, 12)}...` : org)}>
                   Create org name
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Describe org</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            {this.renderContent()}
-          </Collapse>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="error"
-          />
-        </div>
-      </Paper>
+                </StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>Describe org</StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>Confirm</StepLabel>
+              </Step>
+            </Stepper>
+            <Collapse in={!loading}>
+              {this.renderContent()}
+            </Collapse>
+            <ConfirmationModal
+              open={submitFail}
+              onOk={this.handleClose}
+              message={submitMessage}
+              title="Error"
+              className="error"
+            />
+          </div>
+        </Paper>
+      </MuiThemeProvider>
     );
   }
 }

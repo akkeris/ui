@@ -4,6 +4,8 @@ import {
   MenuItem, Select, FormControl, InputLabel, FormControlLabel, Typography,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import deepmerge from 'deepmerge';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
@@ -69,6 +71,16 @@ export default class NewApp extends BaseComponent {
       stack: [],
     };
   }
+
+  theme = parentTheme => deepmerge(parentTheme, {
+    overrides: {
+      MuiStepper: {
+        root: {
+          padding: '24px 0px',
+        },
+      },
+    },
+  });
 
   componentDidMount() {
     super.componentDidMount();
@@ -355,41 +367,43 @@ export default class NewApp extends BaseComponent {
     } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
-      <Paper style={style.paper}>
-        <div style={style.div}>
-          <Stepper activeStep={stepIndex} style={style.stepper}>
-            <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(space.length > 12 ? `${space.slice(0, 12)}...` : space)}>
+      <MuiThemeProvider theme={this.theme}>
+        <Paper style={style.paper}>
+          <div style={style.div}>
+            <Stepper activeStep={stepIndex} style={style.stepper}>
+              <Step>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(space.length > 12 ? `${space.slice(0, 12)}...` : space)}>
                   Create space name
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(stack)}>
+                </StepLabel>
+              </Step>
+              <Step>
+                <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(stack)}>
                   Select stack
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Describe space</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Select tags</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            {this.renderContent()}
-          </Collapse>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="error"
-          />
-        </div>
-      </Paper>
+                </StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>Describe space</StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>Select tags</StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>Confirm</StepLabel>
+              </Step>
+            </Stepper>
+            <Collapse in={!loading}>
+              {this.renderContent()}
+            </Collapse>
+            <ConfirmationModal
+              open={submitFail}
+              onOk={this.handleClose}
+              message={submitMessage}
+              title="Error"
+              className="error"
+            />
+          </div>
+        </Paper>
+      </MuiThemeProvider>
     );
   }
 }

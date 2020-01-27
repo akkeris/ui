@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   FormGroup, FormControlLabel, Switch, Typography, FormControl, Radio, RadioGroup, FormLabel,
-  Step, Stepper, StepLabel, Button, TextField, Collapse,
+  Step, Stepper, StepLabel, Button, TextField, CircularProgress,
 } from '@material-ui/core';
 import gh from 'parse-github-url';
 import ReactGA from 'react-ga';
@@ -10,16 +10,7 @@ import ConfirmationModal from '../ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
 
 const style = {
-  stepper: {
-    width: '100%',
-    maxWidth: 700,
-    margin: 'auto',
-  },
   buttons: {
-    div: {
-      marginTop: 24,
-      marginBottom: 24,
-    },
     back: {
       marginRight: 12,
     },
@@ -32,6 +23,48 @@ const style = {
   },
   bold: {
     fontWeight: 'bold',
+  },
+  root: {
+    width: '100%',
+    maxWidth: 700,
+    margin: 'auto',
+    minHeight: 200,
+    paddingBottom: '12px',
+  },
+  stepper: {
+    height: '40px',
+  },
+  contentContainer: {
+    margin: '0 32px', height: '280px', display: 'flex', flexDirection: 'column',
+  },
+  stepContainer: {
+    flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+  },
+  buttonContainer: {
+    paddingTop: '12px',
+  },
+  refresh: {
+    div: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexGrow: 1,
+    },
+    indicator: {
+      display: 'inline-block',
+      position: 'relative',
+    },
+  },
+  userSelection: {
+    textField: {
+      width: '275px',
+    },
+    container: {
+      paddingTop: '12px',
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
   },
 };
 
@@ -170,7 +203,8 @@ export default class NewAutoBuild extends BaseComponent {
         return (
           <div>
             <TextField
-              label="Master"
+              placeholder="master"
+              label="Branch"
               value={branch}
               onChange={this.handleChange('branch')}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
@@ -195,34 +229,30 @@ export default class NewAutoBuild extends BaseComponent {
                 <FormControlLabel value="bot" control={<Radio />} label="Service Account" />
                 <FormControlLabel value="user" control={<Radio />} label="User Account" />
               </RadioGroup>
-              {userSelection === 'user' && (
-                <div>
-                  <TextField
-                    label="User"
-                    value={username}
-                    onChange={this.handleChange('username')}
-                    helperText={errorText}
-                    error={errorText && errorText.length > 0}
-                    onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
-                    autoFocus
-                  />
-                  <Typography variant="body1" style={style.stepDescription}>
-                    {'The username to access the repo as.'}
-                  </Typography>
-                  <TextField
-                    label="Token"
-                    value={token}
-                    onChange={this.handleChange('token')}
-                    helperText={errorText}
-                    error={errorText && errorText.length > 0}
-                    onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
-                  />
-                  <Typography variant="body1" style={style.stepDescription}>
-                    {'The user\'s token.'}
-                  </Typography>
-                </div>
-              )}
             </FormControl>
+            {userSelection === 'user' && (
+              <div style={style.userSelection.container}>
+                <TextField
+                  label="User"
+                  value={username}
+                  onChange={this.handleChange('username')}
+                  helperText={'The username to access the repo as'}
+                  error={errorText && errorText.length > 0}
+                  onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+                  autoFocus
+                  style={style.userSelection.textField}
+                />
+                <TextField
+                  label="Token"
+                  value={token}
+                  onChange={this.handleChange('token')}
+                  helperText={"The user's token"}
+                  error={errorText && errorText.length > 0}
+                  onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
+                  style={style.userSelection.textField}
+                />
+              </div>
+            )}
           </div>
         );
       case 3:
@@ -287,26 +317,31 @@ export default class NewAutoBuild extends BaseComponent {
   }
 
   renderContent() {
-    const { stepIndex } = this.state;
-    const contentStyle = { margin: '0 32px', overflow: 'hidden' };
-
+    const { stepIndex, loading } = this.state;
     return (
-      <div style={contentStyle}>
-        <div>{this.renderStepContent(stepIndex)}</div>
-        <div style={style.buttons.div}>
-          {stepIndex > 0 && (
-            <Button
-              className="back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.back}
-            >Back</Button>
-          )}
+      <div style={style.contentContainer}>
+        {!loading ? (
+          <div style={style.stepContainer}>
+            {this.renderStepContent(stepIndex)}
+          </div>
+        ) : (
+          <div style={style.refresh.div}>
+            <CircularProgress top={0} size={40} left={0} status="loading" />
+          </div>
+        )}
+        <div style={style.buttonContainer}>
+          <Button
+            className="back"
+            disabled={stepIndex === 0}
+            onClick={this.handlePrev}
+            style={style.buttons.back}
+          >Back</Button>
           <Button
             variant="contained"
             className="next"
             color="primary"
             onClick={this.handleNext}
+            disabled={loading || stepIndex > 4}
           >{stepIndex === 4 ? 'Finish' : 'Next'}</Button>
         </div>
       </div>
@@ -315,27 +350,27 @@ export default class NewAutoBuild extends BaseComponent {
 
   render() {
     const {
-      loading, stepIndex, submitFail, submitMessage,
+      stepIndex, submitFail, submitMessage,
       repo, branch, username, userSelection,
     } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     const account = userSelection === 'bot' ? 'Service Account' : username;
     return (
-      <div style={style.stepper}>
-        <Stepper activeStep={stepIndex}>
+      <div style={style.root}>
+        <Stepper style={style.stepper} activeStep={stepIndex}>
           <Step>
             <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(gh(repo).repo)}>
-                Input Repo
+                GitHub Repo
             </StepLabel>
           </Step>
           <Step>
             <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(branch.length === 0 ? 'master' : branch)}>
-                Input Branch
+                Branch
             </StepLabel>
           </Step>
           <Step>
             <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(account)}>
-                Input GitHub User
+                GitHub User
             </StepLabel>
           </Step>
           <Step>
@@ -347,9 +382,7 @@ export default class NewAutoBuild extends BaseComponent {
             <StepLabel>Confirm</StepLabel>
           </Step>
         </Stepper>
-        <Collapse in={!loading}>
-          {this.renderContent()}
-        </Collapse>
+        {this.renderContent()}
         <ConfirmationModal
           open={submitFail}
           onOk={this.handleClose}
