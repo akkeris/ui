@@ -6,7 +6,8 @@ import {
   FormControl, FormControlLabel, RadioGroup, Radio,
 } from '@material-ui/core';
 import ReactGA from 'react-ga';
-
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import deepmerge from 'deepmerge';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
@@ -70,6 +71,16 @@ export default class NewSite extends BaseComponent {
       internal: false,
     };
   }
+
+  theme = parentTheme => deepmerge(parentTheme, {
+    overrides: {
+      MuiStepper: {
+        root: {
+          padding: '24px 0px',
+        },
+      },
+    },
+  });
 
   componentDidMount() {
     super.componentDidMount();
@@ -294,40 +305,42 @@ export default class NewSite extends BaseComponent {
     const { loading, stepIndex, submitFail, submitMessage, domain, region, internal } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
-      <Paper style={style.paper}>
-        <div style={style.div}>
-          <Stepper activeStep={stepIndex} style={style.stepper}>
-            <Step>
-              <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain.length > 12 ? `${domain.slice(0, 12)}...` : domain)}>
+      <MuiThemeProvider theme={this.theme}>
+        <Paper style={style.paper}>
+          <div style={style.div}>
+            <Stepper activeStep={stepIndex} style={style.stepper}>
+              <Step>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(domain.length > 12 ? `${domain.slice(0, 12)}...` : domain)}>
                   Create domain
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(region)}>
+                </StepLabel>
+              </Step>
+              <Step>
+                <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(region)}>
                   Select Region
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(internal ? 'internal' : 'external')}>
+                </StepLabel>
+              </Step>
+              <Step>
+                <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(internal ? 'internal' : 'external')}>
                   Select Availability
-              </StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Confirm</StepLabel>
-            </Step>
-          </Stepper>
-          <Collapse in={!loading}>
-            {this.renderContent()}
-          </Collapse>
-          <ConfirmationModal
-            open={submitFail}
-            onOk={this.handleClose}
-            message={submitMessage}
-            title="Error"
-            className="error"
-          />
-        </div>
-      </Paper>
+                </StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>Confirm</StepLabel>
+              </Step>
+            </Stepper>
+            <Collapse in={!loading}>
+              {this.renderContent()}
+            </Collapse>
+            <ConfirmationModal
+              open={submitFail}
+              onOk={this.handleClose}
+              message={submitMessage}
+              title="Error"
+              className="error"
+            />
+          </div>
+        </Paper>
+      </MuiThemeProvider>
     );
   }
 }

@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Step, Stepper, StepLabel, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import deepmerge from 'deepmerge';
 import ReactGA from 'react-ga';
 
 import History from '../../config/History';
@@ -40,6 +42,16 @@ export default class NewPipeline extends BaseComponent {
       pipeline: '',
     };
   }
+
+  theme = parentTheme => deepmerge(parentTheme, {
+    overrides: {
+      MuiStepper: {
+        root: {
+          padding: '24px 0px',
+        },
+      },
+    },
+  });
 
   handleNext = () => {
     if ((this.state.stepIndex === 0 && this.state.pipeline === '')) {
@@ -167,21 +179,23 @@ export default class NewPipeline extends BaseComponent {
   render() {
     const { stepIndex, submitFail, submitMessage } = this.state;
     return (
-      <div style={style.stepper}>
-        <Stepper activeStep={stepIndex}>
-          <Step>
-            <StepLabel>Create Pipeline</StepLabel>
-          </Step>
-        </Stepper>
-        {this.renderContent()}
-        <ConfirmationModal
-          open={submitFail}
-          onOk={this.handleClose}
-          message={submitMessage}
-          title="Error"
-          className="new-pipeline-error"
-        />
-      </div>
+      <MuiThemeProvider theme={this.theme}>
+        <div style={style.stepper}>
+          <Stepper activeStep={stepIndex}>
+            <Step>
+              <StepLabel>Create Pipeline</StepLabel>
+            </Step>
+          </Stepper>
+          {this.renderContent()}
+          <ConfirmationModal
+            open={submitFail}
+            onOk={this.handleClose}
+            message={submitMessage}
+            title="Error"
+            className="new-pipeline-error"
+          />
+        </div>
+      </MuiThemeProvider>
     );
   }
 }
