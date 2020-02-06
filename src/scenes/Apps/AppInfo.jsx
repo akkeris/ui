@@ -3,7 +3,7 @@ import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
   Tooltip, IconButton, Menu, MenuItem, Divider, ListItemIcon, ListItemText,
   Switch, ListItemSecondaryAction, Collapse, Typography, Dialog, TextField,
-  DialogTitle, DialogContent, Button, DialogActions,
+  DialogTitle, DialogContent, Button, DialogActions, Icon,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
@@ -20,6 +20,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import RemoveIcon from '@material-ui/icons/Clear';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import WarningIcon from '@material-ui/icons/Warning';
 import ReactGA from 'react-ga';
 
 import AutoBuildIcon from '../../components/Icons/CircuitBoard';
@@ -255,6 +256,14 @@ export default class AppInfo extends BaseComponent {
     });
   }
 
+  handleMaintenanceConfirmationButton = () => {
+    this.setState({
+      mOpen: true,
+      anchorEl: null,
+      isMaintenance: false,
+    });
+  }
+
   handleCancelMaintenanceConfirmation = () => {
     this.setState({
       mOpen: false,
@@ -402,7 +411,7 @@ export default class AppInfo extends BaseComponent {
   }
 
   renderHeaderActions() {
-    const { anchorEl, restrictedSpace, isElevated } = this.state;
+    const { anchorEl, restrictedSpace, isElevated, isMaintenance } = this.state;
     const menuOpen = Boolean(anchorEl);
 
     let deleteButton = (
@@ -425,9 +434,20 @@ export default class AppInfo extends BaseComponent {
 
     return (
       <div style={{
-        display: 'flex', justifyContent: 'space-between', width: '102px', float: 'right',
+        display: 'flex', justifyContent: 'flex-end', width: '108px', float: 'right',
       }}
       >
+        { isMaintenance && (
+          <Tooltip title="Maintenance mode is on!" placement="top-end">
+            <IconButton
+              style={style.iconButton}
+              className="favorite-app"
+              onClick={this.handleMaintenanceConfirmationButton}
+            >
+              <WarningIcon color="secondary" />
+            </IconButton>
+          </Tooltip>
+        )}
         <Tooltip title="Favorite" placement="top-end">
           <IconButton
             style={style.iconButton}
@@ -555,7 +575,7 @@ export default class AppInfo extends BaseComponent {
 
   render() {
     const {
-      loading, submitMessage, submitFail, editDescriptionOpen,
+      loading, submitMessage, submitFail, editDescriptionOpen, isMaintenance,
     } = this.state;
     const currentTab = this.props.match.params.tab;
     if (loading) {
