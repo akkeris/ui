@@ -434,7 +434,7 @@ export default class AppInfo extends BaseComponent {
 
     return (
       <div style={{
-        display: 'flex', justifyContent: 'flex-end', width: '108px', float: 'right',
+        display: 'flex', justifyContent: 'flex-end', width: '102px', float: 'right',
       }}
       >
         { isMaintenance && (
