@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DeveloperBoard, Delete, Edit } from '@material-ui/icons/';
-import { Paper, CircularProgress, Button, Link, IconButton } from '@material-ui/core';
+import { Paper, CircularProgress, Button, Link, IconButton, Tooltip } from '@material-ui/core';
 import ReactGA from 'react-ga';
 import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
 import ReleaseStatus from '../Releases/ReleaseStatus.jsx'; // eslint-disable-line import/extensions
@@ -223,7 +223,7 @@ export default class Stage extends BaseComponent {
         </div>
         <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText }}>
           { coupling.release.build.commit && coupling.release.build.commit.sha ? (
-            <a href={commitUrl} style={{textDecoration:'none'}}>
+            <a href={commitUrl} style={{ textDecoration: 'none' }}>
               <pre style={GlobalStyles.CommitLink}>
                 <code>#{coupling.release.build.commit.sha.substring(0, 7)}</code>
               </pre>
@@ -235,7 +235,9 @@ export default class Stage extends BaseComponent {
           <ReleaseStatus release={{ release: true, ...coupling.statuses.release }} />
           <span style={{ marginLeft: '0.25rem', verticalAlign: 'middle' }}>
             Deployed <pre style={GlobalStyles.CommitLink}><code>v{coupling.release.version}</code></pre>  { /* eslint-disable-line */ }
-            <span style={{ float: 'right' }}> {util.getDateDiff(coupling.release.updated_at)}</span>
+            <Tooltip title={(new Date(coupling.release.updated_at)).toLocaleString()} placement="top" interactive>
+              <span style={{ float: 'right' }}> {util.getDateDiff(coupling.release.updated_at)}</span>
+            </Tooltip>
           </span>
         </div>
         {this.canPromote(coupling) ? (
