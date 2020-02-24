@@ -215,6 +215,8 @@ export default class Releases extends BaseComponent {
     try {
       const { data: builds } = await this.api.getBuilds(this.props.app.name);
       let { data: releases } = await this.api.getReleases(this.props.app.name);
+      console.log(builds);
+      console.log(releases);
 
       releases = (await Promise.all(releases
         .map(async (release) => {
@@ -222,6 +224,7 @@ export default class Releases extends BaseComponent {
           if (build.length === 0 && release.slug && release.slug.id) {
             // this build may have come from a promotion.
             build[0] = (await this.api.getSlug(release.slug.id)).data;
+            release.promoted = true;
           }
           const source_blob = build[0] ? build[0].source_blob : {};  // eslint-disable-line 
           return {
@@ -234,7 +237,7 @@ export default class Releases extends BaseComponent {
             releases: releases.filter(b => b.slug.id === a.id),
           }, a)))
         .sort((a, b) => (new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1));
-
+      console.log(releases);
       this.setState({
         releases,
         loading: false,
@@ -411,9 +414,11 @@ export default class Releases extends BaseComponent {
                     color="default"
                     className="logs"
                     onClick={() => this.handleBuildLogs(release)}
+                    disabled={release.promoted}
                   ><BuildOutputIcon />
                   </IconButton>
                 </Tooltip>
+
               </div>
             </TableCell>
           </TableRow>
