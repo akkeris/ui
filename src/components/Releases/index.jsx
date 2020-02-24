@@ -215,8 +215,6 @@ export default class Releases extends BaseComponent {
     try {
       const { data: builds } = await this.api.getBuilds(this.props.app.name);
       let { data: releases } = await this.api.getReleases(this.props.app.name);
-      console.log(builds);
-      console.log(releases);
 
       releases = (await Promise.all(releases
         .map(async (release) => {
@@ -237,7 +235,6 @@ export default class Releases extends BaseComponent {
             releases: releases.filter(b => b.slug.id === a.id),
           }, a)))
         .sort((a, b) => (new Date(a.created_at).getTime() < new Date(b.created_at) ? 1 : -1));
-      console.log(releases);
       this.setState({
         releases,
         loading: false,
