@@ -8,6 +8,7 @@ import ReactGA from 'react-ga';
 import Search from '../Search';
 import ConfirmationModal from '../ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
+import { truncstr } from '../../services/util';
 
 const style = {
   radio: {
@@ -421,7 +422,7 @@ export default class NewFormation extends BaseComponent {
       <div style={style.root}>
         <Stepper style={style.stepper} activeStep={stepIndex}>
           <Step>
-            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(type.length > 12 ? `${type.slice(0, 12)}...` : type)}>
+            <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(truncstr(type, 12))}>
               Select Type
             </StepLabel>
           </Step>

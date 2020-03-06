@@ -55,6 +55,10 @@ const Pipelines = Loadable({
   loader: () => import('../scenes/Pipelines/Pipelines'),
   loading: Loading,
 });
+const NewPipeline = Loadable({
+  loader: () => import('../scenes/Pipelines/NewPipeline'),
+  loading: Loading,
+});
 const PipelineInfo = Loadable({
   loader: () => import('../scenes/Pipelines/PipelineInfo'),
   loading: Loading,
@@ -67,6 +71,7 @@ const PipelineInfo = Loadable({
 const PipelineRoutes = () => (
   <Switch>
     <Route exact path="/pipelines" component={Pipelines} />
+    <Route exact path="/pipelines/new-pipeline" component={NewPipeline} />
     <Route path="/pipelines/:pipeline/:tab?" component={PipelineInfo} />
   </Switch>
 );

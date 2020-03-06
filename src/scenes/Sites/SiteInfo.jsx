@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 
 import SiteOverView from '../../components/Sites/SiteOverview';
 import RouteList from '../../components/Sites/RouteList';
-import util from '../../services/util';
+import { updateHistory } from '../../services/util';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
@@ -87,7 +87,7 @@ export default class SiteInfo extends BaseComponent {
         history.replaceState(null, '', `${this.state.basePath}/info`);
       }
       this.setState({ currentTab, site, loading: false });
-      util.updateHistory('sites', site.id, site.domain);
+      updateHistory('sites', site.id, site.domain);
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({

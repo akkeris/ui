@@ -156,7 +156,26 @@ function deepCopy(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-export default {
+/**
+ * Display a string up to a certain number of characters
+ * @param {*} str The string to truncate
+ * @param {*} count How many characters the string should be limited to
+ */
+function truncstr(str, count) {
+  if (!str || str.length < count) { return str; }
+  return `${str.substring(0, count)}...`;
+}
+
+// https://stackoverflow.com/questions/679915
+/**
+ * Check to see if an object is empty
+ * @param {*} obj The object to test
+ */
+function isEmpty(obj) {
+  return (obj && obj.constructor === Object && Object.entries(obj).length === 0);
+}
+
+export {
   deepCopy,
   filterApps,
   filterName,
@@ -171,4 +190,6 @@ export default {
   getHistory,
   clearHistory,
   getDateDiff,
+  truncstr,
+  isEmpty,
 };

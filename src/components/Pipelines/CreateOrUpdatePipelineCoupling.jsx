@@ -4,7 +4,7 @@ import { Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTit
 import { DeveloperBoard, ArrowDownward } from '@material-ui/icons/';
 import AutoSuggest from '../AutoSuggest';
 import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
-import util from '../../services/util';
+import { deepCopy, filterName } from '../../services/util';
 import BaseComponent from '../../BaseComponent';
 
 const originalState = {
@@ -67,7 +67,7 @@ export default class CreateOrUpdatePipelineCoupling extends BaseComponent {
 
   constructor(props, context) {
     super(props, context);
-    this.state = util.deepCopy(originalState);
+    this.state = deepCopy(originalState);
   }
 
   componentDidMount() {
@@ -79,7 +79,7 @@ export default class CreateOrUpdatePipelineCoupling extends BaseComponent {
     try {
       this.setState({
         loading,
-        ...util.deepCopy(originalState),
+        ...deepCopy(originalState),
         selected: this.props.coupling ? this.props.coupling.required_status_checks.contexts : [],
       });
       const { data: apps } = await this.api.getApps();
@@ -182,7 +182,7 @@ export default class CreateOrUpdatePipelineCoupling extends BaseComponent {
           key={`${this.props.stage}-app-search`}
           labelText="Choose an application"
           errorText={this.state.appErrorText}
-          data={util.filterName(this.state.apps)}
+          data={filterName(this.state.apps)}
           handleSearch={this.handleSearch}
           color="black"
         />

@@ -16,15 +16,7 @@ import ConfirmationModal from '../ConfirmationModal';
 import AttachmentIcon from '../Icons/AttachmentIcon';
 import DeleteAttachmentIcon from '../Icons/DeleteAttachmentIcon';
 import BaseComponent from '../../BaseComponent';
-
-// fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
-function isEmpty(obj) {
-  let empty = true;
-  Object.keys(obj).forEach((key) => {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) { empty = false; }
-  });
-  return empty;
-}
+import { isEmpty } from '../../services/util';
 
 function addRestrictedTooltip(title, placement, children) {
   return (

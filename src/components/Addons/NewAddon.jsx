@@ -7,6 +7,7 @@ import ReactGA from 'react-ga';
 import Search from '../Search';
 import ConfirmationModal from '../ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
+import { isEmpty } from '../../services/util';
 
 const style = {
   root: {
@@ -58,8 +59,6 @@ const style = {
     paddingTop: '12px',
   },
 };
-
-const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
 export default class NewAddon extends BaseComponent {
   constructor(props, context) {

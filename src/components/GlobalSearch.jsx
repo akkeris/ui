@@ -7,6 +7,7 @@ import {
 import SearchIcon from '@material-ui/icons/Search';
 import { withStyles } from '@material-ui/core/styles';
 import api from '../services/api';
+import { isEmpty, truncstr } from '../services/util';
 import BaseComponent from '../BaseComponent';
 
 const styles = theme => ({
@@ -83,13 +84,6 @@ const styles = theme => ({
     marginRight: '12px',
   },
 });
-
-function trunc(str, count) {
-  if (!str || str.length < count) { return str; }
-  return `${str.substring(0, count)}...`;
-}
-
-const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
 const inputComponent = ({ inputRef, ...props }) => <div ref={inputRef} {...props} />;
 
@@ -173,7 +167,7 @@ const SingleValue = props => (
     className={props.selectProps.classes.singleValue}
     {...props.innerProps}
   >
-    {trunc(props.children, 25)}
+    {truncstr(props.children, 25)}
   </Typography>
 );
 

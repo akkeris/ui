@@ -5,6 +5,7 @@ import {
   NoSsr, Typography, TextField, MenuItem, Paper, Divider,
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
+import { isEmpty } from '../services/util';
 
 const styles = theme => ({
   root: {
@@ -46,8 +47,6 @@ const styles = theme => ({
     marginBottom: '6px',
   },
 });
-
-const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
 
 const inputComponent = ({ inputRef, ...props }) => <div ref={inputRef} {...props} />;
 

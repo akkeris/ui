@@ -8,7 +8,7 @@ import {
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import RecentIcon from '@material-ui/icons/AccessTime';
 
-import util from '../../services/util';
+import { getHistory } from '../../services/util';
 import FavoritesList from '../../components/Apps/FavoritesList';
 import RecentsList from '../../components/RecentsList';
 import BaseComponent from '../../BaseComponent';
@@ -132,7 +132,7 @@ export default class Dashboard extends BaseComponent {
           )}
           {currentTab === 'recent' && (
 
-            <RecentsList className="recents" recents={util.getHistory()} />
+            <RecentsList className="recents" recents={getHistory()} />
 
           )}
         </Paper>

@@ -5,7 +5,7 @@ import { Paper, CircularProgress, Button, Link, IconButton, Tooltip } from '@mat
 import ReactGA from 'react-ga';
 import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
 import ReleaseStatus from '../Releases/ReleaseStatus.jsx'; // eslint-disable-line import/extensions
-import util from '../../services/util';
+import { getDateDiff, deepCopy, filterCouplings } from '../../services/util';
 import ConfirmationModal from '../ConfirmationModal';
 import CreateOrUpdatePipelineCoupling from './CreateOrUpdatePipelineCoupling';
 import PipelinePromote from './PipelinePromote';
@@ -67,7 +67,7 @@ export default class Stage extends BaseComponent {
 
   constructor(props, context) {
     super(props, context);
-    this.state = util.deepCopy(originalState);
+    this.state = deepCopy(originalState);
   }
 
   componentDidMount() {
@@ -77,16 +77,16 @@ export default class Stage extends BaseComponent {
 
   getTargets(stage) {
     if (stage !== 'production') {
-      return util.filterCouplings(this.state.couplings, this.props.stages[stage]);
+      return filterCouplings(this.state.couplings, this.props.stages[stage]);
     }
     return null;
   }
 
   refreshStage = async (loading = true) => {
     try {
-      this.setState({ loading, ...util.deepCopy(originalState) });
+      this.setState({ loading, ...deepCopy(originalState) });
       const { data: fullCouplings } = await this.api.getPipelineCouplings(this.props.pipeline.name);
-      const couplings = await Promise.all(util.filterCouplings(fullCouplings, this.props.stage).map(async (coupling) => { // eslint-disable-line max-len
+      const couplings = await Promise.all(filterCouplings(fullCouplings, this.props.stage).map(async (coupling) => { // eslint-disable-line max-len
         try {
           const { data: statuses } = await this.api.getReleaseStatuses(coupling.app.id, coupling.release.id); // eslint-disable-line max-len
           const { data: slug } = await this.api.getSlug(statuses.release.slug.id);
@@ -107,7 +107,7 @@ export default class Stage extends BaseComponent {
     if (coupling.stage === 'production') {
       return false;
     }
-    if (util.filterCouplings(this.state.fullCouplings, this.props.stages[this.props.stage]).length === 0) { // eslint-disable-line max-len
+    if (filterCouplings(this.state.fullCouplings, this.props.stages[this.props.stage]).length === 0) { // eslint-disable-line max-len
       return false;
     }
     return true;
@@ -236,7 +236,7 @@ export default class Stage extends BaseComponent {
           <span style={{ marginLeft: '0.25rem', verticalAlign: 'middle' }}>
             Deployed <pre style={GlobalStyles.CommitLink}><code>v{coupling.release.version}</code></pre>  { /* eslint-disable-line */ }
             <Tooltip title={(new Date(coupling.release.updated_at)).toLocaleString()} placement="top" interactive>
-              <span style={{ float: 'right' }}> {util.getDateDiff(coupling.release.updated_at)}</span>
+              <span style={{ float: 'right' }}> {getDateDiff(coupling.release.updated_at)}</span>
             </Tooltip>
           </span>
         </div>

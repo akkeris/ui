@@ -1,7 +1,9 @@
 import React from 'react';
 import {
-  Step, Stepper, StepLabel, Button, TextField, Collapse, Paper, Typography, CircularProgress,
+  Step, Stepper, StepLabel, Button, TextField, Paper, Typography, CircularProgress,
+  Tooltip, IconButton,
 } from '@material-ui/core';
+import DocumentationIcon from '@material-ui/icons/DescriptionOutlined';
 import ReactGA from 'react-ga';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import deepmerge from 'deepmerge';
@@ -10,45 +12,46 @@ import Search from '../../components/Search';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
-
-const isEmpty = obj => (obj && obj.constructor === Object && Object.entries(obj).length === 0);
-
-function trunc(str, count) {
-  if (!str || str.length < count) { return str; }
-  return `${str.substring(0, count)}...`;
-}
+import { truncstr, isEmpty } from '../../services/util';
 
 const style = {
+  paper: {
+    maxWidth: '1024px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginTop: '32px',
+    width: '100%',
+  },
+  div: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '372px',
+  },
   stepper: {
     width: '100%',
-    margin: 'auto',
+    margin: '0 auto',
     maxWidth: 900,
+    height: '40px',
+  },
+  contentStyle: {
+    margin: '0 94px',
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   buttons: {
     div: {
       marginTop: 24,
       marginBottom: 24,
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     back: {
       marginRight: 12,
     },
-  },
-  paper: {
-    maxWidth: '1024px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    marginTop: '12px',
-    width: '100%',
-  },
-  div: {
-    width: '100%',
-    margin: 'auto',
-  },
-  menu: {
-    minWidth: 180,
-  },
-  contentStyle: {
-    margin: '0 94px',
   },
   bold: {
     fontWeight: 'bold',
@@ -64,6 +67,23 @@ const style = {
   },
   h6: {
     marginBottom: '12px',
+  },
+  loadingContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
+  },
+  stepContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    flexGrow: 1,
+    wordBreak: 'break-word',
+  },
+  textField: {
+    name: { width: '500px' },
+    description: { width: '600px' },
   },
 };
 
@@ -193,7 +213,7 @@ export default class NewApp extends BaseComponent {
     switch (stepIndex) {
       case 0:
         return (
-          <div>
+          <div style={style.stepContainer}>
             <TextField
               className="app-name"
               label="App name"
@@ -203,19 +223,17 @@ export default class NewApp extends BaseComponent {
               helperText={this.state.errorText ? this.state.errorText : ''}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              style={style.textField.name}
             />
             <Typography variant="body1" style={style.stepDescription}>
-              {`
-                Enter a name that will define your new akkeris app
-                (typically matches the repository name)!
-                This app will then be built from a source and deployed as a Docker image.
-              `}
+              Enter a name that will define your new Akkeris app.<br />
+              (This will typically match the repository name)
             </Typography>
           </div>
         );
       case 1:
         return (
-          <div>
+          <div style={style.stepContainer}>
             <div style={style.selectContainer}>
               <Search
                 onChange={this.handleSelectChange('org')}
@@ -234,7 +252,7 @@ export default class NewApp extends BaseComponent {
         );
       case 2:
         return (
-          <div>
+          <div style={style.stepContainer}>
             <div style={style.selectContainer}>
               <Search
                 onChange={this.handleSelectChange('space')}
@@ -247,17 +265,15 @@ export default class NewApp extends BaseComponent {
               {this.state.selectErr && <Typography variant="subtitle2" style={style.err}>{this.state.selectErr}</Typography>}
             </div>
             <Typography variant="body1" style={style.stepDescription}>
-              {`
-                Specify the space your app will live in.
-                Spaces contain multiple apps and configurations at a similar stage in a pipeline
-                (e.g. dev, qa, prod).
-              `}
+              Specify the space your app will live in.<br />
+              Spaces contain multiple apps and configurations at a similar stage
+              in a pipeline (e.g. dev, qa, prod)
             </Typography>
           </div>
         );
       case 3:
         return (
-          <div style={{ maxWidth: '450px' }}>
+          <div style={style.stepContainer}>
             <TextField
               className="app-description"
               label="Description"
@@ -266,17 +282,16 @@ export default class NewApp extends BaseComponent {
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
               fullWidth
+              style={style.textField.description}
             />
             <Typography variant="body1" style={style.stepDescription}>
-              {`
-                Enter a short description of your app (optional)
-              `}
+              Enter a short description of your app (optional)
             </Typography>
           </div>
         );
       case 4:
         return (
-          <div className="new-app-summary">
+          <div className="new-app-summary" style={style.stepContainer}>
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The app '}
@@ -287,7 +302,7 @@ export default class NewApp extends BaseComponent {
               {this.state.description !== '' ? (
                 <React.Fragment>
                   {' with the description "'}
-                  <span style={style.bold}>{this.state.description}</span>
+                  <span style={style.bold}>{truncstr(this.state.description, 300)}</span>
                   {'".'}
                 </React.Fragment>
               ) : ('.')}
@@ -296,7 +311,7 @@ export default class NewApp extends BaseComponent {
         );
       case 5:
         return (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', width: '100%' }}>
+          <div style={style.loadingContainer}>
             <CircularProgress />
           </div>
         );
@@ -307,7 +322,7 @@ export default class NewApp extends BaseComponent {
 
   render() {
     const {
-      collapsed, finished, stepIndex, app, org, space, description, submitFail, submitMessage,
+      finished, stepIndex, app, org, space, description, submitFail, submitMessage,
     } = this.state;
     if (finished) { this.submitApp(); }
 
@@ -319,7 +334,7 @@ export default class NewApp extends BaseComponent {
           <div style={style.div}>
             <Stepper activeStep={stepIndex} style={style.stepper}>
               <Step>
-                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(app.length > 12 ? `${app.slice(0, 12)}...` : app)}>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(truncstr(app, 12))}>
                   Create app name
                 </StepLabel>
               </Step>
@@ -334,7 +349,7 @@ export default class NewApp extends BaseComponent {
                 </StepLabel>
               </Step>
               <Step>
-                <StepLabel className="step-3-label" optional={stepIndex > 3 && renderCaption(trunc(description, 20))}>
+                <StepLabel className="step-3-label" optional={stepIndex > 3 && renderCaption(truncstr(description, 20))}>
                   Create Description
                 </StepLabel>
               </Step>
@@ -342,27 +357,36 @@ export default class NewApp extends BaseComponent {
                 <StepLabel>Confirm</StepLabel>
               </Step>
             </Stepper>
-            <Collapse in={!collapsed}>
-              <div style={style.contentStyle}>
-                <div>{this.renderStepContent(stepIndex)}</div>
+            <div style={style.contentStyle}>
+              {this.renderStepContent(stepIndex)}
+              {stepIndex < 5 && (
                 <div style={style.buttons.div}>
-                  {stepIndex > 0 && (
+                  <div>
                     <Button
                       className="back-button"
                       disabled={stepIndex === 0}
                       onClick={this.handlePrev}
                       style={style.buttons.back}
                     >Back</Button>
-                  )}
-                  <Button
-                    className="next"
-                    color="primary"
-                    variant="contained"
-                    onClick={this.handleNext}
-                  >{stepIndex === 4 ? 'Finish' : 'Next'}</Button>
+                    <Button
+                      className="next"
+                      color="primary"
+                      variant="contained"
+                      onClick={this.handleNext}
+                    >{stepIndex === 4 ? 'Finish' : 'Next'}</Button>
+                  </div>
+                  <Tooltip title="Documentation" placement="top">
+                    <IconButton
+                      role="link"
+                      tabindex="0"
+                      onClick={() => window.open('https://docs.akkeris.io/how-akkeris-works.html#what-is-an-application')}
+                    >
+                      <DocumentationIcon />
+                    </IconButton>
+                  </Tooltip>
                 </div>
-              </div>
-            </Collapse>
+              )}
+            </div>
             <ConfirmationModal
               open={submitFail}
               onOk={this.handleClose}
