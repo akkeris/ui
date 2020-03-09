@@ -1,13 +1,13 @@
 import React from 'react';
-
 import {
-  Step, Stepper, StepLabel, Button, TextField, IconButton, Paper, Switch, CircularProgress,
-  Typography, FormControl, FormControlLabel, RadioGroup, Radio, Tooltip,
+  Step, Stepper, StepLabel, Button, TextField, Paper,
+  Typography, IconButton, Tooltip, CircularProgress,
 } from '@material-ui/core';
-import ReactGA from 'react-ga';
 import DocumentationIcon from '@material-ui/icons/DescriptionOutlined';
+import ReactGA from 'react-ga';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import deepmerge from 'deepmerge';
+
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
@@ -24,7 +24,7 @@ const style = {
   div: {
     display: 'flex',
     flexDirection: 'column',
-    height: '360px',
+    height: '372px',
   },
   contentStyle: {
     margin: '0 94px',
@@ -76,25 +76,21 @@ const style = {
     marginTop: '24px',
   },
   textField: {
-    description: { width: '600px' },
-    domain: { minWidth: '50%' },
+    name: { width: '300px' },
   },
 };
 
-export default class NewSite extends BaseComponent {
-  constructor(props, context) {
-    super(props, context);
+export default class NewPipeline extends BaseComponent {
+  constructor(props) {
+    super(props);
     this.state = {
-      loading: true,
+      loading: false,
       finished: false,
-      stepIndex: 0,
       errorText: null,
+      stepIndex: 0,
+      pipeline: '',
       submitFail: false,
       submitMessage: '',
-      domain: '',
-      region: '',
-      regions: [],
-      internal: false,
     };
   }
 
@@ -108,80 +104,57 @@ export default class NewSite extends BaseComponent {
     },
   });
 
-  componentDidMount() {
-    super.componentDidMount();
-    this.getRegions();
-  }
-
-  getRegions = async () => {
-    try {
-      const { data: regions } = await this.api.getRegions();
-      this.setState({ regions, loading: false, region: regions[0].name });
-    } catch (err) {
-      if (!this.isCancel(err)) {
-        console.error(err); // eslint-disable-line no-console
-      }
-    }
-  }
-
-  handleClose = () => {
-    this.setState({
-      submitFail: false,
-    });
-  }
-
-  handleDomainChange = (event) => {
-    this.setState({
-      domain: event.target.value,
-    });
-  }
-
-  handleToggleInternal = (event, isInputChecked) => {
-    this.setState({ internal: isInputChecked });
-  }
-
-  handleRegionChange = (event, value) => {
-    this.setState({
-      region: value,
-    });
-  }
-
   handleNext = () => {
-    if ((this.state.stepIndex === 0 && this.state.domain === '') || (this.state.stepIndex === 1 && this.state.region === '')) {
+    if ((this.state.stepIndex === 0 && this.state.pipeline === '')) {
       this.setState({ errorText: 'field required' });
     } else {
       const { stepIndex } = this.state;
-      if (stepIndex + 1 <= 3) {
+      if (stepIndex + 1 <= 1) {
         this.setState({
           stepIndex: stepIndex + 1,
           errorText: null,
         });
       } else {
-        this.setState({ stepIndex: stepIndex + 1 });
-        this.submitSite();
+        this.setState({
+          stepIndex: stepIndex + 1,
+        });
+        this.submitPipeline();
       }
     }
-  }
+  };
+
 
   handlePrev = () => {
     const { stepIndex } = this.state;
     if (!this.state.loading) {
       this.setState({
+        loading: false,
         stepIndex: stepIndex - 1,
         errorText: null,
-        loading: false,
       });
     }
-  }
+  };
 
-  submitSite = async () => {
+  handlePipelineChange = (event) => {
+    this.setState({
+      pipeline: event.target.value,
+    });
+  };
+
+  handleClose = () => {
+    this.setState({
+      submitFail: false,
+    });
+  };
+
+  submitPipeline = async () => {
     try {
-      await this.api.createSite(this.state.domain, this.state.region, this.state.internal);
+      await this.api.createPipeline(this.state.pipeline);
       ReactGA.event({
-        category: 'SITES',
-        action: 'Created new site',
+        category: 'PIPELINES',
+        action: 'Created new pipeline',
       });
-      History.get().push('/sites');
+      History.get().push(`/pipelines/${this.state.pipeline}/review`);
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({
@@ -190,92 +163,49 @@ export default class NewSite extends BaseComponent {
           finished: false,
           stepIndex: 0,
           errorText: null,
-          domain: '',
-          region: '',
-          internal: false,
-          loading: false,
+          pipeline: '',
         });
       }
     }
   };
 
   renderStepContent(stepIndex) {
-    const { domain, errorText, region, internal } = this.state;
+    const { errorText, pipeline } = this.state;
     switch (stepIndex) {
       case 0:
         return (
           <div style={style.stepContainer}>
             <TextField
-              className="site-name"
-              label="Domain Name"
-              value={domain}
-              onChange={this.handleDomainChange}
+              className="pipeline-name"
+              label="Pipeline Name"
+              value={pipeline}
+              onChange={this.handlePipelineChange}
               error={!!errorText}
               helperText={errorText || ''}
-              style={style.textField.domain}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              style={style.textField.name}
             />
             <Typography variant="body1" style={style.stepDescription}>
-              The domain name of a site must only use alphanumerics, hyphens and periods.
+              Enter a name that will define your pipeline.<br />
+              (less that 24 characters, alphanumeric only)<br /><br />
+              A pipeline is a group of apps that share the same codebase,
+              but exist in different environments.
             </Typography>
           </div>
         );
       case 1:
         return (
-          <div className="region" style={style.stepContainer}>
-            <h3>Region</h3>
-            <FormControl component="fieldset" className="radio-group">
-              <RadioGroup
-                aria-label="Select Region"
-                name="region-radio-group"
-                className="region-radio-group"
-                value={region}
-                onChange={this.handleRegionChange}
-              >
-                {this.renderRegions()}
-              </RadioGroup>
-            </FormControl>
-            {errorText !== '' && (
-              <p style={style.error}>{errorText}</p>
-            )}
+          <div className="new-pipeline-summary" style={style.stepContainer}>
+            <Typography variant="h6" style={style.h6}>Summary</Typography>
+            <Typography variant="subtitle1">
+              {'The new pipeline '}
+              <span style={style.bold}>{pipeline}</span>
+              {' will be created.'}
+            </Typography>
           </div>
         );
       case 2:
-        return (
-          <div style={style.stepContainer}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={internal}
-                  onChange={this.handleToggleInternal}
-                  value="internal"
-                  className="toggle"
-                />
-              }
-              label="Internal"
-            />
-            <Typography variant="body1" style={style.stepDescription}>
-              Select whether you want your site to route to internal or external apps.
-            </Typography>
-          </div>
-        );
-      case 3:
-        return (
-          <div className="new-site-summary" style={style.stepContainer}>
-            <Typography variant="h6" style={style.h6}>Summary</Typography>
-            <Typography variant="subtitle1">
-              {'The '}
-              <span style={style.bold}>{internal ? 'internal' : 'external'}</span>
-              {' site '}
-              <span style={style.bold}>{domain}</span>
-              {' will be created in the region '}
-              <span style={style.bold}>{region}</span>
-              {'.'}
-            </Typography>
-          </div>
-        );
-      case 4:
         return (
           <div style={style.loadingContainer}>
             <CircularProgress />
@@ -286,20 +216,8 @@ export default class NewSite extends BaseComponent {
     }
   }
 
-  renderRegions() {
-    return this.state.regions.map(region => (
-      <FormControlLabel
-        className={region.name}
-        key={region.name}
-        value={region.name}
-        label={region.name}
-        control={<Radio />}
-      />
-    ));
-  }
-
   render() {
-    const { stepIndex, submitFail, submitMessage, domain, region, internal } = this.state;
+    const { stepIndex, submitFail, submitMessage, pipeline } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
       <MuiThemeProvider theme={this.theme}>
@@ -307,18 +225,8 @@ export default class NewSite extends BaseComponent {
           <div style={style.div}>
             <Stepper activeStep={stepIndex} style={style.stepper}>
               <Step>
-                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(truncstr(domain, 12))}>
-                  Create domain
-                </StepLabel>
-              </Step>
-              <Step>
-                <StepLabel className="step-1-label" optional={stepIndex > 1 && renderCaption(region)}>
-                  Select Region
-                </StepLabel>
-              </Step>
-              <Step>
-                <StepLabel className="step-2-label" optional={stepIndex > 2 && renderCaption(internal ? 'internal' : 'external')}>
-                  Select Availability
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(truncstr(pipeline, 12))}>
+                  Pipeline Name
                 </StepLabel>
               </Step>
               <Step>
@@ -327,28 +235,27 @@ export default class NewSite extends BaseComponent {
             </Stepper>
             <div style={style.contentStyle}>
               {this.renderStepContent(stepIndex)}
-              {stepIndex < 4 && (
+              {stepIndex < 2 && (
                 <div style={style.buttons.div}>
                   <div>
                     <Button
-                      className="back-button"
+                      className="back"
                       disabled={stepIndex === 0}
                       onClick={this.handlePrev}
                       style={style.buttons.back}
                     >Back</Button>
-
                     <Button
+                      variant="contained"
                       className="next"
                       color="primary"
-                      variant="contained"
                       onClick={this.handleNext}
-                    >{stepIndex === 3 ? 'Finish' : 'Next'}</Button>
+                    >{stepIndex === 1 ? 'Submit' : 'Next'}</Button>
                   </div>
                   <Tooltip title="Documentation" placement="top">
                     <IconButton
                       role="link"
                       tabindex="0"
-                      onClick={() => window.open('https://docs.akkeris.io/architecture/sites-and-routes.html')}
+                      onClick={() => window.open('https://docs.akkeris.io/architecture/pipelines.html')}
                     >
                       <DocumentationIcon />
                     </IconButton>

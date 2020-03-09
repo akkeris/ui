@@ -6,7 +6,7 @@ import {
 import ReactGA from 'react-ga';
 import ConfirmationModal from '../ConfirmationModal';
 import AutoSuggest from '../AutoSuggest';
-import util from '../../services/util';
+import { filterName } from '../../services/util';
 import BaseComponent from '../../BaseComponent';
 
 const style = {
@@ -201,7 +201,7 @@ export default class AttachAddon extends BaseComponent {
             <AutoSuggest
               className={'app-search'}
               label="App"
-              data={util.filterName(this.state.apps)}
+              data={filterName(this.state.apps)}
               handleSearch={this.handleSearch}
               errorText={this.state.errorText}
               color="black"

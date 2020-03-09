@@ -1,13 +1,11 @@
 import React from 'react';
 import {
   Toolbar, IconButton, CircularProgress, Paper, Table, TableBody, TableRow, TableCell,
-  Snackbar, Divider, Collapse, TableFooter, TablePagination, TableHead, TableSortLabel, Tooltip,
+  Snackbar, TableFooter, TablePagination, TableHead, TableSortLabel, Tooltip,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import RemoveIcon from '@material-ui/icons/Clear';
 import FilterListIcon from '@material-ui/icons/FilterList';
 
-import { NewPipeline } from '../../components/Pipelines';
 import History from '../../config/History';
 import FilterSelect from '../../components/FilterSelect';
 import BaseComponent from '../../BaseComponent';
@@ -82,7 +80,6 @@ class Pipelines extends BaseComponent {
       loading: true,
       pipelines: [],
       sortedPipelines: [],
-      new: false,
       open: false,
       message: '',
       page: 0,
@@ -169,14 +166,6 @@ class Pipelines extends BaseComponent {
     History.get().push(`/pipelines/${name}/review`);
   }
 
-  handleNewPipeline = () => {
-    this.setState({ new: true });
-  }
-
-  handleNewPipelineCancel = () => {
-    this.setState({ new: false });
-  }
-
   handleRequestClose = () => {
     this.setState({ open: false });
   }
@@ -190,7 +179,6 @@ class Pipelines extends BaseComponent {
         sortedPipelines: pipelines,
         message,
         loading: false,
-        new: false,
         open: true,
         page: 0,
         rowsPerPage: 15,
@@ -276,15 +264,13 @@ class Pipelines extends BaseComponent {
     return (
       <div>
         <Toolbar style={style.toolbar}>
-          {!this.state.new && (
-            <IconButton
-              className="new-pipeline"
-              style={style.icon}
-              onClick={this.handleNewPipeline}
-            >
-              <AddIcon style={{ color: 'white' }} />
-            </IconButton>
-          )}
+          <IconButton
+            className="new-pipeline"
+            style={style.icon}
+            onClick={() => History.get().push('/pipelines/new-pipeline')}
+          >
+            <AddIcon style={{ color: 'white' }} />
+          </IconButton>
         </Toolbar>
         <Paper style={style.paper}>
           <Toolbar style={{ paddingTop: '6px' }}>
@@ -305,15 +291,6 @@ class Pipelines extends BaseComponent {
               />
             )}
           </Toolbar>
-          <Collapse in={this.state.new}>
-            <div>
-              <IconButton className="cancel" onClick={this.handleNewPipelineCancel} style={style.cancelIcon}>
-                <RemoveIcon htmlColor="black" />
-              </IconButton>
-              <NewPipeline onComplete={this.reload} />
-              <Divider style={{ marginTop: '15px' }} />
-            </div>
-          </Collapse>
           <Table className="pipeline-list">
             <TableHead>
               <TableRow>

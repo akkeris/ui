@@ -8,7 +8,7 @@ import ReactGA from 'react-ga';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
 import { Stage } from '../../components/Pipelines';
-import util from '../../services/util';
+import { updateHistory, deepCopy } from '../../services/util';
 import CreateOrUpdatePipelineCoupling from '../../components/Pipelines/CreateOrUpdatePipelineCoupling';
 import History from '../../config/History';
 import BaseComponent from '../../BaseComponent';
@@ -38,7 +38,7 @@ export default class PipelineInfo extends BaseComponent {
 
   constructor(props, context) {
     super(props, context);
-    this.state = util.deepCopy(originalState);
+    this.state = deepCopy(originalState);
   }
 
   componentDidMount = () => {
@@ -54,10 +54,10 @@ export default class PipelineInfo extends BaseComponent {
 
   refreshPipeline = async (loading = true) => {
     try {
-      this.setState({ loading, ...util.deepCopy(originalState) });
+      this.setState({ loading, ...deepCopy(originalState) });
       const { data: stages } = await this.api.getPipelineStages();
       const { data: pipeline } = await this.api.getPipeline(this.props.match.params.pipeline);
-      util.updateHistory('pipelines', pipeline.id, pipeline.name);
+      updateHistory('pipelines', pipeline.id, pipeline.name);
       const accountResponse = await this.api.getAccount();
       const isElevated = (accountResponse.data && 'elevated_access' in accountResponse.data) ?
         accountResponse.data.elevated_access :

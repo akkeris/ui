@@ -11,18 +11,8 @@ import { LockOpen, Lock, ErrorOutline } from '@material-ui/icons';
 import KeyValue from './KeyValue';
 
 import GlobalStyles from '../../config/GlobalStyles';
-import util from '../../services/util';
-
+import { deepCopy, isEmpty } from '../../services/util';
 import BaseComponent from '../../BaseComponent';
-
-// fastest way to check for an empty object (https://stackoverflow.com/questions/679915)
-function isEmpty(obj) {
-  let empty = true;
-  Object.keys(obj).forEach((key) => {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) { empty = false; }
-  });
-  return empty;
-}
 
 const style = {
   tableRow: {
@@ -92,7 +82,7 @@ const originalState = {
 export default class ConfigVar extends BaseComponent {
   constructor(props, context) {
     super(props, context);
-    this.state = util.deepCopy(originalState);
+    this.state = deepCopy(originalState);
   }
 
   componentDidMount = async () => {
@@ -110,7 +100,7 @@ export default class ConfigVar extends BaseComponent {
 
   refresh = async () => {
     try {
-      this.setState(util.deepCopy(originalState));
+      this.setState(deepCopy(originalState));
       await this.getConfigVars();
     } catch (err) {
       if (!this.isCancel(err)) {
@@ -141,8 +131,8 @@ export default class ConfigVar extends BaseComponent {
 
   handleSaveConfigVar = async () => { /* eslint-disable-line */
     try {
-      const changes = util.deepCopy(this.state.changes);
-      const changesNotes = util.deepCopy(this.state.changesNotes);
+      const changes = deepCopy(this.state.changes);
+      const changesNotes = deepCopy(this.state.changesNotes);
       /* Port must be changed through a formation change,
        * as a convenience lets update the formation if we
        * find a port change. */
@@ -213,10 +203,10 @@ export default class ConfigVar extends BaseComponent {
     const key = this.state.editKey;
     const value = this.state.editValue;
     const notesValue = this.state.editNotes;
-    const config = util.deepCopy(this.state.config);
-    const changes = util.deepCopy(this.state.changes);
-    const notes = util.deepCopy(this.state.notes);
-    const changesNotes = util.deepCopy(this.state.changesNotes);
+    const config = deepCopy(this.state.config);
+    const changes = deepCopy(this.state.changes);
+    const notes = deepCopy(this.state.notes);
+    const changesNotes = deepCopy(this.state.changesNotes);
     if (config[key] === value && !notesValue || !key || key === '') { /* eslint-disable-line */
       this.setState({
         edit: false,
@@ -280,7 +270,7 @@ export default class ConfigVar extends BaseComponent {
   }
 
   handleDeleteConfigVar(key /* value */) {
-    const changes = util.deepCopy(this.state.changes);
+    const changes = deepCopy(this.state.changes);
     changes[key] = null;
     this.setState({
       changes,

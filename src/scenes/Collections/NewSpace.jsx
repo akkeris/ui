@@ -1,47 +1,79 @@
 import React from 'react';
 import {
-  Step, Stepper, StepLabel, Button, TextField, Collapse, Checkbox, Paper,
-  MenuItem, Select, FormControl, InputLabel, FormControlLabel, Typography,
+  Step, Stepper, StepLabel, Button, TextField, Checkbox, Paper, CircularProgress, IconButton,
+  MenuItem, Select, FormControl, InputLabel, FormControlLabel, Typography, Tooltip,
 } from '@material-ui/core';
+import DocumentationIcon from '@material-ui/icons/DescriptionOutlined';
 import ReactGA from 'react-ga';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import deepmerge from 'deepmerge';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import BaseComponent from '../../BaseComponent';
+import { truncstr } from '../../services/util';
 
 const tags = ['internal', 'socs', 'prod', 'dev', 'qa'];
 
 const style = {
+  paper: {
+    maxWidth: '1024px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginTop: '32px',
+    width: '100%',
+  },
+  div: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '420px',
+  },
+  contentStyle: {
+    margin: '0 94px',
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
   stepper: {
     width: '100%',
-    margin: 'auto',
+    margin: '0 auto',
     maxWidth: 900,
+    height: '40px',
+    overflow: 'hidden',
+  },
+  loadingContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
+  },
+  stepContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    flexGrow: 1,
+    wordBreak: 'break-word',
   },
   buttons: {
     div: {
       marginTop: 24,
       marginBottom: 24,
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     back: {
       marginRight: 12,
     },
   },
-  paper: {
-    maxWidth: '1024px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    marginTop: '12px',
-    width: '100%',
-  },
-  div: {
-    width: '100%',
-    margin: 'auto',
-  },
   compliance: {
     paddingLeft: '14px',
     display: 'flex',
     flexDirection: 'column',
+    flexWrap: 'wrap',
+    height: '132px',
+    width: '312px',
   },
   h6: {
     marginBottom: '12px',
@@ -51,6 +83,11 @@ const style = {
   },
   stepDescription: {
     marginTop: '24px',
+  },
+  textField: {
+    name: { width: '300px' },
+    stack: { width: '300px' },
+    description: { width: '600px' },
   },
 };
 
@@ -136,18 +173,14 @@ export default class NewApp extends BaseComponent {
       this.setState({ errorText: 'field required' });
     } else {
       const { stepIndex } = this.state;
-      if (!this.state.loading) {
-        if (stepIndex + 1 <= 4) {
-          this.setState({
-            stepIndex: stepIndex + 1,
-            errorText: null,
-          });
-        } else {
-          this.setState({
-            finished: true,
-            loading: true,
-          });
-        }
+      if (stepIndex + 1 <= 4) {
+        this.setState({
+          stepIndex: stepIndex + 1,
+          errorText: null,
+        });
+      } else {
+        this.setState({ stepIndex: stepIndex + 1 });
+        this.submitSpace();
       }
     }
   }
@@ -188,7 +221,6 @@ export default class NewApp extends BaseComponent {
           description: '',
           compliance: [],
           stack: this.state.stacks[0].name,
-          loading: false,
         });
       }
     }
@@ -199,7 +231,7 @@ export default class NewApp extends BaseComponent {
     switch (stepIndex) {
       case 0:
         return (
-          <div>
+          <div style={style.stepContainer}>
             <TextField
               className="space-name"
               label="Space Name"
@@ -209,19 +241,18 @@ export default class NewApp extends BaseComponent {
               helperText={errorText || ''}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              style={style.textField.name}
             />
             <Typography variant="body1" style={style.stepDescription}>
-              {`
-                Create a space! Enter a name that will define your space.
-                (this is typically an org id with environment ex. perf-dev, perf-qa, perf-prod).
-                This will be used to group apps, and provides some service discovery.
-              `}
+              Choose a name that will define your space.
+              Typically, this will be an organization ID with an environment.<br />
+              (e.g. perf-dev, perf-qa, perf-prd)
             </Typography>
           </div>
         );
       case 1:
         return (
-          <div>
+          <div style={style.stepContainer}>
             <FormControl className="stack-form">
               <InputLabel htmlFor="stack-select">Stack</InputLabel>
               <Select
@@ -232,25 +263,22 @@ export default class NewApp extends BaseComponent {
                   id: 'stack-select',
                   name: 'stack',
                 }}
+                style={style.textField.stack}
               >
                 {this.renderStacks()}
               </Select>
             </FormControl>
             <Typography variant="body1" style={style.stepDescription}>
-              {`
-                Stacks are unique runtimes in akkeris.
-                One or more of them may exist in any one region.
-                The difference between stacks may be physical location,
-                an upgrade to backend components on one stack vs the
-                other, or on prem vs cloud offerings.
-                A space must solely exist in one stack. 
-              `}
+              Stacks are unique runtimes in Akkeris. A space can only exist in one
+              stack.<br /><br />
+              The difference between stacks may include physical location, backend
+              component versions, or on prem vs cloud offerings.
             </Typography>
           </div>
         );
       case 2:
         return (
-          <div>
+          <div style={style.stepContainer}>
             <TextField
               className="space-description"
               label="Description"
@@ -258,31 +286,28 @@ export default class NewApp extends BaseComponent {
               onChange={this.handleDescriptionChange}
               onKeyPress={(e) => { if (e.key === 'Enter') this.handleNext(); }}
               autoFocus
+              style={style.textField.description}
             />
             <Typography variant="body1" style={style.stepDescription}>
-              {'Give a description of your space.'}
+              {'Include a description for your space (optional)'}
             </Typography>
           </div>
         );
       case 3:
         return (
-          <div>
+          <div style={style.stepContainer}>
             <h3>Compliance Tags</h3>
             <div style={style.compliance}>
               {this.renderCompliance()}
             </div>
             <Typography variant="body1" style={style.stepDescription}>
-              {`
-                Add these to your space.
-                (e.g. socs allows socs credentials to be added to apps in this space
-                and redacts sensitive info from the console.)
-              `}
+              Add these to your space if your apps require specific compliance or protection.
             </Typography>
           </div>
         );
       case 4:
         return (
-          <div className="new-space-summary">
+          <div className="new-space-summary" style={style.stepContainer}>
             <Typography variant="h6" style={style.h6}>Summary</Typography>
             <Typography variant="subtitle1">
               {'The space '}
@@ -299,9 +324,12 @@ export default class NewApp extends BaseComponent {
             </Typography>
           </div>
         );
-      // need this otherwise "You're a long way ..." shows up when you hit finish
       case 5:
-        return '';
+        return (
+          <div style={style.loadingContainer}>
+            <CircularProgress />
+          </div>
+        );
       default:
         return 'You\'re a long way from home sonny jim!';
     }
@@ -332,38 +360,9 @@ export default class NewApp extends BaseComponent {
     ));
   }
 
-  renderContent() {
-    const { finished, stepIndex } = this.state;
-    const contentStyle = { margin: '0 94px', overflow: 'hidden' };
-    if (finished) {
-      this.submitSpace();
-    }
-    return (
-      <div style={contentStyle}>
-        <div>{this.renderStepContent(stepIndex)}</div>
-        <div style={style.buttons.div}>
-          {stepIndex > 0 && (
-            <Button
-              className="back"
-              disabled={stepIndex === 0}
-              onClick={this.handlePrev}
-              style={style.buttons.back}
-            >Back</Button>
-          )}
-          <Button
-            variant="contained"
-            className="next"
-            color="primary"
-            onClick={this.handleNext}
-          >{stepIndex === 4 ? 'Finish' : 'Next'}</Button>
-        </div>
-      </div>
-    );
-  }
-
   render() {
     const {
-      loading, stepIndex, submitFail, submitMessage, space, stack,
+      stepIndex, submitFail, submitMessage, space, stack,
     } = this.state;
     const renderCaption = text => <Typography variant="caption" className="step-label-caption">{text}</Typography>;
     return (
@@ -372,7 +371,7 @@ export default class NewApp extends BaseComponent {
           <div style={style.div}>
             <Stepper activeStep={stepIndex} style={style.stepper}>
               <Step>
-                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(space.length > 12 ? `${space.slice(0, 12)}...` : space)}>
+                <StepLabel className="step-0-label" optional={stepIndex > 0 && renderCaption(truncstr(space, 12))}>
                   Create space name
                 </StepLabel>
               </Step>
@@ -391,9 +390,36 @@ export default class NewApp extends BaseComponent {
                 <StepLabel>Confirm</StepLabel>
               </Step>
             </Stepper>
-            <Collapse in={!loading}>
-              {this.renderContent()}
-            </Collapse>
+            <div style={style.contentStyle}>
+              {this.renderStepContent(stepIndex)}
+              {stepIndex < 5 && (
+                <div style={style.buttons.div}>
+                  <div>
+                    <Button
+                      className="back"
+                      disabled={stepIndex === 0}
+                      onClick={this.handlePrev}
+                      style={style.buttons.back}
+                    >Back</Button>
+                    <Button
+                      variant="contained"
+                      className="next"
+                      color="primary"
+                      onClick={this.handleNext}
+                    >{stepIndex === 4 ? 'Finish' : 'Next'}</Button>
+                  </div>
+                  <Tooltip title="Documentation" placement="top">
+                    <IconButton
+                      role="link"
+                      tabindex="0"
+                      onClick={() => window.open('https://docs.akkeris.io/architecture/spaces.html')}
+                    >
+                      <DocumentationIcon />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              )}
+            </div>
             <ConfirmationModal
               open={submitFail}
               onOk={this.handleClose}

@@ -13,7 +13,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import InfoIcon from '@material-ui/icons/Info';
 import GlobalStyles from '../../config/GlobalStyles';
-import util from '../../services/util';
+import { deepCopy } from '../../services/util';
 import BaseComponent from '../../BaseComponent';
 import './KeyValue.css';
 
@@ -54,7 +54,7 @@ export default class KeyValue extends BaseComponent {
       key: this.props.configkey,
       value: this.props.value,
       saved: this.props.saved,
-      notes: util.deepCopy(this.props.notes),
+      notes: deepCopy(this.props.notes),
     };
   }
 
@@ -160,7 +160,7 @@ export default class KeyValue extends BaseComponent {
   }
 
   renderEditConfigVar() {
-    const configVarStyle = util.deepCopy(GlobalStyles.ConfigVarStyle);
+    const configVarStyle = deepCopy(GlobalStyles.ConfigVarStyle);
     configVarStyle.maxWidth = '450px';
     configVarStyle.verticalAlign = 'top';
     configVarStyle.backgroundColor = this.props.saved ?

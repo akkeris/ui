@@ -18,7 +18,7 @@ import NewBuild from './NewBuild';
 import ConfirmationModal from '../ConfirmationModal';
 import ReleaseStatus from './ReleaseStatus';
 import GlobalStyles from '../../config/GlobalStyles';
-import util from '../../services/util/index';
+import { getDateDiff } from '../../services/util/index';
 import BaseComponent from '../../BaseComponent';
 
 function addRestrictedTooltip(title, placement, children) {
@@ -222,7 +222,7 @@ export default class Releases extends BaseComponent {
           if (build.length === 0 && release.slug && release.slug.id) {
             // this build may have come from a promotion.
             build[0] = (await this.api.getSlug(release.slug.id)).data;
-            release.promoted = true;
+            release.promoted = true; // eslint-disable-line
           }
           const source_blob = build[0] ? build[0].source_blob : {};  // eslint-disable-line 
           return {
@@ -381,7 +381,7 @@ export default class Releases extends BaseComponent {
                   </a>
                 ) : ''}&nbsp;<ReleaseStatus release={release} />
                 <div style={style.textEllipses}>{info2.join('\n')}</div>
-                <div style={style.tableCell.sub}> {util.getDateDiff(new Date(release.created_at))} </div> { /* eslint-disable-line */ }
+                <div style={style.tableCell.sub}> {getDateDiff(new Date(release.created_at))} </div> { /* eslint-disable-line */ }
               </div>
               <div style={style.release.actions.root}>
                 {!release.current && release.release &&
@@ -463,7 +463,7 @@ export default class Releases extends BaseComponent {
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>
           <div>
-            {util.getDateDiff(new Date(revert.created_at))} - {[
+            {getDateDiff(new Date(revert.created_at))} - {[
               revert.description,
               revert.source_blob.author,
               revert.source_blob.commit ? `#${revert.source_blob.commit.substring(0, 7)}` : '',

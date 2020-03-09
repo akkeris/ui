@@ -7,7 +7,7 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Clear';
 import ReloadIcon from '@material-ui/icons/Refresh';
-import util from '../../services/util';
+import { filterDynosByFormation } from '../../services/util';
 import NewFormation from './NewFormation';
 import DynoType from './DynoType';
 import ConfirmationModal from '../ConfirmationModal';
@@ -181,7 +181,7 @@ export default class Formations extends BaseComponent {
     return this.state.formations.map(formation => (
       <DynoType
         formation={formation}
-        dynos={util.filterDynosByFormation(this.state.dynos, formation)}
+        dynos={filterDynosByFormation(this.state.dynos, formation)}
         onComplete={this.reload}
         onAlert={this.info}
         key={formation.id}

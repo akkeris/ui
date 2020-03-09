@@ -75,7 +75,7 @@ test('Should be able to create and delete pipeline', async (t) => { // eslint-di
   const pipelineName = utils.randomString();
   global.createdPipelines.push(pipelineName);
   await t
-    // navigate to new app page
+    // navigate to new pipeline page
     .click('.new-pipeline')
 
     // field validation
@@ -84,6 +84,7 @@ test('Should be able to create and delete pipeline', async (t) => { // eslint-di
     .contains('field required')
 
     .typeText('.pipeline-name input', pipelineName)
+    .click('button.next')
     .click('button.next')
 
     // check if pipeline was created
@@ -264,6 +265,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/pipelines`)
       .click('.new-pipeline')
       .typeText('.pipeline-name input', pipelineName)
+      .click('button.next')
       .click('button.next')
       .navigateTo(`${baseUrl}/pipelines`)
       .click(`.pipeline-list .${pipelineName}`)

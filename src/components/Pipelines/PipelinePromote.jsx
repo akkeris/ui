@@ -4,7 +4,7 @@ import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Ic
 import { ArrowDownward, CheckBoxOutlineBlank, CheckBox, Delete, DeveloperBoard, Edit, Error, CheckCircle, Cancel, Lens } from '@material-ui/icons/';
 import { grey, yellow } from '@material-ui/core/colors';
 import GlobalStyles from '../../config/GlobalStyles.jsx'; // eslint-disable-line import/extensions
-import util from '../../services/util';
+import { getDateDiff, deepCopy, filterCouplings } from '../../services/util';
 import BaseComponent from '../../BaseComponent';
 
 const originalState = {
@@ -86,7 +86,7 @@ function statusIconColor(state) {
 export default class PipelinePromote extends BaseComponent {
   constructor(props, context) {
     super(props, context);
-    this.state = util.deepCopy(originalState);
+    this.state = deepCopy(originalState);
   }
 
   async componentDidMount() {
@@ -96,11 +96,11 @@ export default class PipelinePromote extends BaseComponent {
 
   refresh = async (loading = true) => {
     try {
-      this.setState({ loading, ...util.deepCopy(originalState) });
+      this.setState({ loading, ...deepCopy(originalState) });
       const { data: sourceApp } = await this.api.getApp(this.props.source.app.id);
       const { data: sourceReleases } = await this.api.getReleases(this.props.source.app.id);
       const { data: fullCouplings } = await this.api.getPipelineCouplings(this.props.pipeline.name);
-      let targets = util.filterCouplings(fullCouplings, this.props.stages[this.props.stage]);
+      let targets = filterCouplings(fullCouplings, this.props.stages[this.props.stage]);
       targets = await Promise.all(targets.map(async (target) => {
         try {
           const { data: slug } = await this.api.getSlug(target.release.build.id);
@@ -212,21 +212,21 @@ export default class PipelinePromote extends BaseComponent {
         {!this.state.editRelease ? (
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText }}>
             { commitUrl ? (
-              <a style={{ textDecoration: 'none' }} target="_blank" href={commitUrl}>
+              <a style={{ textDecoration: 'none' }} rel="noopener noreferrer" target="_blank" href={commitUrl}>
                 <pre style={GlobalStyles.CommitLink} ><code>#{commitSha}</code></pre>
               </a>
             ) : '' }
             <span style={GlobalStyles.Subtle}> {description}</span>
             <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.Subtle, marginBottom: '0' }}>
               Deployed <pre style={GlobalStyles.CommitLink}><code>v{this.state.release.version}</code></pre>  { /* eslint-disable-line */ }
-              <span style={{ float: 'right' }}>{util.getDateDiff(this.state.release.created_at)}</span>
+              <span style={{ float: 'right' }}>{getDateDiff(this.state.release.created_at)}</span>
             </div>
           </div>
         ) : (
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText }}>
             <Select onChange={this.handleChangeRelease} style={{ ...GlobalStyles.Subtle, ...GlobalStyles.Text, width: '100%' }} value={this.state.release.id}>
               {this.state.sourceReleases.slice(-15).map(release => (
-                <MenuItem key={`menuitem-${release.id}`} value={release.id}>v{release.version} Deployed {util.getDateDiff(release.created_at)} - {release.description}</MenuItem>
+                <MenuItem key={`menuitem-${release.id}`} value={release.id}>v{release.version} Deployed {getDateDiff(release.created_at)} - {release.description}</MenuItem>
               ))}
             </Select>
           </div>
@@ -259,7 +259,7 @@ export default class PipelinePromote extends BaseComponent {
           </div>
           <div style={{ ...GlobalStyles.StandardLabelMargin, ...GlobalStyles.NoWrappingText }}>
             { coupling.release.build.commit && coupling.release.build.commit.sha ? (
-              <a style={{ textDecoration: 'none' }} target="_blank" href={commitUrl}>
+              <a style={{ textDecoration: 'none' }} rel="noopener noreferrer" target="_blank" href={commitUrl}>
                 <pre style={GlobalStyles.CommitLink}>
                   <code>#{coupling.release.build.commit.sha.substring(0, 7)}</code>
                 </pre>
@@ -272,7 +272,7 @@ export default class PipelinePromote extends BaseComponent {
               <React.Fragment>
                 {'Deployed '}
                 <pre style={GlobalStyles.CommitLink}><code>v{coupling.release.version}</code></pre>
-                <span style={{ float: 'right' }}>{util.getDateDiff(coupling.release.updated_at)}</span>
+                <span style={{ float: 'right' }}>{getDateDiff(coupling.release.updated_at)}</span>
               </React.Fragment>
             ) : <span>This app does not have any releases.</span>}
           </div>

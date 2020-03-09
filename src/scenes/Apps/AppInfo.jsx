@@ -3,7 +3,7 @@ import {
   Tab, Tabs, CircularProgress, Snackbar, Card, CardHeader,
   Tooltip, IconButton, Menu, MenuItem, Divider, ListItemIcon, ListItemText,
   Switch, ListItemSecondaryAction, Collapse, Typography, Dialog, TextField,
-  DialogTitle, DialogContent, Button, DialogActions, Icon,
+  DialogTitle, DialogContent, Button, DialogActions,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import InfoIcon from '@material-ui/icons/Info';
@@ -34,7 +34,7 @@ import Metrics from '../../components/Metrics';
 import Addons from '../../components/Addons';
 import Logs from '../../components/Logs';
 import AppOverview from '../../components/Apps/AppOverview';
-import util from '../../services/util';
+import { updateHistory } from '../../services/util';
 import History from '../../config/History';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import NewAutoBuild from '../../components/Releases/NewAutoBuild';
@@ -127,7 +127,7 @@ export default class AppInfo extends BaseComponent {
 
     await this.loadApp();
 
-    util.updateHistory('apps', this.props.match.params.app, this.props.match.params.app);
+    updateHistory('apps', this.props.match.params.app, this.props.match.params.app);
   }
 
   componentDidUpdate(prevProps) {
@@ -575,7 +575,7 @@ export default class AppInfo extends BaseComponent {
 
   render() {
     const {
-      loading, submitMessage, submitFail, editDescriptionOpen, isMaintenance,
+      loading, submitMessage, submitFail, editDescriptionOpen,
     } = this.state;
     const currentTab = this.props.match.params.tab;
     if (loading) {

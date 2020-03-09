@@ -10,14 +10,7 @@ import {
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import CancelIcon from '@material-ui/icons/Cancel';
 import { withStyles } from '@material-ui/core/styles';
-
-function isEmpty(obj) {
-  let empty = true;
-  Object.keys(obj).forEach((key) => {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) { empty = false; }
-  });
-  return empty;
-}
+import { isEmpty, truncstr } from '../services/util';
 
 const styles = theme => ({
   rootBase: {
@@ -105,11 +98,6 @@ const styles = theme => ({
   },
 });
 
-function trunc(str, count) {
-  if (!str || str.length < count) { return str; }
-  return `${str.substring(0, count)}...`;
-}
-
 const inputComponent = ({ inputRef, ...props }) => <div ref={inputRef} {...props} />;
 
 const Control = props => (
@@ -195,7 +183,7 @@ const SingleValue = props => (
     className={props.selectProps.classes.singleValue}
     {...props.innerProps}
   >
-    {trunc(props.children, 25)}
+    {truncstr(props.children, 25)}
   </Typography>
 );
 
