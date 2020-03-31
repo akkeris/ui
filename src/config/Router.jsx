@@ -10,6 +10,7 @@ import History from './History';
 import globalTheme from './GlobalTheme';
 import GA from './GoogleAnalytics';
 
+import AprilFools from './AprilFools';
 
 const PageNotFound = Loadable({
   loader: () => import('../components/PageNotFound'),
@@ -164,33 +165,36 @@ const SitesRoutes = () => (
 );
 
 const Router = () => (
-  <BrowserRouter history={History.get()}>
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
-      { GA.init({ token: sessionStorage.getItem('ga_token') }) && <GA.RouteTracker /> }
-      <MuiThemeProvider theme={globalTheme}>
-        <div style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%' }}>
-          <Nav />
-          <div style={{ flex: 1, marginTop: '64px' }}>
-            <div style={{ width: 'calc(100% - 64px)' }}>
-              <Switch>
-                <Route exact path="/" render={() => <Redirect to="/apps" />} />
-                <Route path="/dashboard" component={DashboardRoutes} />
-                <Route path="/app-setups" component={AppSetupsRoutes} />
-                <Route path="/apps" component={AppRoutes} />
-                <Route path="/pipelines" component={PipelineRoutes} />
-                <Route path="/invoices" component={InvoiceRoutes} />
-                <Route path="/sites" component={SitesRoutes} />
-                <Route path="/spaces" component={SpacesRoutes} />
-                <Route path="/orgs" component={OrgsRoutes} />
-                <Route component={PageNotFound} />
-              </Switch>
+  <React.Fragment>
+    <BrowserRouter history={History.get()}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
+        { GA.init({ token: sessionStorage.getItem('ga_token') }) && <GA.RouteTracker /> }
+        <MuiThemeProvider theme={globalTheme}>
+          <div style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '100%' }}>
+            <Nav />
+            <div style={{ flex: 1, marginTop: '64px' }}>
+              <div style={{ width: 'calc(100% - 64px)' }}>
+                <Switch>
+                  <Route exact path="/" render={() => <Redirect to="/apps" />} />
+                  <Route path="/dashboard" component={DashboardRoutes} />
+                  <Route path="/app-setups" component={AppSetupsRoutes} />
+                  <Route path="/apps" component={AppRoutes} />
+                  <Route path="/pipelines" component={PipelineRoutes} />
+                  <Route path="/invoices" component={InvoiceRoutes} />
+                  <Route path="/sites" component={SitesRoutes} />
+                  <Route path="/spaces" component={SpacesRoutes} />
+                  <Route path="/orgs" component={OrgsRoutes} />
+                  <Route component={PageNotFound} />
+                </Switch>
+              </div>
             </div>
           </div>
-        </div>
-        <Footer />
-      </MuiThemeProvider>
-    </div>
-  </BrowserRouter>
+          <Footer />
+        </MuiThemeProvider>
+      </div>
+    </BrowserRouter>
+    <AprilFools />
+  </React.Fragment>
 );
 
 export default Router;

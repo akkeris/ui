@@ -93,6 +93,7 @@ export default class AccountMenu extends BaseComponent {
         >
           <MenuItem className="account" onClick={this.account}>Account</MenuItem>
           <MenuItem className="logout" onClick={this.logout}>Logout</MenuItem>
+          <MenuItem className="aprilfools" onClick={() => { localStorage.removeItem('april-fools-shown'); location.reload(); }}>Show April Fools</MenuItem>
         </Menu>
       </div>
     );
