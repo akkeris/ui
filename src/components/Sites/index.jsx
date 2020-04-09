@@ -34,6 +34,14 @@ export default class SitesList extends BaseComponent {
     };
   }
 
+  componentDidUpdate(prevProps) {
+    // If our target data prop changed, the user changed the active filters
+    // Need to set page back to 0 in this case
+    if (prevProps.sites.length !== this.props.sites.length) {
+      this.setState({ page: 0 }); // eslint-disable-line
+    }
+  }
+
   handleRowSelection = (id) => {
     History.get().push(`/sites/${id}/info`);
   }

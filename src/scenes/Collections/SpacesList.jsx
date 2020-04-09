@@ -136,7 +136,7 @@ export default class SpacesList extends BaseComponent {
 
   handleFilterChange = (values) => {
     if (!values || values.length === 0) {
-      this.setState({ sortedSpaces: this.state.spaces, filters: [] }, this.handleSort);
+      this.setState({ sortedSpaces: this.state.spaces, filters: [], page: 0 });
       localStorage.setItem('akkeris_space_filters', JSON.stringify(values));
       return;
     }
@@ -159,7 +159,8 @@ export default class SpacesList extends BaseComponent {
       return true;
     });
 
-    this.setState({ sortedSpaces, filters: values }, this.handleSort);
+
+    this.setState({ sortedSpaces, filters: values, page: 0 });
 
     localStorage.setItem('akkeris_space_filters', JSON.stringify(values));
   }
@@ -231,7 +232,7 @@ export default class SpacesList extends BaseComponent {
   }
 
   render() {
-    const { spaces, page, rowsPerPage, sortBy, sortDirection } = this.state;
+    const { sortedSpaces, page, rowsPerPage, sortBy, sortDirection } = this.state;
     if (this.state.loading) {
       return (
         <div style={style.refresh.div}>
@@ -337,13 +338,13 @@ export default class SpacesList extends BaseComponent {
             <TableBody>
               {this.renderSpaces(page, rowsPerPage)}
             </TableBody>
-            {spaces.length !== 0 && (
+            {sortedSpaces.length !== 0 && (
               <TableFooter>
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[15, 25, 50]}
                     colSpan={4}
-                    count={spaces.length}
+                    count={sortedSpaces.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onChangePage={this.handleChangePage}

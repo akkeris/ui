@@ -126,7 +126,7 @@ class Pipelines extends BaseComponent {
 
   handleFilterChange = (values) => {
     if (!values || values.length === 0) {
-      this.setState({ sortedPipelines: this.state.pipelines, filters: [] }, this.handleSort);
+      this.setState({ sortedPipelines: this.state.pipelines, filters: [], page: 0 });
       localStorage.setItem('akkeris_pipeline_filters', JSON.stringify(values));
       return;
     }
@@ -149,7 +149,7 @@ class Pipelines extends BaseComponent {
       return true;
     });
 
-    this.setState({ sortedPipelines, filters: values }, this.handleSort);
+    this.setState({ sortedPipelines, filters: values, page: 0 });
 
     localStorage.setItem('akkeris_pipeline_filters', JSON.stringify(values));
   }
@@ -252,7 +252,7 @@ class Pipelines extends BaseComponent {
 
   render() {
     const {
-      page, rowsPerPage, pipelines, sortBy, sortDirection,
+      page, rowsPerPage, sortedPipelines, sortBy, sortDirection,
     } = this.state;
     if (this.state.loading) {
       return (
@@ -329,13 +329,13 @@ class Pipelines extends BaseComponent {
             <TableBody >
               {this.renderPipelines()}
             </TableBody>
-            {pipelines.length !== 0 && (
+            {sortedPipelines.length !== 0 && (
               <TableFooter>
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[15, 25, 50]}
                     colSpan={4}
-                    count={pipelines.length}
+                    count={sortedPipelines.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onChangePage={this.handleChangePage}
