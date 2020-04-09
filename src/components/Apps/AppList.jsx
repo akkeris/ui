@@ -51,6 +51,14 @@ export default class AppList extends BaseComponent {
     isFilter: false,
   }
 
+  componentDidUpdate(prevProps) {
+    // If our target data prop changed, the user changed the active filters
+    // Need to set page back to 0 in this case
+    if (prevProps.apps.length !== this.props.apps.length) {
+      this.setState({ page: 0 }); // eslint-disable-line
+    }
+  }
+
   handleRowSelection = (app) => {
     History.get().push(`/apps/${app.name}/info`);
   }
