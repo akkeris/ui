@@ -7,12 +7,8 @@ import {
 import GitIcon from './Icons/GitIcon';
 
 /* Documentation Links */
-const wikiLink = '';
-const gettingStartedLink = '';
-const apiLink = '';
-const releasesLink = '';
-const akkerisSupportLink = '';
-const kubernetesSupportLink = 'https://kubernetes.io/';
+const akkerisLink = 'https://beta.akkeris.io';
+const githubLink = 'https://github.com/akkeris';
 
 const theme = parentTheme => deepmerge(parentTheme, {
   overrides: {
@@ -84,59 +80,32 @@ const Footer = () => (
       <div style={style.div}>
         <Table style={style.table.body}>
           <colgroup>
-            <col style={{ width: 'calc(100%  /3)' }} />
-            <col style={{ width: 'calc(100%  /3)' }} />
-            <col style={{ width: 'calc(100%  /3)' }} />
+            <col style={{ width: 'calc(100%  /2)' }} />
           </colgroup>
           <TableHead>
             <TableRow>
               <TableCell style={style.table.headerCell}>
-                Documentation
+                Resources
               </TableCell >
               <TableCell style={style.table.headerCell}>
                 Contribution
-              </TableCell>
-              <TableCell style={style.table.headerCell}>
-                Support
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
               <TableCell style={style.table.cell}>
-                {wikiLink !== '' ? (
-                  <div><a href={wikiLink} style={style.link}>Wiki</a></div>
-                ) : (
-                  <div style={style.link}>Wiki</div>
-                )}
-                {gettingStartedLink !== '' ? (
-                  <div><a href={gettingStartedLink} style={style.link}>Getting Started</a></div>
-                ) : (
-                  <div style={style.link}>Getting Started</div>
-                )}
-              </TableCell>
-              <TableCell style={style.table.cell}>
-                {apiLink !== '' ? (
-                  <div><a href={apiLink} style={style.link}>API</a></div>
-                ) : (
-                  <div style={style.link}>API</div>
-                )}
-                {releasesLink !== '' ? (
-                  <div><a href={releasesLink} style={style.link}>Releases</a></div>
-                ) : (
-                  <div style={style.link}>Releases</div>
-                )}
-              </TableCell>
-              <TableCell style={style.table.cell}>
-                {akkerisSupportLink !== '' ? (
-                  <div><a href={akkerisSupportLink} style={style.link}>Akkeris</a></div>
+                {akkerisLink !== '' ? (
+                  <div><a href={akkerisLink} style={style.link}>Akkeris</a></div>
                 ) : (
                   <div style={style.link}>Akkeris</div>
                 )}
-                {kubernetesSupportLink !== '' ? (
-                  <div><a href={kubernetesSupportLink} style={style.link}>Kubernetes</a></div>
+              </TableCell>
+              <TableCell style={style.table.cell}>
+                {githubLink !== '' ? (
+                  <div><a href={githubLink} style={style.link}>Github</a></div>
                 ) : (
-                  <div style={style.link}>Kubernetes</div>
+                  <div style={style.link}>Github</div>
                 )}
               </TableCell>
             </TableRow>
