@@ -121,7 +121,7 @@ export default class SiteOverview extends BaseComponent {
             <ListItemText primary="Compliance" secondary={this.props.site.compliance.toString()} />
           </ListItem>
           <ListItem >
-            <ListItemText primary="Updated At" secondary={Date(this.props.site.updated_at).toLocaleString()} />
+            <ListItemText primary="Updated At" secondary={(new Date(this.props.site.updated_at)).toLocaleString()} />
             <Button
               variant="contained"
               className="delete"
