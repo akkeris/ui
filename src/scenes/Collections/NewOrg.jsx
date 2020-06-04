@@ -162,7 +162,7 @@ export default class NewOrg extends BaseComponent {
         category: 'ORGS',
         action: 'Created new org',
       });
-      History.get().push('/collections');
+      History.get().push('/orgs');
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({
