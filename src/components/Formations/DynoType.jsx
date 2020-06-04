@@ -464,17 +464,31 @@ export default class DynoType extends BaseComponent {
             </div>
             <div style={style.info.details.commandPort}>
               {this.props.formation.type === 'web' ? (
-                <TextField
-                  fullWidth
-                  className="port"
-                  disabled={!this.state.edit}
-                  type="numeric"
-                  label="Port"
-                  value={port}
-                  onChange={this.handleChange('port')}
-                  helperText={this.state.errorText}
-                  error={this.state.errorText.length > 0}
-                />
+                <div style={style.info.details.commandPort}>
+                  <TextField
+                    fullWidth
+                    className="port"
+                    disabled={!this.state.edit}
+                    type="numeric"
+                    label="Port"
+                    value={port}
+                    onChange={this.handleChange('port')}
+                    helperText={this.state.errorText}
+                    error={this.state.errorText.length > 0}
+                  />
+                  <TextField
+                    className="command"
+                    disabled={!this.state.edit}
+                    label="Command"
+                    value={this.state.command}
+                    onChange={this.handleChange('command')}
+                    helperText={this.state.errorText}
+                    error={this.state.errorText.length > 0}
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">~$</InputAdornment>,
+                    }}
+                  />
+                </div>
               ) : (
                 <TextField
                   className="command"
