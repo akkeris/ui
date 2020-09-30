@@ -210,7 +210,7 @@ export default class Stage extends BaseComponent {
       <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{ ...style.AppPaperPanel, ...GlobalStyles.StandardPadding }}>
         <div style={couplingCardStyle}>
           <DeveloperBoard style={{ marginRight: '0.25rem', ...GlobalStyles.FairlySubtle }} fontSize="small" />
-          <Link style={{ ...GlobalStyles.Subtle }} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
+          <Link style={{ ...GlobalStyles.Subtle }} href={`/apps/${coupling.app.name}/info`}>{coupling.app.name}</Link>
           <span style={{ flexGrow: '1' }} />
           {this.props.stage !== 'review' ? (
             <IconButton style={GlobalStyles.FairlySubtle} onClick={() => { this.setState({ editCoupling: coupling }); }} size="small">
@@ -261,7 +261,7 @@ export default class Stage extends BaseComponent {
       <Paper className={`coupling ${coupling.app.name}`} key={coupling.id} style={{ ...style.AppPaperPanel, ...GlobalStyles.StandardPadding }}>
         <div style={couplingCardStyle}>
           <DeveloperBoard style={{ marginRight: '0.25rem', ...GlobalStyles.FairlySubtle }} fontSize="small" />
-          <Link style={{ ...GlobalStyles.Subtle }} href={`/apps/${coupling.app.id}/info`}>{coupling.app.name}</Link>
+          <Link style={{ ...GlobalStyles.Subtle }} href={`/apps/${coupling.app.name}/info`}>{coupling.app.name}</Link>
           <span style={{ flexGrow: '1' }} />
           <IconButton style={GlobalStyles.FairlySubtle} onClick={() => { this.setState({ editCoupling: coupling }); }} size="small">
             <Edit fontSize="inherit" />
