@@ -317,10 +317,18 @@ export default class Webhook extends BaseComponent {
 
   patchWebhook = async () => {
     try {
+      let url;
+      if (this.props.webhook.url === this.state.url) {
+        url = null;
+      } else if (/^(HTTP|HTTP|http(s)?:\/\/)/.test(this.state.url)) {
+        url = this.state.url;
+      } else {
+        url = `http://${this.state.url}`;
+      }
       await this.api.patchWebhook(
         this.props.app,
         this.props.webhook.id,
-        /^(HTTP|HTTP|http(s)?:\/\/)/.test(this.state.url) ? this.state.url : `http://${this.state.url}`,
+        url,
         this.state.events,
         this.state.secret === '' ? null : this.state.secret,
         this.state.active,
