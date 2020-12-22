@@ -43,6 +43,10 @@ To run locally,
 
 ---
 
+### DotEnv
+
+You can save env vars to a `.env` file, which will be read in by the [dotenv](https://github.com/motdotla/dotenv) package when starting the server via `npm run dev`.
+
 ### Authentication
 
 Connect an oauth provider with the following env info.
@@ -116,7 +120,7 @@ The presence of the "RUN_TESTCAFE" environment variable will instruct the UI to 
 
 ### Selenium
 
-If you have access to Selenium Grid (open source and [simple to setup](https://github.com/SeleniumHQ/docker-selenium)), you can run Testcafe tests using Selenium as a remote browser. This is especially useful for testing with [Akkeris TaaS](https://github.com/akkeris/taas). 
+If you have access to Selenium Grid (open source and [simple to setup](https://github.com/SeleniumHQ/docker-selenium)), you can run Testcafe tests using Selenium as a remote browser. This is especially useful for testing with [Akkeris TaaS](https://github.com/akkeris/taas).
 
 This method utilizes the [Automated Test Runner](#automated-test-runner).
 
