@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node server.js",
+    "dev": "node -r dotenv/config server.js",
     "webpack": "webpack --config webpack-production.config.js --progress --colors",
     "testcafe": "testcafe chrome:headless test/e2e/*",
     "testcafe:chrome": "testcafe chrome test/e2e/*",
@@ -23,6 +24,7 @@
     "babel-preset-react": "6.24.1",
     "babel-preset-stage-2": "6.24.1",
     "css-loader": "^3.4.2",
+    "dotenv": "^8.2.0",
     "enzyme": "^3.7.0",
     "eslint": "4.19.1",
     "eslint-config-airbnb": "15.1.0",
