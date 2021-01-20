@@ -141,7 +141,7 @@ export default class ConfigVar extends BaseComponent {
         if (Number.isNaN(port) || port < 1 || port > 65535) {
           return this.setState({ error: 'The port specified had an invalid value, it must be a number greater than 0 and less than 65535' });
         }
-        await this.api.patchFormation(this.props.app, 'web', undefined, undefined, undefined, port, undefined, undefined);
+        await this.api.patchFormation(this.props.app, 'web', undefined, undefined, undefined, port, undefined, undefined, undefined);
         delete changes.PORT;
       }
       if (!isEmpty(changes)) {
