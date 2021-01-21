@@ -100,9 +100,8 @@ async function runTests() {
 
   const mode = process.env.TESTCAFE_MODE ? process.env.TESTCAFE_MODE : 'local';
 
-  // Give react some time to spin up
   if (process.env.NODE_ENV === 'dev') {
-    console.log('Sleeping for 20 seconds...');
+    console.log('Waiting 20 seconds for React to spin up ...');
     await sleep(20000);
   }
 

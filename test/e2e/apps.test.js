@@ -558,7 +558,26 @@ test('Should be able to create edit and delete formations', async (t) => { // es
     .contains('Updated Formation')
     .click('.formation-list .web')
     .expect(Selector('.formation-list .web .port input').value)
-    .contains('8080');
+    .contains('8080')
+
+    // Command
+    .click('.formation-list .web .web-info button.edit')
+    .typeText('.formation-list .web .web-info .command input', 'npm start')
+    .click('.formation-list .web .web-info button.save')
+    .expect(Selector('.formation-snack').innerText)
+    .contains('Updated Formation')
+    .click('.formation-list .web')
+    .expect(Selector('.formation-list .web .command input').value)
+    .contains('npm start')
+    .click('.formation-list .web .web-info button.edit')
+    .click('.formation-list .web .web-info .command input')
+    .pressKey('ctrl+a delete')
+    .click('.formation-list .web .web-info button.save')
+    .expect(Selector('.formation-snack').innerText)
+    .contains('Updated Formation')
+    .click('.formation-list .web')
+    .expect(Selector('.formation-list .web .command input').value)
+    .contains('');
 });
 
 test('Should be able to create view and release builds', async (t) => { // eslint-disable-line no-undef
