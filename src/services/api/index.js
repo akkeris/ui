@@ -105,7 +105,16 @@ function deleteFormation(app, formation) {
   return axios.delete(`/api/apps/${app}/formation/${formation}`, { cancelToken: this.cancelToken });
 }
 
-function patchFormation(app, type, size, quantity, command, port, healthcheck, removeHealthcheck) {
+function patchFormation(
+  app,
+  type,
+  size,
+  quantity,
+  command,
+  port,
+  healthcheck,
+  removeHealthcheck,
+  removeCommand) {
   return axios.patch(`/api/apps/${app}/formation`, [{
     type,
     size,
@@ -114,6 +123,7 @@ function patchFormation(app, type, size, quantity, command, port, healthcheck, r
     port,
     healthcheck,
     removeHealthcheck,
+    'remove-command': removeCommand,
   }], { cancelToken: this.cancelToken });
 }
 

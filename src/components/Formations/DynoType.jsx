@@ -250,8 +250,8 @@ export default class DynoType extends BaseComponent {
         this.state.command === '' ? null : this.state.command,
         this.state.port === '' ? null : this.state.port,
         healthcheck,
-        this.props.formation.type === 'web' ?
-          (this.state.healthcheck === null || this.state.healthcheck === '') : undefined,
+        this.props.formation.type === 'web' && (this.state.healthcheck === null || this.state.healthcheck === ''),
+        this.props.formation.type === 'web' && (this.state.command === null || this.state.command === ''),
       );
       ReactGA.event({
         category: 'DYNOS',
