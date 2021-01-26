@@ -117,25 +117,16 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
     t.ctx.pipelineName = pipelineName; // eslint-disable-line no-param-reassign
     global.createdApps.push(appName, appName2, appName3);
     global.createdPipelines.push(pipelineName);
+    await utils.createApp(appName);
+    await utils.createApp(appName2);
+    await utils.createApp(appName3);
+
     await t
 
       // login
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
       .click('button.login')
-
-      // App 1
-      .click('.new-app')
-      .typeText('.app-name input', appName)
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .click('button.next')
-      .click('button.next')
 
       // create build on app1
       .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
@@ -168,55 +159,6 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .gt(0)
       .wait(10000)
 
-
-      .navigateTo(`${baseUrl}/apps`)
-      .click('button.addFilter')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .ok()
-
-
-      // App 2
-      .click('.new-app')
-      .typeText('.app-name input', appName2)
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .click('button.next')
-      .click('button.next')
-      .navigateTo(`${baseUrl}/apps`)
-      .click('button.addFilter')
-      .click('.filter-select-clear')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName2}-testcafe`).exists)
-      .ok()
-
-      // App 3
-      .click('.new-app')
-      .typeText('.app-name input', appName3)
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .click('button.next')
-      .click('button.next')
-      .navigateTo(`${baseUrl}/apps`)
-      .click('button.addFilter')
-      .click('.filter-select-clear')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName3}-testcafe`).exists)
-      .ok()
-
       // Config for app 3
       .navigateTo(`${baseUrl}/apps/${appName3}-testcafe`)
       .click('.config-tab')
@@ -230,7 +172,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
       .expect(Selector('.config-list .MERP').innerText)
       .contains('DERP')
 
-      // Build and Release for app 1
+      // Build and Release for app 2
       .navigateTo(`${baseUrl}/apps`)
       .navigateTo(`${baseUrl}/apps/${appName2}-testcafe`)
       .click('.dynos-tab')
@@ -278,46 +220,31 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
     const appName3 = t.ctx.appName3;
     const pipelineName = t.ctx.pipelineName;
 
+    try {
+      await utils.deleteApp(`${appName}-testcafe`);
+    } catch (err) {
+      if (err.response.status !== 404) {
+        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
+      }
+    }
+
+    try {
+      await utils.deleteApp(`${appName2}-testcafe`);
+    } catch (err) {
+      if (err.response.status !== 404) {
+        throw new Error(`Error deleting ${appName2}: ${err.response.data}`);
+      }
+    }
+
+    try {
+      await utils.deleteApp(`${appName3}-testcafe`);
+    } catch (err) {
+      if (err.response.status !== 404) {
+        throw new Error(`Error deleting ${appName3}: ${err.response.data}`);
+      }
+    }
+
     await t
-      // App 1
-      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
-      .click('.info-tab')
-      .click('button.app-menu-button')
-      .click('.delete-app')
-      .click('.delete-confirm .ok')
-      .click('button.addFilter')
-      .click('.filter-select-clear')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list ${appName}`).exists)
-      .notOk()
-
-      // App 2
-      .navigateTo(`${baseUrl}/apps/${appName2}-testcafe`)
-      .click('.info-tab')
-      .click('button.app-menu-button')
-      .click('.delete-app')
-      .click('.delete-confirm .ok')
-      .click('button.addFilter')
-      .click('.filter-select-clear')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName2}`).exists)
-      .notOk()
-
-      // App 3
-      .navigateTo(`${baseUrl}/apps/${appName3}-testcafe`)
-      .click('.info-tab')
-      .click('button.app-menu-button')
-      .click('.delete-app')
-      .click('.delete-confirm .ok')
-      .click('button.addFilter')
-      .click('.filter-select-clear')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName3}`).exists)
-      .notOk()
-
       // Pipeline
       .navigateTo(`${baseUrl}/pipelines/${pipelineName}`)
       .click('button.delete-pipeline')

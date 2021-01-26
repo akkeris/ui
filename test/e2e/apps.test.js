@@ -9,6 +9,7 @@ const botUsername = process.env.BOT_USER;
 if (!global.createdApps) {
   global.createdApps = [];
 }
+
 fixture('Apps Page') // eslint-disable-line no-undef
   .page(`${baseUrl}/apps`)
   .beforeEach(async (t) => {
@@ -17,41 +18,115 @@ fixture('Apps Page') // eslint-disable-line no-undef
 
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
-      .click('button.login');
+      .click('button.login')
+      .navigateTo(`${baseUrl}/apps`);
   });
+
+test('Should be able to create and delete an app', async (t) => { // eslint-disable-line no-undef
+  const appName = utils.randomString();
+  global.createdApps.push(appName);
+
+  await t
+    // navigate to new app page
+    .click('.new-app')
+    .click('button.next')
+    .expect(Selector('.app-name').innerText)
+    .contains('App required')
+
+    // create app
+    .typeText('.app-name input', appName)
+    .click('button.next')
+
+  // Check step 1 caption
+    .expect(Selector('.step-0-label .step-label-caption').innerText)
+    .contains(appName)
+
+    .typeText('div.select-textfield', 'testcafe')
+    .pressKey('enter')
+    .click('button.next')
+
+  // Check step 2 caption
+    .expect(Selector('.step-1-label .step-label-caption').innerText)
+    .contains('testcafe')
+
+    .typeText('div.select-textfield', 'testcafe')
+    .pressKey('enter')
+    .click('button.next')
+
+  // Description will be tested later
+    .click('button.next')
+
+  // Check step 3 caption, stepper summary
+    .expect(Selector('.step-2-label .step-label-caption').innerText)
+    .contains('testcafe')
+    .expect(Selector('.new-app-summary').innerText)
+    .contains(`The app ${appName}-testcafe will be created in the testcafe org.`)
+    .click('button.next')
+
+  // Verify that app exists
+    .navigateTo(`${baseUrl}/apps`)
+    .click('button.addFilter')
+    .typeText(Selector('.filter-select-input input'), 'testcafe')
+    .click('.filter-select-results .testcafe')
+    .expect(Selector(`.app-list .${appName}-testcafe`).exists)
+    .ok()
+
+    // navigate to new app page
+    .click('.new-app')
+    .click('button.next')
+    .expect(Selector('.app-name').innerText)
+    .contains('App required')
+
+    // test duplicate
+    .typeText('.app-name input', appName)
+    .click('button.next')
+    .typeText('div.select-textfield', 'testcafe')
+    .pressKey('enter')
+    .click('button.next')
+    .typeText('div.select-textfield', 'testcafe')
+    .pressKey('enter')
+    .click('button.next')
+    .click('button.next')
+    .click('button.next')
+    .expect(Selector('.new-app-error').innerText)
+    .contains('The requested application already exists.')
+    .click('.ok')
+    .navigateTo(`${baseUrl}/apps`)
+    .click('button.addFilter')
+    .click('.filter-select-clear')
+
+    // check if app was created
+    .typeText(Selector('.filter-select-input input'), 'testcafe')
+    .click('.filter-select-results .testcafe')
+    .click(`.app-list .${appName}-testcafe`)
+    .expect(Selector('.card .header').innerText)
+    .contains(`${appName}-testcafe`)
+
+  // delete the app
+    .click('button.app-menu-button')
+    .click('.delete-app')
+    .expect(Selector('.delete-confirm').innerText)
+    .contains('Are you sure you want to delete this app?')
+
+  // confirm delete and make sure app no longer exists
+    .click('.delete-confirm .ok')
+    .expect(Selector(`.app-list .${appName}-testcafe`).exists)
+    .notOk();
+});
 
 test // eslint-disable-line
   .before(async (t) => {
     const appName = utils.randomString();
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     global.createdApps.push(appName);
+    await utils.createApp(appName);
     await t
-    // login
+      .expect(Selector('button.login').innerText).eql('Login')
+
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
       .click('button.login')
-
-    // navigate to new app page
-      .click('.new-app')
-
-    // create app
-      .typeText('.app-name input', appName)
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .click('button.next')
-      .click('button.next')
-      .navigateTo(`${baseUrl}/apps`)
-      .click('button.addFilter')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .ok()
-      .click('.filter-select-clear');
+      .navigateTo(`${baseUrl}/apps`);
   })('Should show list of apps based on filter', async (t) => { // eslint-disable-line no-undef
     const appName = t.ctx.appName;
 
@@ -59,6 +134,7 @@ test // eslint-disable-line
       .expect(Selector('.app-list .MuiTableBody-root').childElementCount)
       .gt(0)
 
+      .click('button.addFilter')
       .click('.filter-select-input')
       .expect(Selector('.filter-select-results .us-seattle').exists)
       .ok()
@@ -75,19 +151,13 @@ test // eslint-disable-line
   })
   .after(async (t) => {
     const appName = t.ctx.appName;
-
-    await t
-      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
-      .click('.info-tab')
-
-    // delete the app
-      .click('button.app-menu-button')
-      .click('.delete-app')
-
-    // confirm delete and make sure app no longer exists
-      .click('.delete-confirm .ok')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .notOk();
+    try {
+      await utils.deleteApp(`${appName}-testcafe`);
+    } catch (err) {
+      if (err.response.status !== 404) {
+        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
+      }
+    }
   });
 
 test('Should throw error on non-existent app', async (t) => { // eslint-disable-line no-undef
@@ -107,98 +177,6 @@ test('Should show apps as first group in global search', async (t) => { // eslin
     .wait(2000)
     .expect(Selector('.global-search-results .group-heading').nth(0).innerText)
     .contains('Apps', 'List of apps not first in search results');
-});
-
-test('Should be able to create and delete an app', async (t) => { // eslint-disable-line no-undef
-  const appName = utils.randomString();
-  global.createdApps.push(appName);
-
-  await t
-  // navigate to new app page
-    .click('.new-app')
-    .click('button.next')
-    .expect(Selector('.app-name').innerText)
-    .contains('App required')
-
-  // create app
-    .typeText('.app-name input', appName)
-    .click('button.next')
-
-    // Check step 1 caption
-    .expect(Selector('.step-0-label .step-label-caption').innerText)
-    .contains(appName)
-
-    .typeText('div.select-textfield', 'testcafe')
-    .pressKey('enter')
-    .click('button.next')
-
-    // Check step 2 caption
-    .expect(Selector('.step-1-label .step-label-caption').innerText)
-    .contains('testcafe')
-
-    .typeText('div.select-textfield', 'testcafe')
-    .pressKey('enter')
-    .click('button.next')
-
-    // Description will be tested later
-    .click('button.next')
-
-    // Check step 3 caption, stepper summary
-    .expect(Selector('.step-2-label .step-label-caption').innerText)
-    .contains('testcafe')
-    .expect(Selector('.new-app-summary').innerText)
-    .contains(`The app ${appName}-testcafe will be created in the testcafe org.`)
-    .click('button.next')
-
-    // Verify that app exists
-    .navigateTo(`${baseUrl}/apps`)
-    .click('button.addFilter')
-    .typeText(Selector('.filter-select-input input'), 'testcafe')
-    .click('.filter-select-results .testcafe')
-    .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-    .ok()
-
-  // navigate to new app page
-    .click('.new-app')
-    .click('button.next')
-    .expect(Selector('.app-name').innerText)
-    .contains('App required')
-
-  // test duplicate
-    .typeText('.app-name input', appName)
-    .click('button.next')
-    .typeText('div.select-textfield', 'testcafe')
-    .pressKey('enter')
-    .click('button.next')
-    .typeText('div.select-textfield', 'testcafe')
-    .pressKey('enter')
-    .click('button.next')
-    .click('button.next')
-    .click('button.next')
-    .expect(Selector('.new-app-error').innerText)
-    .contains('The requested application already exists.')
-    .click('.ok')
-    .navigateTo(`${baseUrl}/apps`)
-    .click('button.addFilter')
-    .click('.filter-select-clear')
-
-  // check if app was created
-    .typeText(Selector('.filter-select-input input'), 'testcafe')
-    .click('.filter-select-results .testcafe')
-    .click(`.app-list .${appName}-testcafe`)
-    .expect(Selector('.card .header').innerText)
-    .contains(`${appName}-testcafe`)
-
-    // delete the app
-    .click('button.app-menu-button')
-    .click('.delete-app')
-    .expect(Selector('.delete-confirm').innerText)
-    .contains('Are you sure you want to delete this app?')
-
-    // confirm delete and make sure app no longer exists
-    .click('.delete-confirm .ok')
-    .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-    .notOk();
 });
 
 test('Should be able to create and edit app description', async (t) => { // eslint-disable-line no-undef
@@ -302,68 +280,38 @@ test('Should be able to create and edit app description', async (t) => { // esli
     .click('button.cancel');
 }).after(async (t) => {
   const appName = t.ctx.appName;
-
-  await t
-    .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
-    .click('.info-tab')
-
-    // delete the app
-    .click('button.app-menu-button')
-    .click('.delete-app')
-
-    // confirm delete and make sure app no longer exists
-    .click('.delete-confirm .ok')
-    .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-    .notOk();
+  try {
+    await utils.deleteApp(`${appName}-testcafe`);
+  } catch (err) {
+    if (err.response.status !== 404) {
+      throw new Error(`Error deleting ${appName}: ${err.response.data}`);
+    }
+  }
 });
+
 fixture('AppInfo Page') // eslint-disable-line no-undef
   .page(`${baseUrl}/apps`)
   .beforeEach(async (t) => {
     const appName = utils.randomString();
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     global.createdApps.push(appName);
+    await utils.createApp(appName);
+    // login
     await t
-
-      // login
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
       .click('button.login')
-
-      // navigate to new app page
-      .click('.new-app')
-
-      // create app
-      .typeText('.app-name input', appName)
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .click('button.next')
-      .click('button.next')
-      .navigateTo(`${baseUrl}/apps`)
-      .click('button.addFilter')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .ok();
+      .navigateTo(`${baseUrl}/apps`);
   })
   .afterEach(async (t) => {
     const appName = t.ctx.appName;
-    await t
-      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
-      .click('.info-tab')
-
-    // delete the app
-      .click('button.app-menu-button')
-      .click('.delete-app')
-
-    // confirm delete and make sure app no longer exists
-      .click('.delete-confirm button.ok')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .notOk();
+    try {
+      await utils.deleteApp(`${appName}-testcafe`);
+    } catch (err) {
+      if (err.response.status !== 404) {
+        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
+      }
+    }
   });
 
 test('Should follow search to app and see all info', async (t) => { // eslint-disable-line no-undef
@@ -386,7 +334,7 @@ test('Should follow search to app and see all info', async (t) => { // eslint-di
 test('Should be able to toggle into maintenance mode', async (t) => { // eslint-disable-line no-undef
   const appName = t.ctx.appName;
   await t
-    .click(`.app-list .${appName}-testcafe`)
+    .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
 
     // In order to put an app in maintenance mode, you have to have a dyno running something
 
@@ -434,7 +382,7 @@ test('Should be able to toggle into maintenance mode', async (t) => { // eslint-
 test('Should be able to create edit and delete formations', async (t) => { // eslint-disable-line no-undef
   const appName = t.ctx.appName;
   await t
-    .click(`.app-list .${appName}-testcafe`)
+    .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
     .click('.dynos-tab')
 
     // Check new component shows
@@ -584,7 +532,7 @@ test('Should be able to create view and release builds', async (t) => { // eslin
   const appName = t.ctx.appName;
 
   await t
-    .click(`.app-list .${appName}-testcafe`)
+    .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
     .click('.releases-tab')
     .expect(Selector('.release-list tbody').innerText)
     .contains('No Releases')
@@ -677,61 +625,19 @@ test // eslint-disable-line no-undef
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     t.ctx.appName2 = appName2; // eslint-disable-line no-param-reassign
     global.createdApps.push(appName, appName2);
-    await t
-
+    await utils.createApp(appName);
+    await utils.createApp(appName2);
     // login
+    await t
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
-      .click('button.login')
-
-    // navigate to new app page
-      .click('.new-app')
-
-    // create app
-      .typeText('.app-name input', appName)
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .click('button.next')
-      .click('button.next')
-      .navigateTo(`${baseUrl}/apps`)
-      .click('button.addFilter')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .ok()
-
-      // navigate to new app page
-      .click('.new-app')
-
-    // create app
-      .typeText('.app-name input', appName2)
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .click('button.next')
-      .click('button.next')
-      .navigateTo(`${baseUrl}/apps`)
-      .click('button.addFilter')
-      .click('.filter-select-clear')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName2}-testcafe`).exists)
-      .ok();
+      .click('button.login');
   })('Should be able to create and remove addons', async (t) => { // eslint-disable-line no-undef
     const appName = t.ctx.appName;
     const appName2 = t.ctx.appName2;
 
     await t
-      .click(`.app-list .${appName}-testcafe`)
+      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
       .click('.addons-tab')
 
     // Check new component shows
@@ -906,37 +812,26 @@ test // eslint-disable-line no-undef
   .after(async (t) => {
     const appName = t.ctx.appName;
     const appName2 = t.ctx.appName2;
-
-    await t
-      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
-      .click('.info-tab')
-
-    // delete the app
-      .click('button.app-menu-button')
-      .click('.delete-app')
-
-    // confirm delete and make sure app no longer exists
-      .click('.delete-confirm .ok')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .notOk()
-
-      .navigateTo(`${baseUrl}/apps/${appName2}-testcafe`)
-      .click('.info-tab')
-
-    // delete the app
-      .click('button.app-menu-button')
-      .click('.delete-app')
-
-    // confirm delete and make sure app no longer exists
-      .click('.delete-confirm button.ok')
-      .expect(Selector(`.app-list .${appName2}-testcafe`).exists)
-      .notOk();
+    try {
+      await utils.deleteApp(`${appName}-testcafe`);
+    } catch (err) {
+      if (err.response.status !== 404) {
+        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
+      }
+    }
+    try {
+      await utils.deleteApp(`${appName2}-testcafe`);
+    } catch (err) {
+      if (err.response.status !== 404) {
+        throw new Error(`Error deleting ${appName2}: ${err.response.data}`);
+      }
+    }
   });
 
 test('Should be able to create edit and remove webhooks', async (t) => { // eslint-disable-line no-undef
   const appName = t.ctx.appName;
   await t
-    .click(`.app-list .${appName}-testcafe`)
+    .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
     .click('.webhooks-tab')
 
     // Check new component shows
@@ -1309,7 +1204,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
 test('Should be able to create edit and remove config vars', async (t) => { // eslint-disable-line no-undef
   const appName = t.ctx.appName;
   await t
-    .click(`.app-list .${appName}-testcafe`)
+    .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
     .click('.config-tab')
 
     // Check new component shows
