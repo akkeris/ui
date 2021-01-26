@@ -37,9 +37,8 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
     const appName = utils.randomString();
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     global.createdApps.push(appName);
+    // login
     await t
-
-      // login
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
       .click('button.login')
@@ -48,7 +47,7 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
       .navigateTo(`${baseUrl}/apps`)
       .click('.new-app')
 
-      // create app
+      // create app with UI
       .typeText('.app-name input', appName)
       .click('button.next')
       .typeText('div.select-textfield', 'testcafe')
@@ -69,18 +68,13 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
   })
   .afterEach(async (t) => {
     const appName = t.ctx.appName;
-    await t
-      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
-      .click('.info-tab')
-
-    // delete the app
-      .click('button.app-menu-button')
-      .click('.delete-app')
-
-    // confirm delete and make sure app no longer exists
-      .click('.delete-confirm button.ok')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .notOk();
+    try {
+      await utils.deleteApp(`${appName}-testcafe`);
+    } catch (err) {
+      if (err.response.status !== 404) {
+        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
+      }
+    }
   });
 
 test('Should allow favorite of app and addition or removal to dashboard', async (t) => { // eslint-disable-line no-undef
@@ -105,51 +99,24 @@ fixture('Recents Tab') // eslint-disable-line no-undef
     const appName = utils.randomString();
     t.ctx.appName = appName; // eslint-disable-line no-param-reassign
     global.createdApps.push(appName);
+    await utils.createApp(appName);
+    // login
     await t
-
-      // login
       .typeText('#username', botUsername)
       .typeText('#password', botPassword)
       .click('button.login')
-
-      // navigate to new app page
-      .navigateTo(`${baseUrl}/apps`)
-      .click('.new-app')
-
-      // create app
-      .typeText('.app-name input', appName)
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .typeText('div.select-textfield', 'testcafe')
-      .pressKey('enter')
-      .click('button.next')
-      .click('button.next')
-      .click('button.next')
-      .navigateTo(`${baseUrl}/apps`)
-      .click('button.addFilter')
-      .typeText(Selector('.filter-select-input input'), 'testcafe')
-      .click('.filter-select-results .testcafe')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .ok()
       .navigateTo(`${baseUrl}/dashboard`)
       .click('.recents-tab');
   })
   .afterEach(async (t) => {
     const appName = t.ctx.appName;
-    await t
-      .navigateTo(`${baseUrl}/apps/${appName}-testcafe`)
-      .click('.info-tab')
-
-    // delete the app
-      .click('button.app-menu-button')
-      .click('.delete-app')
-
-    // confirm delete and make sure app no longer exists
-      .click('.delete-confirm button.ok')
-      .expect(Selector(`.app-list .${appName}-testcafe`).exists)
-      .notOk();
+    try {
+      await utils.deleteApp(`${appName}-testcafe`);
+    } catch (err) {
+      if (err.response.status !== 404) {
+        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
+      }
+    }
   });
 
 test('Should allow view of recent activity and quick access to those items', async (t) => { // eslint-disable-line no-undef

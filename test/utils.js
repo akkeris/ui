@@ -27,14 +27,46 @@ async function getAccessToken() {
   }
 }
 
+// Create app with given name in the testcafe space
+async function createApp(name) {
+  if (!global.accessToken) {
+    global.accessToken = await getAccessToken();
+  }
+
+  const payload = {
+    name,
+    space: 'testcafe',
+    org: 'testcafe',
+    description: 'App created during UI testing',
+  };
+
+  const config = { headers: { Authorization: `Bearer ${global.accessToken}` } };
+
+  return axios.post(`${process.env.AKKERIS_API}/apps`, payload, config);
+}
+
+// Delete an app with the given name (name-space format)
+async function deleteApp(name) {
+  if (!global.accessToken) {
+    global.accessToken = await getAccessToken();
+  }
+
+  const config = { headers: { Authorization: `Bearer ${global.accessToken}` } };
+
+  return axios.delete(`${process.env.AKKERIS_API}/apps/${name}`, config);
+}
+
 async function verifyResourceDeletion(appNames, pipelineNames, siteNames) {
   if (!process.env.OAUTH_ENDPOINT && !process.env.AKKERIS_API) {
     console.log('\tProvide both OAUTH_ENDPOINT and AKKERIS_API environment variables to perform post-test cleanup verification.');
     return;
   }
 
-  const token = await getAccessToken();
-  if (!token) {
+  if (!global.accessToken) {
+    global.accessToken = await getAccessToken();
+  }
+
+  if (!global.accessToken) {
     console.log(`\tCould not get access token. Manual verification of deleted apps may be needed: ${appNames.join(', ')}`);
     return;
   }
@@ -44,11 +76,11 @@ async function verifyResourceDeletion(appNames, pipelineNames, siteNames) {
   console.log(`\tPipelines: ${pipelineNames.join(', ')}`);
   console.log(`\tSites: ${siteNames.join(', ')}`);
 
-  const config = { headers: { Authorization: `Bearer ${token}` } };
+  const config = { headers: { Authorization: `Bearer ${global.accessToken}` } };
 
   await asyncForEach(appNames, async (appName) => {
     try {
-      await axios.delete(`${process.env.AKKERIS_API}/apps/${appName}-testcafe`, config);
+      await deleteApp(`${appName}-testcafe`);
     } catch (err) {
       if (err.response.status !== 404) {
         console.error(`\tError deleting ${appName}: `);
@@ -85,5 +117,7 @@ async function verifyResourceDeletion(appNames, pipelineNames, siteNames) {
 module.exports = {
   randomString,
   verifyResourceDeletion,
+  createApp,
+  deleteApp,
 };
 
