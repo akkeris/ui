@@ -14,7 +14,7 @@ const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
 const https = require('https');
 
-const httpsAgent = new https.Agent({ keepAlive: true, keepAliveMsecs: 30000 });
+const httpsAgent = new https.Agent({ keepAlive: true, keepAliveMsecs: 360000 }); // 6 minutes
 
 const allowed = ['/oauth/callback', '/logout', '.css', '.js', '.map', '.png', '.ico', '.svg'];
 function isUnprotected(requestPath) {
@@ -217,9 +217,11 @@ app.get('/*', (req, res) => {
   }
 });
 
-app.listen(port, '0.0.0.0', (err) => {
+const server = app.listen(port, '0.0.0.0', (err) => {
   if (err) {
     console.log(err);
   }
   console.info(`==> 🌎 Listening on port %s. Open up ${clientURI} in your browser.`, port, port);
 });
+
+server.keepAliveTimeout = 1000 * (60 * 6); // 6 minutes
