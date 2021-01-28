@@ -87,7 +87,7 @@ Please note that for these tests the UI must be running somewhere (e.g. on your 
 
 ### Automated Test Runner
 
-If you have Chrome (or Firefox) installed on your local machine, you can set some environment variables and have npm automatically run Testcafe tests with the same `npm start` command used for starting the UI.
+If you have Chrome (or Firefox) installed on your local machine, you can set some environment variables and use the `npm test` command to run Testcafe automated tests.
 
 You can also use this option to automatically "clean up" remaining Akkeris resources if tests fail by providing the `AKKERIS_API` and `OAUTH_ENDPOINT` options.
 
@@ -102,8 +102,7 @@ _This is the preferred (and easiest) option for testing on development machines_
 | BOT_PASS             | -                     | Yes      | Password of the testing bot user                               | For authentication to the UI                                                                                                                 |
 | OAUTH_ENDPOINT       | -                     | No       | The URL of the OAuth provider                                  | Provide this to perform post-test cleanup verification.                                                                                      |
 | AKKERIS_API          | -                     | No       | The URL of the Akkeris API                                     | Provide this to perform post-test cleanup verification.                                                                                      |
-| RUN_TESTCAFE         | false                 | Yes      | Run tests instead of starting the UI                           | Must be set to `true` otherwise the UI will start                                                                                            |
-| TESTCAFE_BROWSERS    | chrome                | No       | Comma separated list of browsers to use                        | Multiple values means run simultaneously on both (e.g. `chrome,firefox`)                                                                     |
+| TESTCAFE_BROWSERS    | chrome                | No       | Comma separated list of browsers to use                        | Multiple values means run simultaneously on both (e.g. `chrome,firefox`).                                                                     |
 | TESTCAFE_TESTS       | e2e/*                 | No       | Comma separated list of test files                             | Use `e2e/` as the root folder - e.g. `e2e/*` or `e2e/apps.test.js`                                                                           |
 | TESTCAFE_CONCURRENCY | 1                     | No       | Number of browser instances to use                             | [Testcafe documentation](https://devexpress.github.io/testcafe/documentation/using-testcafe/common-concepts/concurrent-test-execution.html)) |
 
@@ -114,7 +113,7 @@ For screenshot options, see the [Taking Screenshots](#taking-screenshots) sectio
 Given that the applicable environment variables have been saved to `config.env`...
 
 1. `source config.env`
-2. `npm start`
+2. `npm test`
 
 The presence of the "RUN_TESTCAFE" environment variable will instruct the UI to run the Testcafe tests rather than starting normally.
 
@@ -133,10 +132,10 @@ This method utilizes the [Automated Test Runner](#automated-test-runner).
 | AKKERIS_API          | -               | No       | The URL of the Akkeris API                 | Provide this to perform post-test cleanup verification.                                                                                      |
 | BOT_USER             | -               | Yes      | Username of bot user                       |                                                                                                                                              |
 | BOT_PASS             | -               | Yes      | Password of bot user                       |                                                                                                                                              |
-| RUN_TESTCAFE         | -               | Yes      | Run tests instead of UI                    | Must be set to `true`                                                                                                                        |
 | SELENIUM_SERVER      | -               | Yes      | URL of Selenium Grid Hub                   | e.g. https://localhost:4444/wd/hub                                                                                                           |
 | TESTCAFE_MODE        | -               | Yes      | Mode to run in                             | `selenium` for running in Selenium Grid                                                                                                      |
-| TESTCAFE_BROWSERS    | selenium:chrome | No       | Comma separated list of browsers to use    | Multiple values means run simultaneously on both browsers. Prefix with `selenium:`                                                           |
+| TESTCAFE_BROWSERS    | selenium:chrome | No       | Comma separated list of browsers to use    | Multiple values means run simultaneously on both browsers. Prefix with `selenium:`, and end with `#headless` if using `SELENIUM_CAPABILITIES` (e.g. `selenium:chrome#headless`)         |
+| SELENIUM_CAPABILITIES | -              | No       | Set to `headless.json` to enable headless mode option                             | [Testcafe documentation](https://devexpress.github.io/testcafe/documentation/using-testcafe/common-concepts/concurrent-test-execution.html)) |
 | TESTCAFE_TESTS       | e2e/*           | No       | Comma separated list of test files         | Use `e2e/` as the root folder                                                                                                                |
 | TESTCAFE_CONCURRENCY | 1               | No       | Number of browser instances to use         | [Testcafe documentation](https://devexpress.github.io/testcafe/documentation/using-testcafe/common-concepts/concurrent-test-execution.html)) |
 
@@ -149,12 +148,12 @@ With Docker:
 Given that the applicable environment variables have been saved to `config.env`...
 
 1. `docker build -t akkeris-ui .`
-2. `docker run --env-file config.env -n akkeris-ui --rm akkeris-ui`
+2. `docker run --env-file config.env -n akkeris-ui --rm akkeris-ui npm test`
 
 Locally:
 
 1. `source config.env`
-2. `npm start`
+2. `npm test`
 
 ### Docker Image
 

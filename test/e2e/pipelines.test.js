@@ -220,13 +220,7 @@ fixture('Pipeline Info Page') // eslint-disable-line no-undef
     const appName3 = t.ctx.appName3;
     const pipelineName = t.ctx.pipelineName;
 
-    try {
-      await utils.deleteApp(`${appName}-testcafe`);
-    } catch (err) {
-      if (err.response.status !== 404) {
-        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
-      }
-    }
+    await utils.deleteApp(`${appName}-testcafe`);
 
     try {
       await utils.deleteApp(`${appName2}-testcafe`);
