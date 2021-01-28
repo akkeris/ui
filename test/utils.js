@@ -47,13 +47,19 @@ async function createApp(name) {
 
 // Delete an app with the given name (name-space format)
 async function deleteApp(name) {
-  if (!global.accessToken) {
-    global.accessToken = await getAccessToken();
+  try {
+    if (!global.accessToken) {
+      global.accessToken = await getAccessToken();
+    }
+
+    const config = { headers: { Authorization: `Bearer ${global.accessToken}` } };
+
+    await axios.delete(`${process.env.AKKERIS_API}/apps/${name}`, config);
+  } catch (err) {
+    if (err.response.status !== 404) {
+      throw new Error(`Error deleting ${name}: ${err.response.data}`);
+    }
   }
-
-  const config = { headers: { Authorization: `Bearer ${global.accessToken}` } };
-
-  return axios.delete(`${process.env.AKKERIS_API}/apps/${name}`, config);
 }
 
 async function verifyResourceDeletion(appNames, pipelineNames, siteNames) {

@@ -16,8 +16,6 @@ const https = require('https');
 
 const httpsAgent = new https.Agent({ keepAlive: true, keepAliveMsecs: 360000 }); // 6 minutes
 
-const tests = require('./test/runtests');
-
 const allowed = ['/oauth/callback', '/logout', '.css', '.js', '.map', '.png', '.ico', '.svg'];
 function isUnprotected(requestPath) {
   return allowed.some(resource => requestPath.endsWith(resource));
@@ -30,11 +28,6 @@ function redirectOAuth(req, res) {
   } else {
     res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
   }
-}
-
-if (process.env.RUN_TESTCAFE) {
-  tests.runTests();
-  return;
 }
 
 const app = express();
