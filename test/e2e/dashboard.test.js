@@ -68,13 +68,7 @@ fixture('Favorites Tab') // eslint-disable-line no-undef
   })
   .afterEach(async (t) => {
     const appName = t.ctx.appName;
-    try {
-      await utils.deleteApp(`${appName}-testcafe`);
-    } catch (err) {
-      if (err.response.status !== 404) {
-        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
-      }
-    }
+    await utils.deleteApp(`${appName}-testcafe`);
   });
 
 test('Should allow favorite of app and addition or removal to dashboard', async (t) => { // eslint-disable-line no-undef
@@ -110,13 +104,7 @@ fixture('Recents Tab') // eslint-disable-line no-undef
   })
   .afterEach(async (t) => {
     const appName = t.ctx.appName;
-    try {
-      await utils.deleteApp(`${appName}-testcafe`);
-    } catch (err) {
-      if (err.response.status !== 404) {
-        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
-      }
-    }
+    await utils.deleteApp(`${appName}-testcafe`);
   });
 
 test('Should allow view of recent activity and quick access to those items', async (t) => { // eslint-disable-line no-undef

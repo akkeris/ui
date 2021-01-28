@@ -96,6 +96,12 @@ async function uploadScreenshots(testcafe, testResult) {
 }
 
 async function runTests() {
+  // Check for required environment variables
+  if (!process.env.BOT_USER || !process.env.BOT_PASS) {
+    console.error('Missing bot credentials - make sure that BOT_USER and BOT_PASS environment variables are present');
+    process.exit(1);
+  }
+
   console.log('Running tests!\n');
 
   const mode = process.env.TESTCAFE_MODE ? process.env.TESTCAFE_MODE : 'local';
@@ -167,8 +173,6 @@ async function runTests() {
   }
 }
 
-module.exports = {
-  runTests,
-};
+runTests();
 
 /* eslint-enable no-console */

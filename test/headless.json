@@ -1,0 +1,16 @@
+{
+	"chrome#headless": {
+		"goog:chromeOptions": {
+			"args": [
+				"headless"
+			]
+		}
+	},
+	"firefox#headless": {
+		"moz:firefoxOptions": {
+			"args": [
+				"-headless"
+			]
+		}
+	}
+}

@@ -13,9 +13,8 @@ const clientURI = process.env.CLIENT_URI || 'http://localhost:3000';
 const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
 const https = require('https');
-const httpsAgent = new https.Agent({"keepAlive":true, "keepAliveMsecs":30000})
 
-const tests = require('./test/runtests');
+const httpsAgent = new https.Agent({ keepAlive: true, keepAliveMsecs: 30000 });
 
 const allowed = ['/oauth/callback', '/logout', '.css', '.js', '.map', '.png', '.ico', '.svg'];
 function isUnprotected(requestPath) {
@@ -29,11 +28,6 @@ function redirectOAuth(req, res) {
   } else {
     res.redirect(`${authEndpoint}/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(`${clientURI}/oauth/callback`)}`);
   }
-}
-
-if (process.env.RUN_TESTCAFE) {
-  tests.runTests();
-  return;
 }
 
 const app = express();
@@ -140,14 +134,14 @@ app.use('/api', proxy(`${akkerisApi}`, {
   proxyReqOptDecorator(reqOpts, srcReq) {
     reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`; // eslint-disable-line no-param-reassign
     reqOpts.agent = httpsAgent;
-    reqOpts.headers.connection = `keep-alive`;
+    reqOpts.headers.connection = 'keep-alive';
     return reqOpts;
   },
 }));
 
 app.get('/analytics', (req, res) => {
   if (process.env.GA_TOKEN) {
-    res.status(200).send({ga_token: process.env.GA_TOKEN});
+    res.status(200).send({ ga_token: process.env.GA_TOKEN });
   } else {
     res.sendStatus(404);
   }

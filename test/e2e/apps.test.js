@@ -151,13 +151,7 @@ test // eslint-disable-line
   })
   .after(async (t) => {
     const appName = t.ctx.appName;
-    try {
-      await utils.deleteApp(`${appName}-testcafe`);
-    } catch (err) {
-      if (err.response.status !== 404) {
-        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
-      }
-    }
+    await utils.deleteApp(`${appName}-testcafe`);
   });
 
 test('Should throw error on non-existent app', async (t) => { // eslint-disable-line no-undef
@@ -305,13 +299,7 @@ fixture('AppInfo Page') // eslint-disable-line no-undef
   })
   .afterEach(async (t) => {
     const appName = t.ctx.appName;
-    try {
-      await utils.deleteApp(`${appName}-testcafe`);
-    } catch (err) {
-      if (err.response.status !== 404) {
-        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
-      }
-    }
+    await utils.deleteApp(`${appName}-testcafe`);
   });
 
 test('Should follow search to app and see all info', async (t) => { // eslint-disable-line no-undef
@@ -812,13 +800,7 @@ test // eslint-disable-line no-undef
   .after(async (t) => {
     const appName = t.ctx.appName;
     const appName2 = t.ctx.appName2;
-    try {
-      await utils.deleteApp(`${appName}-testcafe`);
-    } catch (err) {
-      if (err.response.status !== 404) {
-        throw new Error(`Error deleting ${appName}: ${err.response.data}`);
-      }
-    }
+    await utils.deleteApp(`${appName}-testcafe`);
     try {
       await utils.deleteApp(`${appName2}-testcafe`);
     } catch (err) {
@@ -1179,7 +1161,7 @@ test('Should be able to create edit and remove webhooks', async (t) => { // esli
     // Expect an event
     .click('.webhook-item-0 .webhook-title') // Open edit dropdown
     .click('.webhook-item-0 button.webhook-history')
-    .expect(Selector('.history-dialog .historyItem-0'))
+    .expect(Selector('.history-dialog .historyItem-0').exists)
     .ok()
     .expect(Selector('.history-dialog .historyItem-0').innerText)
     .contains('config_change')
