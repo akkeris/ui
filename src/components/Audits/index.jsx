@@ -55,13 +55,23 @@ function sillyfunc(prefix, input) {
     if (typeof input[key] === 'object') {
       return sillyfunc(prefix ? `${prefix}.${key}` : key, input[key]);
     }
+
+    let value;
+    if (input[key] === '') {
+      value = 'n/a';
+    } else if (typeof input[key] === 'boolean') {
+      value = input[key].toString();
+    } else {
+      value = input[key];
+    }
+
     return (
       <TableRow key={key}>
         <TableCell>
           <span>{prefix ? `${prefix}.${key}` : key}</span>
         </TableCell>
         <TableCell>
-          <span>{input[key]}</span>
+          <span>{value}</span>
         </TableCell>
       </TableRow>
     );
