@@ -1,5 +1,6 @@
 const webpack = require('webpack');
-const path = require('path');// eslint-disable-line no-unused-vars
+
+const CLIENT_URI = process.env.CLIENT_URI || 'http://localhost:3000';
 
 const config = {
   mode: 'development',
@@ -21,7 +22,7 @@ const config = {
   output: {
     path: __dirname, // Path of output file
     filename: 'app.js',
-    publicPath: 'http://localhost:3000/',
+    publicPath: `${CLIENT_URI}/`,
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
