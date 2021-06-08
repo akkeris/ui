@@ -24,7 +24,7 @@ const style = {
   div: {
     display: 'flex',
     flexDirection: 'column',
-    height: '360px',
+    height: '420px',
   },
   contentStyle: {
     margin: '0 94px',
@@ -79,6 +79,12 @@ const style = {
     description: { width: '600px' },
     domain: { minWidth: '50%' },
   },
+  regionRadioGroup: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    flexDirection: 'column',
+    maxHeight: '180px',
+  },
 };
 
 export default class NewSite extends BaseComponent {
@@ -116,6 +122,10 @@ export default class NewSite extends BaseComponent {
   getRegions = async () => {
     try {
       const { data: regions } = await this.api.getRegions();
+      const { data: stacks } = await this.api.getStacks();
+      regions.forEach((region, idx) => {
+        regions[idx].stack = stacks.find(stack => stack.region.id === region.id).name;
+      });
       this.setState({ regions, loading: false, region: regions[0].name });
     } catch (err) {
       if (!this.isCancel(err)) {
@@ -232,11 +242,12 @@ export default class NewSite extends BaseComponent {
                 className="region-radio-group"
                 value={region}
                 onChange={this.handleRegionChange}
+                style={style.regionRadioGroup}
               >
                 {this.renderRegions()}
               </RadioGroup>
             </FormControl>
-            {errorText !== '' && (
+            {errorText && errorText !== '' && (
               <p style={style.error}>{errorText}</p>
             )}
           </div>
@@ -292,7 +303,7 @@ export default class NewSite extends BaseComponent {
         className={region.name}
         key={region.name}
         value={region.name}
-        label={region.name}
+        label={`${region.name} (${region.stack})`}
         control={<Radio />}
       />
     ));
@@ -347,7 +358,7 @@ export default class NewSite extends BaseComponent {
                   <Tooltip title="Documentation" placement="top">
                     <IconButton
                       role="link"
-                      tabindex="0"
+                      tabIndex="0"
                       onClick={() => window.open('https://docs.akkeris.io/architecture/sites-and-routes.html')}
                     >
                       <DocumentationIcon />
