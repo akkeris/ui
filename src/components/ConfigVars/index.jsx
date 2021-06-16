@@ -24,7 +24,7 @@ const style = {
       ...GlobalStyles.Subtle,
       ...GlobalStyles.Text,
       overflow: 'auto',
-      whiteSpace: 'nowrap',
+      // whiteSpace: 'nowrap',
     },
   },
   refresh: {

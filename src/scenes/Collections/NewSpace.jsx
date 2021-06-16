@@ -208,7 +208,7 @@ export default class NewApp extends BaseComponent {
         category: 'SPACES',
         action: 'Created new space',
       });
-      History.get().push('/collections');
+      History.get().push('/spaces');
     } catch (error) {
       if (!this.isCancel(error)) {
         this.setState({
@@ -355,8 +355,8 @@ export default class NewApp extends BaseComponent {
       <MenuItem
         className={stack.name}
         key={stack.id}
-        value={stack.name}
-      >{stack.name}</MenuItem>
+        value={`${stack.name}`}
+      >{stack.name} ({stack.region.name})</MenuItem>
     ));
   }
 
