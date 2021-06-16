@@ -4,7 +4,9 @@ const session = require('express-session');
 const request = require('request');
 const proxy = require('express-http-proxy');
 const bodyParser = require('body-parser');
-const Redis = require('connect-redis')(session);
+const redis = require('redis');
+const RedisStore = require('connect-redis')(session);
+const redisClient = redis.createClient({url:process.env.REDIS_URL || 'redis://localhost:6379'})
 
 const port = process.env.PORT || 3000;
 const clientID = process.env.CLIENT_ID;
@@ -36,9 +38,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  store: new Redis({
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
-  }),
+  store: new RedisStore({ client: redisClient }),
   name: 'akkeris',
 }));
 app.use(bodyParser.json());
