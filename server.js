@@ -14,9 +14,15 @@ const clientSecret = process.env.CLIENT_SECRET;
 const clientURI = process.env.CLIENT_URI || 'http://localhost:3000';
 const akkerisApi = process.env.AKKERIS_API;
 const authEndpoint = process.env.OAUTH_ENDPOINT;
-const https = require('https');
 
-const httpsAgent = new https.Agent({ keepAlive: true, keepAliveMsecs: 360000 }); // 6 minutes
+let proxyAgent;
+if (akkerisApi.startsWith('https')) {
+  const https = require('https');
+  proxyAgent = new https.Agent({ keepAlive: true, keepAliveMsecs: 360000 });
+} else {
+  const http = require('http');
+  proxyAgent = new http.Agent({ keepAlive: true, keepAliveMsecs: 360000 });
+}
 
 const allowed = ['/oauth/callback', '/logout', '.css', '.js', '.map', '.png', '.ico', '.svg'];
 function isUnprotected(requestPath) {
@@ -133,7 +139,7 @@ app.get('/oauth/callback', (req, res) => {
 app.use('/api', proxy(`${akkerisApi}`, {
   proxyReqOptDecorator(reqOpts, srcReq) {
     reqOpts.headers.Authorization = `Bearer ${srcReq.session.token}`; // eslint-disable-line no-param-reassign
-    reqOpts.agent = httpsAgent;
+    reqOpts.agent = proxyAgent;
     reqOpts.headers.connection = 'keep-alive';
     return reqOpts;
   },
