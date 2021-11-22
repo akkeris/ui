@@ -82,7 +82,7 @@ export default class CreateOrUpdatePipelineCoupling extends BaseComponent {
         ...deepCopy(originalState),
         selected: this.props.coupling ? this.props.coupling.required_status_checks.contexts : [],
       });
-      const { data: apps } = await this.api.getApps();
+      const { data: apps } = await this.api.getApps('?simple=true');
       const {
         data: statuses,
       } = await this.api.getAvailablePipelineStatuses(this.props.pipeline.name);

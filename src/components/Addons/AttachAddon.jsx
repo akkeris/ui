@@ -89,7 +89,7 @@ export default class AttachAddon extends BaseComponent {
   getApps = async () => {
     const { app } = this.props;
     try {
-      const { data: apps } = await this.api.getApps();
+      const { data: apps } = await this.api.getApps('?simple=true');
       // Remove the current app from the results
       apps.splice(apps.findIndex(i => i.name.toLowerCase() === app.toLowerCase()), 1);
       this.setState({ apps, loading: false });

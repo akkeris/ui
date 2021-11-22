@@ -33,8 +33,8 @@ function isCancel(error) {
 // unless the function is bound to an object that has this.cancelToken set
 // before it is invoked.
 
-function getApps() {
-  return axios.get('/api/apps', { cancelToken: this.cancelToken });
+function getApps(paramstring) {
+  return axios.get(paramstring ? `/api/apps${paramstring}` : '/api/apps', { cancelToken: this.cancelToken });
 }
 
 function getApp(app) {
