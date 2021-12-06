@@ -73,7 +73,7 @@ export default class NewRoute extends BaseComponent {
 
   getApps = async () => {
     try {
-      const { data: apps } = await this.api.getApps();
+      const { data: apps } = await this.api.getApps('?simple=true');
       apps.forEach((i) => { i.value = i.id; i.label = i.name; }); // eslint-disable-line
       this.setState({ apps, app: apps[0], loading: false });
     } catch (err) {

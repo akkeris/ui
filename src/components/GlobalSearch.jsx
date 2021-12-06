@@ -221,7 +221,7 @@ class GlobalSearch extends BaseComponent {
 
   getOptions = async () => {
     try {
-      const { data: apps } = await this.api.getApps();
+      const { data: apps } = await this.api.getApps('?simple=true');
       const { data: pipelines } = await this.api.getPipelines();
       const { data: sites } = await this.api.getSites();
 

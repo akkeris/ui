@@ -92,7 +92,7 @@ export default class Apps extends BaseComponent {
     try {
       const { data: spaces } = await this.api.getSpaces();
       const { data: regions } = await this.api.getRegions();
-      let { data: apps } = await this.api.getApps();
+      let { data: apps } = await this.api.getApps('?simple=true');
       const { data: favorites } = await this.api.getFavorites();
       apps = apps.map(app => ({
         ...app,
