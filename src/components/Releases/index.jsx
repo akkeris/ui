@@ -535,19 +535,21 @@ export default class Releases extends BaseComponent {
     let newReleaseButton;
     let triggerGitHubBuildIcon;
     if (!restrictedSpace || isElevated) {
-      triggerGitHubBuildIcon = (
-        <Tooltip title="Build from Github" placement="bottom-end">
-          <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleConfirmTriggerBuild(); }}>
-            <GitHubIcon style={style.gitHubIcon} />
-            <AddCircleIcon style={style.addCircleIcon} />
-          </IconButton>
-        </Tooltip>
-      );
       newReleaseButton = (
         <Tooltip title="New Release" placement="bottom-end">
           <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleNewBuild(); }}><AddIcon /></IconButton>
         </Tooltip>
       );
+      if (this.props.app.git_url) {
+        triggerGitHubBuildIcon = (
+          <Tooltip title="Build from Github" placement="bottom-end">
+            <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleConfirmTriggerBuild(); }}>
+              <GitHubIcon style={style.gitHubIcon} />
+              <AddCircleIcon style={style.addCircleIcon} />
+            </IconButton>
+          </Tooltip>
+        );
+      }
     } else {
       // Wrap the new release button in a tooltip to avoid confusion as to why it is disabled
       newReleaseButton = addRestrictedTooltip(
@@ -561,18 +563,20 @@ export default class Releases extends BaseComponent {
           </IconButton>
         ),
       );
-      triggerGitHubBuildIcon = addRestrictedTooltip(
-        'Elevated access required', 'right', (
-          <IconButton
-            disabled
-            style={{ ...style.iconButton, opacity: 0.35 }}
-            className="new-build"
-          >
-            <GitHubIcon style={style.gitHubIcon} />
-            <AddCircleIcon style={style.addCircleIcon} />
-          </IconButton>
-        ),
-      );
+      if (this.props.app.git_url) {
+        triggerGitHubBuildIcon = addRestrictedTooltip(
+          'Elevated access required', 'right', (
+            <IconButton
+              disabled
+              style={{ ...style.iconButton, opacity: 0.35 }}
+              className="new-build"
+            >
+              <GitHubIcon style={style.gitHubIcon} />
+              <AddCircleIcon style={style.addCircleIcon} />
+            </IconButton>
+          ),
+        );
+      }
     }
 
     return (
@@ -608,7 +612,7 @@ export default class Releases extends BaseComponent {
           {this.state.collapse && (
             <div style={style.header.actions.container}>
               <div style={style.header.actions.button}>
-                {triggerGitHubBuildIcon}
+                {this.props.app.git_url && triggerGitHubBuildIcon}
               </div>
               <div style={style.header.actions.button}>
                 {newReleaseButton}
