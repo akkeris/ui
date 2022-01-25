@@ -254,6 +254,10 @@ function deleteAutoBuild(app) {
   return axios.delete(`/api/apps/${app}/builds/auto/github`, { cancelToken: this.cancelToken });
 }
 
+function triggerManualAutoBuild(app) {
+  return axios.get(`/api/apps/${app}/builds/auto/github/trigger`, { cancelToken: this.cancelToken });
+}
+
 function redoBuild(app, build) {
   return axios.put(`/api/apps/${app}/builds/${build}`, { cancelToken: this.cancelToken });
 }
@@ -608,4 +612,5 @@ export default {
   getCancelSource,
   isCancel,
   getAvailableHooks,
+  triggerManualAutoBuild,
 };
