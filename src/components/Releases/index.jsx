@@ -12,6 +12,8 @@ import BuildOutputIcon from '@material-ui/icons/Assignment';
 import BuildIcon from '@material-ui/icons/Build';
 import ReleaseIcon from '@material-ui/icons/Backup';
 import RevertIcon from '@material-ui/icons/Replay';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import GitHubIcon from '../Icons/GitIcon';
 import RebuildIcon from '../Icons/RebuildIcon';
 import Logs from './Logs';
 import NewBuild from './NewBuild';
@@ -161,6 +163,18 @@ const style = {
     boxSizing: 'border-box',
     marginTop: '0.5rem',
   },
+  gitHubIcon: {
+    color: 'black',
+    width: '25px',
+    height: '25px',
+  },
+  addCircleIcon: {
+    color: 'rgb(40, 167, 69)',
+    width: '16px',
+    position: 'absolute',
+    marginTop: '20px',
+    marginLeft: '22px',
+  },
 };
 
 export default class Releases extends BaseComponent {
@@ -182,6 +196,7 @@ export default class Releases extends BaseComponent {
       isElevated: false,
       restrictedSpace: false,
       confirmRebuildOpen: false,
+      confirmTriggerBuildOpen: false,
       rebuildRelease: null,
       collapse: true,
     };
@@ -246,6 +261,26 @@ export default class Releases extends BaseComponent {
     }
   }
 
+  handleConfirmTriggerBuild = () => {
+    this.setState({ confirmTriggerBuildOpen: true });
+  }
+
+  handleCancelTriggerBuild = () => {
+    this.setState({ confirmTriggerBuildOpen: false });
+  }
+
+  handleTriggerBuild = async () => {
+    try {
+      this.setState({ confirmTriggerBuildOpen: false });
+      await this.api.triggerManualAutoBuild(this.props.app.name);
+      this.reload('Triggering new build from GitHub...');
+    } catch (err) {
+      if (!this.isCancel(err)) {
+        console.error(err); // eslint-disable-line no-console
+      }
+    }
+  }
+
   handleConfirmRebuild = (release) => {
     this.setState({ confirmRebuildOpen: true, rebuildRelease: release });
   }
@@ -301,6 +336,10 @@ export default class Releases extends BaseComponent {
   }
 
   handleNewBuild() {
+    this.setState({ collapse: false, new: true });
+  }
+
+  handleTriggerBuild() {
     this.setState({ collapse: false, new: true });
   }
 
@@ -494,12 +533,23 @@ export default class Releases extends BaseComponent {
       releases, rowsPerPage, page, isElevated, restrictedSpace,
     } = this.state;
     let newReleaseButton;
+    let triggerGitHubBuildIcon;
     if (!restrictedSpace || isElevated) {
       newReleaseButton = (
         <Tooltip title="New Release" placement="bottom-end">
           <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleNewBuild(); }}><AddIcon /></IconButton>
         </Tooltip>
       );
+      if (this.props.app.git_url) {
+        triggerGitHubBuildIcon = (
+          <Tooltip title="Build from Github" placement="bottom-end">
+            <IconButton style={style.iconButton} className="new-build" onClick={() => { this.handleConfirmTriggerBuild(); }}>
+              <GitHubIcon style={style.gitHubIcon} />
+              <AddCircleIcon style={style.addCircleIcon} />
+            </IconButton>
+          </Tooltip>
+        );
+      }
     } else {
       // Wrap the new release button in a tooltip to avoid confusion as to why it is disabled
       newReleaseButton = addRestrictedTooltip(
@@ -513,6 +563,20 @@ export default class Releases extends BaseComponent {
           </IconButton>
         ),
       );
+      if (this.props.app.git_url) {
+        triggerGitHubBuildIcon = addRestrictedTooltip(
+          'Elevated access required', 'right', (
+            <IconButton
+              disabled
+              style={{ ...style.iconButton, opacity: 0.35 }}
+              className="new-build"
+            >
+              <GitHubIcon style={style.gitHubIcon} />
+              <AddCircleIcon style={style.addCircleIcon} />
+            </IconButton>
+          ),
+        );
+      }
     }
 
     return (
@@ -547,6 +611,9 @@ export default class Releases extends BaseComponent {
           <Typography style={style.header.title} variant="overline">Release</Typography>
           {this.state.collapse && (
             <div style={style.header.actions.container}>
+              <div style={style.header.actions.button}>
+                {this.props.app.git_url && triggerGitHubBuildIcon}
+              </div>
               <div style={style.header.actions.button}>
                 {newReleaseButton}
               </div>
@@ -589,6 +656,14 @@ export default class Releases extends BaseComponent {
           onOk={this.handleRebuild}
           onCancel={this.handleCancelRebuild}
           message="Are you sure you want to rebuild this?"
+        />
+        <ConfirmationModal
+          title="New Build from GitHub"
+          className="trigger-build-confirm"
+          open={this.state.confirmTriggerBuildOpen}
+          onOk={this.handleTriggerBuild}
+          onCancel={this.handleCancelTriggerBuild}
+          message="Are you sure you want to trigger a new build from GitHub?"
         />
         <Snackbar
           className="release-snack"
