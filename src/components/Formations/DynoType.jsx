@@ -411,7 +411,6 @@ export default class DynoType extends BaseComponent {
     if (this.props.formation.type === 'web') {
       webUrl = this.props.app.web_url.replace(/\/+$/, '');
     }
-
     return (
       <div
         style={{ ...style.info.root, backgroundColor: this.state.edit ? 'rgba(0,0,0,0.05)' : undefined }}
@@ -448,17 +447,9 @@ export default class DynoType extends BaseComponent {
                   onChange={this.handleChange('quantity')}
                   input={<Input name="quantity" id="quantity-select-input" />}
                 >
-                  <MenuItem className="q0" value={0}>0</MenuItem>
-                  <MenuItem className="q1" value={1}>1</MenuItem>
-                  <MenuItem className="q2" value={2}>2</MenuItem>
-                  <MenuItem className="q3" value={3}>3</MenuItem>
-                  <MenuItem className="q4" value={4}>4</MenuItem>
-                  <MenuItem className="q5" value={5}>5</MenuItem>
-                  <MenuItem className="q6" value={6}>6</MenuItem>
-                  <MenuItem className="q7" value={7}>7</MenuItem>
-                  <MenuItem className="q8" value={8}>8</MenuItem>
-                  <MenuItem className="q9" value={9}>9</MenuItem>
-                  <MenuItem className="q10" value={10}>10</MenuItem>
+                  {Array.from(Array(11).keys()).map(k => (
+                    <MenuItem key={k} className={`q${k}`} value={k}>{k}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </div>
@@ -471,7 +462,7 @@ export default class DynoType extends BaseComponent {
                     disabled={!this.state.edit}
                     type="numeric"
                     label="Port"
-                    value={port}
+                    value={port || ''}
                     onChange={this.handleChange('port')}
                     helperText={this.state.errorText}
                     error={this.state.errorText.length > 0}
@@ -480,7 +471,7 @@ export default class DynoType extends BaseComponent {
                     className="command"
                     disabled={!this.state.edit}
                     label="Command"
-                    value={this.state.command}
+                    value={this.state.command || ''}
                     onChange={this.handleChange('command')}
                     helperText={this.state.errorText}
                     error={this.state.errorText.length > 0}
@@ -494,7 +485,7 @@ export default class DynoType extends BaseComponent {
                   className="command"
                   disabled={!this.state.edit}
                   label="Command"
-                  value={this.state.command}
+                  value={this.state.command || ''}
                   onChange={this.handleChange('command')}
                   helperText={this.state.errorText}
                   error={this.state.errorText.length > 0}
@@ -549,7 +540,7 @@ export default class DynoType extends BaseComponent {
                 type="text"
                 label="Healthcheck"
                 placeholder="healthcheck_endpoint"
-                value={healthcheck}
+                value={healthcheck || ''}
                 onChange={this.handleChange('healthcheck')}
                 helperText={this.state.errorText}
                 error={this.state.errorText.length > 0}
