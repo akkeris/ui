@@ -307,6 +307,7 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
     .click(`.development-coupling-list .${appName}-testcafe button.promote`)
     .expect(Selector('.promote-confirm').innerText)
     .contains('Promote')
+    .click('.promote-confirm .force-check')
     .click('.promote-confirm .ok')
     .wait(1000)
 
@@ -314,7 +315,6 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
     .click(`.staging-coupling-list .${appName2}-testcafe button.promote`)
     .expect(Selector('.promote-confirm').innerText)
     .contains('Promote')
-    .click('.promote-confirm .force-check')
     .click('.promote-confirm .ok')
     .expect(Selector('.error').innerText)
     .contains('Safe promotion was specified and this promotion has been deemed unsafe.')
@@ -325,6 +325,7 @@ test('Should be able to create promote and remove couplings', async (t) => { // 
     .click(`.staging-coupling-list .${appName2}-testcafe button.promote`)
     .expect(Selector('.promote-confirm').innerText)
     .contains('Promote')
+    .click('.promote-confirm .force-check')
     .click('.promote-confirm .ok')
     .wait(1000)
 
