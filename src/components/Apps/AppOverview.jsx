@@ -202,7 +202,12 @@ class AppOverview extends BaseComponent {
         </div>
       );
     }
-
+    let compliance = this.props.app.space.compliance;
+    if (compliance && compliance !== '') {
+      compliance = compliance.replace(/compliance=/g, '').split(',').join(', ');
+    } else {
+      compliance = 'none';
+    }
     return (
       <div>
         <div className="app-description" style={style.appDescription.container}>
@@ -222,6 +227,9 @@ class AppOverview extends BaseComponent {
               <ListItem style={style.listItem}>
                 <ListItemText primary="ID" secondary={`${this.props.app.id}`} />
               </ListItem>
+              <ListItem style={style.listItem}>
+                <ListItemText primary="Region" secondary={`${this.props.app.region.name}`} />
+              </ListItem>
             </List>
           </GridListTile>
           <GridListTile style={{ padding: '0px' }}>
@@ -238,6 +246,9 @@ class AppOverview extends BaseComponent {
               </ListItem>
               <ListItem style={style.listItem}>
                 <ListItemText primary="Discovery" secondary={`${this.props.app.simple_name.toUpperCase()}_SERVICE_HOST, ${this.props.app.simple_name.toUpperCase()}_SERVICE_PORT`} />
+              </ListItem>
+              <ListItem style={style.listItem}>
+                <ListItemText primary="Space Compliance" secondary={`${compliance}`} />
               </ListItem>
             </List>
           </GridListTile>
