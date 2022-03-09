@@ -416,7 +416,7 @@ export default class PipelinePromote extends BaseComponent {
               control={
                 <Checkbox
                   style={GlobalStyles.Subtle}
-                  checked={this.state.safe}
+                  checked={!this.state.safe}
                   onChange={(event) => { this.handleSafePromoteChange(event); }}
                   icon={<CheckBoxOutlineBlank fontSize="small" />}
                   checkedIcon={<CheckBox fontSize="small" />}
