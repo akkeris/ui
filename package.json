@@ -54,7 +54,7 @@
     "autosuggest-highlight": "^3.1.1",
     "axios": "^0.21.1",
     "babel-polyfill": "6.26.0",
-    "body-parser": "1.18.3",
+    "body-parser": "1.19.0",
     "connect-redis": "4.0.4",
     "crypto-js": "3.1.9-1",
     "deepmerge": "^3.2.0",
