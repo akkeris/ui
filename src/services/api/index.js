@@ -255,7 +255,7 @@ function deleteAutoBuild(app) {
 }
 
 function triggerManualAutoBuild(app) {
-  return axios.post(`/api/apps/${app}/builds/auto/github/trigger`, { cancelToken: this.cancelToken });
+  return axios.post(`/api/apps/${app}/builds/auto/github/trigger`, {}, { cancelToken: this.cancelToken });
 }
 
 function redoBuild(app, build) {
@@ -522,6 +522,51 @@ function getAvailableHooks() {
   return axios.get('/api/docs/hooks', { cancelToken: this.cancelToken });
 }
 
+function getActions(app) {
+  return axios.get(`/api/apps/${app}/actions`, { cancelToken: this.cancelToken });
+}
+
+function getActionRuns(app, action) {
+  return axios.get(`/api/apps/${app}/actions/${action}/runs`, { cancelToken: this.cancelToken });
+}
+
+function createAction(app, name, description, size, image, command, env, events) {
+  return axios.post(`/api/apps/${app}/actions`, {
+    name,
+    ...(description && { description }),
+    size,
+    command,
+    events,
+    options: {
+      ...(image && { image }),
+      ...(env && { env }),
+    },
+  }, { cancelToken: this.cancelToken });
+}
+
+function deleteAction(app, action) {
+  return axios.delete(`/api/apps/${app}/actions/${action}`, { cancelToken: this.cancelToken });
+}
+
+function triggerActionRun(app, action) {
+  return axios.post(`/api/apps/${app}/actions/${action}/runs`, {}, { cancelToken: this.cancelToken });
+}
+
+function patchAction(app, actionID, action) {
+  return axios.patch(`/api/apps/${app}/actions/${actionID}`, {
+    name: action.name,
+    description: action.description,
+    command: action.command,
+    events: action.events,
+    size: action.size,
+    options: action.options,
+  }, { cancelToken: this.cancelToken });
+}
+
+function getActionRun(app, action, run) {
+  return axios.get(`/api/apps/${app}/actions/${action}/runs/${run}`, { cancelToken: this.cancelToken });
+}
+
 export default {
   getGAToken,
   appSetup,
@@ -613,4 +658,11 @@ export default {
   isCancel,
   getAvailableHooks,
   triggerManualAutoBuild,
+  getActions,
+  getActionRuns,
+  createAction,
+  deleteAction,
+  triggerActionRun,
+  patchAction,
+  getActionRun,
 };

@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import deepmerge from 'deepmerge';
 import PropTypes from 'prop-types';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import { Select, InputLabel, FormControl } from '@material-ui/core';
+import { Select, InputLabel, FormControl, MenuItem } from '@material-ui/core';
 
 class CustomSelect extends PureComponent {
   theme = parentTheme => deepmerge(parentTheme, {
@@ -44,7 +44,7 @@ class CustomSelect extends PureComponent {
 
 
   render() {
-    const { children, value, onChange, name, label, style } = this.props;
+    const { children, value, onChange, name, label, style, multiple, options, fullWidth } = this.props;
     return (
       <MuiThemeProvider theme={this.theme}>
         <FormControl style={style}>
@@ -53,12 +53,20 @@ class CustomSelect extends PureComponent {
             className={`${name}-dropdown`}
             value={value}
             onChange={onChange}
+            multiple={multiple}
+            fullWidth={fullWidth}
             inputProps={{
               name,
               id: `${name}-select`,
             }}
           >
-            {children}
+            {multiple ? (
+              options.map(option => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))
+            ) : children}
           </Select>
         </FormControl>
       </MuiThemeProvider>
@@ -68,12 +76,15 @@ class CustomSelect extends PureComponent {
 
 CustomSelect.propTypes = {
   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]),
-  value: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired, // eslint-disable-line
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.string, PropTypes.arrayOf(PropTypes.string)]).isRequired, // eslint-disable-line
   style: PropTypes.object, // eslint-disable-line react/forbid-prop-types
   onChange: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   color: PropTypes.string,
   label: PropTypes.string,
+  multiple: PropTypes.bool,
+  options: PropTypes.arrayOf(PropTypes.string),
+  fullWidth: PropTypes.bool,
 };
 
 CustomSelect.defaultProps = {
@@ -81,6 +92,9 @@ CustomSelect.defaultProps = {
   color: 'white',
   label: 'Select',
   style: {},
+  multiple: false,
+  options: [],
+  fullWidth: false,
 };
 
 export default CustomSelect;
