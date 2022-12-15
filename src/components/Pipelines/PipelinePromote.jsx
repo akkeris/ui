@@ -14,7 +14,7 @@ const originalState = {
   targets: [],
   release: null,
   editRelease: false,
-  safe: false,
+  safe: true,
 };
 
 const formTextStyle = {
