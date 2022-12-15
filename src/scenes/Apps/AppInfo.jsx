@@ -24,6 +24,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 import ReactGA from 'react-ga';
 
 import AutoBuildIcon from '../../components/Icons/CircuitBoard';
+import ActionsIcon from '../../components/Icons/ActionsIcon';
 import GitIcon from '../../components/Icons/GitIcon';
 import WebhookIcon from '../../components/Icons/WebhookIcon';
 import Formations from '../../components/Formations';
@@ -33,6 +34,7 @@ import Config from '../../components/ConfigVars';
 import Metrics from '../../components/Metrics';
 import Addons from '../../components/Addons';
 import Logs from '../../components/Logs';
+import Actions from '../../components/Actions';
 import AppOverview from '../../components/Apps/AppOverview';
 import { updateHistory } from '../../services/util';
 import History from '../../config/History';
@@ -88,7 +90,7 @@ function addRestrictedTooltip(title, children) {
   );
 }
 
-const tabs = ['info', 'dynos', 'releases', 'addons', 'config', 'logs', 'metrics', 'webhooks'];
+const tabs = ['info', 'dynos', 'actions', 'releases', 'addons', 'config', 'logs', 'metrics', 'webhooks'];
 
 export default class AppInfo extends BaseComponent {
   constructor(props) {
@@ -647,6 +649,16 @@ export default class AppInfo extends BaseComponent {
             />
             <Tab
               component="a"
+              href={`/apps/${this.state.app.name}/actions`}
+              onClick={this.cancelHref}
+              disableRipple
+              className="actions-tab"
+              icon={<ActionsIcon />}
+              label="Actions"
+              value="actions"
+            />
+            <Tab
+              component="a"
               href={`/apps/${this.state.app.name}/releases`}
               onClick={this.cancelHref}
               disableRipple
@@ -732,6 +744,11 @@ export default class AppInfo extends BaseComponent {
           )}
           {currentTab === 'dynos' && (
             <Formations
+              app={this.state.app}
+            />
+          )}
+          {currentTab === 'actions' && (
+            <Actions
               app={this.state.app}
             />
           )}

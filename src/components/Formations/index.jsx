@@ -84,7 +84,7 @@ export default class Formations extends BaseComponent {
         this.api.getFormationSizes(),
         this.api.getDynos(this.props.app.name),
       ]);
-      const formations = r1.data.sort((a, b) => (a.type < b.type ? -1 : 1));
+      const formations = r1.data.filter(a => !a.oneoff).sort((a, b) => (a.type < b.type ? -1 : 1));
       const dynos = r3.data;
       let sizes = [];
       r2.data.forEach((size) => {

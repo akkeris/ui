@@ -69,7 +69,7 @@ const GlobalTheme = createMuiTheme({
     },
     MuiTab: {
       root: {
-        minWidth: '120px !important',
+        minWidth: '114px !important',
       },
     },
     MuiCard: {
